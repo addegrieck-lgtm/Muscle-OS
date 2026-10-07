@@ -1,0 +1,56 @@
+# Phase 1 : un VPS (2 vCPU / 4 Go suffisent), tout sur la même machine.
+# Secrets dans deploy/.env (jamais commité). Voir docs/SCALABILITY.md.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vaeloria
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: vaeloria
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "vaeloria"], interval: 10s, retries: 5 }
+
+  api:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: api }
+    restart: unless-stopped
+    depends_on: { postgres: { condition: service_healthy } }
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://vaeloria:${POSTGRES_PASSWORD}@postgres:5432/vaeloria
+      CORS_ORIGINS: https://vaeloria.fr
+      BRIDGE_KEYS: ${BRIDGE_KEYS:?}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
+      MC_PING_HOST: ${MC_PING_HOST:-play.vaeloria.fr}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+
+  web:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: web }
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_URL: https://vaeloria.fr
+
+  admin:
+    build: { context: .., dockerfile: deploy/Dockerfile, target: admin }
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_URL: http://api:4000
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
+      ADMIN_USER: ${ADMIN_USER:?}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?}
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [web, api, admin]
+
+volumes:
+  pgdata:
+  caddy_data:

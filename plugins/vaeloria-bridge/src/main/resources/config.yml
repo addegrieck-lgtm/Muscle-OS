@@ -1,0 +1,21 @@
+# VæloriaBridge — configuration
+# Le secret ne doit JAMAIS être partagé ni commité. Il doit correspondre à BRIDGE_KEYS côté API.
+api:
+  url: "https://api.vaeloria.fr"
+  key-id: "factions-1"
+  secret: "REMPLACER_PAR_LE_SECRET"
+  timeout-seconds: 5
+
+# Nom de ce serveur dans le réseau (factions, hub, practice…)
+server-name: "factions"
+
+intervals:
+  # Envoi des événements en file (secondes)
+  flush-seconds: 5
+  # Heartbeat : joueurs, TPS, MSPT (secondes)
+  heartbeat-seconds: 30
+  # Récupération des commandes web (secondes)
+  commands-seconds: 10
+
+# Taille max d'un lot envoyé à l'API
+batch-size: 200

@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "@vaeloria/config/theme.css";
+@source "../../../packages/ui/src";
+
+/* Grain + lueur discrets du hero : pur CSS, aucun asset à charger. */
+/* Lueur rubis sombre derrière l'écusson, comme sur la bannière officielle (#2A0A0E → noir). */
+.hero-backdrop {
+  background:
+    radial-gradient(ellipse 55% 60% at 50% 40%, rgb(42 10 14 / 0.9), transparent 70%),
+    linear-gradient(180deg, #0b0b0e 0%, var(--color-bg) 100%);
+}
+.page-backdrop {
+  background:
+    radial-gradient(ellipse 60% 120% at 15% 0%, rgb(42 10 14 / 0.55), transparent 70%),
+    linear-gradient(180deg, #0b0b0e 0%, var(--color-bg) 100%);
+}
+
+.prose-vae { line-height: 1.75; color: var(--color-muted); }
+.prose-vae h2 { margin-top: 2rem; margin-bottom: 0.75rem; font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-fg); }
+.prose-vae h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.125rem; font-weight: 600; color: var(--color-fg); }
+.prose-vae p { margin: 0.75rem 0; }
+.prose-vae ul, .prose-vae ol { margin: 0.75rem 0; padding-left: 1.25rem; }
+.prose-vae ul { list-style: disc; }
+.prose-vae ol { list-style: decimal; }
+.prose-vae li { margin: 0.25rem 0; }
+.prose-vae strong { color: var(--color-fg); }
+.prose-vae a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.prose-vae code { font-family: var(--font-mono); font-size: 0.9em; background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 4px; color: var(--color-fg); }

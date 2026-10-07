@@ -1,83 +1,36 @@
-# MUSCLEOS — coach sportif & nutrition personnel
+# VÆLORIA
 
-Application de coaching (musculation maison, cardio, gainage, nutrition) **100 % locale, 0 €** :
-aucun serveur, aucune API payante, aucun compte. Installable sur iPhone comme une app (PWA).
-
-> Cette application fournit des recommandations générales et ne remplace pas un professionnel de santé.
-
-## Démarrer
-
-```bash
-npm install
-npm run dev        # http://localhost:5173 (et sur le réseau local grâce à --host)
-npm test           # 52 tests des moteurs
-npm run build      # build de production dans dist/
-npm run icons      # régénère icônes + écrans de démarrage iOS (sans dépendance)
-```
-
-## Installer sur iPhone
-
-Le mode hors-ligne (service worker) exige **HTTPS**. Deux options gratuites :
-
-1. **GitHub Pages (recommandé)** : pousser ce dossier sur un dépôt GitHub, puis
-   *Settings → Pages → Source : GitHub Actions*. Le workflow `.github/workflows/deploy.yml`
-   teste, construit et publie. Ouvrir l'URL dans **Safari** → Partager → **Sur l'écran d'accueil**.
-   (Netlify / Cloudflare Pages fonctionnent aussi : dossier `dist/`.)
-2. **Réseau local (test rapide)** : `npm run dev`, puis sur l'iPhone ouvrir
-   `http://<IP-du-PC>:5173`. Tout fonctionne et les données sont conservées, mais sans cache
-   hors-ligne (HTTP).
-
-Les données restent sur l'appareil (localStorage + IndexedDB pour les photos).
-**Profil → Exporter** crée une sauvegarde JSON (avec ou sans photos) ; **Importer** la restaure.
-
-## Architecture
+**LE RETOUR DE LA VRAIE GUERRE.** — Site officiel, API, administration et intégration Minecraft du réseau Faction & PvP français VÆLORIA (Minecraft 1.21, PvP inspiré du 1.8).
 
 ```
-src/
-  types/models.ts          Modèles : User, Exercise, Workout, WorkoutSession, Set, CardioSession,
-                           Meal, Food, NutritionPlan, Measurement, WeightEntry, ProgressPhoto,
-                           RecoveryEntry, ShoppingList, Source… (IDs stables)
-  data/                    Données locales : 119 exercices, 56 aliments (Ciqual), 34 recettes,
-                           32 sources scientifiques, référentiels (muscles, objectifs, matériel)
-  engines/                 Moteurs purs, séparés et testables (aucune dépendance UI)
-    config.ts              Tous les paramètres (multiplicateurs de priorité, volumes, RIR, cardio…)
-    musclePriorityEngine   Priorités → séries hebdomadaires par muscle (réduction proportionnelle)
-    workoutGenerator       Split, répartition, choix d'exercices selon matériel/niveau, ordre, durée
-    progressionEngine      Double progression, variantes, décharge, douleur → régression
-    cardioPlanner          Volume OMS, +10 %/sem max, semaine allégée, placement loin des jambes
-    recoveryAdjuster       Check-in → score de forme → séance allégée / cardio facile
-    nutritionCalculator    Mifflin-St Jeor, facteur d'activité, protéines 1,6-2,2 g/kg, eau EFSA
-    mealGenerator          Recettes recalculées pour viser kcal + protéines, mode « j'ai ces aliments »
-    shoppingListGenerator  Agrégation, unités d'achat, rayons, coût estimé
-    coach.ts / safety.ts   Coach local à règles + fournisseur Ollama optionnel ; détection des signaux d'alerte
-    programService.ts      Orchestrateur : profil + historique → programme de la semaine
-  store/                   État applicatif (useSyncExternalStore), adaptateur de stockage, actions
-  components/              Corps anatomique SVG (BodyMap), graphiques SVG, UI
-  pages/                   Onboarding, Accueil, Entraînement, Séance, Nutrition, Corps,
-                           Progression, Coach, Sources & méthode, Profil
-public/                    manifest, service worker, icônes, écrans de démarrage iOS
-tests/                     Tests Vitest des moteurs (profils débutant, intermédiaire, sans matériel,
-                           haltères, priorités pecs/abdos/jambes/multiples…)
+Minecraft ─► VæloriaBridge ─► API ─► PostgreSQL ◄─ API ◄─ Site / Admin
 ```
 
-Aucune bibliothèque en dehors de React : graphiques, corps anatomique, icônes et PNG sont faits maison.
+## Démarrage local
 
-## Vers une version commerciale
+Prérequis : Node 22, pnpm 10, PostgreSQL 16 (ou `docker compose -f docker-compose.dev.yml up -d`), Java 21 + Gradle pour le plugin.
 
-L'architecture est prête à évoluer sans réécriture :
+```sh
+pnpm install
+cp apps/api/.env.example apps/api/.env          # renseigner les secrets de dev
+cp apps/web/.env.example apps/web/.env.local
+cp apps/admin/.env.example apps/admin/.env.local
+pnpm db:seed -- --demo                           # migrations + contenu + données FICTIVES
+pnpm dev                                         # site :3000, admin :3001/admin, API :4000
+```
 
-| Besoin | Point d'extension |
-| --- | --- |
-| Comptes + synchro cloud | Implémenter `StorageAdapter` (`src/store/storage.ts`) ; les IDs sont déjà stables |
-| IA générative | Implémenter `CoachProvider` (`src/engines/coach.ts`) ; la couche sécurité reste appliquée avant |
-| IA gratuite dès maintenant | Profil → Coach IA → Ollama (modèle local sur ton ordinateur) |
-| App Store / Android | Empaqueter la PWA avec Capacitor (mêmes sources) |
-| Abonnement | Ajouter un contrôle d'accès autour des pages ; les moteurs restent inchangés |
-| Base d'aliments étendue | Remplacer/compléter `src/data/foods.ts` (ex. import Ciqual complet) |
+| Commande | Effet |
+|---|---|
+| `pnpm test` | Tests API (PostgreSQL `DATABASE_URL_TEST`) + site |
+| `pnpm typecheck` | Vérification TypeScript de tout le workspace |
+| `pnpm build` | Builds de production |
+| `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 
-## Méthode scientifique
+## Documentation
 
-Voir l'écran **Sources & méthode** dans l'application (ACSM, OMS, CDC, BJSM, méta-analyses
-Schoenfeld, Morton, Refalo…). Les paramètres des moteurs sont des choix de programmation
-raisonnables dérivés de ces travaux, centralisés dans `src/engines/config.ts` — pas des valeurs
-médicales définitives.
+- [Architecture du site](docs/SITE_ARCHITECTURE.md) · [API](docs/API_ARCHITECTURE.md) · [Base de données](docs/DATABASE.md)
+- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
+- [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
+- **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
+
+Serveur non officiel, non affilié à Mojang Studios ni à Microsoft.

@@ -1,0 +1,20 @@
+{
+  "name": "@vaeloria/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "peerDependencies": { "next": "^15.5.0", "react": "^19.1.0" },
+  "dependencies": { "@vaeloria/types": "workspace:*", "@vaeloria/config": "workspace:*" },
+  "devDependencies": {
+    "@types/react": "19.1.13",
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "typescript": "5.9.3"
+  }
+}

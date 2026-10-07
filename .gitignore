@@ -1,4 +1,17 @@
 node_modules
+.next
+out
 dist
+build
 *.log
+.env
+.env.*
+!.env.example
+.turbo
+coverage
+*.tsbuildinfo
+next-env.d.ts
 .claude
+# Plugin Minecraft
+plugins/vaeloria-bridge/build
+plugins/vaeloria-bridge/.gradle

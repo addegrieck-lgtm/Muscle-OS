@@ -1,0 +1,16 @@
+# HTTPS automatique (Let's Encrypt). Mettre Cloudflare (gratuit) devant pour le CDN.
+vaeloria.fr, www.vaeloria.fr {
+	encode zstd gzip
+	@admin path /admin /admin/*
+	handle @admin {
+		reverse_proxy admin:3001
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+api.vaeloria.fr {
+	encode zstd gzip
+	reverse_proxy api:4000
+}

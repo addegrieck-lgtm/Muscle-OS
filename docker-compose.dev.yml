@@ -1,0 +1,14 @@
+# PostgreSQL local pour le développement : docker compose -f docker-compose.dev.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vaeloria
+      POSTGRES_PASSWORD: vaeloria
+      POSTGRES_DB: vaeloria
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+volumes:
+  pgdata:

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 670 140" width="670" height="140">
+<defs>
+  <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/>
+    <stop offset="0.45" stop-color="#D9DCE2"/>
+    <stop offset="0.55" stop-color="#A9AEB8"/>
+    <stop offset="1" stop-color="#E6E8EC"/>
+  </linearGradient>
+  <linearGradient id="silverText" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100">
+    <stop offset="0" stop-color="#FFFFFF"/>
+    <stop offset="0.48" stop-color="#E2E4E9"/>
+    <stop offset="0.52" stop-color="#AEB3BC"/>
+    <stop offset="1" stop-color="#D6D9DF"/>
+  </linearGradient>
+  <linearGradient id="rubyText" gradientUnits="userSpaceOnUse" x1="0" y1="62" x2="0" y2="86">
+    <stop offset="0" stop-color="#D21F2F"/>
+    <stop offset="1" stop-color="#5E0710"/>
+  </linearGradient>
+  <linearGradient id="silverDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#B9BDC6"/>
+    <stop offset="1" stop-color="#6E737E"/>
+  </linearGradient>
+  <linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2A2C33"/>
+    <stop offset="1" stop-color="#07070A"/>
+  </linearGradient>
+  <linearGradient id="ruby" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#D21F2F"/>
+    <stop offset="1" stop-color="#5E0710"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
+    <stop offset="0" stop-color="#2A0A0E" stop-opacity="0.9"/>
+    <stop offset="1" stop-color="#07070A" stop-opacity="0"/>
+  </radialGradient>
+</defs><g transform="translate(20 20) scale(1)"><g transform="translate(0 0)"><polygon points="0,0 21,0 42,72 63,0 84,0 52,100 32,100" fill="#FFFFFF"/></g><g transform="translate(100 0)"><polygon points="44,0 122,0 114,17 76,17 76,42 112,42 105,58 76,58 76,83 122,83 114,100 58,100 58,18 22,100 0,100" fill="#FFFFFF"/><polygon points="36.9,66 58,66 58,80 30.8,80" fill="#A3121E"/></g><g transform="translate(238 0)"><polygon points="0,0 18,0 18,83 64,83 57,100 0,100" fill="#FFFFFF"/></g><g transform="translate(318 0)"><path d="M18 0 L64 0 L82 18 L82 82 L64 100 L18 100 L0 82 L0 18 Z M25 17 L57 17 L64 24 L64 76 L57 83 L25 83 L18 76 L18 24 Z" fill="#FFFFFF" fill-rule="evenodd"/></g><g transform="translate(416 0)"><path d="M0 0 L62 0 L78 16 L78 42 L64 56 L80 100 L60 100 L46 58 L18 58 L18 100 L0 100 Z M18 17 L55 17 L60 22 L60 36 L55 41 L18 41 Z" fill="#FFFFFF" fill-rule="evenodd"/></g><g transform="translate(512 0)"><polygon points="0,0 18,0 18,100 0,100" fill="#FFFFFF"/></g><g transform="translate(546 0)"><path d="M32 0 L52 0 L84 100 L64 100 L58 81 L26 81 L20 100 L0 100 Z M42 24 L53 64 L31 64 Z" fill="#FFFFFF" fill-rule="evenodd"/></g></g></svg>
