@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BRAND, LINKS } from "@vaeloria/config";
-import { Badge, ButtonLink, Card, Container, EmptyState, EventCard, LeaderboardTable, NewsCard, Section, SectionHeader, ServerStatusLine, formatDate, formatNumber } from "@vaeloria/ui";
+import { Badge, ButtonLink, Card, Container, EmptyState, EventCard, LeaderboardTable, NewsCard, Ornament, Section, SectionHeader, ServerStatusLine, formatDate, formatNumber } from "@vaeloria/ui";
+import { HeroLockup } from "@/components/Logo";
 import { CopyIp } from "@/components/CopyIp";
 import { Countdown } from "@/components/Countdown";
 import { FaqList } from "@/components/Faq";
@@ -43,11 +44,17 @@ export default async function HomePage() {
 
       {/* 1–3 · Hero, statut, joueurs */}
       <div className="hero-backdrop border-b border-line/60">
-        <Container className="flex flex-col items-start py-16 sm:py-28">
-          <ServerStatusLine status={status} className="mb-6" />
-          <h1 className="metal-text font-display text-5xl font-bold tracking-[0.12em] sm:text-7xl">VÆLORIA</h1>
-          <p className="mt-4 font-display text-lg font-semibold tracking-[0.15em] text-fg sm:text-2xl">{BRAND.tagline}</p>
-          <ul className="mt-6 flex flex-wrap gap-2" aria-label="Caractéristiques">
+        <Container className="flex flex-col items-center py-14 text-center sm:py-24">
+          <ServerStatusLine status={status} className="mb-10 justify-center" />
+          <h1>
+            <span className="sr-only">VÆLORIA</span>
+            <HeroLockup />
+          </h1>
+          <p className="mt-8 font-display text-sm font-semibold uppercase tracking-[0.3em] text-muted sm:text-lg sm:tracking-[0.35em]">
+            Le retour de la <span className="text-accent">vraie guerre.</span>
+          </p>
+          <Ornament className="mt-6" />
+          <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Caractéristiques">
             <li><Badge>Minecraft {BRAND.minecraftVersion}</Badge></li>
             <li><Badge>PvP inspiré du 1.8</Badge></li>
             <li><Badge tone="accent">Faction compétitif</Badge></li>
@@ -95,8 +102,8 @@ export default async function HomePage() {
           ].map((b) => (
             <Link key={b.href} href={b.href} className="group">
               <Card className="h-full transition-colors group-hover:bg-surface-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{b.eyebrow}</p>
-                <p className="mt-2 font-display text-xl font-bold">{b.title}</p>
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.25em] text-accent">{b.eyebrow}</p>
+                <p className="mt-2 font-display text-xl font-bold uppercase tracking-[0.04em]">{b.title}</p>
                 <p className="mt-2 text-sm text-muted">{b.body}</p>
                 <p className="mt-4 text-sm font-semibold text-fg group-hover:text-accent">Découvrir →</p>
               </Card>
@@ -176,7 +183,7 @@ export default async function HomePage() {
         <Container>
           <Card className="flex flex-col items-start gap-5 p-8 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="font-display text-2xl font-bold">La guerre se prépare sur Discord</p>
+              <p className="font-display text-2xl font-bold uppercase tracking-[0.04em]">La guerre se prépare sur Discord</p>
               <p className="mt-2 max-w-xl text-muted">Annonces, recrutement de factions, événements, support et patch notes : tout passe par le Discord.</p>
             </div>
             <ButtonLink href={LINKS.discord} external size="lg" data-track="click_discord">Rejoindre le Discord</ButtonLink>
@@ -195,7 +202,8 @@ export default async function HomePage() {
       {/* 14 · CTA final */}
       <Section className="hero-backdrop border-t border-line/60">
         <Container className="flex flex-col items-center text-center">
-          <p className="metal-text font-display text-3xl font-bold tracking-[0.1em] sm:text-5xl">{BRAND.tagline}</p>
+          <Ornament className="mb-6" />
+          <p className="metal-text font-display text-3xl font-bold uppercase tracking-[0.08em] sm:text-5xl">{BRAND.tagline}</p>
           <p className="mt-4 text-muted">Rejoins {BRAND.serverIp} en Minecraft {BRAND.minecraftVersion}.</p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
             <CopyIp />

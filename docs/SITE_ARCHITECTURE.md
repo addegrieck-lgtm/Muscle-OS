@@ -77,7 +77,19 @@ Lien d'évitement, `aria-current`, fil d'Ariane, `<details>` natifs pour la FAQ,
 
 ## 9. Identité visuelle
 
-Noir / gris très sombre, blanc, accent laiton `#c9a45c` personnalisable via `--accent` (`packages/config/theme.css`), dégradés « métal » sur le logotype, typographie Cinzel (titres) + Inter (texte), polices auto-hébergées au build. Emblème écu + lame en SVG inline. Aucun visuel repris d'un autre serveur.
+Source de vérité : le pack logo dans `brand/` (SVG générés par `brand/build.py`, à relancer après toute retouche ; `valoria-wordmark-argent.svg` et `valoria-og.png` en sont dérivés pour le web).
+
+| Élément | Choix | Raison |
+|---|---|---|
+| Fond | `#07070A` noir, surfaces anthracite `#101115` / `#1B1C21`, filets `#2A2C33` | palette du pack |
+| Argent | dégradé blanc → `#E2E4E9`, bande `#AEB3BC` nette à mi-hauteur (`metal-text`) | reflet chromé du logotype |
+| Rubis | `#D21F2F` / `#A3121E` pour les surfaces (boutons `ruby-fill`, losanges) ; `#EF4450` pour le texte | le rubis pur ne fait que 3,8:1 sur noir : le texte utilise une teinte éclaircie (5,4:1, WCAG AA) |
+| Titres | Chakra Petch, capitales, léger interlettrage | angles coupés = écho du O octogonal et des facettes de l'écusson |
+| Texte | Inter | lisibilité sur mobile |
+| Motifs | losange rubis (eyebrows), filet–losange–filet (`Ornament`), lueur rubis sombre derrière l'écusson | repris du logo complet et de la bannière |
+| Logos | écusson + logotype en SVG (`public/brand/`), favicon = icône du pack, image de partage = bannière recadrée 1200×630 | nets à toute taille, aucun JS |
+
+L'accent reste personnalisable via `--accent` (texte) et `--accent-fill` (surfaces) dans `packages/config/theme.css`. Icône du serveur Minecraft (64×64) : `brand/server-icon.png`, à placer à la racine du serveur.
 
 ## 10. Aperçu statique (GitHub Pages)
 

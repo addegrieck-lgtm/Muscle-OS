@@ -6,9 +6,9 @@ type Variant = "primary" | "secondary" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold tracking-wide transition-colors disabled:opacity-50 disabled:pointer-events-none select-none";
+  "inline-flex items-center justify-center gap-2 rounded-md font-display font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 disabled:pointer-events-none select-none";
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-accent-contrast hover:bg-accent-strong",
+  primary: "ruby-fill hover:brightness-110",
   secondary: "metal-border text-fg hover:text-white hover:bg-surface-2",
   ghost: "text-muted hover:text-fg hover:bg-surface-2",
 };

@@ -35,7 +35,7 @@ export function Navbar() {
         <Link href="/" aria-label="VÆLORIA — accueil">
           <Wordmark />
         </Link>
-        <ul className="hidden items-center gap-1 lg:flex">
+        <ul className="hidden items-center gap-0.5 xl:flex">
           {NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -43,7 +43,7 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("rounded-md px-3 py-2 text-sm font-medium transition-colors", active ? "text-fg" : "text-muted hover:text-fg")}
+                  className={cn("relative rounded-md px-3 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
                 >
                   {item.label}
                 </Link>
@@ -63,7 +63,7 @@ export function Navbar() {
           </div>
           <button
             type="button"
-            className="inline-flex size-10 items-center justify-center rounded-md text-fg hover:bg-surface-2 lg:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-md text-fg hover:bg-surface-2 xl:hidden"
             aria-expanded={open}
             aria-controls="menu-mobile"
             aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
@@ -76,11 +76,11 @@ export function Navbar() {
         </div>
       </nav>
       {open && (
-        <div id="menu-mobile" className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 lg:hidden">
+        <div id="menu-mobile" className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
           <ul className="flex flex-col">
             {[...NAV, { href: "/faq", label: "FAQ" }, { href: "/status", label: "Statut" }, { href: "/support", label: "Support" }, { href: "/account", label: "Mon compte" }].map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="block border-b border-line/60 py-3.5 text-lg font-semibold text-fg">
+                <Link href={item.href} className="block border-b border-line/60 py-3.5 font-display text-lg font-semibold uppercase tracking-[0.06em] text-fg">
                   {item.label}
                 </Link>
               </li>

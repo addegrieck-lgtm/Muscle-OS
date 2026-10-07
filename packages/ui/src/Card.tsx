@@ -22,7 +22,7 @@ export function Badge({
     danger: "bg-danger/10 text-danger border-danger/30",
   } as const;
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold uppercase tracking-wider", tones[tone], className)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 font-display text-xs font-semibold uppercase tracking-[0.12em]", tones[tone], className)}>
       {children}
     </span>
   );
@@ -52,11 +52,36 @@ export function SectionHeader({
   return (
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
-        {eyebrow && <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">{eyebrow}</p>}
-        <Tag className={cn("font-display font-bold tracking-wide text-fg", Tag === "h1" ? "text-3xl sm:text-5xl" : "text-2xl sm:text-3xl")}>{title}</Tag>
+        {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+        <Tag className={cn("font-display font-bold uppercase tracking-[0.04em] text-fg", Tag === "h1" ? "text-3xl sm:text-5xl" : "text-2xl sm:text-3xl")}>{title}</Tag>
         {description && <p className="mt-3 text-muted">{description}</p>}
       </div>
       {action}
+    </div>
+  );
+}
+
+/** Losange rubis — motif repris du logo complet. */
+export function Diamond({ className }: { className?: string }) {
+  return <span aria-hidden className={cn("inline-block size-2 rotate-45 bg-gradient-to-b from-ruby to-ruby-deep", className)} />;
+}
+
+export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <p className={cn("mb-2 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-[0.25em] text-accent", className)}>
+      <Diamond className="size-1.5" />
+      {children}
+    </p>
+  );
+}
+
+/** Filet argent — losange — filet argent (séparateur du logo complet). */
+export function Ornament({ className }: { className?: string }) {
+  return (
+    <div aria-hidden className={cn("flex items-center gap-3", className)}>
+      <span className="h-px w-16 bg-subtle/60" />
+      <Diamond />
+      <span className="h-px w-16 bg-subtle/60" />
     </div>
   );
 }

@@ -1,34 +1,42 @@
 /*
- * Design tokens VÆLORIA (Tailwind v4).
- * L'accent est personnalisable : surcharger --accent / --accent-strong / --accent-contrast.
+ * Design tokens VÆLORIA (Tailwind v4) — alignés sur le pack logo (brand/build.py).
+ * Palette : noir #07070A, anthracite #1B1C21 / #2A2C33, argent (dégradé), rubis #D21F2F / #A3121E / #5E0710.
+ * Contrastes (sur #07070A) : texte accent #EF4450 = 5,4:1 ; texte secondaire #A9AEB8 = 9:1 ;
+ * texte tertiaire #8B909B = 6,3:1 ; blanc sur bouton rubis #C11C2B = 6:1.
  */
 @theme {
-  --color-bg: #0a0a0b;
-  --color-surface: #111113;
-  --color-surface-2: #17171a;
-  --color-line: #26262b;
-  --color-line-strong: #34343b;
-  --color-fg: #f4f4f5;
-  --color-muted: #a1a1aa;
-  --color-subtle: #71717a;
+  --color-bg: #07070a;
+  --color-surface: #101115;
+  --color-surface-2: #1b1c21;
+  --color-line: #2a2c33;
+  --color-line-strong: #3a3d45;
+  --color-fg: #f4f5f7;
+  --color-muted: #a9aeb8;
+  --color-subtle: #8b909b;
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-contrast: var(--accent-contrast);
+  --color-ruby: #d21f2f;
+  --color-ruby-deep: #a3121e;
   --color-success: #4ade80;
   --color-warning: #facc15;
   --color-danger: #f87171;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-cinzel), ui-serif, Georgia, serif;
+  --font-display: var(--font-chakra), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --radius-card: 0.875rem;
+  --radius-card: 0.75rem;
 }
 
 :root {
-  --accent: #c9a45c;
-  --accent-strong: #e2c27f;
-  --accent-contrast: #0a0a0b;
+  /* Accent personnalisable. --accent sert au texte et aux contours (lisible sur noir),
+     --accent-fill aux surfaces pleines (boutons) avec texte blanc. */
+  --accent: #ef4450;
+  --accent-strong: #ff5a65;
+  --accent-contrast: #ffffff;
+  --accent-fill: #c11c2b;
+  --accent-fill-hover: #d21f2f;
   color-scheme: dark;
 }
 
@@ -36,11 +44,12 @@
   html { background: var(--color-bg); color: var(--color-fg); -webkit-tap-highlight-color: transparent; }
   body { background: var(--color-bg); font-family: var(--font-sans); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-  ::selection { background: var(--accent); color: var(--accent-contrast); }
+  ::selection { background: var(--accent-fill); color: #fff; }
 }
 
+/* Argent du logotype : blanc → gris clair, bande sombre nette à mi-hauteur (reflet chromé). */
 @utility metal-text {
-  background: linear-gradient(180deg, #ffffff 0%, #d4d4d8 45%, #8a8a93 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #e2e4e9 48%, #aeb3bc 52%, #d6d9df 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -50,7 +59,14 @@
   border: 1px solid transparent;
   background:
     linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
-    linear-gradient(160deg, #3f3f46, #1c1c20 40%, #3a3a41) border-box;
+    linear-gradient(180deg, #3a3d45, #1b1c21 50%, #2a2c33) border-box;
+}
+
+/* Bouton rubis : même dégradé vertical que la gemme de l'écusson. */
+@utility ruby-fill {
+  background: linear-gradient(180deg, var(--accent-fill-hover) 0%, var(--accent-fill) 55%, #a3121e 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), 0 0 0 1px rgb(94 7 16 / 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {

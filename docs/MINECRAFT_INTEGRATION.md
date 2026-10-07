@@ -11,6 +11,9 @@ Le plugin est le **seul** composant du serveur qui communique avec l'extérieur.
 
 ## Installation
 
+Icône de la liste des serveurs : copier `brand/server-icon.png` (64×64) à la racine du serveur Minecraft.
+
+
 1. Copier le jar dans `plugins/`, démarrer une fois.
 2. Renseigner `plugins/VaeloriaBridge/config.yml` : `api.url`, `api.key-id`, `api.secret` (le même que `BRIDGE_KEYS` côté API), `server-name`.
 3. Redémarrer. `/vbridge` affiche l'état (file en mémoire, file sur disque, dernière erreur API).

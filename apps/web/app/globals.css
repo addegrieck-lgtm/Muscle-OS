@@ -3,15 +3,20 @@
 @source "../../../packages/ui/src";
 
 /* Grain + lueur discrets du hero : pur CSS, aucun asset à charger. */
+/* Lueur rubis sombre derrière l'écusson, comme sur la bannière officielle (#2A0A0E → noir). */
 .hero-backdrop {
   background:
-    radial-gradient(60rem 30rem at 50% -10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 70%),
-    radial-gradient(40rem 20rem at 85% 30%, rgb(255 255 255 / 0.04), transparent 70%),
-    linear-gradient(180deg, #0d0d0f 0%, var(--color-bg) 100%);
+    radial-gradient(ellipse 55% 60% at 50% 40%, rgb(42 10 14 / 0.9), transparent 70%),
+    linear-gradient(180deg, #0b0b0e 0%, var(--color-bg) 100%);
+}
+.page-backdrop {
+  background:
+    radial-gradient(ellipse 60% 120% at 15% 0%, rgb(42 10 14 / 0.55), transparent 70%),
+    linear-gradient(180deg, #0b0b0e 0%, var(--color-bg) 100%);
 }
 
 .prose-vae { line-height: 1.75; color: var(--color-muted); }
-.prose-vae h2 { margin-top: 2rem; margin-bottom: 0.75rem; font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--color-fg); }
+.prose-vae h2 { margin-top: 2rem; margin-bottom: 0.75rem; font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-fg); }
 .prose-vae h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.125rem; font-weight: 600; color: var(--color-fg); }
 .prose-vae p { margin: 0.75rem 0; }
 .prose-vae ul, .prose-vae ol { margin: 0.75rem 0; padding-left: 1.25rem; }

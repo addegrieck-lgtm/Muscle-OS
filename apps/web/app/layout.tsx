@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, Inter } from "next/font/google";
+import { Chakra_Petch, Inter } from "next/font/google";
 import { BRAND } from "@vaeloria/config";
 import { Analytics } from "@/components/Analytics";
 import { Footer } from "@/components/Footer";
@@ -11,7 +11,8 @@ import "./globals.css";
 
 // Polices auto-hébergées par Next au build : aucune requête vers Google côté visiteur (RGPD).
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const cinzel = Cinzel({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-cinzel", display: "swap" });
+// Chakra Petch : angles coupés, écho direct du O octogonal et des facettes du logotype.
+const chakra = Chakra_Petch({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-chakra", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,11 +24,11 @@ export const metadata: Metadata = {
   ...(PREVIEW ? { robots: { index: false, follow: false } } : {}),
 };
 
-export const viewport: Viewport = { themeColor: "#0a0a0b", width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = { themeColor: "#07070a", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${cinzel.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${chakra.variable}`}>
       <body className="min-h-dvh">
         <JsonLd
           data={{
@@ -35,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "@type": "Organization",
             name: BRAND.name,
             url: SITE_URL,
-            logo: `${SITE_URL}/icon.svg`,
+            logo: `${SITE_URL}/brand/valoria-symbole.svg`,
             slogan: BRAND.tagline,
           }}
         />

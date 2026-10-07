@@ -21,6 +21,8 @@ const preview = process.env.NEXT_PUBLIC_PREVIEW === "1";
 const basePath = process.env.PREVIEW_BASE_PATH ?? "";
 
 const shared: NextConfig = {
+  // Préfixe des assets statiques référencés à la main (<img src="/brand/...">) en mode aperçu.
+  env: { NEXT_PUBLIC_BASE_PATH: basePath },
   transpilePackages: ["@vaeloria/ui", "@vaeloria/config", "@vaeloria/types", "@vaeloria/api-client"],
   poweredByHeader: false,
 };

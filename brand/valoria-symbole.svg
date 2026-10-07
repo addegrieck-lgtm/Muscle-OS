@@ -32,7 +32,7 @@
     <stop offset="0" stop-color="#2A0A0E" stop-opacity="0.9"/>
     <stop offset="1" stop-color="#07070A" stop-opacity="0"/>
   </radialGradient>
-</defs><rect width="512" height="512" fill="#07070A"/><ellipse cx="256" cy="250" rx="250" ry="240" fill="url(#glow)"/><g transform="translate(28 28) scale(0.890625)">
+</defs>
 <g>
   <path d="M256 40 L300 100 L360 72 L432 104 L432 264 C432 360 360 420 256 472 C152 420 80 360 80 264 L80 104 L152 72 L212 100 Z" fill="url(#silver)"/>
   <path d="M256 40 L300 100 L360 72 L432 104 L432 264 C432 360 360 420 256 472 C152 420 80 360 80 264 L80 104 L152 72 L212 100 Z" transform="translate(256 262) scale(0.875) translate(-256 -262)" fill="url(#core)"/>
@@ -42,4 +42,4 @@
   <polygon points="325,150 298,150 256,300 256,350" fill="#E1E3E8"/>
   <polygon points="256,150 276,188 256,272 236,188" fill="url(#ruby)"/>
   <polygon points="256,150 276,188 256,188" fill="#D21F2F" opacity="0.55"/>
-</g></g></svg>
+</g></svg>
