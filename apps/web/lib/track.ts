@@ -7,7 +7,8 @@
  */
 export type TrackName =
   | "page_view" | "copy_ip" | "click_play" | "click_discord" | "click_leaderboard" | "beta_signup"
-  | "shop_view" | "product_view" | "add_to_cart" | "remove_from_cart" | "checkout_started";
+  | "shop_view" | "product_view" | "add_to_cart" | "remove_from_cart" | "checkout_started"
+  | "event_view" | "war_view" | "ranking_view" | "share_empire" | "cta_click" | "map_view" | "empire_view";
 
 const OPT_OUT_KEY = "vae-analytics-optout";
 

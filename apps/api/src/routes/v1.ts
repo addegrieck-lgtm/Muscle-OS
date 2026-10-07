@@ -148,6 +148,8 @@ export async function v1Routes(app: FastifyInstance, ctx: AppContext) {
       "page_view", "copy_ip", "click_play", "click_discord", "click_leaderboard", "beta_signup", "account_created", "account_linked",
       // Boutique (côté navigateur). PAYMENT_SUCCESS, POINTS_EARNED, RANK_UNLOCKED… sont enregistrés par l'API elle-même.
       "shop_view", "product_view", "add_to_cart", "remove_from_cart", "checkout_started", "checkout_start",
+      // Monde V2 (côté navigateur) ; REGISTER, FOUNDER_JOIN, EMPIRE_CREATE/JOIN, REFERRAL_*, VOTE sont enregistrés par l'API.
+      "event_view", "war_view", "ranking_view", "share_empire", "cta_click", "map_view", "empire_view",
     ]),
     props: z.record(z.union([z.string().max(100), z.number()])).optional(),
     path: z.string().max(300).optional(),

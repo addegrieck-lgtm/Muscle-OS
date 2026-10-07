@@ -8,6 +8,7 @@ import { randomUUID } from "node:crypto";
 import { createDb } from "./db";
 import { migrate } from "./migrate";
 import { seedShopExamples } from "./shopSeed";
+import { seedWorld, seedWorldDemo } from "./worldSeed";
 
 const demo = process.argv.includes("--demo");
 const url = process.env.DATABASE_URL;
@@ -62,10 +63,13 @@ await sql.begin(async (tx) => {
 });
 
 console.log(`Boutique : ${await seedShopExamples(sql, { activatePromotion: demo })} produit(s) d'exemple ajouté(s).`);
+await seedWorld(sql);
+if (demo) await seedWorldDemo(sql);
 
 if (demo) {
   // Données FICTIVES : ne jamais exécuter sur une base de production.
-  await sql.begin(async (tx) => {
+  const already = await sql`SELECT 1 FROM factions f JOIN seasons s ON s.id = f.season_id WHERE s.number = 1 LIMIT 1`;
+  if (!already.length) await sql.begin(async (tx) => {
     await tx`UPDATE seasons SET status = 'active', starts_at = now() - interval '10 days', ends_at = now() + interval '50 days' WHERE number = 1`;
     const [season] = await tx<{ id: string }[]>`SELECT id FROM seasons WHERE number = 1`;
     const names = ["Adrien", "Kraken_", "Nyxos", "Valdor", "SirLance", "Mirelle", "Torvik", "Ashen", "Zephyr_", "Brakka", "Lysandre", "Orrin"];

@@ -6,6 +6,9 @@ import type { LinkedMinecraft, Me } from "@vaeloria/types";
 import type { Sql } from "../db";
 import { sha256 } from "../lib/hmac";
 import { getProgress } from "./shop/ledger";
+import { assignFounder } from "./world/founders";
+import { grantInfluence } from "./world/influence";
+import { attributeReferral, qualifyReferral } from "./world/referrals";
 
 export const SESSION_DAYS = 30;
 
@@ -35,7 +38,16 @@ export async function deleteSession(sql: Sql, token: string) {
 }
 
 /** Crée ou met à jour l'utilisateur lié à un compte Discord. */
-export async function upsertDiscordUser(sql: Sql, d: { discordId: string; username: string; displayName: string; avatar: string | null }): Promise<string> {
+/**
+ * Crée ou met à jour l'utilisateur lié à un compte Discord.
+ * À la création (= inscription) : numéro de fondateur si les inscriptions fondateurs sont ouvertes,
+ * attribution du parrainage éventuel.
+ */
+export async function upsertDiscordUser(
+  sql: Sql,
+  d: { discordId: string; username: string; displayName: string; avatar: string | null },
+  onboarding: { referralCode?: string | null } = {},
+): Promise<string> {
   return sql.begin(async (tx) => {
     const [existing] = await tx<{ userId: string }[]>`SELECT user_id AS "userId" FROM discord_accounts WHERE discord_id = ${d.discordId}`;
     if (existing) {
@@ -45,7 +57,9 @@ export async function upsertDiscordUser(sql: Sql, d: { discordId: string; userna
     }
     const [user] = await tx<{ id: string }[]>`INSERT INTO users (display_name) VALUES (${d.displayName}) RETURNING id`;
     await tx`INSERT INTO discord_accounts (discord_id, user_id, username, avatar) VALUES (${d.discordId}, ${user!.id}, ${d.username}, ${d.avatar})`;
-    await tx`INSERT INTO analytics_events (name) VALUES ('account_created')`;
+    await tx`INSERT INTO analytics_events (name) VALUES ('account_created'), ('register'), ('discord_connect')`;
+    await attributeReferral(tx, user!.id, onboarding.referralCode);
+    await assignFounder(tx, user!.id);
     return user!.id;
   });
 }
@@ -106,6 +120,9 @@ export async function consumeLinkCode(sql: Sql, userId: string, rawCode: string)
              ON CONFLICT (player_uuid) DO UPDATE SET user_id = EXCLUDED.user_id, linked_at = now()`;
     await tx`INSERT INTO audit_logs (actor_type, actor_id, action, target_type, target_id) VALUES ('user', ${userId}, 'minecraft.linked', 'player', ${row.uuid})`;
     await tx`INSERT INTO analytics_events (name) VALUES ('account_linked')`;
+    // Preuve d'un vrai compte Java : débloque l'influence liée et qualifie le parrainage éventuel.
+    await grantInfluence(tx, { userId, kind: "account_linked", key: `linked:${userId}` });
+    await qualifyReferral(tx, userId, row.uuid);
     return row;
   });
 }

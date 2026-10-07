@@ -29,7 +29,7 @@ export default async function LeaderboardsPage() {
                   <h2 id={`lb-${c.id}`} className="font-display text-xl font-bold">{c.label}</h2>
                   <Link href={`/leaderboards/${c.id}`} className="text-sm font-semibold text-accent hover:underline">Voir tout</Link>
                 </div>
-                <LeaderboardTable board={board} unit={c.unit} hrefFor={(_i, n) => (PLAYER_BOARDS.has(c.id) ? `/player/${encodeURIComponent(n)}` : `/faction/${encodeURIComponent(n)}`)} />
+                <LeaderboardTable board={board} unit={c.unit} hrefFor={(_i, n) => (PLAYER_BOARDS.has(c.id) ? `/joueur/${encodeURIComponent(n)}` : `/faction/${encodeURIComponent(n)}`)} />
               </section>
             );
           })}

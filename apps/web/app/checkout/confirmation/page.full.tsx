@@ -27,7 +27,7 @@ export default async function ConfirmationPage({ searchParams }: { searchParams:
             <OrderStatus initial={order} />
           ) : (
             <EmptyState title={me ? "Commande introuvable" : "Connecte-toi pour suivre ta commande"}>
-              <div className="mt-4"><ButtonLink href={me ? "/compte" : `/api/auth/discord?next=${encodeURIComponent(`/checkout/confirmation?commande=${publicId}`)}`} variant="secondary">{me ? "Mes commandes" : "Se connecter"}</ButtonLink></div>
+              <div className="mt-4"><ButtonLink href={me ? "/compte" : `/login?next=${encodeURIComponent(`/checkout/confirmation?commande=${publicId}`)}`} variant="secondary">{me ? "Mes commandes" : "Se connecter"}</ButtonLink></div>
             </EmptyState>
           )}
         </Container>

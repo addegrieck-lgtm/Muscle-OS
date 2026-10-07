@@ -3,8 +3,8 @@
  * Un seul formulaire générique + une seule paire de server actions pour tous.
  */
 export type Field =
-  | { name: string; label: string; kind: "text" | "textarea" | "datetime" | "url"; required?: boolean; column?: string }
-  | { name: string; label: string; kind: "number"; required?: boolean; column?: string; cents?: boolean }
+  | { name: string; label: string; kind: "text" | "textarea" | "datetime" | "url"; required?: boolean; column?: string; nullIfEmpty?: boolean }
+  | { name: string; label: string; kind: "number"; required?: boolean; column?: string; cents?: boolean; omitIfEmpty?: boolean }
   | { name: string; label: string; kind: "select"; options: [string, string][]; column?: string }
   | { name: string; label: string; kind: "checkbox"; column?: string }
   | { name: string; label: string; kind: "lines"; column?: string };
@@ -69,8 +69,12 @@ export const RESOURCES: Record<string, Resource> = {
 
 /** FormData → corps JSON attendu par l'API admin. */
 export function formToBody(r: Resource, form: FormData): Record<string, unknown> {
+  return fieldsToBody(r.fields, form);
+}
+
+export function fieldsToBody(fields: Field[], form: FormData): Record<string, unknown> {
   const body: Record<string, unknown> = {};
-  for (const f of r.fields) {
+  for (const f of fields) {
     const raw = form.get(f.name);
     const str = typeof raw === "string" ? raw.trim() : "";
     switch (f.kind) {
@@ -78,6 +82,7 @@ export function formToBody(r: Resource, form: FormData): Record<string, unknown>
         body[f.name] = raw === "on";
         break;
       case "number":
+        if (str === "" && "omitIfEmpty" in f && f.omitIfEmpty) break; // l'API applique sa valeur par défaut
         if (str === "") body[f.name] = null;
         else body[f.name] = "cents" in f && f.cents ? Math.round(Number(str.replace(",", ".")) * 100) : Number(str);
         break;
@@ -91,7 +96,7 @@ export function formToBody(r: Resource, form: FormData): Record<string, unknown>
         body[f.name] = str || null;
         break;
       default:
-        body[f.name] = str;
+        body[f.name] = str === "" && "nullIfEmpty" in f && f.nullIfEmpty ? null : str;
     }
   }
   return body;

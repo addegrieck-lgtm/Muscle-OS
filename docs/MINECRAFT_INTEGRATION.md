@@ -38,7 +38,12 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 | `FACTION_CREATE` / `DISBAND` / `JOIN` / `LEAVE` | plugin Factions via `emit()` | factions et membres |
 | `FACTION_CLAIM` / `UNCLAIM` | plugin Factions | claims, classement Territoire |
 | `FACTION_SNAPSHOT` (`power`, `maxPower`, `wealth`, `claims`) | plugin Factions, périodique | Power, richesse |
+| `KOTH_START` (`koth`, `durationSeconds?`) | plugin KOTH | événement KOTH « en direct » sur /evenements et la carte |
 | `KOTH_CAPTURE` | plugin KOTH | classement KOTH |
+| `WAR_START` (`warId`, `title?`, `attacker`, `defender` = noms de faction) | plugin Factions / guerres | guerre active sur /guerres, si les deux factions sont liées à un empire (admin → Monde → Empires → « faction en jeu ») |
+| `WAR_END` (`warId`, `winner` \| null, `scores`, `territories?`, `participants?`) | plugin Factions / guerres | guerre terminée, vainqueur, influence « victoire » aux membres liés |
+| `EVENT_START` (`eventId`, `title`, `type`, `zone?`) | plugin d'événements | événement en direct (créé ou mis à jour par `eventId`) |
+| `EVENT_END` (`eventId`, `participants[]` ≤ 1000 UUID) | plugin d'événements | participants et empires comptés, influence « participation » aux joueurs liés |
 | `ECONOMY_TRANSACTION` | plugin économie | solde joueur |
 | `PLAYER_RANK_CHANGE` | plugin de grades | rang affiché |
 
@@ -54,6 +59,21 @@ e.addProperty("uuid", player.getUniqueId().toString());
 e.addProperty("username", player.getName());
 VaeloriaBridgePlugin.emit(e);                 // thread-safe, non bloquant
 ```
+
+### Événements du monde (V2)
+
+VæloriaBridge relaie tel quel tout événement passé à `emit()` : aucune modification du plugin n'est nécessaire pour les guerres, KOTH et événements. Il suffit que les plugins du réseau les émettent :
+
+```java
+JsonObject e = Events.base("WAR_START", VaeloriaBridgePlugin.serverName());
+e.addProperty("warId", war.getId());          // identifiant stable : rend l'événement idempotent
+e.addProperty("title", "Guerre du Nord");
+e.addProperty("attacker", "Nightmare");        // nom de la faction en jeu
+e.addProperty("defender", "Titans");
+VaeloriaBridgePlugin.emit(e);
+```
+
+Le site fonctionne entièrement **avant** la synchronisation Minecraft : empires, fondateurs, Conseil et parrainage ne dépendent que des comptes du site. Les guerres et événements peuvent aussi être saisis à la main dans l'admin (Monde → Guerres). `PLAYER_QUIT` crédite l'influence « temps de jeu » (1 / heure, plafonnée) au compte lié.
 
 ## File d'événements et pannes
 

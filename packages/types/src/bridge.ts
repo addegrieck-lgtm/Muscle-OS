@@ -40,6 +40,19 @@ export const BridgeEvent = z.discriminatedUnion("event", [
   z.object({ ...base, event: z.literal("KOTH_CAPTURE"), koth: z.string().max(64), faction: z.string().min(2).max(24).nullable(), ...player }),
   z.object({ ...base, event: z.literal("ECONOMY_TRANSACTION"), ...player, amount: z.number(), balanceAfter: z.number(), reason: z.string().max(64) }),
   z.object({ ...base, event: z.literal("PLAYER_RANK_CHANGE"), ...player, rank: z.string().max(32) }),
+  // ── Monde V2 : guerres, KOTH, événements ──
+  z.object({ ...base, event: z.literal("WAR_START"), warId: z.string().min(1).max(64), title: z.string().max(120).optional(), attacker: z.string().min(2).max(24), defender: z.string().min(2).max(24) }),
+  z.object({
+    ...base, event: z.literal("WAR_END"), warId: z.string().min(1).max(64), winner: z.string().min(2).max(24).nullable(),
+    attackerScore: z.number().int().min(0), defenderScore: z.number().int().min(0),
+    attackerTerritories: z.number().int().min(0).optional(), defenderTerritories: z.number().int().min(0).optional(), participants: z.number().int().min(0).optional(),
+  }),
+  z.object({ ...base, event: z.literal("KOTH_START"), koth: z.string().max(64), durationSeconds: z.number().int().min(60).max(86_400).optional() }),
+  z.object({
+    ...base, event: z.literal("EVENT_START"), eventId: z.string().min(1).max(64), title: z.string().min(3).max(120),
+    type: z.enum(["koth", "boss", "tournament", "supply_drop", "war", "seasonal", "gold_rush", "siege", "other"]), zone: z.string().max(40).optional(),
+  }),
+  z.object({ ...base, event: z.literal("EVENT_END"), eventId: z.string().min(1).max(64), participants: z.array(z.object(player)).max(1000).default([]) }),
   z.object({
     ...base,
     event: z.literal("SERVER_HEARTBEAT"),

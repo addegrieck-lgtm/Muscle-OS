@@ -22,7 +22,7 @@ export function skinHead(uuidOrName: string, size = 64) {
 
 export function PlayerCard({ player }: { player: Pick<PlayerProfile, "uuid" | "username" | "rank" | "faction"> }) {
   return (
-    <Link href={`/player/${player.username}`} className="block">
+    <Link href={`/joueur/${player.username}`} className="block">
       <Card className="flex items-center gap-4 p-4 transition-colors hover:bg-surface-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={skinHead(player.uuid, 48)} alt="" width={48} height={48} loading="lazy" className="size-12 rounded-md [image-rendering:pixelated]" />
@@ -63,22 +63,37 @@ const EVENT_LABEL: Record<GameEvent["type"], string> = {
   supply_drop: "Supply drop",
   war: "Guerre",
   seasonal: "Saisonnier",
+  gold_rush: "Ruée vers l'or",
+  siege: "Siège",
   other: "Événement",
 };
 
+export const eventTypeLabel = (t: GameEvent["type"]) => EVENT_LABEL[t];
+
 export function EventCard({ event }: { event: GameEvent }) {
   return (
-    <Card className="flex flex-col gap-2 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <Badge tone="accent">{EVENT_LABEL[event.type]}</Badge>
-        <time dateTime={event.startsAt} className="text-xs text-muted">
-          {formatDateTime(event.startsAt)}
-        </time>
-      </div>
-      <p className="font-semibold">{event.title}</p>
-      <p className="line-clamp-3 text-sm text-muted">{event.description}</p>
-      {event.rewards && <p className="text-xs text-subtle">Récompenses : {event.rewards}</p>}
-    </Card>
+    <Link href={`/evenement/${event.slug}`} className="group block h-full">
+      <Card className="flex h-full flex-col gap-2 p-4 transition-colors group-hover:bg-surface-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-2">
+            {event.live && <Badge tone="danger">En direct</Badge>}
+            <Badge tone="accent">{EVENT_LABEL[event.type]}</Badge>
+          </span>
+          <time dateTime={event.startsAt} className="text-xs text-muted">
+            {formatDateTime(event.startsAt)}
+          </time>
+        </div>
+        <p className="font-semibold group-hover:text-accent">{event.title}</p>
+        {event.description && <p className="line-clamp-3 text-sm text-muted">{event.description}</p>}
+        {(event.participants !== null || event.rewards) && (
+          <p className="mt-auto text-xs text-subtle">
+            {event.participants !== null && `${event.participants} joueurs${event.empiresCount ? ` · ${event.empiresCount} empires` : ""}`}
+            {event.participants !== null && event.rewards ? " · " : ""}
+            {event.rewards && `Récompenses : ${event.rewards}`}
+          </p>
+        )}
+      </Card>
+    </Link>
   );
 }
 

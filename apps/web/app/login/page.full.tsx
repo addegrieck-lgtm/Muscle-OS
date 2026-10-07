@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { ButtonLink, Card, Container, Section } from "@vaeloria/ui";
+import { Card, Container, Section, buttonClass } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { devLogin } from "@/lib/shop/actions.full";
 import { pageMeta } from "@/lib/seo";
@@ -25,7 +25,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <Container className="max-w-md">
           <Card className="space-y-4">
             {sp.erreur && ERRORS[sp.erreur] && <p role="alert" className="text-sm text-danger">{ERRORS[sp.erreur]}</p>}
-            <ButtonLink href={`/api/auth/discord?next=${encodeURIComponent(next)}`} size="lg" className="w-full">Se connecter avec Discord</ButtonLink>
+            {/* Lien simple (pas de préchargement Next) : la route OAuth redirige vers Discord. */}
+            <a href={`/api/auth/discord?next=${encodeURIComponent(next)}`} className={buttonClass("primary", "lg", "w-full")}>Se connecter avec Discord</a>
             <p className="text-sm text-muted">Ensuite, lie ton compte Minecraft avec la commande <code className="rounded bg-surface-2 px-1 text-fg">/link</code> en jeu pour suivre tes points et tes grades.</p>
             {process.env.DEV_LOGIN === "1" && (
               <form action={devLogin} className="space-y-2 border-t border-dashed border-line pt-4">

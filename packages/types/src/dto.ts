@@ -82,6 +82,11 @@ export interface PlayerProfile {
   firstSeenAt: string;
   lastSeenAt: string | null;
   achievements: { id: string; label: string; unlockedAt: string }[];
+  /** Compte VÆLORIA lié (null si le joueur n'a pas lié son compte). */
+  founder: number | null;
+  empire: { slug: string; name: string; tag: string; color: string; crest: string; role: string } | null;
+  wars: { won: number; lost: number };
+  badges: { id: string; label: string }[];
 }
 
 export interface FactionProfile {
@@ -104,12 +109,18 @@ export interface GameEvent {
   id: string;
   slug: string;
   title: string;
-  type: "koth" | "boss" | "tournament" | "supply_drop" | "war" | "seasonal" | "other";
+  type: "koth" | "boss" | "tournament" | "supply_drop" | "war" | "seasonal" | "gold_rush" | "siege" | "other";
   description: string;
   startsAt: string;
   endsAt: string | null;
   location: string | null;
   rewards: string | null;
+  /** En cours maintenant (début passé, fin non atteinte). */
+  live: boolean;
+  /** Réels uniquement (synchronisés depuis le serveur), null tant qu'inconnus. */
+  participants: number | null;
+  empiresCount: number | null;
+  zoneKey: string | null;
 }
 
 export interface NewsArticle {

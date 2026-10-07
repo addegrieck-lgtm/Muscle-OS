@@ -1,5 +1,6 @@
 import type { BridgeEvent } from "@vaeloria/types";
 import type { Sql, Tx as TxSql } from "../db";
+import { grantInfluence } from "./world/influence";
 
 type Tx = Sql | TxSql;
 
@@ -36,6 +37,16 @@ async function bumpSeasonStats(tx: Tx, seasonId: string | null, uuid: string, de
       playtime_seconds = player_season_stats.playtime_seconds + EXCLUDED.playtime_seconds`;
 }
 
+async function empireOfFaction(tx: Tx, faction: string): Promise<string | null> {
+  const [e] = await tx<{ id: string }[]>`SELECT id FROM empires WHERE lower(faction_name) = lower(${faction}) AND status = 'active'`;
+  return e?.id ?? null;
+}
+
+async function linkedUser(tx: Tx, uuid: string): Promise<string | null> {
+  const [u] = await tx<{ userId: string }[]>`SELECT user_id AS "userId" FROM minecraft_accounts WHERE player_uuid = ${uuid}`;
+  return u?.userId ?? null;
+}
+
 async function factionId(tx: Tx, seasonId: string | null, name: string): Promise<string | null> {
   if (!seasonId) return null;
   const [f] = await tx<{ id: string }[]>`
@@ -50,11 +61,72 @@ async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null): Promise<v
       await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
       await tx`UPDATE players SET online = true WHERE uuid = ${e.uuid}`;
       return;
-    case "PLAYER_QUIT":
+    case "PLAYER_QUIT": {
       await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
       await tx`UPDATE players SET online = false, playtime_seconds = playtime_seconds + ${e.sessionSeconds} WHERE uuid = ${e.uuid}`;
       await bumpSeasonStats(tx, seasonId, e.uuid, { playtime: e.sessionSeconds });
+      // Activité : influence par heure de jeu (plafonnée par jour, compte lié uniquement)
+      const hours = Math.floor(e.sessionSeconds / 3600);
+      const user = await linkedUser(tx, e.uuid);
+      if (hours > 0 && user) await grantInfluence(tx as TxSql, { userId: user, kind: "playtime_hour", key: `playtime:${e.id}`, units: hours });
       return;
+    }
+    case "WAR_START": {
+      const [a, d] = [await empireOfFaction(tx, e.attacker), await empireOfFaction(tx, e.defender)];
+      if (!a || !d || a === d) return; // factions pas encore liées à un empire : l'événement reste journalisé
+      await tx`
+        INSERT INTO wars (slug, title, attacker_empire_id, defender_empire_id, status, starts_at, source, external_id)
+        VALUES (${`guerre-${e.warId.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`.slice(0, 80)}, ${e.title ?? `${e.attacker} contre ${e.defender}`}, ${a}, ${d}, 'active', ${e.occurredAt}, 'bridge', ${e.warId})
+        ON CONFLICT (external_id) DO NOTHING`;
+      await tx`INSERT INTO war_events (war_id, kind, message, occurred_at) SELECT id, 'start', ${`${e.attacker} déclare la guerre à ${e.defender}`}, ${e.occurredAt} FROM wars WHERE external_id = ${e.warId}`;
+      return;
+    }
+    case "WAR_END": {
+      const winner = e.winner ? await empireOfFaction(tx, e.winner) : null;
+      const [w] = await tx<{ id: string }[]>`
+        UPDATE wars SET status = 'ended', ends_at = ${e.occurredAt}, winner_empire_id = ${winner}, attacker_score = ${e.attackerScore}, defender_score = ${e.defenderScore},
+          attacker_territories = coalesce(${e.attackerTerritories ?? null}, attacker_territories), defender_territories = coalesce(${e.defenderTerritories ?? null}, defender_territories),
+          participants = coalesce(${e.participants ?? null}, participants)
+        WHERE external_id = ${e.warId} AND status <> 'ended' RETURNING id`;
+      if (!w) return;
+      await tx`INSERT INTO war_events (war_id, kind, message, occurred_at) VALUES (${w.id}, 'end', ${e.winner ? `Victoire de ${e.winner}` : "Fin de la guerre sans vainqueur"}, ${e.occurredAt})`;
+      if (winner) {
+        const members = await tx<{ userId: string }[]>`SELECT user_id AS "userId" FROM empire_members WHERE empire_id = ${winner}`;
+        for (const m of members) await grantInfluence(tx as TxSql, { userId: m.userId, kind: "war_victory", key: `war:${w.id}:${m.userId}` });
+      }
+      return;
+    }
+    case "KOTH_START": {
+      const ends = new Date(new Date(e.occurredAt).getTime() + (e.durationSeconds ?? 1800) * 1000).toISOString();
+      const zone = await tx<{ key: string; name: string }[]>`SELECT key, name FROM map_zones WHERE key = ${e.koth} AND kind = 'koth'`;
+      await tx`
+        INSERT INTO events (slug, title, type, description, starts_at, ends_at, published, zone_key, external_id)
+        VALUES (${`koth-${e.id.slice(0, 8)}`}, ${`KOTH — ${zone[0]?.name ?? e.koth}`}, 'koth', 'Capture en cours.', ${e.occurredAt}, ${ends}, true, ${zone[0]?.key ?? null}, ${`koth:${e.id}`})
+        ON CONFLICT (external_id) DO NOTHING`;
+      return;
+    }
+    case "EVENT_START": {
+      const zone = e.zone ? (await tx<{ key: string }[]>`SELECT key FROM map_zones WHERE key = ${e.zone}`)[0]?.key ?? null : null;
+      const slug = `${e.title}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) + `-${e.eventId.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 12)}`;
+      await tx`
+        INSERT INTO events (slug, title, type, starts_at, published, zone_key, external_id)
+        VALUES (${slug}, ${e.title}, ${e.type}, ${e.occurredAt}, true, ${zone}, ${e.eventId})
+        ON CONFLICT (external_id) DO UPDATE SET starts_at = EXCLUDED.starts_at, published = true`;
+      return;
+    }
+    case "EVENT_END": {
+      const [ev] = await tx<{ id: string }[]>`SELECT id FROM events WHERE external_id = ${e.eventId}`;
+      if (!ev) return;
+      const uuids = e.participants.map((p) => p.uuid);
+      const [{ empires }] = (await tx`
+        SELECT count(DISTINCT m.empire_id)::int AS empires FROM minecraft_accounts ma JOIN empire_members m ON m.user_id = ma.user_id
+        WHERE ma.player_uuid = ANY(${uuids}::uuid[])`) as unknown as [{ empires: number }];
+      await tx`UPDATE events SET ends_at = ${e.occurredAt}, participants = ${uuids.length}, empires_count = ${empires} WHERE id = ${ev.id}`;
+      // Influence de participation : seulement les comptes liés (anti-faux comptes), une fois par événement.
+      const users = await tx<{ userId: string }[]>`SELECT DISTINCT user_id AS "userId" FROM minecraft_accounts WHERE player_uuid = ANY(${uuids}::uuid[])`;
+      for (const u of users) await grantInfluence(tx as TxSql, { userId: u.userId, kind: "event_participation", key: `event:${ev.id}:${u.userId}` });
+      return;
+    }
     case "PLAYER_KILL": {
       await upsertPlayer(tx, e.killer.uuid, e.killer.username, e.server, e.occurredAt);
       await upsertPlayer(tx, e.victim.uuid, e.victim.username, e.server, e.occurredAt);

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const NAV = [
   ["/", "Tableau de bord"], ["/players", "Joueurs"], ["/server", "Serveur"], ["/commands", "Commandes MC"],
-  ["/shop", "Boutique"], ["/news", "News"], ["/events", "Événements"], ["/faq", "FAQ"],
+  ["/world", "Monde"], ["/shop", "Boutique"], ["/news", "News"], ["/events", "Événements"], ["/faq", "FAQ"],
   ["/marketing", "Marketing"], ["/costs", "Coûts"],
 ] as const;
 

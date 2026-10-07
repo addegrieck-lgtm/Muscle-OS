@@ -30,7 +30,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const pages = board ? Math.max(1, Math.ceil(board.total / 50)) : 1;
   return (
     <>
-      <PageHeader eyebrow="Classement" title={c.label} crumbs={[{ name: "Classements", path: "/leaderboards" }, { name: c.label, path: `/leaderboards/${c.id}` }]} />
+      <PageHeader eyebrow="Classement" title={c.label} crumbs={[{ name: "Classements", path: "/classements" }, { name: c.label, path: `/leaderboards/${c.id}` }]} />
       <Section>
         <Container className="max-w-3xl">
           <nav aria-label="Catégories" className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -40,7 +40,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
               </Link>
             ))}
           </nav>
-          <LeaderboardTable board={board} unit={c.unit} hrefFor={(_i, n) => (PLAYER_BOARDS.has(c.id) ? `/player/${encodeURIComponent(n)}` : `/faction/${encodeURIComponent(n)}`)} />
+          <LeaderboardTable board={board} unit={c.unit} hrefFor={(_i, n) => (PLAYER_BOARDS.has(c.id) ? `/joueur/${encodeURIComponent(n)}` : `/faction/${encodeURIComponent(n)}`)} />
           {pages > 1 && (
             <div className="mt-6 flex justify-between text-sm">
               {page > 1 ? <Link href={`?page=${page - 1}`} className="text-accent">← Précédent</Link> : <span />}

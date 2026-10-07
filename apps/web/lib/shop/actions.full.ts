@@ -53,7 +53,7 @@ export async function devLogin(form: FormData): Promise<void> {
   const res = await fetch(`${process.env.API_URL ?? "http://localhost:4000"}/internal/v1/auth/dev-login`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-internal-token": process.env.WEB_INTERNAL_TOKEN ?? "" },
-    body: JSON.stringify({ name: String(form.get("name") ?? "") }),
+    body: JSON.stringify({ name: String(form.get("name") ?? ""), referralCode: (await cookies()).get("vae_ref")?.value }),
   });
   if (!res.ok) redirect("/login?erreur=dev");
   const { token } = (await res.json()) as { token: string };

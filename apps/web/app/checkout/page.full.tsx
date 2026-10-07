@@ -14,7 +14,7 @@ export default async function CheckoutPage() {
       <PageHeader title="Paiement" eyebrow="Boutique" crumbs={[{ name: "Boutique", path: "/boutique" }, { name: "Paiement", path: "/checkout" }]} />
       <Section className="py-8 sm:py-12">
         <Container>
-          <CheckoutFlow me={me} loginHref="/api/auth/discord?next=%2Fcheckout" />
+          <CheckoutFlow me={me} loginHref="/login?next=%2Fcheckout" />
         </Container>
       </Section>
     </>

@@ -3,12 +3,21 @@ import { Card, Table, buttonClass, formatNumber } from "@vaeloria/ui";
 import { ErrorBox, H1 } from "@/components/Shell";
 import { adminApi } from "@/lib/api";
 
-type Funnel = { days: number; steps: Record<string, number> };
+type Funnel = { days: number; steps: Record<string, number>; world?: Record<string, number> };
 type Marketing = {
   sources: { source: string; visitors: number; copiedIp: number; discord: number }[];
   campaigns: { source: string; medium: string | null; campaign: string; content: string | null; visitors: number }[];
   referrers: { host: string; visitors: number }[];
 };
+
+const WORLD_STEPS: [string, string][] = [
+  ["cta_click", "Clics « Rejoindre » / CTA"], ["register", "Inscription (Discord)"], ["founder_join", "Fondateur"], ["account_linked", "Compte Minecraft lié"],
+  ["empire_create", "Empire fondé"], ["empire_join", "Empire rejoint"],
+];
+const WORLD_OTHER: [string, string][] = [
+  ["referral_click", "Clics d'invitation"], ["referral_register", "Inscriptions parrainées"], ["vote", "Votes au Conseil"], ["share_empire", "Partages d'empire"],
+  ["map_view", "Vues de la carte"], ["empire_view", "Vues d'empire"], ["war_view", "Vues de guerre"], ["event_view", "Vues d'événement"], ["ranking_view", "Vues de classement"],
+];
 
 const STEPS: [string, string][] = [
   ["visitors", "Visiteurs"], ["copiedIp", "Copie de l'IP"], ["discord", "Clic Discord"], ["firstJoin", "Première connexion"],
@@ -42,6 +51,26 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
           })}
         </ol>
         <p className="mt-4 text-xs text-subtle">Étapes 1–3 : analytics du site (visiteurs uniques). Étapes 4–9 : données de jeu des joueurs arrivés sur la période.</p>
+      </Card>
+      <Card className="mt-8">
+        <h2 className="mb-1 font-semibold">Parcours VÆLORIA ({days} jours)</h2>
+        <p className="mb-4 text-xs text-subtle">TikTok → site → inscription → fondateur → empire → lancement. Les étapes après le clic sont comptées côté serveur (sans identifiant de visiteur) : la source d&apos;une inscription n&apos;est connue que par les tableaux UTM ci-dessous.</p>
+        <ol className="space-y-2">
+          {WORLD_STEPS.map(([k, label]) => {
+            const v = f.world?.[k] ?? 0;
+            const max = Math.max(1, ...WORLD_STEPS.map(([x]) => f.world?.[x] ?? 0));
+            return (
+              <li key={k} className="grid grid-cols-[12rem_1fr_4rem] items-center gap-3 text-sm">
+                <span className="text-muted">{label}</span>
+                <span className="h-2.5 rounded bg-surface-2"><span className="block h-full rounded bg-accent" style={{ width: `${Math.min(100, (v / max) * 100)}%` }} /></span>
+                <span className="text-right tabular-nums">{formatNumber(v)}</span>
+              </li>
+            );
+          })}
+        </ol>
+        <dl className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+          {WORLD_OTHER.map(([k, label]) => <div key={k} className="rounded-md border border-line p-2"><dt className="text-xs text-muted">{label}</dt><dd className="font-semibold tabular-nums">{formatNumber(f.world?.[k] ?? 0)}</dd></div>)}
+        </dl>
       </Card>
       <h2 className="mb-3 mt-8 font-semibold">Sources (utm_source)</h2>
       <Table head={["Source", "Visiteurs", "Copie IP", "Discord", "Conversion IP"]}>

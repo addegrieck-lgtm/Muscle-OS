@@ -51,8 +51,13 @@ const config: NextConfig = preview
       },
       async redirects() {
         return [
-          { source: "/leaderboard", destination: "/leaderboards", permanent: true },
-          { source: "/classement", destination: "/leaderboards", permanent: true },
+          { source: "/leaderboard", destination: "/classements", permanent: true },
+          { source: "/classement", destination: "/classements", permanent: true },
+          // V2 : les pages du monde remplacent les anciennes (les classements détaillés /leaderboards/* restent).
+          { source: "/leaderboards", destination: "/classements", permanent: true },
+          { source: "/events", destination: "/evenements", permanent: true },
+          { source: "/player/:username", destination: "/joueur/:username", permanent: true },
+          { source: "/carte", destination: "/monde", permanent: true },
           { source: "/season", destination: "/seasons", permanent: true },
         ];
       },

@@ -91,6 +91,21 @@ export async function getPlayer(sql: Sql, usernameOrUuid: string): Promise<Playe
     WHERE m.player_uuid = ${p.uuid} AND f.disbanded_at IS NULL LIMIT 1`;
   const achievements = await sql<{ id: string; label: string; unlockedAt: Date }[]>`
     SELECT achievement_id AS id, label, unlocked_at AS "unlockedAt" FROM player_achievements WHERE player_uuid = ${p.uuid} ORDER BY unlocked_at DESC`;
+  const [world] = await sql<{ founder: number | null; empire: PlayerProfile["empire"]; won: number; lost: number; leader: boolean; recruits: number }[]>`
+    SELECT (SELECT number FROM founders f WHERE f.user_id = ma.user_id) AS founder,
+           (SELECT json_build_object('slug', e.slug, 'name', e.name, 'tag', e.tag, 'color', e.color, 'crest', e.crest, 'role', m.role)
+              FROM empire_members m JOIN empires e ON e.id = m.empire_id AND e.status = 'active' WHERE m.user_id = ma.user_id) AS empire,
+           (SELECT count(*)::int FROM wars w JOIN empire_members m ON m.user_id = ma.user_id WHERE w.status = 'ended' AND w.winner_empire_id = m.empire_id) AS won,
+           (SELECT count(*)::int FROM wars w JOIN empire_members m ON m.user_id = ma.user_id WHERE w.status = 'ended' AND w.winner_empire_id IS NOT NULL
+              AND w.winner_empire_id <> m.empire_id AND m.empire_id IN (w.attacker_empire_id, w.defender_empire_id)) AS lost,
+           EXISTS (SELECT 1 FROM empire_members m WHERE m.user_id = ma.user_id AND m.role = 'leader') AS leader,
+           (SELECT count(*)::int FROM user_referrals r WHERE r.referrer_user_id = ma.user_id AND r.status = 'qualified') AS recruits
+    FROM minecraft_accounts ma WHERE ma.player_uuid = ${p.uuid}`;
+  const badges: { id: string; label: string }[] = [];
+  if (world?.founder) badges.push({ id: "founder", label: `Fondateur #${world.founder}` });
+  if (world?.leader) badges.push({ id: "leader", label: "Chef d'empire" });
+  if ((world?.recruits ?? 0) >= 3) badges.push({ id: "recruiter", label: "Recruteur" });
+  if ((world?.won ?? 0) > 0) badges.push({ id: "victor", label: "Vainqueur de guerre" });
   const kills = stats?.kills ?? 0;
   const deaths = stats?.deaths ?? 0;
   return {
@@ -110,6 +125,10 @@ export async function getPlayer(sql: Sql, usernameOrUuid: string): Promise<Playe
     firstSeenAt: iso(p.firstSeenAt),
     lastSeenAt: p.lastSeenAt ? iso(p.lastSeenAt) : null,
     achievements: achievements.map((a) => ({ ...a, unlockedAt: iso(a.unlockedAt) })),
+    founder: world?.founder ?? null,
+    empire: world?.empire ?? null,
+    wars: { won: world?.won ?? 0, lost: world?.lost ?? 0 },
+    badges,
   };
 }
 
@@ -135,11 +154,29 @@ export async function getFaction(sql: Sql, name: string): Promise<FactionProfile
 
 // ───────────── Événements, news, boutique ─────────────
 export async function getUpcomingEvents(sql: Sql): Promise<GameEvent[]> {
-  const rows = await sql<(Omit<GameEvent, "startsAt" | "endsAt"> & { startsAt: Date; endsAt: Date | null })[]>`
-    SELECT id, slug, title, type, description, starts_at AS "startsAt", ends_at AS "endsAt", location, rewards
-    FROM events WHERE published AND coalesce(ends_at, starts_at + interval '2 hours') > now()
+  const rows = await sql<EventRow[]>`
+    SELECT ${eventColumns(sql)} FROM events WHERE published AND coalesce(ends_at, starts_at + interval '2 hours') > now()
     ORDER BY starts_at LIMIT 50`;
-  return rows.map((r) => ({ ...r, startsAt: iso(r.startsAt), endsAt: r.endsAt ? iso(r.endsAt) : null }));
+  return rows.map(eventDto);
+}
+
+type EventRow = Omit<GameEvent, "startsAt" | "endsAt"> & { startsAt: Date; endsAt: Date | null };
+const eventColumns = (sql: Sql) => sql`
+  id, slug, title, type, description, starts_at AS "startsAt", ends_at AS "endsAt", location, rewards,
+  participants, empires_count AS "empiresCount", zone_key AS "zoneKey",
+  (starts_at <= now() AND coalesce(ends_at, starts_at + interval '2 hours') > now()) AS live`;
+const eventDto = (r: EventRow): GameEvent => ({ ...r, startsAt: iso(r.startsAt), endsAt: r.endsAt ? iso(r.endsAt) : null });
+
+export async function getEvent(sql: Sql, slug: string): Promise<GameEvent | null> {
+  const [r] = await sql<EventRow[]>`SELECT ${eventColumns(sql)} FROM events WHERE published AND slug = ${slug}`;
+  return r ? eventDto(r) : null;
+}
+
+export async function pastEvents(sql: Sql, limit = 20): Promise<GameEvent[]> {
+  const rows = await sql<EventRow[]>`
+    SELECT ${eventColumns(sql)} FROM events WHERE published AND coalesce(ends_at, starts_at + interval '2 hours') <= now()
+    ORDER BY starts_at DESC LIMIT ${limit}`;
+  return rows.map(eventDto);
 }
 
 type NewsRow = Omit<NewsArticle, "publishedAt" | "updatedAt"> & { publishedAt: Date; updatedAt: Date };

@@ -58,7 +58,7 @@ export default async function SeasonsPage() {
             </Card>
           </div>
           <div>
-            <SectionHeader title="Classement des factions" action={<ButtonLink href="/leaderboards" variant="secondary">Tous les classements</ButtonLink>} />
+            <SectionHeader title="Classement des factions" action={<ButtonLink href="/classements" variant="secondary">Tous les classements</ButtonLink>} />
             <LeaderboardTable board={factions} unit="Points" hrefFor={(_i, n) => `/faction/${encodeURIComponent(n)}`} />
           </div>
         </Container>

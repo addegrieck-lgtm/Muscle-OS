@@ -6,6 +6,9 @@ import { HttpError, notFound } from "../lib/errors";
 import { parse } from "../lib/validate";
 import { consumeLinkCode, deleteSession, getMe, userOwnsPlayer } from "../services/identity";
 import { getProgress, pointsHistory } from "../services/shop/ledger";
+import { createEmpire, CRESTS, EMPIRE_COLORS, EmpireError, joinEmpire, leaveEmpire, myEmpire, updateEmpire } from "../services/world/empires";
+import { castVote, myVotes, PollError } from "../services/world/polls";
+import { referralStats } from "../services/world/referrals";
 import { iso } from "../services/status";
 
 /** Espace joueur. Toutes les routes exigent une session. */
@@ -43,6 +46,73 @@ export async function meRoutes(app: FastifyInstance, ctx: AppContext) {
     if (!(await userOwnsPlayer(sql, user.id, uuid))) throw notFound("Compte Minecraft");
     const [progress, history] = await Promise.all([getProgress(sql, uuid), pointsHistory(sql, uuid)]);
     return { progress, history };
+  });
+
+  /** État personnel dans le monde : fondateur, parrainage, empire, votes. */
+  app.get("/world", async (req) => {
+    const user = await requireUser(sql, req);
+    const [founder, referral, empire, votes, linked, influence] = await Promise.all([
+      sql<{ number: number }[]>`SELECT number FROM founders WHERE user_id = ${user.id}`,
+      referralStats(sql, user.id),
+      myEmpire(sql, user.id),
+      myVotes(sql, user.id),
+      sql`SELECT 1 FROM minecraft_accounts WHERE user_id = ${user.id} LIMIT 1`,
+      sql<{ influence: number }[]>`SELECT influence FROM users WHERE id = ${user.id}`,
+    ]);
+    return { founder: founder[0]?.number ?? null, referral, empire, votes, linked: linked.length > 0, influence: influence[0]?.influence ?? 0 };
+  });
+
+  const empireError = (e: unknown): never => {
+    if (e instanceof EmpireError) throw new HttpError(e.code === "not_found" ? 404 : e.code === "forbidden" ? 403 : 409, e.code, e.message);
+    throw e;
+  };
+  const afterEmpireChange = () => ctx.cache.invalidate("world:");
+
+  // Limité par compte (et non par IP : plusieurs joueurs partagent souvent une connexion).
+  const perUser = (max: number) => ({ rateLimit: { max, timeWindow: "10 minutes", keyGenerator: (r: { headers: Record<string, unknown>; ip: string }) => String(r.headers.authorization ?? r.ip) } });
+  app.post("/empire", { config: perUser(15) }, async (req, reply) => {
+    const user = await requireUser(sql, req);
+    const b = parse(z.object({
+      name: z.string().max(40), tag: z.string().max(8), motto: z.string().max(80).default(""),
+      color: z.enum(EMPIRE_COLORS), crest: z.enum(CRESTS),
+    }), req.body);
+    const r = await createEmpire(sql, user.id, b).catch(empireError);
+    afterEmpireChange();
+    reply.code(201);
+    return r;
+  });
+  app.post("/empire/join", { config: perUser(20) }, async (req) => {
+    const user = await requireUser(sql, req);
+    const b = parse(z.object({ slug: z.string().regex(/^[a-z0-9-]{2,40}$/), code: z.string().max(12).optional() }), req.body);
+    await joinEmpire(sql, user.id, b.slug, b.code).catch(empireError);
+    afterEmpireChange();
+    return { ok: true };
+  });
+  app.post("/empire/leave", async (req) => {
+    const user = await requireUser(sql, req);
+    const r = await leaveEmpire(sql, user.id).catch(empireError);
+    afterEmpireChange();
+    return { result: r };
+  });
+  app.patch("/empire", async (req) => {
+    const user = await requireUser(sql, req);
+    const b = parse(z.object({ motto: z.string().max(80).optional(), description: z.string().max(600).optional(), recruiting: z.boolean().optional(), regenerateCode: z.boolean().optional() }), req.body);
+    await updateEmpire(sql, user.id, b).catch(empireError);
+    afterEmpireChange();
+    return { ok: true };
+  });
+
+  app.post("/votes", { config: perUser(20) }, async (req) => {
+    const user = await requireUser(sql, req);
+    const b = parse(z.object({ slug: z.string().regex(/^[a-z0-9-]{2,80}$/), optionId: z.string().uuid() }), req.body);
+    try {
+      await castVote(sql, user.id, b.slug, b.optionId);
+    } catch (e) {
+      if (e instanceof PollError) throw new HttpError(e.code === "not_found" ? 404 : 409, e.code, e.message);
+      throw e;
+    }
+    ctx.cache.invalidate("world:"); // le vote change aussi l'influence (empires, classements)
+    return { ok: true };
   });
 
   app.get("/orders", async (req) => {

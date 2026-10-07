@@ -12,7 +12,13 @@ export async function GET(req: Request) {
   const api = await fetch(`${process.env.API_URL ?? "http://localhost:4000"}/internal/v1/auth/discord`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-internal-token": process.env.WEB_INTERNAL_TOKEN ?? "" },
-    body: JSON.stringify({ code, redirectUri: `${site}/api/auth/callback`, userAgent: req.headers.get("user-agent") ?? undefined }),
+    body: JSON.stringify({
+      code,
+      redirectUri: `${site}/api/auth/callback`,
+      userAgent: req.headers.get("user-agent") ?? undefined,
+      // Code de parrainage mémorisé par /invite/CODE (pris en compte seulement à la création du compte)
+      referralCode: req.headers.get("cookie")?.match(/(?:^|;\s*)vae_ref=([A-Z0-9]{6,12})/)?.[1],
+    }),
     signal: AbortSignal.timeout(10_000),
   }).catch(() => null);
   if (!api?.ok) return NextResponse.redirect(`${site}/login?erreur=discord`);
@@ -20,5 +26,6 @@ export async function GET(req: Request) {
   const res = NextResponse.redirect(`${site}${safeNext(next)}`);
   res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
   res.cookies.delete("vae_oauth");
+  res.cookies.delete("vae_ref");
   return res;
 }

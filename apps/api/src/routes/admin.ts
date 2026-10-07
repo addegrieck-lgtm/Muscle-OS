@@ -233,7 +233,13 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
         (SELECT count(DISTINCT s.player_uuid)::int FROM player_season_stats s JOIN players p ON p.uuid = s.player_uuid WHERE (s.kills + s.deaths) > 0 AND p.first_seen_at > now() - make_interval(days => ${days})) AS "firstPvp",
         (SELECT count(*)::int FROM players WHERE first_seen_at > now() - make_interval(days => ${days}) AND last_seen_at > first_seen_at + interval '1 day') AS returned,
         (SELECT count(*)::int FROM players WHERE first_seen_at > now() - make_interval(days => ${days}) AND last_seen_at > first_seen_at + interval '7 days') AS recurring`;
-    return { days, steps: f };
+    // Parcours V2 (monde) : comptes, fondateurs, empires, parrainages, Conseil. Événements serveur, comptés sur la période.
+    const world = await sql<{ name: string; n: number }[]>`
+      SELECT name, count(*)::int AS n FROM analytics_events
+      WHERE created_at > now() - make_interval(days => ${days})
+        AND name IN ('register', 'founder_join', 'account_linked', 'empire_create', 'empire_join', 'referral_click', 'referral_register', 'vote', 'share_empire', 'cta_click', 'map_view', 'war_view', 'event_view', 'ranking_view', 'empire_view')
+      GROUP BY name`;
+    return { days, steps: f, world: Object.fromEntries(world.map((r) => [r.name, r.n])) };
   });
 
   app.get("/marketing", async (req) => {
