@@ -3,12 +3,13 @@ import { createDb } from "./db";
 import { loadEnv, parseBridgeKeys } from "./env";
 import { TtlCache } from "./lib/cache";
 import { migrate } from "./migrate";
+import { paymentProviderFromEnv } from "./services/payments";
 
 const env = loadEnv();
 const sql = createDb(env.DATABASE_URL);
 await migrate(sql, (m) => console.log(m));
 
-const app = await buildApp({ sql, cache: new TtlCache(), env, bridgeKeys: parseBridgeKeys(env.BRIDGE_KEYS) });
+const app = await buildApp({ sql, cache: new TtlCache(), env, bridgeKeys: parseBridgeKeys(env.BRIDGE_KEYS), payments: paymentProviderFromEnv(env) });
 
 const shutdown = async (signal: string) => {
   app.log.info(`${signal} reçu, arrêt propre`);

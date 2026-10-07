@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
   // L'aperçu ne doit pas être indexé : il ferait doublon avec le futur site officiel.
   if (PREVIEW) return { rules: [{ userAgent: "*", disallow: "/" }] };
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/account", "/login"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/account", "/compte", "/checkout", "/login", "/boutique/panier"] }],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
   };

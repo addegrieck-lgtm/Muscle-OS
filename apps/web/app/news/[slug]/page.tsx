@@ -3,9 +3,16 @@ import { Badge, Container, Section, formatDate } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { api, orNull } from "@/lib/api";
 import { Markdown } from "@/lib/markdown";
+import { PREVIEW } from "@/lib/preview";
 import { JsonLd, articleLd, pageMeta } from "@/lib/seo";
 
 export const revalidate = 300;
+
+/** Articles récents pré-générés ; les nouveaux sont rendus à la demande (hors aperçu statique). */
+export async function generateStaticParams() {
+  const slugs = (await orNull(api.news(1)))?.items.map((a) => a.slug) ?? [];
+  return (slugs.length ? slugs : PREVIEW ? ["indisponible"] : []).map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const a = await orNull(api.article((await params).slug));

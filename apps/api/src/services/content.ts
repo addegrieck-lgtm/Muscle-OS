@@ -1,5 +1,5 @@
 import type { LeaderboardCategory } from "@vaeloria/config";
-import type { FactionProfile, GameEvent, Leaderboard, NewsArticle, PlayerProfile, Product, Season } from "@vaeloria/types";
+import type { FactionProfile, GameEvent, Leaderboard, NewsArticle, PlayerProfile, Season } from "@vaeloria/types";
 import type { Sql } from "../db";
 import { iso } from "./status";
 
@@ -160,14 +160,6 @@ export async function getArticle(sql: Sql, slug: string): Promise<NewsArticle | 
     SELECT id, slug, title, excerpt, body, category, cover_url AS "coverUrl", author, published_at AS "publishedAt", updated_at AS "updatedAt"
     FROM news WHERE slug = ${slug} AND status = 'published' AND published_at <= now()`;
   return r ? newsDto(r) : null;
-}
-
-export async function listProducts(sql: Sql): Promise<Product[]> {
-  return sql<Product[]>`
-    SELECT id, slug, name, description, category,
-           (price_cents * (100 - coalesce(promo_percent, 0)) / 100)::int AS "priceCents",
-           currency, image_url AS "imageUrl", active
-    FROM products WHERE active ORDER BY category, price_cents`;
 }
 
 export async function getStats(sql: Sql) {

@@ -11,6 +11,8 @@ import type {
   Season,
   ServerStatus,
   ServiceStatus,
+  ShopCatalog,
+  ShopProduct,
 } from "@vaeloria/types";
 
 export class ApiClientError extends Error {
@@ -75,6 +77,8 @@ export function createApiClient({ baseUrl, headers, timeoutMs = 4000 }: ApiClien
       get<Paginated<NewsArticle>>(`/api/v1/news?page=${page}${category ? `&category=${enc(category)}` : ""}`, { revalidate: 120, tags: ["news"] }),
     article: (slug: string) => get<NewsArticle>(`/api/v1/news/${enc(slug)}`, { revalidate: 300, tags: ["news"] }),
     products: () => get<{ items: Product[] }>("/api/v1/shop/products", { revalidate: 300, tags: ["shop"] }),
+    shopCatalog: () => get<ShopCatalog>("/api/v1/shop/catalog", { revalidate: 30, tags: ["shop"] }),
+    shopProduct: (slug: string) => get<ShopProduct>(`/api/v1/shop/products/${enc(slug)}`, { revalidate: 30, tags: ["shop"] }),
     stats: () => get<{ players: number; factions: number; kills: number; betaSignups: number }>("/api/v1/stats", { revalidate: 120 }),
   };
 }

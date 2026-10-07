@@ -5,7 +5,7 @@ import { Wordmark } from "./Logo";
 const COLS = [
   { title: "Jouer", links: [["/pvp", "PvP"], ["/factions", "Factions"], ["/seasons", "Saisons"], ["/events", "Événements"], ["/guides", "Guides"], ["/beta", "Bêta"]] },
   { title: "Communauté", links: [["/leaderboards", "Classements"], ["/news", "News"], ["/staff", "Staff"], ["/creators", "Créateurs"], ["/discord", "Discord"]] },
-  { title: "Aide", links: [["/faq", "FAQ"], ["/rules", "Règlement"], ["/support", "Support"], ["/status", "Statut"], ["/shop", "Boutique"]] },
+  { title: "Aide", links: [["/faq", "FAQ"], ["/rules", "Règlement"], ["/support", "Support"], ["/status", "Statut"], ["/boutique", "Boutique"]] },
   { title: "Légal", links: [["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"], ["/cookies", "Cookies"], ["/cgv", "CGV"], ["/contact", "Contact"]] },
 ] as const;
 

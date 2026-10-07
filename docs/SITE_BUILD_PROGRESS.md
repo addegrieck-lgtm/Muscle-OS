@@ -12,14 +12,14 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 | 4 | Pages serveur | ✅ Terminée (contenus légaux à renseigner) | 90 |
 | 5 | API | 🟡 Avancée | 85 |
 | 6 | Database | ✅ Terminée | 90 |
-| 7 | Authentication | 🔴 Conçue, non implémentée | 10 |
+| 7 | Authentication | 🟡 Implémentée et testée ; connexion Discord réelle à activer (identifiants) | 80 |
 | 8 | Minecraft Bridge | 🟡 Avancée, pas encore testée sur un vrai serveur Paper | 75 |
 | 9 | Profils joueur / faction | ✅ Terminée | 85 |
 | 10 | Classements | ✅ Terminée | 85 |
 | 11 | Événements | 🟡 Affichage + admin, sans rappels | 70 |
 | 12 | Admin | 🟡 Fonctionnel | 70 |
-| 13 | Architecture boutique | 🟡 Cœur testé, pas de tunnel d'achat | 70 |
-| 14 | Intégration paiement | 🔴 Prestataire à choisir | 15 |
+| 13 | Architecture boutique | 🟢 Boutique complète (voir `SHOP_BUILD_PROGRESS.md`) | 95 |
+| 14 | Intégration paiement | 🟡 Stripe prêt + prestataire de test ; prestataire réel à choisir | 60 |
 | 15 | Analytics | 🟡 Collecte + funnel + UTM | 70 |
 | 16 | Sécurité | 🟡 Base solide, CSP et auth admin à faire | 60 |
 | 17 | Performance | 🟡 Mesures de build, Lighthouse à faire | 60 |

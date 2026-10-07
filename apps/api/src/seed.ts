@@ -7,6 +7,7 @@
 import { randomUUID } from "node:crypto";
 import { createDb } from "./db";
 import { migrate } from "./migrate";
+import { seedShopExamples } from "./shopSeed";
 
 const demo = process.argv.includes("--demo");
 const url = process.env.DATABASE_URL;
@@ -59,6 +60,8 @@ await sql.begin(async (tx) => {
       'actualites', 'published', now())
     ON CONFLICT (slug) DO NOTHING`;
 });
+
+console.log(`Boutique : ${await seedShopExamples(sql, { activatePromotion: demo })} produit(s) d'exemple ajouté(s).`);
 
 if (demo) {
   // Données FICTIVES : ne jamais exécuter sur une base de production.

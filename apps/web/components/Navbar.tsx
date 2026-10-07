@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LINKS } from "@vaeloria/config";
 import { buttonClass, cn } from "@vaeloria/ui";
 import { Wordmark } from "./Logo";
+import { CartButton } from "./shop/CartButton";
 
 export const NAV = [
   { href: "/pvp", label: "PvP" },
@@ -15,7 +16,7 @@ export const NAV = [
   { href: "/events", label: "Événements" },
   { href: "/news", label: "News" },
   { href: "/guides", label: "Guides" },
-  { href: "/shop", label: "Boutique" },
+  { href: "/boutique", label: "Boutique" },
 ];
 
 export function Navbar() {
@@ -53,6 +54,7 @@ export function Navbar() {
         </ul>
         <div className="flex items-center gap-2">
           {/* Masqués sur mobile : la barre fixe du bas porte déjà « Jouer » et l'IP. */}
+          <CartButton />
           <div className="hidden items-center gap-2 sm:flex">
             <a href={LINKS.discord} target="_blank" rel="noopener noreferrer" data-track="click_discord" className={buttonClass("ghost", "sm")}>
               Discord
@@ -78,7 +80,7 @@ export function Navbar() {
       {open && (
         <div id="menu-mobile" className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
           <ul className="flex flex-col">
-            {[...NAV, { href: "/faq", label: "FAQ" }, { href: "/status", label: "Statut" }, { href: "/support", label: "Support" }, { href: "/account", label: "Mon compte" }].map((item) => (
+            {[...NAV, { href: "/faq", label: "FAQ" }, { href: "/status", label: "Statut" }, { href: "/support", label: "Support" }, { href: "/compte", label: "Mon compte" }].map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="block border-b border-line/60 py-3.5 font-display text-lg font-semibold uppercase tracking-[0.06em] text-fg">
                   {item.label}

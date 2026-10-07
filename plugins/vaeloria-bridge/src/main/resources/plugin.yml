@@ -8,6 +8,11 @@ commands:
   vbridge:
     description: État du pont VæloriaBridge
     permission: vaeloria.bridge.admin
+  link:
+    description: Lier ton compte Minecraft à ton compte VÆLORIA (vaeloria.fr/compte)
+    permission: vaeloria.link
 permissions:
+  vaeloria.link:
+    default: true
   vaeloria.bridge.admin:
     default: op

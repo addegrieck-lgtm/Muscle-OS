@@ -5,7 +5,9 @@
  * Identifiant visiteur aléatoire (localStorage), refus respecté (opt-out, Do Not Track, GPC).
  * Les événements sont envoyés au site (/api/track) qui les relaie à l'API côté serveur.
  */
-export type TrackName = "page_view" | "copy_ip" | "click_play" | "click_discord" | "click_leaderboard" | "beta_signup" | "shop_view";
+export type TrackName =
+  | "page_view" | "copy_ip" | "click_play" | "click_discord" | "click_leaderboard" | "beta_signup"
+  | "shop_view" | "product_view" | "add_to_cart" | "remove_from_cart" | "checkout_started";
 
 const OPT_OUT_KEY = "vae-analytics-optout";
 
@@ -56,7 +58,7 @@ function utm(): Record<string, string> | undefined {
   return saved ? (JSON.parse(saved) as Record<string, string>) : undefined;
 }
 
-export function track(name: TrackName) {
+export function track(name: TrackName, props?: Record<string, string | number>) {
   // Aperçu statique : aucun serveur pour recevoir les événements.
   if (process.env.NEXT_PUBLIC_PREVIEW === "1" || typeof window === "undefined" || analyticsDisabled()) return;
   const payload = JSON.stringify({
@@ -65,6 +67,7 @@ export function track(name: TrackName) {
     visitorId: visitorId(),
     referrer: document.referrer && !document.referrer.startsWith(window.location.origin) ? document.referrer : undefined,
     utm: utm(),
+    props,
   });
   if (!navigator.sendBeacon?.("/api/track", payload)) {
     void fetch("/api/track", { method: "POST", body: payload, keepalive: true }).catch(() => {});

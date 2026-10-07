@@ -63,6 +63,12 @@ VaeloriaBridgePlugin.emit(e);                 // thread-safe, non bloquant
 - Lot rejeté pour schéma invalide (400) → journalisé puis abandonné (le renvoyer bouclerait).
 - Réponse perdue après traitement → renvoi dédupliqué par l'`id` côté API.
 
+## Boutique : ordres typés et /link
+
+Chaque ordre reçu porte une `action` : `GRANT_RANK`, `GIVE_KIT`, `GIVE_ITEM`, `GIVE_SPAWNER`, `COMMAND`, `ADD_POINTS`, `SYNC_PLAYER` (ces deux derniers sans commande : le plugin prévient le joueur). Détail dans `SHOP_DELIVERY.md`.
+
+`/link` (permission `vaeloria.link`, accordée à tous) : le plugin obtient un code à usage unique (`POST /bridge/v1/link-codes`) et l'affiche au joueur, qui le saisit sur `vaeloria.fr/compte`.
+
 ## Commandes (API → Minecraft)
 
 1. Un paiement confirmé (webhook) crée des `entitlements` puis des lignes `minecraft_commands` (modèles du produit, variables `{uuid}` et `{username}`).
@@ -79,9 +85,6 @@ Une commande ne peut donc ni être perdue, ni être livrée deux fois via deux p
 
 Avant l'installation du plugin, l'API interroge le serveur avec le Server List Ping (`MC_PING_HOST`) pour afficher joueurs et version.
 
-## Liaison de compte (Phase 7)
-
-Table `link_codes` prête : `/link` en jeu → code à 6 caractères valable 10 min → saisi sur le site connecté via Discord → `minecraft_accounts`. Commande `/link` et endpoint à implémenter.
 
 ## Non testé à ce stade
 
