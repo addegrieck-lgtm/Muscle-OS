@@ -1,0 +1,13 @@
+name: VaeloriaBridge
+version: '${version}'
+main: fr.vaeloria.bridge.VaeloriaBridgePlugin
+api-version: '1.21'
+description: Pont sécurisé entre le serveur Minecraft VÆLORIA et l'API (événements, statut, commandes web).
+authors: [VÆLORIA]
+commands:
+  vbridge:
+    description: État du pont VæloriaBridge
+    permission: vaeloria.bridge.admin
+permissions:
+  vaeloria.bridge.admin:
+    default: op

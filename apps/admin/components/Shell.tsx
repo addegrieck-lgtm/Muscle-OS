@@ -1,0 +1,36 @@
+import Link from "next/link";
+
+const NAV = [
+  ["/", "Tableau de bord"], ["/players", "Joueurs"], ["/server", "Serveur"], ["/commands", "Commandes MC"],
+  ["/news", "News"], ["/events", "Événements"], ["/shop", "Boutique"], ["/faq", "FAQ"],
+  ["/marketing", "Marketing"], ["/costs", "Coûts"],
+] as const;
+
+export function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-dvh md:grid md:grid-cols-[220px_1fr]">
+      <aside className="border-b border-line bg-surface md:border-b-0 md:border-r">
+        <p className="px-5 py-4 font-display font-bold tracking-widest">VÆLORIA <span className="text-xs text-accent">ADMIN</span></p>
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-col md:overflow-visible">
+          {NAV.map(([href, label]) => (
+            <Link key={href} href={href} className="shrink-0 rounded-md px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-fg">{label}</Link>
+          ))}
+        </nav>
+      </aside>
+      <main className="min-w-0 p-4 sm:p-8">{children}</main>
+    </div>
+  );
+}
+
+export function H1({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <h1 className="font-display text-2xl font-bold">{children}</h1>
+      {action}
+    </div>
+  );
+}
+
+export function ErrorBox({ message }: { message: string }) {
+  return <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-4 text-sm text-danger">API : {message}</p>;
+}

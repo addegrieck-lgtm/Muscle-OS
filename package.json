@@ -1,25 +1,19 @@
 {
-  "name": "muscleos",
+  "name": "vaeloria",
   "private": true,
-  "version": "1.0.0",
-  "type": "module",
+  "version": "0.1.0",
+  "description": "VÆLORIA — site officiel, API, administration et intégration Minecraft",
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc --noEmit && vite build", "typecheck": "tsc --noEmit",
-    "preview": "vite preview --host",
-    "test": "vitest run",
-    "icons": "node scripts/generate-icons.mjs"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.31",
-    "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.7.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.4.3",
-    "vitest": "^3.2.7"
+    "dev": "pnpm -r --parallel --filter ./apps/* dev",
+    "dev:web": "pnpm --filter @vaeloria/web dev",
+    "dev:api": "pnpm --filter @vaeloria/api dev",
+    "dev:admin": "pnpm --filter @vaeloria/admin dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @vaeloria/api db:migrate",
+    "db:seed": "pnpm --filter @vaeloria/api db:seed"
   }
 }
