@@ -41,6 +41,7 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 | E2E admin : auth, 10 écrans, création news → visible sur l'API, création produit, maintenance on/off | ✅ |
 | Client Java du plugin → API réelle (événements acceptés, mauvais secret 401, statut en ligne) | ✅ |
 | Sauvegarde `pg_dump` → restauration → comptes identiques | ✅ |
+| Export statique « aperçu » servi sous /Muscle-OS : 43 pages explorées, 0 lien cassé, 0 erreur JS | ✅ |
 | Docker (Dockerfile, Compose prod) | ⚠️ Non testé : Docker indisponible dans l'environnement de développement |
 | Plugin sur un vrai serveur Paper 1.21 | ⚠️ Non testé |
 

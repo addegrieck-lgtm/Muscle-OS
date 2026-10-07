@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LINKS } from "@vaeloria/config";
 import type { Product } from "@vaeloria/types";
 import { Badge, ButtonLink, Card, Container, EmptyState, Section, formatPrice } from "@vaeloria/ui";
@@ -50,7 +51,7 @@ export default async function ShopPage() {
               </section>
             ))
           )}
-          <p className="text-xs text-subtle">Prix TTC. Voir les <a href="/cgv" className="underline">conditions générales de vente</a>.</p>
+          <p className="text-xs text-subtle">Prix TTC. Voir les <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
         </Container>
       </Section>
     </>

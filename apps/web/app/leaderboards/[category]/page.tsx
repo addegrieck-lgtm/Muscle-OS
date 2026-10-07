@@ -4,6 +4,7 @@ import { LEADERBOARD_CATEGORIES, type LeaderboardCategory } from "@vaeloria/conf
 import { Container, LeaderboardTable, Section, buttonClass } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { api, orNull } from "@/lib/api";
+import { PREVIEW } from "@/lib/preview";
 import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -24,7 +25,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const { category } = await params;
   const c = find(category);
   if (!c) notFound();
-  const page = Math.max(1, Number((await searchParams).page) || 1);
+  const page = PREVIEW ? 1 : Math.max(1, Number((await searchParams).page) || 1);
   const board = await orNull(api.leaderboard(c.id as LeaderboardCategory, page));
   const pages = board ? Math.max(1, Math.ceil(board.total / 50)) : 1;
   return (

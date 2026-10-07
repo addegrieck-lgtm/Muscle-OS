@@ -78,3 +78,12 @@ Lien d'évitement, `aria-current`, fil d'Ariane, `<details>` natifs pour la FAQ,
 ## 9. Identité visuelle
 
 Noir / gris très sombre, blanc, accent laiton `#c9a45c` personnalisable via `--accent` (`packages/config/theme.css`), dégradés « métal » sur le logotype, typographie Cinzel (titres) + Inter (texte), polices auto-hébergées au build. Emblème écu + lame en SVG inline. Aucun visuel repris d'un autre serveur.
+
+## 10. Aperçu statique (GitHub Pages)
+
+En attendant l'hébergement réel, `.github/workflows/preview-pages.yml` publie un export HTML du site sur https://addegrieck-lgtm.github.io/Muscle-OS/ (`pnpm --filter @vaeloria/web build:preview`).
+
+- Aucune API : statut « indisponible », classements et événements vides, bandeau « Aperçu » en haut de page.
+- Pas de formulaire bêta (renvoi vers Discord), pas d'analytics, pas de profils joueur/faction ni d'articles individuels.
+- Non indexé (`robots.txt` + `noindex`) pour ne pas faire doublon avec le futur site officiel.
+- Mécanisme : les fichiers de route qui exigent un serveur sont nommés `*.full.tsx|ts`, leurs remplaçants statiques `*.preview.tsx` ; `pageExtensions` (dans `next.config.ts`) choisit la série selon `NEXT_PUBLIC_PREVIEW`.

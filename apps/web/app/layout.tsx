@@ -5,6 +5,7 @@ import { Analytics } from "@/components/Analytics";
 import { Footer } from "@/components/Footer";
 import { MobilePlayBar } from "@/components/MobilePlayBar";
 import { Navbar } from "@/components/Navbar";
+import { PREVIEW } from "@/lib/preview";
 import { JsonLd, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
   applicationName: BRAND.name,
   openGraph: { siteName: BRAND.name, locale: BRAND.locale, type: "website" },
   twitter: { card: "summary_large_image" },
+  ...(PREVIEW ? { robots: { index: false, follow: false } } : {}),
 };
 
 export const viewport: Viewport = { themeColor: "#0a0a0b", width: "device-width", initialScale: 1, viewportFit: "cover" };
@@ -37,6 +39,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             slogan: BRAND.tagline,
           }}
         />
+        {PREVIEW && (
+          <p className="border-b border-accent/30 bg-accent/10 px-4 py-2 text-center text-xs text-accent">
+            Aperçu du site — les données en direct (joueurs, classements, saison) arriveront avec l&apos;ouverture du serveur.
+          </p>
+        )}
         <Navbar />
         <main id="contenu">{children}</main>
         <Footer />

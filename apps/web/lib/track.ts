@@ -57,7 +57,8 @@ function utm(): Record<string, string> | undefined {
 }
 
 export function track(name: TrackName) {
-  if (typeof window === "undefined" || analyticsDisabled()) return;
+  // Aperçu statique : aucun serveur pour recevoir les événements.
+  if (process.env.NEXT_PUBLIC_PREVIEW === "1" || typeof window === "undefined" || analyticsDisabled()) return;
   const payload = JSON.stringify({
     name,
     path: window.location.pathname,

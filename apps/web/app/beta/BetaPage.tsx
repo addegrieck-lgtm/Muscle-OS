@@ -4,14 +4,13 @@ import { Countdown } from "@/components/Countdown";
 import { PageHeader } from "@/components/PageHeader";
 import { api, orNull } from "@/lib/api";
 import { pageMeta } from "@/lib/seo";
-import { BetaForm } from "./BetaForm";
+import type { ReactNode } from "react";
 
-export const revalidate = 60;
-export const metadata = pageMeta({ title: "Saison I — lancement & inscription bêta", description: "Inscris-toi à la bêta de VÆLORIA et sois prévenu de l'ouverture de la Saison I.", path: "/beta" });
+export const betaMeta = pageMeta({ title: "Saison I — lancement & inscription bêta", description: "Inscris-toi à la bêta de VÆLORIA et sois prévenu de l'ouverture de la Saison I.", path: "/beta" });
 
 const FEATURES = ["Factions, claims et Power", "PvP inspiré du 1.8 en 1.21", "KOTH programmés", "Classements en direct sur le site", "Économie et spawners", "Saison classée avec récompenses"];
 
-export default async function BetaPage() {
+export async function BetaPage({ form }: { form: ReactNode }) {
   const [seasons, stats] = await Promise.all([orNull(api.season()), orNull(api.stats())]);
   const upcoming = seasons?.upcoming ?? null;
   return (
@@ -28,7 +27,7 @@ export default async function BetaPage() {
         <Container className="grid gap-8 md:grid-cols-[1.2fr_1fr]">
           <Card className="p-6">
             <h2 className="mb-4 font-display text-xl font-bold">Inscription</h2>
-            <BetaForm />
+            {form}
             {stats && stats.betaSignups >= 50 && <p className="mt-4 text-sm text-muted">Déjà <strong className="text-fg">{formatNumber(stats.betaSignups)}</strong> inscrits.</p>}
           </Card>
           <div>

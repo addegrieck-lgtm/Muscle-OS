@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container, EmptyState, NewsCard, Section, buttonClass } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { api, orNull } from "@/lib/api";
+import { PREVIEW } from "@/lib/preview";
 import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 120;
@@ -16,7 +17,7 @@ const CATEGORIES = [
 ] as const;
 
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ page?: string; category?: string }> }) {
-  const sp = await searchParams;
+  const sp: { page?: string; category?: string } = PREVIEW ? {} : await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
   const category = CATEGORIES.some(([c]) => c === sp.category) ? sp.category : undefined;
   const news = await orNull(api.news(page, category || undefined));

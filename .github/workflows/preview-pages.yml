@@ -1,0 +1,47 @@
+# Aperçu statique du site sur GitHub Pages (https://addegrieck-lgtm.github.io/Muscle-OS/).
+# Pas d'API ni de données en direct : version vitrine non indexée, en attendant l'hébergement réel.
+# Réglage requis une fois : Settings → Pages → Source : « GitHub Actions ».
+name: Aperçu GitHub Pages
+
+on:
+  push:
+    branches: [main, claude/vaeloria-platform]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @vaeloria/web build:preview
+        env:
+          PREVIEW_BASE_PATH: /Muscle-OS
+          NEXT_PUBLIC_SITE_URL: https://addegrieck-lgtm.github.io/Muscle-OS
+          API_URL: http://127.0.0.1:9
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/out
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { Button } from "@vaeloria/ui";
 import { track } from "@/lib/track";
@@ -30,7 +31,7 @@ export function BetaForm() {
       </div>
       <label className="flex items-start gap-3 text-sm text-muted">
         <input type="checkbox" name="consent" required className="mt-1 size-4 accent-[var(--accent)]" />
-        <span>J&apos;accepte que ces informations soient utilisées pour gérer mon inscription à la bêta. Voir la <a href="/confidentialite" className="underline">politique de confidentialité</a>.</span>
+        <span>J&apos;accepte que ces informations soient utilisées pour gérer mon inscription à la bêta. Voir la <Link href="/confidentialite" className="underline">politique de confidentialité</Link>.</span>
       </label>
       {state && !state.ok && <p role="alert" className="text-sm font-semibold text-danger">{state.message}</p>}
       <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={pending}>{pending ? "Inscription…" : "M'inscrire à la bêta"}</Button>
