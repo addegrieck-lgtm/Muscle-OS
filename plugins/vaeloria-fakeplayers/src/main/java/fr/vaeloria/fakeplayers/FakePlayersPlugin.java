@@ -36,6 +36,7 @@ import java.util.logging.Level;
  * (connexions, déconnexions, messages) et, sur Minecraft 1.21.9+, sous forme de corps « mannequin » dans le monde.
  */
 public final class FakePlayersPlugin extends JavaPlugin implements Listener {
+    private static volatile FakePlayersPlugin instance;
     private final FakePlayerManager manager = new FakePlayerManager(this);
     private NamePool names;
     private BukkitTask ticker;
@@ -52,8 +53,25 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
     private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
 
+    /**
+     * API pour les autres plugins (TAB, scoreboard…), utilisable depuis n'importe quel thread :
+     * nombre de faux joueurs connectés, à ajouter au nombre de vrais joueurs.
+     * Appel par réflexion conseillé pour ne pas dépendre de ce plugin à la compilation (voir VaeloriaTab).
+     */
+    public static int fakeCount() {
+        FakePlayersPlugin plugin = instance;
+        return plugin == null ? 0 : plugin.manager.namesSnapshot().size();
+    }
+
+    /** Pseudos des faux joueurs connectés (copie immuable, n'importe quel thread). */
+    public static List<String> fakeNames() {
+        FakePlayersPlugin plugin = instance;
+        return plugin == null ? List.of() : plugin.manager.namesSnapshot();
+    }
+
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
         names = new NamePool(getConfig().getStringList("names"), new Random());
         loadSchedule();
@@ -93,6 +111,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         if (ticker != null) ticker.cancel();
         save();
         manager.removeAll(true);
+        instance = null;
     }
 
     public FakePlayerManager manager() { return manager; }

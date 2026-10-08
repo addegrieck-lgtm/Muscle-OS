@@ -43,4 +43,4 @@ Ces permissions sont déclarées à `false` par défaut : un op n'apparaît pas 
 
 ## Variables
 
-`<logo>`, `<player>`, `<rank>`, `<online>`, `<max>`, `<ping>`, `<tps>`, `<server>`, `<world>`, et les couleurs `<ping_color>…</ping_color>`, `<tps_color>…</tps_color>`.
+`<logo>`, `<player>`, `<rank>`, `<online>` (vrais joueurs visibles + faux joueurs de VaeloriaFakePlayers s'il est installé), `<max>`, `<ping>`, `<tps>`, `<server>`, `<world>`, et les couleurs `<ping_color>…</ping_color>`, `<tps_color>…</tps_color>`.

@@ -154,7 +154,7 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
 
     private TagResolver playerTags(TabSettings s, Player p, Component logo, double tps) {
         int ping = p.getPing();
-        long visible = Bukkit.getOnlinePlayers().stream().filter(p::canSee).count();
+        long visible = Bukkit.getOnlinePlayers().stream().filter(p::canSee).count() + FakePlayersHook.count();
         Rank rank = rankOf(p);
         return TagResolver.resolver(
                 paletteTags,

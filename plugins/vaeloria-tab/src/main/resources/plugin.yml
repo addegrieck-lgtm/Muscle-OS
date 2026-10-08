@@ -4,6 +4,8 @@ main: fr.vaeloria.tab.VaeloriaTabPlugin
 api-version: '1.21'
 description: TAB et écran Multijoueur aux couleurs du logo VÆLORIA — en-tête animé, grades, MOTD, icône, maintenance.
 authors: [VÆLORIA]
+# Optionnel : les faux joueurs de VaeloriaFakePlayers sont comptés dans <online>.
+softdepend: [VaeloriaFakePlayers]
 commands:
   vtab:
     description: Recharger la configuration du TAB VÆLORIA

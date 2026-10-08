@@ -18,8 +18,9 @@ messages:
 tab:
   # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
   enabled: true
-  # Nom affiché dans le TAB ("" = pseudo brut).
-  display-name: ""
+  # Nom affiché dans le TAB ("" = pseudo brut). Doit ressembler aux vrais joueurs sans grade :
+  # avec VaeloriaTab, c'est le format du grade « default » (<steel><player> = gris acier #A9AEB8).
+  display-name: "<#A9AEB8><name>"
   ping:
     min: 15
     max: 90
