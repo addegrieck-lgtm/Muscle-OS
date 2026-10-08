@@ -176,8 +176,11 @@ def _shade(kind, y):
     return kind
 
 
-def logo_grid(width: int) -> list[list[str | None]]:
-    """Logo VÆLORIA redessiné bloc par bloc depuis la géométrie du SVG, ligne du haut en premier."""
+def logo_grid(width: int, relief: bool = True) -> list[list[str | None]]:
+    """Logo VÆLORIA redessiné bloc par bloc depuis la géométrie du SVG, ligne du haut en premier.
+
+    relief=False supprime le liseré anthracite, qui brouille le dessin sous 20 blocs de large.
+    """
     x0, y0, x1, y1 = 80, 40, 432, 472
     height = round(width * (y1 - y0) / (x1 - x0))
     cw, ch = (x1 - x0) / width, (y1 - y0) / height
@@ -203,6 +206,8 @@ def logo_grid(width: int) -> list[list[str | None]]:
             a, b = row[x], row[width - 1 - x]
             if (a is None) != (b is None):
                 row[x] = row[width - 1 - x] = a or b
+    if not relief:
+        return grid
     # Relief : liseré anthracite sur le fond noir, au contact de l'argent et du rubis.
     shaded = [row[:] for row in grid]
     for y in range(height):
