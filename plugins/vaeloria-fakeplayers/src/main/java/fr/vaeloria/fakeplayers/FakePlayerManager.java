@@ -1,7 +1,5 @@
 package fr.vaeloria.fakeplayers;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -27,9 +25,11 @@ public final class FakePlayerManager {
     private final Map<String, FakePlayer> fakes = new LinkedHashMap<>();
     private TabList tab = TabList.NONE;
     private Bodies bodies;
+    private final SkinFetcher skins;
 
     FakePlayerManager(FakePlayersPlugin plugin) {
         this.plugin = plugin;
+        this.skins = new SkinFetcher(plugin.getLogger());
     }
 
     void services(TabList tab, Bodies bodies) {
@@ -128,9 +128,9 @@ public final class FakePlayerManager {
         if (!plugin.getConfig().getBoolean("skins.fetch", true)) return;
         List<String> donors = new ArrayList<>(plugin.getConfig().getStringList("skins.fallback-names"));
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            FakePlayer.Skin skin = lookup(fake.name());
+            FakePlayer.Skin skin = skins.fetch(fake.name());
             while (skin == null && !donors.isEmpty()) {
-                skin = lookup(donors.remove(ThreadLocalRandom.current().nextInt(donors.size())));
+                skin = skins.fetch(donors.remove(ThreadLocalRandom.current().nextInt(donors.size())));
             }
             if (skin == null) return;
             FakePlayer.Skin found = skin;
@@ -143,22 +143,5 @@ public final class FakePlayerManager {
                 if (fake.hasBody() && bodies != null) bodies.spawn(fake, fake.bodyLocation());
             });
         });
-    }
-
-    /** Requête Mojang bloquante : uniquement hors du thread principal. */
-    private FakePlayer.Skin lookup(String name) {
-        if (!NamePool.isValid(name)) return null;
-        try {
-            PlayerProfile profile = Bukkit.createProfile(name);
-            if (!profile.complete(true)) return null;
-            for (ProfileProperty property : profile.getProperties()) {
-                if (property.getName().equals("textures") && property.getSignature() != null) {
-                    return new FakePlayer.Skin(property.getValue(), property.getSignature());
-                }
-            }
-        } catch (RuntimeException e) {
-            plugin.getLogger().fine("Skin introuvable pour " + name + " : " + e.getMessage());
-        }
-        return null;
     }
 }

@@ -40,10 +40,10 @@ final class Bodies {
         fake.bodyLocation(at);
         if (!at.isChunkLoaded()) return; // réapparaîtra quand le tronçon sera chargé (voir tick)
         Mannequin body = at.getWorld().spawn(at, Mannequin.class, m -> {
-            ResolvableProfile.Builder profile = ResolvableProfile.resolvableProfile().name(fake.name());
+            // Sans skin connu : profil par défaut (un profil « pseudo seul » ferait chercher le compte par le serveur).
             FakePlayer.Skin skin = fake.skin();
-            if (skin != null) profile.addProperty(new ProfileProperty("textures", skin.value(), skin.signature()));
-            m.setProfile(profile.build());
+            m.setProfile(skin == null ? Mannequin.defaultProfile() : ResolvableProfile.resolvableProfile().name(fake.name())
+                    .addProperty(new ProfileProperty("textures", skin.value(), skin.signature())).build());
             m.customName(Component.text(fake.name()));
             m.setCustomNameVisible(true);
             m.setDescription(null);
