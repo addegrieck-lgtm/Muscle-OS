@@ -40,6 +40,7 @@ export function openApiSpec(opts: { includePrivate: boolean }) {
     "/api/v1/news/{slug}": { get: { tags: ["News"], summary: "Article", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { ...ok({ type: "object" }), 404: err } } },
     "/api/v1/faq": { get: { tags: ["Contenu"], summary: "FAQ", responses: ok({ type: "object" }) } },
     "/api/v1/stats": { get: { tags: ["Serveur"], summary: "Compteurs globaux", responses: ok({ type: "object" }) } },
+    "/api/v1/votes": { get: { tags: ["Serveur"], summary: "Votes du mois (heure de Paris) et 20 meilleurs votants", responses: ok({ type: "object" }) } },
     "/api/v1/shop/products": { get: { tags: ["Boutique"], summary: "Produits actifs", responses: ok({ type: "object" }) } },
     "/api/v1/beta": { post: { tags: ["Acquisition"], summary: "Inscription bêta", requestBody: json({ type: "object", required: ["minecraftUsername", "consent"], properties: { minecraftUsername: { type: "string" }, email: { type: "string" }, referralCode: { type: "string" }, consent: { const: true } } }), responses: { 201: { description: "Inscrit" }, 409: err, 429: err } } },
     "/api/v1/analytics": { post: { tags: ["Acquisition"], summary: "Événement analytics first-party", responses: { 204: { description: "Enregistré" } } } },

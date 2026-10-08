@@ -1,0 +1,14 @@
+name: VaeloriaArena
+version: '${version}'
+main: fr.vaeloria.arena.VaeloriaArenaPlugin
+api-version: '1.21'
+description: Combats de bots en équipes, stuff diamant P4 U3, dans une arène.
+authors: [VÆLORIA]
+commands:
+  botarena:
+    description: Combats de bots P4 U3 dans l'arène
+    aliases: [arenebots]
+    permission: vaeloria.arena.admin
+permissions:
+  vaeloria.arena.admin:
+    default: op

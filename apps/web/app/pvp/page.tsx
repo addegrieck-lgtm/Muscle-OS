@@ -10,12 +10,12 @@ export const metadata = pageMeta({
 });
 
 const FEATURES = [
-  { title: "Combos", body: "L'enchaînement des coups prime. Garder le contact et enchaîner fait la différence entre deux joueurs de niveau proche." },
-  { title: "Knockback", body: "Un recul calibré pour être lisible et exploitable : W-tap, strafe et placement ont de nouveau du sens." },
-  { title: "Potions", body: "Soins et buffs au cœur des combats. Gérer sa hotbar et le timing des potions est une compétence à part entière." },
-  { title: "PvP compétitif", body: "Classement des kills par saison, K/D public sur chaque profil, combats de faction lors des KOTH et des raids." },
-  { title: "Entraînement", body: "Des zones de duel pour se tester sans perdre son stuff de faction." },
-  { title: "Practice (à venir)", body: "Un mode Practice dédié est prévu : duels classés, kits fixes et file d'attente." },
+  { title: "Pas de recharge", body: "Le délai d'attaque de la 1.9 est supprimé : chaque clic frappe à pleine puissance. Pas de coup balayé à l'épée." },
+  { title: "Rythme 1.8", body: "Invulnérabilité de 20 ticks après un coup, comme en 1.8.9 : l'enchaînement et le placement font la différence." },
+  { title: "Knockback 1.8.9", body: "Valeurs de recul vanilla 1.8.9, hauteur plafonnée contre les combos aériens. La netherite ne réduit pas le recul : même recul pour tous." },
+  { title: "Tag de combat", body: "15 s « en combat » après un coup : /home, /spawn, /tpa, /f home et /f fly bloqués. Se déconnecter en combat = mourir." },
+  { title: "Serveur surveillé", body: "Le MSPT est mesuré en continu : en cas de surcharge, la distance de simulation baisse automatiquement pour garder des coups nets." },
+  { title: "Ton ping", body: "/ping affiche ton ping et sa stabilité, /pvpstatus la santé du serveur (TPS, MSPT, ping moyen)." },
 ];
 
 export default function PvpPage() {

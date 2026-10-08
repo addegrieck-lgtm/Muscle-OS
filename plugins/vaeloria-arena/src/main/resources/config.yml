@@ -1,0 +1,37 @@
+# VæloriaArena — combats de bots en P4 U3.
+# Centre défini en jeu avec /botarena setcentre [rayon] (sol plat conseillé : les bots apparaissent à la hauteur du centre).
+arena:
+  world: ""
+  x: 0.5
+  y: 64.0
+  z: 0.5
+  radius: 20          # les bots ne peuvent pas sortir de ce cercle
+
+match:
+  default-team-size: 3
+  max-team-size: 10
+  separation: 16      # distance entre les deux lignes d'apparition
+  spacing: 3          # écart entre bots d'une même équipe
+  countdown-seconds: 5
+  max-duration-seconds: 300   # 0 = illimité ; à la fin : plus de survivants, puis plus de kills
+  cleanup-delay-seconds: 5
+
+bot:
+  # Stuff : armure diamant Protection / Unbreaking, épée diamant Sharpness / Unbreaking.
+  protection: 4
+  unbreaking: 3
+  sharpness: 5
+  fire-aspect: 0
+  health: 20
+  speed: 0.3                 # zombie normal : 0.23
+  base-attack-damage: 1.0    # comme un joueur : 1 + épée
+  golden-apples: 6
+  gapple-health-threshold: 8 # en demi-cœurs
+  gapple-cooldown-seconds: 4
+  strafe: true               # déplacements latéraux et sauts près de la cible, façon PvP 1.8
+  glowing: true              # contour à la couleur de l'équipe
+  names: [Kael, Vex, Draven, Nyx, Orin, Sly, Thorne, Zephyr, Ragn, Lyss, Morrow, Isk, Valk, Riven, Sarn, Jax, Ember, Corvus, Hale, Wren]
+
+spectators:
+  range: 48                  # joueurs à moins de rayon + range du centre : messages, titres, sons
+  players-can-hit-bots: false

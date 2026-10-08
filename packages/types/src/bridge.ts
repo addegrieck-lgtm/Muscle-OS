@@ -53,6 +53,14 @@ export const BridgeEvent = z.discriminatedUnion("event", [
     type: z.enum(["koth", "boss", "tournament", "supply_drop", "war", "seasonal", "gold_rush", "siege", "other"]), zone: z.string().max(40).optional(),
   }),
   z.object({ ...base, event: z.literal("EVENT_END"), eventId: z.string().min(1).max(64), participants: z.array(z.object(player)).max(1000).default([]) }),
+  // ── Plugins VaeloriaVote et VaeloriaShop (option bridge.enabled de leur config.yml) ──
+  z.object({ ...base, event: z.literal("VOTE"), ...player, site: z.string().min(1).max(64) }),
+  z.object({ ...base, event: z.literal("SHOP_PURCHASE"), ...player, item: z.string().min(1).max(128), amount: z.number().int().min(1), price: z.number().min(0) }),
+  z.object({
+    ...base, event: z.literal("AUCTION_SALE"), ...player, seller: MinecraftUuid, sellerName: MinecraftUsername,
+    item: z.string().min(1).max(128), amount: z.number().int().min(1), price: z.number().min(0),
+  }),
+  z.object({ ...base, event: z.literal("MERCHANT_RANK"), ...player, level: z.number().int().min(1).max(20), rank: z.string().max(200) }),
   z.object({
     ...base,
     event: z.literal("SERVER_HEARTBEAT"),

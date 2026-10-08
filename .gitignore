@@ -15,5 +15,11 @@ next-env.d.ts
 # Plugin Minecraft
 plugins/vaeloria-bridge/build
 plugins/vaeloria-bridge/.gradle
+plugins/vaeloria-combat/build
+plugins/vaeloria-combat/.gradle
+plugins/vaeloria-vote/build
+plugins/vaeloria-vote/.gradle
+plugins/vaeloria-arena/build
+plugins/vaeloria-arena/.gradle
 plugins/vaeloria-crates/build
 plugins/vaeloria-crates/.gradle
