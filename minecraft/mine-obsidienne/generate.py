@@ -5,9 +5,9 @@ Sorties dans minecraft/mine-obsidienne/ : vaeloria-mine-obsidienne.schem, apercu
 
 Bloc d'obsidienne de 21 × 15 × 8, couloir vide d'un bloc tout autour, puis un mur fermé sans sortie,
 coiffé d'une voûte en verre rubis sur nervures de pierre noire : personne ne sort par le haut.
-On y entre seulement en sautant depuis le balcon d'arrivée, par-dessus le couloir (3 blocs de chute).
-Le couloir d'un bloc autour de l'obsidienne reste vide du sol jusqu'à la voûte.
-Point de collage : les pieds du joueur au point d'arrivée, sur le balcon. Nord = -Z.
+L'obsidienne est au centre exact de l'enceinte, avec un couloir vide d'un bloc tout autour, du sol à la voûte.
+On arrive sur une plateforme suspendue sous la voûte, au-dessus du centre, et on saute (3 blocs de chute).
+Point de collage : les pieds du joueur au point d'arrivée, au centre de la plateforme. Nord = -Z.
 """
 
 from __future__ import annotations
@@ -26,12 +26,12 @@ Palette, write_schem, logo_grid = _spawn.Palette, _spawn.write_schem, _spawn.log
 
 OBS_X, OBS_Z, OBS_H = 21, 15, 8  # obsidienne : x 0..20, z 0..14, y 1..8
 WALL_TOP = 16  # haut du mur ; la voûte en ogive commence juste au-dessus
-ARRIVAL = (10, 12, 17)  # pieds du joueur sur le balcon (sud)
+ARRIVAL = (OBS_X // 2, OBS_H + 4, OBS_Z // 2)  # pieds du joueur au centre de la plateforme suspendue
 
 PB = "minecraft:polished_blackstone_bricks"
 DT = "minecraft:deepslate_tiles"
-X0, X1, Z0, Z1, Y0, Y1 = -2, OBS_X + 1, -2, OBS_Z + 4, 0, 30
-RIDGE_X = OBS_X // 2  # faîtage de la voûte, dans l'axe du balcon
+X0, X1, Z0, Z1, Y0, Y1 = -2, OBS_X + 1, -2, OBS_Z + 1, 0, 30
+RIDGE_X = OBS_X // 2  # faîtage de la voûte, au-dessus du centre
 
 
 def roof_y(x):
@@ -67,45 +67,33 @@ def build():
             put(wx0, y, z, "minecraft:shroomlight")
             put(wx1, y, z, "minecraft:shroomlight")
 
-    # Balcon d'arrivée au sud, dans l'épaisseur du mur : on saute par-dessus le couloir sur l'obsidienne.
-    ax, ay, az = ARRIVAL
-    for x in range(ax - 2, ax + 3):
-        for z in range(OBS_Z + 1, az + 2):  # le balcon s'arrête au mur : le couloir d'un bloc reste vide sur toute sa hauteur
-            put(x, ay - 1, z, "minecraft:polished_blackstone" if abs(x - ax) < 2 else PB)
-    # Salle du balcon fermée : murs latéraux et mur du fond jusqu'à son plafond (y 17).
-    for z in range(wz1, az + 3):
-        for y in range(ay - 1, 17):
-            put(ax - 3, y, z, PB if y in (ay - 1, 16) else DT)
-            put(ax + 3, y, z, PB if y in (ay - 1, 16) else DT)
-    for x in range(ax - 3, ax + 4):
-        for y in range(ay - 1, 17):
-            put(x, y, az + 2, PB if y in (ay - 1, 16) else DT)
-        for z in range(wz1, az + 3):
-            put(x, 17, z, "minecraft:polished_blackstone_brick_slab[type=bottom]" if wz1 < z < az + 2 and abs(x - ax) < 3 else PB)
-    for y, half in ((ay, 0), (ay + 1, 1), (ay + 2, 1), (ay + 3, 0)):  # losange rubis au fond
-        for x in range(ax - half, ax + half + 1):
-            put(x, y, az + 2, "minecraft:redstone_block")
-    for x in (ax - 2, ax + 2):
-        put(x, 16, az, "minecraft:chain")
-        put(x, 15, az, "minecraft:lantern[hanging=true]")
-    put(ax, ay - 1, az, "minecraft:lodestone")  # point d'arrivée
-
-    # Pignons nord et sud : le mur monte jusque sous la voûte. Ouverture au-dessus du balcon.
+    # Pignons nord et sud : le mur monte jusque sous la voûte.
     for x in range(wx0, wx1 + 1):
         for y in range(WALL_TOP + 1, roof_y(x)):
             put(x, y, wz0, PB if y % 4 == 0 else DT)
             put(x, y, wz1, PB if y % 4 == 0 else DT)
-    for x in range(ax - 2, ax + 3):
-        for y in range(ay, 17):
-            put(x, y, wz1, "minecraft:air")
 
-    # Blason VÆLORIA dans le pignon nord, face au balcon : la première chose qu'on voit en arrivant.
+    # Blason VÆLORIA dans les deux pignons, lisible depuis l'intérieur.
     logo = logo_grid(15, relief=False)
     lh, lw = len(logo), len(logo[0])
     for gy, row in enumerate(logo):
         for gx, b in enumerate(row):
             if b:
-                put(RIDGE_X + gx - lw // 2, WALL_TOP + 7 - gy, wz0, b)  # haut du blason en y 23, sous la voûte
+                y = WALL_TOP + 7 - gy  # haut du blason en y 23, sous la voûte
+                put(RIDGE_X + gx - lw // 2, y, wz0, b)  # nord, vu depuis le sud : gauche = ouest
+                put(RIDGE_X - (gx - lw // 2), y, wz1, b)  # sud, vu depuis le nord : gauche = est
+
+    # Plateforme d'arrivée 5 × 5 suspendue au centre, au-dessus de l'obsidienne (jamais au-dessus du couloir).
+    ax, ay, az = ARRIVAL
+    for x in range(ax - 2, ax + 3):
+        for z in range(az - 2, az + 3):
+            edge = max(abs(x - ax), abs(z - az)) == 2
+            put(x, ay - 1, z, "minecraft:red_nether_bricks" if edge else "minecraft:polished_blackstone")
+    put(ax, ay - 1, az, "minecraft:lodestone")  # point d'arrivée
+    for x in (ax - 2, ax + 2):  # quatre chaînes la tiennent à la voûte
+        for z in (az - 2, az + 2):
+            for y in range(ay, roof_y(x)):
+                put(x, y, z, "minecraft:chain")
 
     # Voûte : nervures en pierre noire tous les 4 blocs, verre rubis entre elles, faîtage argent.
     ribs = set(range(wz0, wz1 + 1, 4)) | {wz0, wz1}
@@ -162,7 +150,7 @@ def main():
     front = Image.new("RGB", (W, H), (7, 7, 10))  # vue depuis le sud, mur sud retiré : ce qu'on voit du balcon
     for y in range(H):
         for x in range(W):
-            for zi in range(OBS_Z - Z0, -1, -1):
+            for zi in range(OBS_Z - Z0, -1, -1):  # depuis le couloir sud, vers le nord
                 b = v[y, zi, x]
                 if b:
                     front.putpixel((x, H - 1 - y), color(names[b]))
