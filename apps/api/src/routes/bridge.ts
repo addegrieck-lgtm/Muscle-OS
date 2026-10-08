@@ -56,6 +56,7 @@ export async function bridgeRoutes(app: FastifyInstance, ctx: AppContext) {
     if (result.accepted > 0) {
       ctx.cache.invalidate("status:");
       ctx.cache.invalidate("players:");
+      if (events.some((e) => e.event === "VOTE")) ctx.cache.invalidate("votes:");
     }
     return result;
   });

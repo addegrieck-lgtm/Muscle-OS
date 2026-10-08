@@ -5,7 +5,7 @@ import { Wordmark } from "./Logo";
 const COLS = [
   { title: "Le monde", links: [["/monde", "Carte"], ["/empires", "Empires"], ["/guerres", "Guerres"], ["/evenements", "Événements"], ["/classements", "Classements"], ["/fondateurs", "Fondateurs"]] },
   { title: "Communauté", links: [["/conseil", "Conseil"], ["/journal", "Journal"], ["/roadmap", "Roadmap"], ["/news", "News"], ["/creators", "Créateurs"], ["/discord", "Discord"]] },
-  { title: "Jouer", links: [["/jouer", "Comment jouer"], ["/pvp", "PvP"], ["/factions", "Factions"], ["/seasons", "Saisons"], ["/guides", "Guides"], ["/boutique", "Boutique"]] },
+  { title: "Jouer", links: [["/jouer", "Comment jouer"], ["/voter", "Voter"], ["/factions", "Factions"], ["/economie", "Économie"], ["/pvp", "PvP"], ["/commandes", "Commandes"], ["/guides", "Guides"], ["/boutique", "Boutique"]] },
   { title: "Aide", links: [["/faq", "FAQ"], ["/rules", "Règlement"], ["/support", "Support"], ["/status", "Statut"], ["/staff", "Staff"], ["/beta", "Bêta"]] },
   { title: "Légal", links: [["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"], ["/cookies", "Cookies"], ["/cgv", "CGV"], ["/contact", "Contact"]] },
 ] as const;
