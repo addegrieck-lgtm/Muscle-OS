@@ -19,6 +19,7 @@ import org.bukkit.metadata.MetadataValue;
 
 /**
  * Chat au format du grade (comme dans le TAB) et annonces de connexion / déconnexion.
+ * Le tag de faction est ajouté devant par VæloriaFactions (voir {@link #onChat}).
  * Le texte tapé par le joueur est inséré tel quel : il ne peut pas injecter de balises MiniMessage.
  */
 final class ChatListener implements Listener {
@@ -29,7 +30,12 @@ final class ChatListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    /**
+     * Priorité LOW : VæloriaFactions (HIGH) passe après et enveloppe ce rendu avec le tag de faction,
+     * coloré selon la relation avec chaque lecteur. Au même niveau, l'ordre dépendrait du chargement
+     * des plugins et l'un écraserait l'autre.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChat(AsyncChatEvent e) {
         MessagesSettings m = plugin.messages();
         if (m == null || !m.chatEnabled()) return;

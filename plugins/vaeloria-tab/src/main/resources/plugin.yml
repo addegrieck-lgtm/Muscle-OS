@@ -4,6 +4,8 @@ main: fr.vaeloria.tab.VaeloriaTabPlugin
 api-version: '1.21'
 description: TAB, chat, annonces et écran Multijoueur aux couleurs du logo VÆLORIA.
 authors: [VÆLORIA]
+# Chargé après VæloriaFactions quand il est présent (tag de faction devant le format de chat).
+softdepend: [VaeloriaFactions]
 commands:
   vtab:
     description: Recharger la configuration du TAB VÆLORIA
