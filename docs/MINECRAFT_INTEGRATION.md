@@ -47,6 +47,15 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 | `ECONOMY_TRANSACTION` | plugin économie | solde joueur |
 | `PLAYER_RANK_CHANGE` | plugin de grades | rang affiché |
 
+### KOTH avec VelKoth (branché)
+
+Si le plugin [VelKoth](https://modrinth.com/plugin/velkoth) est installé, VæloriaBridge le détecte au démarrage (`softdepend`) et relaie ses événements sans configuration :
+
+- `KothStartEvent` → `KOTH_START` (`koth` = identifiant de l'arène) ;
+- `KothWinEvent` → `KOTH_CAPTURE` (gagnant, faction donnée par le plugin d'équipes de VelKoth, ou `null`).
+
+L'identifiant de l'arène VelKoth doit être la clé de la zone KOTH du site (admin → Monde → Zones, type KOTH) pour que l'événement apparaisse sur la carte. L'arène « La Citadelle » et ses réglages sont dans `minecraft/koth/`.
+
 ### Brancher le plugin Factions / KOTH
 
 Le plugin Factions du réseau n'est pas encore choisi. Il suffit d'appeler l'API publique du bridge depuis ses listeners :

@@ -31,4 +31,14 @@ public final class Events {
         o.addProperty("username", name);
         return o;
     }
+
+    /** Nom de faction accepté par l'API (2 à 24 caractères), ou null pour un joueur sans faction. */
+    public static String factionOrNull(String raw) {
+        if (raw == null) return null;
+        String name = raw.strip();
+        if (name.length() < 2 || name.length() > 24) return null;
+        String lower = name.toLowerCase(java.util.Locale.ROOT);
+        if (lower.equals("wilderness") || lower.equals("none") || lower.equals("aucune")) return null;
+        return name;
+    }
 }

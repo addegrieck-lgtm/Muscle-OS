@@ -64,6 +64,7 @@ public final class VaeloriaBridgePlugin extends JavaPlugin implements Listener {
             throw new IllegalStateException("Impossible de créer le dossier spool", e);
         }
         getServer().getPluginManager().registerEvents(this, this);
+        VelKothHook.registerIfPresent(this, serverName);
 
         long flush = getConfig().getLong("intervals.flush-seconds", 5) * 20L;
         long heartbeat = getConfig().getLong("intervals.heartbeat-seconds", 30) * 20L;
