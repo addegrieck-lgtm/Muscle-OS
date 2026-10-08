@@ -124,6 +124,17 @@ final class AdminCommand {
                 }
                 Msg.send(s, "admin.shards-given", "player", t.getName());
             }
+            case "banque", "bank" -> {
+                if (a.length < 3) { Msg.send(s, "error.usage", "usage", "/f admin banque <faction> <montant>"); return; }
+                Faction f = m().byName(a[1]);
+                if (f == null || f.system) { Msg.send(s, "error.faction-not-found", "faction", a[1]); return; }
+                double v = parseDouble(a[2]);
+                if (Double.isNaN(v) || v < 0) { Msg.send(s, "error.usage", "usage", "/f admin banque <faction> <montant>"); return; }
+                f.bank = v;
+                m().markDirty();
+                plugin.logs().add(f, "BANQUE", s.getName(), "solde fixé par le staff à " + plugin.bank().format(v));
+                Msg.send(s, "admin.bank-set", "faction", f.name, "amount", plugin.bank().format(v));
+            }
             case "reload" -> {
                 plugin.reloadAll();
                 Msg.send(s, "admin.reloaded");
@@ -145,11 +156,11 @@ final class AdminCommand {
     }
 
     List<String> complete(CommandSender s, String[] a) {
-        if (a.length <= 1) return List.of("bypass", "safezone", "warzone", "unclaim", "dissoudre", "setpower", "powerboost", "grace", "eclats", "reload", "save");
+        if (a.length <= 1) return List.of("bypass", "safezone", "warzone", "unclaim", "dissoudre", "setpower", "powerboost", "banque", "grace", "eclats", "reload", "save");
         String sub = a[0].toLowerCase(Locale.ROOT);
         if (a.length == 2) {
             return switch (sub) {
-                case "dissoudre", "disband", "powerboost" -> {
+                case "dissoudre", "disband", "powerboost", "banque", "bank" -> {
                     List<String> l = new ArrayList<>();
                     for (Faction f : m().playerFactions()) l.add(f.name);
                     yield l;

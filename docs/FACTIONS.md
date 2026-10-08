@@ -121,6 +121,71 @@ Le rapport est aussi écrit dans `/f logs` (ligne « BILAN », plus une ligne «
   - `/f totem arreter`.
 - Joueurs : `/f totem` (état ou prochains horaires) et `/f totem liste`.
 
+## Spawners pillables
+- Dans un claim, un spawner **résiste aux explosions**.
+- Il ne se récupère qu'à la main, par :
+  - la faction qui tient le chunk (donc l'attaquant après un surclaim) ;
+  - un ennemi pendant une **brèche** (`raid.breach.allow` contient `SPAWNER`).
+- Il tombe alors **en objet avec sa créature**, et se repose tel quel.
+- Un vol pendant une brèche apparaît dans le bilan de pillage et dans le journal (« a arraché un spawner zombie »).
+- Permission de faction `SPAWNER` (Officier par défaut).
+- Les spawners naturels (donjons) ne tombent pas (`spawners.wilderness-drop: false`), pour garder la valeur de la boutique.
+
+## Améliorations de faction (`/f ameliorations`)
+Elles sont payées avec la banque de faction et réservées au chef par défaut (permission `UPGRADE`). Le niveau de faction est la somme des niveaux achetés.
+
+| Amélioration | Bonus par niveau | Niveaux |
+|---|---|---|
+| Territoire | +10 chunks de plafond | 5 |
+| Puissance | +5 power de faction | 5 |
+| Coffre | +1 rangée (6 maximum) | 3 |
+| Bouclier | +1 h de bouclier | 2 |
+| Warps | +1 warp | 3 |
+| Effectif | +5 places de membre | 2 |
+
+Coûts et bonus se règlent dans `config.yml → upgrades`. Pour le staff : `/f admin banque <faction> <montant>`.
+
+## Avant-postes (`/f avantposte`)
+- Ce sont des zones permanentes.
+- Une faction **seule** dans la zone pendant 120 s la capture.
+- Tant qu'elle la tient, elle touche **1000 en banque toutes les 10 min** et **+2 power de faction**.
+- La capture se fige si la zone est disputée, et recule si la zone est désertée.
+- Affichage :
+  - barre de boss près de la zone ;
+  - cercle de particules coloré (blanc libre, vert tenu, jaune en capture, rouge disputé) ;
+  - annonces en jeu et sur Discord ;
+  - journal.
+- Staff : `/f avantposte creer <nom> [rayon]`, `supprimer`. Joueurs : `/f avantposte liste`.
+
+## KOTH (`/f koth`)
+- C'est un événement : la faction qui tient la zone **seule et sans interruption** pendant 5 min gagne.
+- Zone disputée : le chrono se fige. Zone désertée : il repart de zéro.
+- Récompenses : argent, power et commandes (`{player}`, `{faction}`, `{koth}`).
+- Programmation : par défaut le dimanche à 18h00.
+- Affichage : barre de boss pour tout le serveur, titres, Discord, et publication sur le site (`KOTH_START` / `KOTH_CAPTURE`).
+- Staff : `/f koth creer <nom> [rayon]`, `lancer [nom] [minutes]`, `arreter`, `supprimer`.
+
+## Missions quotidiennes (`/f missions`)
+- Chaque jour à minuit, 3 missions sont tirées du catalogue, **les mêmes pour toutes les factions**.
+- Chaque faction progresse de son côté et touche la récompense en banque, avec annonce, journal et Discord.
+- Types :
+  - `KILL_PLAYERS` (joueurs d'autres factions, sans les kills farmés) ;
+  - `KILL_MOBS` ;
+  - `MINE_ORES`, `MINE_DEEPSLATE_ORES` (sans Toucher de soie) ;
+  - `RAID_BLOCKS` (blocs ennemis détruits à la TNT) ;
+  - `PLAYTIME_MINUTES` ;
+  - `CAPTURE_OUTPOST`.
+- Catalogue modifiable dans `config.yml → missions.pool`.
+
+## Confort
+- **Pseudos colorés** au-dessus des têtes et dans la liste des joueurs, selon la relation avec chaque joueur (vert, violet, aqua, rouge, blanc), précédés de `[Faction]`.
+- **`/f acces <joueur|faction>`** : donne ou retire l'accès au chunk où l'on se trouve (construire, coffres, portes). `/f acces liste` affiche les accès. Permission `ACCESS` (Officier). Les accès disparaissent quand le chunk change de mains.
+- **PlaceholderAPI** (facultatif) :
+  - faction et membres : `%vfactions_name%`, `name_or_none`, `tag`, `role`, `role_prefix`, `online`, `members` ;
+  - power : `power`, `maxpower`, `faction_power`, `faction_maxpower`, `claims` ;
+  - progression : `level`, `bank`, `kills`, `deaths`, `war`, `totems`, `raid`.
+- `/f top` accepte en plus `niveau`, `missions` et `avantpostes`.
+
 ## Obsidienne rare
 - Le générateur eau + lave produit de la **pierre**, plus d'obsidienne.
 - L'obsidienne de la nature (portails en ruine, End) ne donne que **1 à 3 éclats** quand on la mine.
@@ -142,7 +207,9 @@ Le rapport est aussi écrit dans `/f logs` (ligne « BILAN », plus une ligne «
 | Diplomatie | `allie`, `treve`, `neutre`, `ennemi`, `relations` (l'alliance et la trêve se signent à deux, la guerre se déclare seul) |
 | Faction | `chat [f\|a\|p]`, `banque [deposer\|retirer]`, `coffre`, `perm`, `bouclier`, `scoreboard`, `logs`, `discord` |
 | Guerre | `guerre`, `guerre declarer <faction>`, `guerre abandonner` |
-| Totem | `totem`, `totem liste` ; staff : `totem creer\|supprimer\|lancer\|arreter` |
+| Totem | `totem`, `totem liste` ; staff : `totem admin\|creer\|supprimer\|lancer\|arreter` |
+| Progression | `ameliorations`, `missions`, `avantposte [liste]`, `koth [liste]` ; staff : `avantposte creer\|supprimer`, `koth creer\|supprimer\|lancer\|arreter` |
+| Territoire partagé | `acces <joueur\|faction>`, `acces liste` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.
@@ -157,6 +224,18 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (spawners, améliorations, avant-postes, KOTH, missions, confort)
+- 33 tests unitaires, dont les coûts, bonus et plafonds des améliorations, et le tirage identique des missions.
+- Essai sur Paper 1.21.4 avec PlaceholderAPI et trois bots :
+  - spawner intact après une TNT, puis arraché par l'ennemi pendant la brèche et tombé en objet (ligne VOL dans le journal) ;
+  - 2 améliorations achetées par le menu, coffre passé à 4 rangées ;
+  - accès refusé puis accordé à Carl sur un chunk des Lions ;
+  - avant-poste capturé (+2 power de faction, mission accomplie, +5000) ;
+  - KOTH gagné malgré une zone disputée un moment (+5000) ;
+  - kill d'un ennemi compté dans les missions ;
+  - PlaceholderAPI : `Lions niv=2 power=7.2 role=Chef` ;
+  - pseudos : [Lions] en vert, [Loups] en rouge, sans faction en blanc.
 
 ## Ce qui a été vérifié (bilan de pillage)
 - 31 tests unitaires, dont l'accumulation par attaquant et le classement des objets volés.

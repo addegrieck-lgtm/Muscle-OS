@@ -61,7 +61,7 @@ public final class RaidService {
 
     public boolean shielded(Faction f) {
         return settings.shieldEnabled && f != null && !f.system
-                && ShieldWindow.isActive(f.shieldStart, settings.shieldHours, minuteOfDay());
+                && ShieldWindow.isActive(f.shieldStart, manager.shieldHours(f), minuteOfDay());
     }
 
     public boolean offlineProtected(Faction f) {
@@ -92,6 +92,8 @@ public final class RaidService {
         boolean hostile = attacker != null && !attacker.id.equals(defender.id);
         if (hostile) {
             attacker.blocksDestroyed += blocks;
+            var pl = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+            if (pl != null) pl.missions().progress(attacker, "RAID_BLOCKS", blocks);
             if (defender.raidAttackers.add(attacker.id)) {
                 attacker.raidsDone++;
                 defender.raidsSuffered++;

@@ -18,7 +18,10 @@ public enum FPerm {
     RELATION("Gérer les relations", Role.OFFICIER),
     FLY("Voler dans le territoire", Role.MEMBRE),
     SHIELD("Régler le bouclier", Role.CHEF),
-    LOGS("Lire le journal", Role.OFFICIER);
+    LOGS("Lire le journal", Role.OFFICIER),
+    SPAWNER("Casser les spawners", Role.OFFICIER),
+    ACCESS("Accès par chunk (/f acces)", Role.OFFICIER),
+    UPGRADE("Acheter des améliorations", Role.CHEF);
 
     private final String label;
     private final Role defaultRole;

@@ -76,7 +76,7 @@ public final class Menus {
                 (pl, c) -> openPerms(pl));
 
         menu.set(28, Menu.item(Material.SHIELD, t("<aqua><b>Bouclier"), List.of(
-                t("<gray>Plage : <white><w>", "w", ShieldWindow.describe(f.shieldStart, plugin.settings().shieldHours)),
+                t("<gray>Plage : <white><w>", "w", ShieldWindow.describe(f.shieldStart, m().shieldHours(f))),
                 t("<gray>/f bouclier <heure>"))), (pl, c) -> run(pl, "f bouclier"));
         menu.set(29, Menu.item(Material.FEATHER, t("<white><b>Vol"), List.of(
                 t(fp.flying ? "<green>Activé" : "<gray>Désactivé"), t("<yellow>Clic : basculer"))), (pl, c) -> run(pl, "f fly"));
@@ -92,6 +92,10 @@ public final class Menus {
                 t("<gray>Blocs détruits : <white><v1>", "v1", f.blocksDestroyed))), null);
         menu.set(34, Menu.item(Material.OAK_SIGN, t("<yellow><b>Chat"), List.of(
                 t("<gray>Mode : <white><m>", "m", fp.chatMode.name().toLowerCase()), t("<yellow>Clic : changer"))), (pl, c) -> run(pl, "f chat"));
+        menu.set(37, Menu.item(Material.EXPERIENCE_BOTTLE, t("<gold><b>Améliorations"), List.of(
+                t("<gray>Niveau de faction : <white><v1>", "v1", f.level()), t("<yellow>Clic : ouvrir"))), (pl, c) -> plugin.upgradeMenu().open(pl));
+        menu.set(43, Menu.item(Material.MAP, t("<green><b>Missions du jour"), List.of(
+                t("<gray>Récompenses en banque"), t("<yellow>Clic : voir"))), (pl, c) -> run(pl, "f missions"));
         var war = plugin.wars().warOf(f);
         menu.set(39, Menu.item(Material.WRITABLE_BOOK, t("<gold><b>Journal"), List.of(
                 t("<gray>Coffre, banque, membres, pillages"), t("<yellow>Clic : lire"))), (pl, c) -> run(pl, "f logs"));
@@ -196,6 +200,9 @@ public final class Menus {
             case FLY -> Material.FEATHER;
             case SHIELD -> Material.SHIELD;
             case LOGS -> Material.WRITABLE_BOOK;
+            case SPAWNER -> Material.SPAWNER;
+            case ACCESS -> Material.TRIPWIRE_HOOK;
+            case UPGRADE -> Material.EXPERIENCE_BOTTLE;
         };
     }
 }

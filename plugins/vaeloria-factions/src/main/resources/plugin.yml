@@ -4,7 +4,7 @@ main: fr.vaeloria.factions.VaeloriaFactionsPlugin
 api-version: '1.21'
 description: "Faction PvP de VÆLORIA : power, surclaim, pillage à la TNT, obsidienne indestructible et rare."
 authors: [VÆLORIA]
-softdepend: [Vault, VaeloriaBridge]
+softdepend: [Vault, VaeloriaBridge, PlaceholderAPI]
 commands:
   f:
     description: Commandes de faction

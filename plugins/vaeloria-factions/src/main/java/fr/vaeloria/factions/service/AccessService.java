@@ -38,9 +38,17 @@ public final class AccessService {
         if (owner.system) return p.hasPermission(ZONE_BUILD_PERMISSION);
         Faction mine = manager.factionOf(p);
         if (mine == owner) return owner.can(p.getUniqueId(), perm);
+        if (granted(owner, pos, p, mine) && (perm == FPerm.BUILD || perm == FPerm.CONTAINER || perm == FPerm.DOOR)) return true;
         Relation rel = manager.relation(mine, owner);
         if (rel == Relation.ALLIE && settings.allyPerms.contains(perm)) return true;
         return settings.breachAllows.contains(perm) && raid.breached(pos, owner, mine);
+    }
+
+    /** Accès accordé sur ce chunk (/f acces) au joueur ou à sa faction. */
+    public static boolean granted(Faction owner, ChunkPos pos, Player p, Faction mine) {
+        java.util.Set<String> g = owner.access.get(pos.key());
+        if (g == null || g.isEmpty()) return false;
+        return g.contains("p:" + p.getUniqueId()) || mine != null && g.contains("f:" + mine.id);
     }
 
     /** Vrai si l'accès n'est permis QUE par une brèche de pillage (ennemi chez un défenseur). */
@@ -51,6 +59,7 @@ public final class AccessService {
         if (owner == null || owner.system) return false;
         Faction mine = manager.factionOf(p);
         if (mine == owner) return false;
+        if (granted(owner, pos, p, mine)) return false;
         if (manager.relation(mine, owner) == Relation.ALLIE && settings.allyPerms.contains(perm)) return false;
         return settings.breachAllows.contains(perm) && raid.breached(pos, owner, mine);
     }

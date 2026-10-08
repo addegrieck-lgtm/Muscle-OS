@@ -55,6 +55,7 @@ info:
   allies: "<gray>Alliés (<count>) : "
   truces: "<gray>Trêves (<count>) : "
   enemies: "<gray>Ennemis (<count>) : "
+  extra: "<gray>Niveau <gold><level></gold> · KOTH <yellow><koths></yellow> · Avant-postes tenus <green><outposts></green> · Missions <white><missions>"
   stats: "<gray>Kills <white><kills></white> · Morts <white><deaths></white> · Pillages <green><raids></green>/<red><raided></red> · Surclaims <green><oc></green>/<red><ocs></red> · Guerres <gold><wars></gold> · Totems <dark_purple><totems>"
 
 list:
@@ -384,6 +385,74 @@ totem:
     world_missing: "<red>Le monde de ce totem n'est pas chargé."
     not_enough_players: "<red>Pas assez de joueurs connectés."
 
+upgrade:
+  bought: "<gold>▲</gold> <white><player></white> <gray>achète <gold><upgrade></gold> niveau <white><level></white> : <green>+<bonus> <unit></green> <dark_gray>(<cost>)"
+  max: "<gray><white><upgrade></white> est déjà au niveau maximum."
+  no-money: "<red>Banque insuffisante : <white><cost></white> requis, <white><bank></white> disponible. <gray>/f banque deposer ‹montant›"
+  disabled: "<red>Cette amélioration est désactivée."
+
+spawner:
+  looted: "<gold>Tu arraches un <white><type></white> à l'ennemi !"
+
+zone:
+  contested: " <red><b>⚔ DISPUTÉ"
+
+outpost:
+  captured: "<green>⚑</green> <gold><faction></gold> <gray>capture l'avant-poste</gray> <white><outpost></white><gray> !"
+  taken: "<green>⚑</green> <gold><faction></gold> <gray>prend l'avant-poste</gray> <white><outpost></white> <gray>à</gray> <red><previous></red><gray> !"
+  income: "<green>+<amount></green> <gray>en banque grâce à l'avant-poste <white><outpost></white>."
+  bossbar: "<green><b>⚑ <outpost></b></green> <gray>— tenu par <holder><capture><state>"
+  capture-part: " <dark_gray>·</dark_gray> <yellow>capture <faction> <progress>/<needed> s"
+  none-defined: "<gray>Aucun avant-poste. <white>/f avantposte creer ‹nom› [rayon]"
+  list-line: "<green>⚑</green> <white><name></white> <gray>— <x>, <y>, <z> (rayon <radius>) — tenu par <gold><holder>"
+  created: "<green>Avant-poste <white><name></white> créé ici (rayon <radius>)."
+  exists: "<red>L'avant-poste <white><name></white> existe déjà."
+  deleted: "<green>Avant-poste <white><name></white> supprimé."
+  unknown: "<red>Avant-poste inconnu : <white><name>"
+
+koth:
+  started: "<yellow><b>♚ KOTH</b></yellow> <white><koth></white> <gray>commence en <white><x>, <z></white> ! Tenez la zone seuls pendant <white><hold></white> (<minutes> min pour y arriver)."
+  start-title: "<yellow><b>♚ KOTH"
+  start-subtitle: "<white><koth></white> <gray>en <white><x>, <z>"
+  capturing: "<yellow>♚</yellow> <gold><faction></gold> <gray>prend le contrôle du KOTH <white><koth></white> !"
+  bossbar: "<yellow><b>♚ <koth></b></yellow> <gray>— <holder> <white><progress></white>/<white><hold></white> <dark_gray>·</dark_gray> <white><time></white><state>"
+  won: "<yellow><b>♚ KOTH</b></yellow> <gold><b><faction></b></gold> <gray>remporte le KOTH <white><koth></white> !"
+  win-title: "<gold><b><faction></b>"
+  win-subtitle: "<gray>remporte le KOTH <white><koth>"
+  reward: "<green>Récompense du KOTH : <white><rewards></white>."
+  timeout: "<yellow>♚</yellow> <gray>Le KOTH <white><koth></white> se termine sans vainqueur."
+  stopped: "<yellow>♚</yellow> <gray>Le KOTH <white><koth></white> a été arrêté par le staff."
+  idle: "<gray>Aucun KOTH en cours."
+  status: "<yellow>♚</yellow> <gray>KOTH <white><koth></white> en cours — fin dans <white><time>"
+  not-running: "<gray>Aucun KOTH en cours."
+  none-defined: "<gray>Aucune zone de KOTH. <white>/f koth creer ‹nom› [rayon]"
+  list-line: "<yellow>♚</yellow> <white><name></white> <gray>— <x>, <y>, <z> (rayon <radius>)"
+  created: "<green>Zone de KOTH <white><name></white> créée ici (rayon <radius>). <gray>Lancer : /f koth lancer <name>"
+  exists: "<red>Le KOTH <white><name></white> existe déjà."
+  deleted: "<green>KOTH <white><name></white> supprimé."
+  unknown: "<red>KOTH inconnu : <white><name>"
+  start-fail:
+    disabled: "<red>Le KOTH est désactivé dans la configuration."
+    already_running: "<red>Un KOTH est déjà en cours."
+    unknown: "<red>KOTH inconnu : <white><name>"
+    none_defined: "<red>Aucune zone de KOTH : <white>/f koth creer ‹nom›"
+    world_missing: "<red>Le monde de ce KOTH n'est pas chargé."
+    not_enough_players: "<red>Pas assez de joueurs connectés."
+
+missions:
+  header: "<dark_gray><st>      </st></dark_gray> <green><b>Missions du jour</b></green> <gray>— nouvelles dans <white><time></white> <dark_gray><st>      </st>"
+  line: "<gray>• <white><mission></white> <dark_gray>|</dark_gray> <yellow><bar></yellow> <white><value></white>/<white><target></white> <dark_gray>→</dark_gray> <gold><reward>"
+  line-done: "<green>✔ <mission></green> <dark_gray>|</dark_gray> <green><bar></green> <gray>accomplie (<gold><reward></gold>)"
+  completed: "<green><b>✔ Mission accomplie :</b></green> <white><mission></white> <gray>— <gold>+<reward></gold> en banque !"
+
+access:
+  not-yours: "<red>Place-toi dans un chunk de ta faction."
+  none: "<gray>Aucun accès particulier sur ce chunk. <white>/f acces ‹joueur|faction›"
+  list: "<gray>Accès au chunk <white><x>, <z></white> : <white><list>"
+  self: "<red>Ta faction a déjà accès à son territoire."
+  granted: "<green>Accès au chunk <white><x>, <z></white> donné à <white><target></white> (construire, coffres, portes)."
+  revoked: "<gray>Accès au chunk <white><x>, <z></white> retiré à <white><target></white>."
+
 logs:
   empty: "<gray>Le journal est vide."
   header: "<dark_gray><st>      </st></dark_gray> <gold><b>Journal</b></gold> <gray>— page <page>/<pages></gray> <dark_gray><st>      </st>"
@@ -404,6 +473,7 @@ discord:
 menu:
   title: "<dark_gray>Faction · <gold><faction>"
   title-none: "<dark_gray>Factions · VÆLORIA"
+  upgrades-title: "<dark_gray>Améliorations · <gold><faction></gold> <dark_gray>(niv. <level>)"
   members-title: "<dark_gray>Membres · <gold><faction>"
   perms-title: "<dark_gray>Permissions par rang"
 
@@ -416,7 +486,7 @@ obsidian:
   inspect-unbreakable: "<dark_purple>Bloc indestructible : seul un surclaim en vient à bout."
 
 admin:
-  help: "<gray>/f admin <white>bypass</white> | <white>safezone</white> [rayon] | <white>warzone</white> [rayon] | <white>unclaim</white> [rayon] | <white>dissoudre</white> ‹faction› | <white>setpower</white> ‹joueur› ‹v› | <white>powerboost</white> ‹faction› ‹v› | <white>grace</white> ‹heures|off› | <white>eclats</white> ‹joueur› [n] | <white>reload</white> | <white>save</white>"
+  help: "<gray>/f admin <white>bypass</white> | <white>banque</white> ‹faction› ‹montant› | <white>safezone</white> [rayon] | <white>warzone</white> [rayon] | <white>unclaim</white> [rayon] | <white>dissoudre</white> ‹faction› | <white>setpower</white> ‹joueur› ‹v› | <white>powerboost</white> ‹faction› ‹v› | <white>grace</white> ‹heures|off› | <white>eclats</white> ‹joueur› [n] | <white>reload</white> | <white>save</white>"
   bypass-on: "<gold>Mode bypass activé : tu ignores les protections."
   bypass-off: "<gray>Mode bypass désactivé."
   zone-claimed: "<green><count> chunk(s) ajouté(s) à <zone>."
@@ -427,3 +497,4 @@ admin:
   shards-given: "<green>Éclats donnés à <player>."
   reloaded: "<green>Configuration et messages rechargés."
   saved: "<green>Données sauvegardées."
+  bank-set: "<green>Banque de <white><faction></white> : <gold><amount></gold>."

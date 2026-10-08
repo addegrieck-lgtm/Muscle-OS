@@ -35,10 +35,11 @@ public final class ChestService {
         public @NotNull Inventory getInventory() { return inventory; }
     }
 
-    public Inventory open(Faction f) {
+    public Inventory open(Faction f, int rows) {
+        if (f.chestInventory != null && f.chestInventory.getSize() != rows * 9) resize(f);
         if (f.chestInventory == null) {
             Holder h = new Holder(f.id);
-            Inventory inv = Bukkit.createInventory(h, settings.chestRows * 9, Msg.get("chest.title", "faction", f.name));
+            Inventory inv = Bukkit.createInventory(h, rows * 9, Msg.get("chest.title", "faction", f.name));
             h.inventory = inv;
             if (f.chest != null) {
                 for (int i = 0; i < f.chest.size(); i++) {
@@ -77,6 +78,15 @@ public final class ChestService {
     private static String encode(ItemStack it) {
         if (it == null || it.getType().isAir() || it.getAmount() <= 0) return null;
         return Base64.getEncoder().encodeToString(it.serializeAsBytes());
+    }
+
+    /** Agrandit le coffre (amélioration) : contenu sauvegardé, inventaire recréé à la prochaine ouverture. */
+    public void resize(Faction f) {
+        if (f.chestInventory == null) return;
+        closeAll(f);
+        encode(f);
+        overflow.remove(f.id);
+        f.chestInventory = null;
     }
 
     public void closeAll(Faction f) {

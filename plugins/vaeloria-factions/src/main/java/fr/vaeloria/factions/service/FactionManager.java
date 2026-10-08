@@ -207,6 +207,7 @@ public final class FactionManager {
 
     /** Un chunk perdu emporte le home et les warps qui s'y trouvaient. */
     private void dropPointsIn(Faction f, ChunkPos pos) {
+        f.access.remove(pos.key());
         if (f.home != null && f.home.chunk().equals(pos)) f.home = null;
         f.warps.values().removeIf(w -> w.chunk().equals(pos));
     }
@@ -229,20 +230,54 @@ public final class FactionManager {
         return p == null ? settings.powerStart : p.power;
     }
 
+    /** Power bonus extérieur (avant-postes tenus), fourni par le plugin. */
+    private java.util.function.ToDoubleFunction<Faction> extraPower = f -> 0;
+
+    public void setExtraPower(java.util.function.ToDoubleFunction<Faction> fn) { this.extraPower = fn; }
+
+    public double upgradeBonus(Faction f, fr.vaeloria.factions.model.UpgradeType t) {
+        return fr.vaeloria.factions.rules.Upgrades.bonus(settings.upgrades.get(t), f.level(t));
+    }
+
+    /** Plafond absolu de claims (0 = aucun), relevé par l'amélioration Territoire. */
+    public int maxClaims(Faction f) {
+        return settings.claimsMax <= 0 ? 0 : settings.claimsMax + (int) upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.CLAIMS);
+    }
+
+    public int maxMembers(Faction f) {
+        return settings.maxMembers + (int) upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.MEMBERS);
+    }
+
+    public int maxWarps(Faction f) {
+        return settings.maxWarps + (int) upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.WARPS);
+    }
+
+    public int chestRows(Faction f) {
+        return fr.vaeloria.factions.rules.Upgrades.capped(settings.chestRows, upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.CHEST), 6);
+    }
+
+    public int shieldHours(Faction f) {
+        return fr.vaeloria.factions.rules.Upgrades.capped(settings.shieldHours, upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.SHIELD), 23);
+    }
+
+    private double bonusPower(Faction f) {
+        return upgradeBonus(f, fr.vaeloria.factions.model.UpgradeType.POWER) + extraPower.applyAsDouble(f);
+    }
+
     public double power(Faction f) {
         if (f.system) return 0;
-        double sum = f.powerBoost;
+        double sum = f.powerBoost + bonusPower(f);
         for (UUID u : f.members.keySet()) sum += playerPower(u);
         return PowerMath.round(sum);
     }
 
     public double maxPower(Faction f) {
         if (f.system) return 0;
-        return PowerMath.round(f.members.size() * settings.powerMax + f.powerBoost);
+        return PowerMath.round(f.members.size() * settings.powerMax + f.powerBoost + bonusPower(f));
     }
 
     public int landLimit(Faction f) {
-        return PowerMath.landLimit(power(f), settings.claimsPerPower, settings.claimsMax);
+        return PowerMath.landLimit(power(f), settings.claimsPerPower, maxClaims(f));
     }
 
     public boolean isVulnerable(Faction f) {

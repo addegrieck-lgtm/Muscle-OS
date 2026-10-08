@@ -71,6 +71,7 @@ public final class ScoreboardService {
         }
         Objective o = sb.getObjective("vfactions");
         if (o == null) return;
+        if (settings.nametags) updateTeams(p, sb);
         List<Component> lines = lines(p);
         for (String entry : new ArrayList<>(sb.getEntries())) {
             if (entry.startsWith("§l") && Integer.parseInt(entry.substring(2)) >= lines.size()) sb.resetScores(entry);
@@ -79,6 +80,38 @@ public final class ScoreboardService {
             var score = o.getScore("§l" + i);
             score.setScore(lines.size() - i);
             score.customName(lines.get(i));
+        }
+    }
+
+    /**
+     * Pseudos colorés selon la relation avec le lecteur, et tag de faction devant : vert pour sa faction, violet pour
+     * les alliés, rouge pour les ennemis. Une équipe par faction dans le tableau de chaque joueur.
+     */
+    private void updateTeams(Player viewer, Scoreboard sb) {
+        Faction mine = manager.factionOf(viewer);
+        java.util.Set<String> used = new java.util.HashSet<>();
+        for (Player o : Bukkit.getOnlinePlayers()) {
+            Faction f = manager.factionOf(o);
+            String teamName = f == null ? "vf_none" : "vf_" + f.id.substring(0, Math.min(12, f.id.length()));
+            used.add(teamName);
+            org.bukkit.scoreboard.Team t = sb.getTeam(teamName);
+            if (t == null) t = sb.registerNewTeam(teamName);
+            Relation r = f == null ? Relation.NEUTRE : manager.relation(mine, f);
+            net.kyori.adventure.text.format.NamedTextColor color = switch (r) {
+                case MEMBRE -> net.kyori.adventure.text.format.NamedTextColor.GREEN;
+                case ALLIE -> net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
+                case TREVE -> net.kyori.adventure.text.format.NamedTextColor.AQUA;
+                case ENNEMI -> net.kyori.adventure.text.format.NamedTextColor.RED;
+                default -> net.kyori.adventure.text.format.NamedTextColor.WHITE;
+            };
+            // Team#color() lève une exception tant qu'aucune couleur n'est posée : on l'applique sans la lire.
+            t.color(color);
+            Component prefix = f == null ? Component.empty() : Msg.parse("<" + r.color() + ">[<n>] ", "n", f.name);
+            t.prefix(prefix);
+            if (!t.hasEntry(o.getName())) t.addEntry(o.getName());
+        }
+        for (org.bukkit.scoreboard.Team t : new ArrayList<>(sb.getTeams())) {
+            if (t.getName().startsWith("vf_") && !used.contains(t.getName())) t.unregister();
         }
     }
 

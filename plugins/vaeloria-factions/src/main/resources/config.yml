@@ -63,7 +63,7 @@ raid:
   breach:
     enabled: true
     minutes: 15
-    allow: [CONTAINER, DOOR]
+    allow: [CONTAINER, DOOR, SPAWNER]
 
 protection:
   liquid-flow: true            # eau / lave ne coulent pas dans un claim depuis l'extérieur
@@ -184,6 +184,81 @@ totem:
     power-boost: 0             # power de faction ajouté à vie (0 = aucun)
     # Commandes console : {player} = dernier coup, {faction}, {totem}
     commands: []
+
+# ── Spawners pillables ────────────────────────────────────────────
+# Dans un claim, un spawner résiste aux explosions et ne se récupère qu'à la main : par la faction qui tient le chunk
+# (donc par l'attaquant après un surclaim) ou par un ennemi pendant une brèche (raid.breach.allow contient SPAWNER).
+# Il tombe alors en objet avec sa créature.
+spawners:
+  enabled: true
+  explosion-proof: true
+  wilderness-drop: false       # spawners naturels (donjons) : ne tombent pas, pour garder la valeur de la boutique
+
+# ── Améliorations de faction (/f ameliorations) ───────────────────
+# Achetées avec la banque de faction. per-level = bonus par niveau ; costs = prix de chaque niveau.
+upgrades:
+  claims:                      # plafond de claims
+    per-level: 10
+    costs: [10000, 25000, 50000, 100000, 200000]
+  power:                       # power de faction
+    per-level: 5
+    costs: [15000, 40000, 80000, 150000, 300000]
+  chest:                       # rangées du coffre de faction (6 maximum)
+    per-level: 1
+    costs: [5000, 15000, 40000]
+  shield:                      # heures de bouclier quotidien
+    per-level: 1
+    costs: [20000, 60000]
+  warps:
+    per-level: 1
+    costs: [5000, 15000, 30000]
+  members:                     # places de membre
+    per-level: 5
+    costs: [20000, 50000]
+
+# ── Avant-postes (/f avantposte) ──────────────────────────────────
+# Zones permanentes : une faction seule dans la zone pendant capture-seconds la prend, puis touche un revenu en
+# banque et un bonus de power tant qu'elle la tient. Création : /f avantposte creer <nom> [rayon].
+outposts:
+  enabled: true
+  capture-seconds: 120
+  income-minutes: 10
+  income-money: 1000
+  power-bonus: 2               # power de faction par avant-poste tenu
+
+# ── KOTH (/f koth) ────────────────────────────────────────────────
+# Événement : la faction qui tient la zone seule, sans interruption, pendant hold-seconds gagne.
+# Zone disputée = chrono figé ; zone désertée = chrono remis à zéro. Création : /f koth creer <nom> [rayon].
+koth:
+  enabled: true
+  hold-seconds: 300
+  duration-minutes: 30
+  min-online: 10
+  schedule:
+    - "DIMANCHE 18:00"
+  reward:
+    money: 5000
+    power-boost: 0
+    commands: []               # {player}, {faction}, {koth}
+
+# ── Missions quotidiennes (/f missions) ───────────────────────────
+# Chaque jour à minuit, per-day missions sont tirées du catalogue, les mêmes pour toutes les factions.
+# Types : KILL_PLAYERS, KILL_MOBS, MINE_ORES, MINE_DEEPSLATE_ORES, RAID_BLOCKS, PLAYTIME_MINUTES, CAPTURE_OUTPOST
+missions:
+  enabled: true
+  per-day: 3
+  pool:
+    - {id: chasse, type: KILL_PLAYERS, target: 20, reward: 6000, label: "Tuer 20 joueurs ennemis"}
+    - {id: monstres, type: KILL_MOBS, target: 250, reward: 2500, label: "Tuer 250 monstres"}
+    - {id: mineurs, type: MINE_ORES, target: 256, reward: 3000, label: "Miner 256 minerais"}
+    - {id: profondeurs, type: MINE_DEEPSLATE_ORES, target: 96, reward: 4000, label: "Miner 96 minerais de deepslate"}
+    - {id: pillards, type: RAID_BLOCKS, target: 300, reward: 7000, label: "Détruire 300 blocs ennemis à la TNT"}
+    - {id: presence, type: PLAYTIME_MINUTES, target: 600, reward: 2000, label: "Cumuler 10 h de jeu entre membres"}
+    - {id: conquete, type: CAPTURE_OUTPOST, target: 1, reward: 5000, label: "Capturer un avant-poste"}
+
+# ── Confort ───────────────────────────────────────────────────────
+nametags:
+  enabled: true                # pseudo coloré (et [Faction]) au-dessus des têtes selon la relation
 
 # ── Guerres officielles ───────────────────────────────────────────
 # /f guerre declarer <faction> : préparation, puis combat chronométré. Points : kills, pillages, surclaims.

@@ -74,6 +74,10 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private fr.vaeloria.factions.service.TotemService totems;
     private fr.vaeloria.factions.service.ChatPrompt prompts;
     private fr.vaeloria.factions.gui.TotemAdminMenu totemAdmin;
+    private fr.vaeloria.factions.service.UpgradeService upgrades;
+    private fr.vaeloria.factions.gui.UpgradeMenu upgradeMenu;
+    private fr.vaeloria.factions.service.CaptureService captures;
+    private fr.vaeloria.factions.service.MissionService missions;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -108,6 +112,12 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         totems.purgeOrphans();
         prompts = new fr.vaeloria.factions.service.ChatPrompt(this);
         totemAdmin = new fr.vaeloria.factions.gui.TotemAdminMenu(this);
+        upgrades = new fr.vaeloria.factions.service.UpgradeService(this);
+        upgradeMenu = new fr.vaeloria.factions.gui.UpgradeMenu(this);
+        captures = new fr.vaeloria.factions.service.CaptureService(this, settings, state);
+        missions = new fr.vaeloria.factions.service.MissionService(this, settings, state);
+        manager.setExtraPower(captures::outpostPower);
+        missions.roll();
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
         bank = Banks.detect();
         raid = new RaidService(settings, manager, state);
@@ -132,6 +142,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         pm.registerEvents(new MenuListener(this), this);
         pm.registerEvents(new fr.vaeloria.factions.listener.TotemListener(this), this);
         pm.registerEvents(prompts, this);
+        pm.registerEvents(new fr.vaeloria.factions.listener.SpawnerListener(this), this);
+        pm.registerEvents(new fr.vaeloria.factions.listener.MissionListener(this), this);
+        if (fr.vaeloria.factions.service.Papi.register(this)) getLogger().info("PlaceholderAPI : placeholders %vfactions_…% disponibles.");
 
         FactionCommand cmd = new FactionCommand(this);
         PluginCommand f = getCommand("f");
@@ -153,12 +166,14 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         tasks.clear();
         var sch = Bukkit.getScheduler();
         tasks.add(sch.runTaskTimer(this, this::regenPower, 1200L, 1200L));
+        tasks.add(sch.runTaskTimer(this, () -> missions.tickMinute(), 1200L, 1200L));
         tasks.add(sch.runTaskTimer(this, () -> {
             raid.tick();
             territory.tickFly();
             combat.tick();
             wars.tick();
             totems.tick();
+            captures.tick();
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
@@ -225,6 +240,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     /** Dissolution complète : claims, coffre, barres de raid, site. */
     public void disband(Faction f) {
         wars.onDisband(f);
+        captures.onDisband(f);
         chests.closeAll(f);
         raid.hideBar(f.id);
         for (Player p : manager.online(f)) {
@@ -277,6 +293,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         }
         raid.hideAll();
         totems.shutdown();
+        captures.shutdown();
         scoreboard.clear();
         obsidian.unregisterRecipe();
         save(false);
@@ -303,6 +320,10 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public fr.vaeloria.factions.service.TotemService totems() { return totems; }
     public fr.vaeloria.factions.service.ChatPrompt prompts() { return prompts; }
     public fr.vaeloria.factions.gui.TotemAdminMenu totemAdmin() { return totemAdmin; }
+    public fr.vaeloria.factions.service.UpgradeService upgrades() { return upgrades; }
+    public fr.vaeloria.factions.gui.UpgradeMenu upgradeMenu() { return upgradeMenu; }
+    public fr.vaeloria.factions.service.CaptureService captures() { return captures; }
+    public fr.vaeloria.factions.service.MissionService missions() { return missions; }
 
     /** Modifie config.yml depuis un menu : écrit le fichier (commentaires conservés) et applique aussitôt. */
     public void setConfigValue(String path, Object value) {

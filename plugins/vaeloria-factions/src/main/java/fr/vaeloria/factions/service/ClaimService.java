@@ -38,7 +38,7 @@ public final class ClaimService {
         boolean other = o == ClaimRules.Owner.OTHER;
         return ClaimRules.evaluate(new ClaimRules.Context(
                 settings.disabledWorlds.contains(pos.world()),
-                f.claims.size(), manager.landLimit(f), settings.claimsMax,
+                f.claims.size(), manager.landLimit(f), manager.maxClaims(f),
                 manager.isConnected(f, pos), settings.mustBeConnected,
                 o,
                 other ? owner.claims.size() : 0,
@@ -60,7 +60,7 @@ public final class ClaimService {
             if (!quiet || r != ClaimRules.Result.ALREADY_OWNED) {
                 Msg.send(p, "claim.fail." + r.name().toLowerCase(java.util.Locale.ROOT),
                         "faction", previous == null ? "" : previous.name,
-                        "limit", manager.landLimit(f), "max", settings.claimsMax);
+                        "limit", manager.landLimit(f), "max", manager.maxClaims(f));
             }
             return false;
         }

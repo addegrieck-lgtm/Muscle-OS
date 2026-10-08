@@ -176,6 +176,7 @@ public final class CombatListener implements Listener {
             if (fk != null) {
                 fk.kills++;
                 plugin.wars().onKill(fk, fac, killer.getUniqueId(), victim.getUniqueId());
+                if (fac != fk) plugin.missions().progress(fk, "KILL_PLAYERS", 1);
             }
         }
         if (killer != null) plugin.raid().onKill(manager.factionOf(killer), fac);

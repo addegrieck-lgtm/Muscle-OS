@@ -52,6 +52,14 @@ public final class Faction {
     public int warsWon;
     public int warsLost;
     public int totemsWon;
+    public int outpostsCaptured;
+    public int kothsWon;
+    public int missionsDone;
+
+    /** Niveau de chaque amélioration (UpgradeType → niveau). */
+    public Map<UpgradeType, Integer> upgrades = new EnumMap<>(UpgradeType.class);
+    /** Accès accordés par chunk (/f acces) : clé de chunk → « p:uuid » ou « f:idFaction ». */
+    public Map<String, java.util.Set<String>> access = new HashMap<>();
 
     /** Webhook Discord de la faction (alertes de pillage, guerres). Jamais affiché en entier. */
     public String discordWebhook;
@@ -89,6 +97,8 @@ public final class Faction {
         if (warps == null) warps = new LinkedHashMap<>();
         if (description == null) description = "";
         if (logs == null) logs = new java.util.ArrayList<>();
+        if (upgrades == null) upgrades = new EnumMap<>(UpgradeType.class);
+        if (access == null) access = new HashMap<>();
         claims = ConcurrentHashMap.newKeySet();
         invites = new ConcurrentHashMap<>();
         raidAttackers = new HashSet<>();
@@ -120,4 +130,16 @@ public final class Faction {
     }
 
     public boolean inRaid() { return raidUntil > System.currentTimeMillis(); }
+
+    public int level(UpgradeType t) {
+        Integer l = upgrades.get(t);
+        return l == null ? 0 : l;
+    }
+
+    /** Niveau global de la faction : somme de ses améliorations. */
+    public int level() {
+        int n = 0;
+        for (int v : upgrades.values()) n += v;
+        return n;
+    }
 }

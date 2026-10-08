@@ -79,6 +79,31 @@ public final class Settings {
     public java.util.List<String> totemRewardCommands = new java.util.ArrayList<>();
     public java.util.List<fr.vaeloria.factions.rules.TotemSchedule.Entry> totemSchedule = new java.util.ArrayList<>();
     public java.util.List<String> totemScheduleErrors = new java.util.ArrayList<>();
+    // Spawners
+    public boolean spawnersEnabled, spawnersExplosionProof, spawnersWildernessDrop;
+    // Améliorations
+    public Map<fr.vaeloria.factions.model.UpgradeType, fr.vaeloria.factions.rules.Upgrades.Def> upgrades =
+            new EnumMap<>(fr.vaeloria.factions.model.UpgradeType.class);
+    // Avant-postes
+    public boolean outpostsEnabled;
+    public int outpostCaptureSeconds, outpostIncomeMinutes;
+    public double outpostIncomeMoney, outpostPower;
+    // KOTH
+    public boolean kothEnabled;
+    public int kothHoldSeconds, kothDurationMinutes, kothMinOnline;
+    public double kothRewardMoney, kothRewardPower;
+    public java.util.List<String> kothRewardCommands = new java.util.ArrayList<>();
+    public java.util.List<fr.vaeloria.factions.rules.TotemSchedule.Entry> kothSchedule = new java.util.ArrayList<>();
+    // Missions
+    public boolean missionsEnabled;
+    public int missionsPerDay;
+    public java.util.List<MissionDef> missionPool = new java.util.ArrayList<>();
+    // Confort
+    public boolean nametags;
+
+    /** Une mission du catalogue. */
+    public record MissionDef(String id, String type, int target, double reward, String label) {}
+
     // Guerres
     public boolean warEnabled;
     public int warPreparationMinutes, warDurationHours, warCooldownHours, warMinMembers, warPointsKill, warPointsRaid, warPointsOverclaim;
@@ -215,6 +240,52 @@ public final class Settings {
             if (entry == null) totemScheduleErrors.add(e);
             else totemSchedule.add(entry);
         }
+
+        spawnersEnabled = c.getBoolean("spawners.enabled", true);
+        spawnersExplosionProof = c.getBoolean("spawners.explosion-proof", true);
+        spawnersWildernessDrop = c.getBoolean("spawners.wilderness-drop", false);
+
+        upgrades = new EnumMap<>(fr.vaeloria.factions.model.UpgradeType.class);
+        for (fr.vaeloria.factions.model.UpgradeType t : fr.vaeloria.factions.model.UpgradeType.values()) {
+            String base = "upgrades." + t.name().toLowerCase(Locale.ROOT);
+            if (!c.contains(base)) continue;
+            java.util.List<Double> costs = new java.util.ArrayList<>();
+            for (Object o : c.getList(base + ".costs", java.util.List.of())) {
+                if (o instanceof Number n) costs.add(n.doubleValue());
+            }
+            upgrades.put(t, new fr.vaeloria.factions.rules.Upgrades.Def(c.getDouble(base + ".per-level", 1), costs));
+        }
+
+        outpostsEnabled = c.getBoolean("outposts.enabled", true);
+        outpostCaptureSeconds = Math.max(5, c.getInt("outposts.capture-seconds", 120));
+        outpostIncomeMinutes = Math.max(1, c.getInt("outposts.income-minutes", 10));
+        outpostIncomeMoney = Math.max(0, c.getDouble("outposts.income-money", 1000));
+        outpostPower = c.getDouble("outposts.power-bonus", 2);
+
+        kothEnabled = c.getBoolean("koth.enabled", true);
+        kothHoldSeconds = Math.max(10, c.getInt("koth.hold-seconds", 300));
+        kothDurationMinutes = Math.max(1, c.getInt("koth.duration-minutes", 30));
+        kothMinOnline = Math.max(0, c.getInt("koth.min-online", 10));
+        kothRewardMoney = Math.max(0, c.getDouble("koth.reward.money", 5000));
+        kothRewardPower = c.getDouble("koth.reward.power-boost", 0);
+        kothRewardCommands = new java.util.ArrayList<>(c.getStringList("koth.reward.commands"));
+        kothSchedule = new java.util.ArrayList<>();
+        for (String e : c.getStringList("koth.schedule")) {
+            var entry = fr.vaeloria.factions.rules.TotemSchedule.parse(e);
+            if (entry == null) totemScheduleErrors.add("koth: " + e);
+            else kothSchedule.add(entry);
+        }
+
+        missionsEnabled = c.getBoolean("missions.enabled", true);
+        missionsPerDay = Math.max(1, c.getInt("missions.per-day", 3));
+        missionPool = new java.util.ArrayList<>();
+        for (java.util.Map<?, ?> m : c.getMapList("missions.pool")) {
+            Object id = m.get("id"), type = m.get("type"), target = m.get("target"), reward = m.get("reward"), label = m.get("label");
+            if (id == null || type == null || !(target instanceof Number t)) continue;
+            missionPool.add(new MissionDef(String.valueOf(id), String.valueOf(type).toUpperCase(Locale.ROOT), Math.max(1, t.intValue()),
+                    reward instanceof Number r ? r.doubleValue() : 0, label == null ? String.valueOf(id) : String.valueOf(label)));
+        }
+        nametags = c.getBoolean("nametags.enabled", true);
 
         warEnabled = c.getBoolean("war.enabled", true);
         warPreparationMinutes = Math.max(0, c.getInt("war.preparation-minutes", 15));
