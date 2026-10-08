@@ -112,6 +112,7 @@ reminder:
 # « X a voté pour VÆLORIA (2/3) [/vote] » à tout le serveur.
 broadcast-votes: true
 
-# Envoie un événement VOTE au site via VaeloriaBridge. À activer seulement quand l'API connaît ce type.
+# Envoie un événement VOTE au site via VaeloriaBridge (classement des votants sur /voter).
+# L'API le connaît depuis la migration 005 : passer à true une fois l'API déployée et le bridge configuré.
 bridge:
   enabled: false

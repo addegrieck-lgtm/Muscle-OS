@@ -54,7 +54,7 @@ export const BridgeEvent = z.discriminatedUnion("event", [
   }),
   z.object({ ...base, event: z.literal("EVENT_END"), eventId: z.string().min(1).max(64), participants: z.array(z.object(player)).max(1000).default([]) }),
   // ── Plugins VaeloriaVote et VaeloriaShop (option bridge.enabled de leur config.yml) ──
-  z.object({ ...base, event: z.literal("VOTE"), ...player, site: z.string().min(1).max(32) }),
+  z.object({ ...base, event: z.literal("VOTE"), ...player, site: z.string().min(1).max(64) }),
   z.object({ ...base, event: z.literal("SHOP_PURCHASE"), ...player, item: z.string().min(1).max(128), amount: z.number().int().min(1), price: z.number().min(0) }),
   z.object({
     ...base, event: z.literal("AUCTION_SALE"), ...player, seller: MinecraftUuid, sellerName: MinecraftUsername,
