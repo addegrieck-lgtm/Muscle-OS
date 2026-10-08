@@ -49,7 +49,7 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 
 ### Brancher le plugin Factions / KOTH
 
-Le plugin Factions du réseau n'est pas encore choisi. Il suffit d'appeler l'API publique du bridge depuis ses listeners :
+Le plugin Factions du réseau est **VæloriaFactions** (`plugins/vaeloria-factions`, voir [FACTIONS.md](FACTIONS.md)) : il émet `FACTION_CREATE`, `DISBAND`, `JOIN`, `LEAVE`, `CLAIM`, `UNCLAIM` et `FACTION_SNAPSHOT` (toutes les 5 min) automatiquement dès que VæloriaBridge est installé. Pour les autres plugins (KOTH…), il suffit d'appeler l'API publique du bridge depuis leurs listeners :
 
 ```java
 JsonObject e = Events.base("KOTH_CAPTURE", VaeloriaBridgePlugin.serverName());

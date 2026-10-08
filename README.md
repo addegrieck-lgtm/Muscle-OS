@@ -25,11 +25,12 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm typecheck` | Vérification TypeScript de tout le workspace |
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
+| `cd plugins/vaeloria-factions && gradle build` | Jar du plugin Faction + tests Java |
 
 ## Documentation
 
 - [Architecture du site](docs/SITE_ARCHITECTURE.md) · [API](docs/API_ARCHITECTURE.md) · [Base de données](docs/DATABASE.md)
-- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
+- [Plugin Faction](docs/FACTIONS.md) · [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
 

@@ -1,0 +1,41 @@
+name: VaeloriaFactions
+version: '${version}'
+main: fr.vaeloria.factions.VaeloriaFactionsPlugin
+api-version: '1.21'
+description: "Faction PvP de VÆLORIA : power, surclaim, pillage à la TNT, obsidienne indestructible et rare."
+authors: [VÆLORIA]
+softdepend: [Vault, VaeloriaBridge]
+commands:
+  f:
+    description: Commandes de faction
+    usage: /f aide
+    aliases: [faction, factions, fac]
+    permission: vaeloria.factions.use
+permissions:
+  vaeloria.factions.use:
+    description: Utiliser /f
+    default: true
+  vaeloria.factions.fly:
+    description: /f fly dans son territoire
+    default: true
+  vaeloria.factions.admin:
+    description: /f admin (zones, power, grâce, rechargement)
+    default: op
+    children:
+      vaeloria.factions.zones.build: true
+      vaeloria.factions.spy: true
+  vaeloria.factions.zones.build:
+    description: Construire en SafeZone / WarZone
+    default: op
+  vaeloria.factions.spy:
+    description: Lire les chats de faction et d'alliance
+    default: op
+  vaeloria.factions.bypass.warmup:
+    description: Téléportations instantanées, même avec un ennemi proche
+    default: op
+  vaeloria.factions.bypass.fly:
+    description: Garder le vol de faction près des ennemis
+    default: op
+  vaeloria.factions.bypass.powerloss:
+    description: Ne pas perdre de power à la mort
+    default: false

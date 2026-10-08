@@ -1,0 +1,327 @@
+# VæloriaFactions — messages (format MiniMessage : https://docs.advntr.dev/minimessage/format.html)
+# Les <placeholders> sont remplis par le plugin. Un message vide ("") n'est pas envoyé.
+prefix: "<gradient:#a3121e:#ef4450><b>VÆLORIA</b></gradient> <dark_gray>»</dark_gray> "
+
+error:
+  unknown-command: "<red>Commande inconnue. <gray>Tape <white>/<label> aide</white>."
+  no-permission: "<red>Tu n'as pas la permission."
+  player-only: "<red>Commande réservée aux joueurs."
+  no-faction: "<red>Tu n'as pas de faction. <gray>Crée-la avec <white>/f creer ‹nom›</white>."
+  rank: "<red>Il faut être <white><role></white> pour : <white><perm></white>."
+  leader-only: "<red>Seul le chef peut faire ça."
+  officer-only: "<red>Il faut être au moins officier."
+  faction-not-found: "<red>Faction introuvable : <white><faction></white>."
+  player-not-found: "<red>Joueur inconnu : <white><player></white>."
+  player-offline: "<red><white><player></white> n'est pas connecté."
+  not-member: "<red><white><player></white> n'est pas dans ta faction."
+  already-in-faction: "<red>Tu es déjà dans une faction. <gray>(/f quitter)"
+  disabled: "<red>Cette fonction est désactivée sur le serveur."
+  usage: "<gray>Utilisation : <white><usage>"
+
+faction:
+  created-broadcast: "<gray><white><player></white> fonde la faction <gold><b><faction></b></gold>. Une nouvelle bannière se lève."
+  created-tips: "<gray>Prochaines étapes : <white>/f claim</white> pour poser ton territoire, <white>/f sethome</white>, <white>/f inviter ‹joueur›</white>. Tout est aussi dans <white>/f</white>."
+  name:
+    too_short: "<red>Le nom doit faire au moins <min> caractères."
+    too_long: "<red>Le nom doit faire au plus <max> caractères."
+    invalid_chars: "<red>Lettres, chiffres, tiret et tiret bas uniquement."
+    reserved: "<red>Ce nom est réservé."
+    taken: "<red>La faction <white><faction></white> existe déjà."
+  disband-confirm: "<prefix><red>Dissoudre ta faction ? Claims, home, warps et <b>coffre de faction</b> seront perdus. <click:run_command:'/f dissoudre confirmer'><hover:show_text:'<red>Dissoudre définitivement'><dark_red><b>[CONFIRMER]</b></dark_red></hover></click>"
+  disbanded-broadcast: "<gray>La faction <gold><faction></gold> a été dissoute par <white><player></white>."
+  renamed-broadcast: "<gray>La faction <white><old></white> s'appelle désormais <gold><b><faction></b></gold>."
+  desc-too-long: "<red>Description trop longue (<max> caractères max)."
+  desc-changed: "<gray><white><player></white> a changé la description : <white><desc>"
+  now-open: "<gray><white><player></white> a <green>ouvert</green> la faction : tout le monde peut la rejoindre."
+  now-closed: "<gray><white><player></white> a <red>fermé</red> la faction : sur invitation uniquement."
+
+info:
+  header: "<dark_gray><st>          </st></dark_gray> <color><b><faction></b></color> <dark_gray><st>          </st>"
+  desc: "<gray><i><desc>"
+  meta: "<gray>Relation : <color><relation></color> <dark_gray>·</dark_gray> <access> <dark_gray>·</dark_gray> Fondée le <white><created>"
+  open: "<green>Ouverte"
+  closed: "<yellow>Sur invitation"
+  power: "<gray>Power : <white><power></white>/<white><max></white> <dark_gray>·</dark_gray> Claims : <white><claims></white>/<white><limit></white> <state>"
+  vulnerable: "<red><b>⚠ SURCLAIMABLE"
+  shield: "<gray>Bouclier : <white><shield>"
+  shield-none: "<gray>aucun"
+  shield-on: " <aqua>(actif)"
+  raid: "<red><b>⚠ Pillage en cours</b> <gray>— verrou encore <white><time>"
+  bank: "<gray>Banque : <gold><bank>"
+  leader: "<gray>Chef : <gold><leader>"
+  member-hover: "<gray>Rang : <white><role></white><newline><gray>Power : <white><power></white>/<white><max>"
+  online: "<gray>En ligne (<green><count></green>) : "
+  offline: "<gray>Hors ligne (<count>) : "
+  allies: "<gray>Alliés (<count>) : "
+  truces: "<gray>Trêves (<count>) : "
+  enemies: "<gray>Ennemis (<count>) : "
+  stats: "<gray>Kills <white><kills></white> · Morts <white><deaths></white> · Pillages <green><raids></green>/<red><raided></red> · Surclaims <green><oc></green>/<red><ocs>"
+
+list:
+  header: "<dark_gray><st>      </st></dark_gray> <gold><b>Factions</b></gold> <gray>(<count>) — page <page>/<pages></gray> <dark_gray><st>      </st>"
+  line: "<color><faction></color> <dark_gray>·</dark_gray> <gray><online>/<members> en ligne · <white><power></white>/<white><max></white> power · <white><claims></white> claims"
+  hover: "<yellow>Clic : voir la fiche"
+  next: "<gray>» <click:run_command:'/f liste'><yellow>Page suivante (<next>)</yellow></click>"
+
+top:
+  header: "<dark_gray><st>      </st></dark_gray> <gold><b>Classement</b></gold> <gray>— <criterion></gray> <dark_gray><st>      </st>"
+  line: "<white><faction></white> <dark_gray>—</dark_gray> <gray><value>"
+  empty: "<gray>Aucune faction pour l'instant. Sois la première : <white>/f creer"
+
+power:
+  show: "<gray>Power de <white><player></white> : <gold><power></gold>/<gold><max></gold> <dark_gray>·</dark_gray> plein dans <white><full></white> <dark_gray>·</dark_gray> <white><kills></white> kills, <white><deaths></white> morts"
+  full: "maintenant"
+  lost: "<red>-<loss> power <gray>(<white><power></white>/<white><max></white>)."
+  faction-vulnerable: "<red><b>⚠</b> Ta faction n'a plus assez de power pour ses terres : ses ennemis peuvent la <b>SURCLAIM</b> !"
+
+invite:
+  already-member: "<red><white><player></white> est déjà dans ta faction."
+  full: "<red>La faction est pleine (<max> membres)."
+  sent: "<gray><white><player></white> a invité <white><target></white>."
+  received: "<gray><white><player></white> t'invite dans <gold><b><faction></b></gold> pour <minutes> min. <green><b>[REJOINDRE]</b>"
+  hover: "<green>Rejoindre <faction>"
+  none: "<red>Aucune invitation pour <white><player></white>."
+  revoked: "<gray>Invitation de <white><player></white> retirée."
+  required: "<red><white><faction></white> est sur invitation."
+  pending: "<gray>Invitation en attente : <gold><faction></gold> — <white>/f rejoindre <faction>"
+
+member:
+  joined: "<green>+</green> <white><player></white> <gray>rejoint <gold><faction></gold>."
+  leader-cannot-leave: "<red>Transmets d'abord la direction : <white>/f chef ‹joueur›"
+  leader-alone: "<red>Tu es seul : dissous la faction avec <white>/f dissoudre"
+  you-left: "<gray>Tu as quitté <white><faction></white>."
+  left: "<red>-</red> <white><player></white> <gray>a quitté la faction."
+  kick-self: "<red>Utilise /f quitter."
+  kick-higher: "<red>Tu ne peux pas expulser un membre de rang égal ou supérieur."
+  kicked: "<red>-</red> <white><player></white> <gray>a été expulsé par <white><by></white>."
+  you-were-kicked: "<red>Tu as été expulsé de <white><faction></white> par <white><by></white>."
+  role-denied: "<red>Tu ne peux gérer que les rangs inférieurs au tien."
+  use-leader: "<red>Pour donner la direction : <white>/f chef ‹joueur›"
+  role-max: "<red><white><player></white> a déjà le rang maximum possible."
+  role-min: "<red><white><player></white> est déjà recrue."
+  promoted: "<green>▲</green> <white><player></white> <gray>devient <gold><role></gold> (par <by>)."
+  demoted: "<red>▼</red> <white><player></white> <gray>redevient <white><role></white> (par <by>)."
+  new-leader: "<gold>♛</gold> <white><player></white> <gray>prend la tête de la faction."
+  online: "<green>●</green> <white><player></white> <gray>s'est connecté."
+
+claim:
+  success: "<green>Chunk <white><x>, <z></white> claim. <gray>(<claims>/<limit>)"
+  member-notice: "<gray><white><player></white> a claim le chunk <white><x>, <z></white>."
+  fail:
+    already_owned: "<gray>Ce chunk est déjà à toi."
+    world_disabled: "<red>Les claims sont désactivés dans ce monde."
+    system_zone: "<red>Impossible de claim une zone protégée."
+    not_enough_power: "<red>Pas assez de power : <white><limit></white> claims maximum. Gagne du power en jouant."
+    max_claims: "<red>Limite atteinte : <white><max></white> claims par faction."
+    not_connected: "<red>Ton territoire doit être d'un seul tenant : claim à côté de tes chunks."
+    target_too_strong: "<red><white><faction></white> a assez de power pour tenir ses terres. <gray>Fais-lui perdre du power (kills) pour la surclaim."
+    overclaim_disabled: "<red>Le surclaim est désactivé."
+    not_enemy: "<red>Il faut être en guerre contre <white><faction></white> pour la surclaim : <white>/f ennemi <faction>"
+    not_edge: "<red>Surclaim par l'extérieur : vise un chunk en bordure du territoire de <white><faction></white>."
+    target_shielded: "<aqua>⛨ <white><faction></white> est sous bouclier : surclaim impossible pour l'instant."
+    target_in_grace: "<yellow>Période de grâce : aucun surclaim pour le moment."
+  radius-too-big: "<red>Rayon maximum : <max>."
+  radius-done: "<green><count> chunk(s) claim. <gray>(<claims>/<limit>)"
+  unclaimall-confirm: "<prefix><red>Libérer TOUS tes claims ? <click:run_command:'/f unclaim tout confirmer'><dark_red><b>[CONFIRMER]</b></dark_red></click>"
+  unclaimall-done: "<gray><white><player></white> a libéré <white><count></white> chunk(s)."
+  unclaimed: "<gray>Chunk <white><x>, <z></white> libéré."
+  not-yours: "<red>Ce chunk n'est pas à ta faction."
+  auto-on: "<green>Auto-claim activé : marche pour conquérir."
+  auto-off: "<gray>Auto-claim désactivé."
+
+overclaim:
+  title: "<gradient:#a3121e:#ef4450><b>SURCLAIM !</b></gradient>"
+  subtitle: "<gray>Chunk arraché à <red><defender>"
+  lost-title: "<dark_red><b>TERRITOIRE PERDU</b>"
+  lost-subtitle: "<white><attacker></white> <gray>a surclaim <white><x>, <z>"
+  broadcast: "<red>⚔</red> <white><attacker></white> <gray>surclaim le territoire de</gray> <red><defender></red><gray> !"
+  success: "<green>Surclaim réussi sur <red><defender></red> : ce chunk et tout ce qu'il contient sont à vous."
+
+map:
+  header: "<dark_gray><st>            </st></dark_gray> <gold>(<x>, <z>)</gold> <color><faction></color> <dark_gray><st>            </st>"
+  hover: "<color><faction></color><newline><gray>Chunk <white><x>, <z></white><newline><gray>Bloc ~<white><bx>, <bz>"
+  legend: "<aqua>+</aqua><gray> toi  <gray>-</gray> nature  <gold>+</gold> safezone  <dark_red>+</dark_red> warzone </gray>"
+  auto-on: "<green>Carte automatique activée."
+  auto-off: "<gray>Carte automatique désactivée."
+
+seechunk:
+  shown: "<green>Bordures du chunk affichées. <gray>(/f voir pour masquer)"
+  hidden: "<gray>Bordures masquées."
+
+home:
+  none: "<red>Ta faction n'a pas de home. <gray>(/f sethome)"
+  must-be-in-claim: "<red>Tu dois être dans ton territoire."
+  set: "<gray><white><player></white> a défini le home de faction."
+
+warp:
+  none: "<gray>Aucun warp. <white>/f setwarp ‹nom›"
+  list: "<gray>Warps (<count>) : "
+  unknown: "<red>Warp inconnu : <white><warp>"
+  max: "<red>Maximum <max> warps."
+  set: "<gray><white><player></white> a créé le warp <aqua><warp></aqua>."
+  deleted: "<gray>Warp <white><warp></white> supprimé."
+
+teleport:
+  warmup: "<gray>Téléportation vers <white><target></white> dans <white><seconds></white> s. Ne bouge pas."
+  countdown: "<light_purple>Téléportation dans <white><seconds></white> s…"
+  done: "<green>Bienvenue au <target>."
+  cancelled: "<red>Téléportation annulée."
+  enemy-nearby: "<red>Un ennemi est à moins de <radius> blocs : impossible de fuir par téléportation."
+
+fly:
+  enabled: "<green>Vol activé dans ton territoire."
+  disabled: "<gray>Vol désactivé."
+  not-here: "<red>Tu ne peux voler que dans ton territoire (ou celui d'un allié)."
+  enemy-nearby: "<red>Ennemi à proximité : vol coupé."
+  left-territory: "<yellow>Tu quittes ton territoire : vol coupé."
+  combat: "<red>Combat : vol coupé."
+
+relation:
+  usage: "<gray>/f allie|treve|neutre|ennemi <faction>"
+  self: "<red>C'est ta propre faction."
+  already: "<gray>Tu souhaites déjà être <white><relation></white> avec <white><faction></white>."
+  max-allies: "<red>Maximum <max> alliés."
+  other-max-allies: "<red><white><faction></white> a déjà trop d'alliés."
+  max-truces: "<red>Maximum <max> trêves."
+  now:
+    ennemi: "<red><b>⚔ GUERRE</b></red> <gray>avec <color><faction></color>. Le surclaim est ouvert."
+    neutre: "<gray>Vous êtes désormais <white>neutres</white> avec <color><faction></color>."
+    treve: "<gray>Trêve conclue avec <color><faction></color>."
+    allie: "<light_purple><b>✦ ALLIANCE</b></light_purple> <gray>scellée avec <color><faction></color> !"
+  war-broadcast: "<red>⚔</red> <white><first></white> <gray>déclare la guerre à</gray> <white><second></white><gray> !"
+  requested: "<gray>Demande envoyée à <white><faction></white> : <white><relation></white>. Elle doit accepter."
+  request-received: "<white><faction></white> <gray>propose : <white><relation></white>. <green><b>[ACCEPTER]"
+  header: "<dark_gray><st>      </st></dark_gray> <gold><b>Relations de <faction></b></gold> <dark_gray><st>      </st>"
+  pending-out: "<gray>→ Demande envoyée à <white><faction></white> : <relation>"
+  pending-in: "<gray>← <white><faction></white> propose : <relation> <dark_gray>(/f allie|treve|neutre <faction>)"
+
+chat:
+  mode:
+    public: "<gray>Chat : <white>public"
+    faction: "<gray>Chat : <green>faction"
+    ally: "<gray>Chat : <light_purple>alliance"
+  faction-format: "<green>[<faction>]</green> <dark_green><role></dark_green><white><player></white><dark_gray>:</dark_gray> <green><message>"
+  ally-format: "<light_purple>[Alliance · <faction>]</light_purple> <white><player></white><dark_gray>:</dark_gray> <light_purple><message>"
+  public-tag: "<color>[<role><faction>]</color> "
+
+bank:
+  unavailable: "<red>Banque indisponible (Vault et un plugin d'économie sont requis)."
+  balance: "<gray>Banque de faction : <gold><balance></gold>. <dark_gray>/f banque deposer|retirer ‹montant›"
+  invalid-amount: "<red>Montant invalide."
+  not-enough: "<red>Tu n'as pas assez d'argent."
+  faction-not-enough: "<red>La banque n'a pas assez d'argent."
+  deposited: "<gray><white><player></white> a déposé <gold><amount></gold>. Solde : <gold><balance>"
+  withdrew: "<gray><white><player></white> a retiré <gold><amount></gold>. Solde : <gold><balance>"
+
+chest:
+  title: "<dark_gray>Coffre · <gold><faction>"
+
+perm:
+  set: "<gray><white><perm></white> : à partir du rang <gold><role></gold>."
+
+shield:
+  status: "<gray>Bouclier (<hours> h) : <white><window></white> — <state> <dark_gray>· /f bouclier ‹heure 0-23|off›"
+  active: "<aqua>actif"
+  inactive: "<gray>inactif"
+  cooldown: "<red>Tu pourras changer le bouclier dans <white><time></white>."
+  while-active: "<red>Impossible de changer le bouclier pendant qu'il est actif."
+  set: "<aqua>⛨</aqua> <gray><white><player></white> règle le bouclier : <white><window></white>."
+
+help:
+  header: "<dark_gray><st>      </st></dark_gray> <gradient:#a3121e:#ef4450><b>VæloriaFactions</b></gradient> <gray>— aide <page>/<pages></gray> <dark_gray><st>      </st>"
+  line: "<white><command></white> <dark_gray>—</dark_gray> <gray><description>"
+  hover: "<yellow>Clic : préparer la commande"
+
+raid:
+  alert-title: "<dark_red><b>⚠ PILLAGE ⚠</b>"
+  alert-subtitle: "<gray>Explosions en <white><x>, <z></white> — <red><attacker>"
+  alert-chat: "<red><b>⚠ Ta base est attaquée</b></red> <gray>en <white><x>, <z></white> par <red><attacker></red>. Défendez-vous !"
+  bossbar: "<red><b>⚠ Pillage en cours</b></red> <gray>— <white><x>, <z></white> — verrou <white><time>"
+  broadcast: "<red>✹</red> <white><attacker></white> <gray>pille la base de</gray> <red><defender></red><gray> !"
+  ended: "<green>Le pillage est terminé. Fais le bilan des dégâts."
+  join-warning: "<red><b>⚠</b> Ta faction est en plein pillage !"
+  locked: "<red>Impossible pendant un pillage (encore <white><time></white>)."
+
+grace:
+  active: "<yellow>Période de grâce : aucune explosion ni surclaim pendant encore <white><time></white>."
+  started: "<yellow><b>Période de grâce</b></yellow> <gray>de <white><time></white> : bâtissez, aucune explosion ni surclaim."
+  ended: "<red><b>La période de grâce est terminée.</b></red> <gray>Que les pillages commencent."
+
+protection:
+  denied: "<red>Territoire de <color><faction></color><red>."
+  denied-rank: "<red>Rang <white><role></white> requis : <perm>."
+
+pvp:
+  safezone: "<gold>Zone protégée : pas de PvP."
+  member: "<green><player></green> <gray>est de ta faction."
+  ally: "<light_purple><player></light_purple> <gray>est ton allié."
+  truce: "<aqua><player></aqua> <gray>est en trêve avec toi."
+
+territory:
+  wilderness: "<color><b>Nature sauvage</b>"
+  wilderness-name: "Nature"
+  wilderness-sub: "<gray>Terre libre — <white>/f claim"
+  state-raid: " <red>⚠ pillage en cours"
+  state-shield: " <aqua>⛨ bouclier"
+  state-vulnerable: " <gold>⚠ surclaimable"
+
+scoreboard:
+  title: "<gradient:#a3121e:#ef4450><b>VÆLORIA</b></gradient>"
+  lines:
+    - "<dark_gray><st>                    </st>"
+    - "<gray>Faction <white><faction>"
+    - "<gray>Rang <white><role>"
+    - "<gray>En ligne <white><online></white>/<white><members>"
+    - " "
+    - "<gray>Power <gold><power></gold>/<gold><maxpower>"
+    - "<gray>Faction <gold><fpower></gold>/<gold><fmaxpower>"
+    - "<gray>Claims <white><claims>"
+    - "<state>"
+    - "  "
+    - "<gray>Zone <territory>"
+    - "<yellow>Grâce <white><grace>"
+    - "<dark_gray><st>                    </st> "
+    - "<#a9aeb8>vaeloria.fr"
+  lines-no-faction:
+    - "<dark_gray><st>                    </st>"
+    - "<gray>Sans faction"
+    - "<white>/f creer ‹nom›"
+    - " "
+    - "<gray>Power <gold><power></gold>/<gold><maxpower>"
+    - "<gray>Kills <white><kills></white> · Morts <white><deaths>"
+    - "  "
+    - "<gray>Zone <territory>"
+    - "<yellow>Grâce <white><grace>"
+    - "<dark_gray><st>                    </st> "
+    - "<#a9aeb8>vaeloria.fr"
+  state-raid: "<red><b>⚠ PILLAGE"
+  state-shield: "<aqua>⛨ Bouclier actif"
+  state-vulnerable: "<gold>⚠ Surclaimable"
+  state-safe: "<green>✔ Territoire tenu"
+
+menu:
+  title: "<dark_gray>Faction · <gold><faction>"
+  title-none: "<dark_gray>Factions · VÆLORIA"
+  members-title: "<dark_gray>Membres · <gold><faction>"
+  perms-title: "<dark_gray>Permissions par rang"
+
+obsidian:
+  shard-name: "<dark_purple><b>Éclat d'obsidienne"
+  shard-lore-1: "<gray><n> éclats = 1 obsidienne (établi)"
+  shard-lore-2: "<dark_gray>L'obsidienne est rare sur VÆLORIA."
+  shard-found: "<dark_purple>✦ Un éclat d'obsidienne !"
+  inspect: "<dark_purple>Bloc renforcé : <white><left></white>/<white><max></white> explosions avant rupture"
+  inspect-unbreakable: "<dark_purple>Bloc indestructible : seul un surclaim en vient à bout."
+
+admin:
+  help: "<gray>/f admin <white>bypass</white> | <white>safezone</white> [rayon] | <white>warzone</white> [rayon] | <white>unclaim</white> [rayon] | <white>dissoudre</white> ‹faction› | <white>setpower</white> ‹joueur› ‹v› | <white>powerboost</white> ‹faction› ‹v› | <white>grace</white> ‹heures|off› | <white>eclats</white> ‹joueur› [n] | <white>reload</white> | <white>save</white>"
+  bypass-on: "<gold>Mode bypass activé : tu ignores les protections."
+  bypass-off: "<gray>Mode bypass désactivé."
+  zone-claimed: "<green><count> chunk(s) ajouté(s) à <zone>."
+  unclaimed: "<green><count> chunk(s) libéré(s)."
+  power-set: "<green>Power de <player> : <power>."
+  boost-set: "<green>Bonus de power de <faction> : <boost>."
+  grace-status: "<gray>Période de grâce : <white><state>"
+  shards-given: "<green>Éclats donnés à <player>."
+  reloaded: "<green>Configuration et messages rechargés."
+  saved: "<green>Données sauvegardées."

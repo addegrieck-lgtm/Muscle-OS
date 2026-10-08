@@ -1,0 +1,139 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                 VæloriaFactions — configuration              ║
+# ║  Le Faction à l'ancienne : power, surclaim, TNT, obsidienne. ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Après modification : /f admin reload
+
+# Fuseau horaire du bouclier quotidien.
+timezone: "Europe/Paris"
+
+factions:
+  name-min: 3
+  # Le site accepte jusqu'à 24 caractères.
+  name-max: 16
+  max-members: 20
+  description-max: 64
+  invite-minutes: 10
+  allow-rename: true
+
+# ── Power ─────────────────────────────────────────────────────────
+# Chaque joueur porte un power entre min et max. Le power d'une faction (somme de ses membres) fixe
+# combien de chunks elle peut tenir. Une faction qui tient plus de chunks que son power devient SURCLAIMABLE.
+power:
+  max: 10.0
+  min: -10.0
+  start: 5.0
+  regen-per-minute: 0.2        # 10 power en 50 minutes de jeu
+  offline-regen: false
+  loss-on-death: 4.0
+  warzone-loss-multiplier: 1.5
+
+claims:
+  per-power: 1.0               # chunks autorisés par point de power
+  max: 120                     # plafond absolu par faction (0 = aucun)
+  max-radius: 5                # /f claim <rayon>
+  must-be-connected: true      # les nouveaux claims doivent toucher le territoire
+  disabled-worlds: []
+
+# ── Pillage par SURCLAIM (le pillage historique) ──────────────────
+# Une faction ennemie en sous-power perd ses chunks de bordure : le surclaimeur devient propriétaire du chunk
+# et de TOUT ce qu'il contient (coffres, obsidienne…), qu'il peut alors casser normalement.
+overclaim:
+  enabled: true
+  require-enemy: true          # il faut être en guerre (/f ennemi)
+  edge-only: true              # on grignote par l'extérieur, pas au cœur de la base
+  broadcast: true
+
+# ── Pillage BASIQUE (TNT, creepers, canons) ───────────────────────
+explosions:
+  wilderness: true
+  in-claims: true
+  offline-protection: false    # true = aucune explosion quand aucun membre n'est connecté
+
+raid:
+  alert-cooldown-seconds: 30   # titre + son d'alerte aux défenseurs
+  lock-minutes: 10             # sous le feu : pas d'unclaim, de dissolution ni de changement de bouclier
+  bossbar: true
+  broadcast: true              # « X pille Y ! » à tout le serveur, une fois par raid
+  # Brèche : un chunk explosé par un ennemi laisse ses ennemis ouvrir coffres et portes pendant quelques minutes.
+  breach:
+    enabled: true
+    minutes: 15
+    allow: [CONTAINER, DOOR]
+
+protection:
+  liquid-flow: true            # eau / lave ne coulent pas dans un claim depuis l'extérieur
+  fire-spread: true
+  pistons: true                # pas de piston qui pousse ou tire à travers une frontière
+
+# ── Bouclier quotidien ────────────────────────────────────────────
+# Chaque faction choisit une plage de N heures (ex. la nuit) sans explosions ni surclaim.
+shield:
+  enabled: true
+  hours: 6
+  change-cooldown-hours: 72
+  blocks-overclaim: true
+
+# ── Obsidienne : indestructible et rare ───────────────────────────
+obsidian:
+  # Eau sur une source de lave : pierre au lieu d'obsidienne.
+  block-generation: true
+  # L'obsidienne de la nature (portails en ruine, End) ne donne que des éclats.
+  wilderness-drops-shards: true
+  replace-in-loot: true        # coffres de structures
+  replace-in-bartering: true   # troc piglin
+  protect-from-wither: true
+  shards:
+    material: ECHO_SHARD
+    min: 1
+    max: 3
+    per-obsidian: 9            # éclats pour recrafter 1 obsidienne
+    deepslate-ore-chance: 0.03 # chance d'un éclat en minant un minerai de deepslate (sans Toucher de soie)
+  # Explosions nécessaires pour briser chaque bloc renforcé. 0 = INDESTRUCTIBLE.
+  # Avec 0, un mur d'obsidienne ne tombe que par surclaim.
+  durability:
+    OBSIDIAN: 0
+    CRYING_OBSIDIAN: 0
+  durability-radius: 3         # rayon d'usure autour d'une explosion (si une durabilité > 0)
+
+relations:
+  max-allies: 2
+  max-truces: 4
+  friendly-fire: false
+  ally-pvp: false
+  truce-pvp: false
+  ally-permissions: [DOOR]     # ce que les alliés peuvent faire chez vous
+
+teleport:
+  warmup-seconds: 5
+  enemy-radius: 16             # pas de /f home avec un ennemi à moins de N blocs
+  home-must-be-in-claim: true
+  max-warps: 3
+
+chest:
+  rows: 3
+
+fly:
+  enabled: true
+  enemy-radius: 32
+
+territory:
+  display: TITLE               # TITLE, ACTIONBAR, CHAT ou NONE
+
+chat:
+  tags: true                   # [Faction] devant les messages publics, coloré selon la relation
+
+scoreboard:
+  enabled: true
+  refresh-ticks: 40
+
+bank:
+  enabled: true                # nécessite Vault + un plugin d'économie
+
+inactivity:
+  days: 0                      # 0 = jamais ; sinon retire les membres absents depuis N jours au démarrage
+
+bridge:
+  snapshot-minutes: 5          # FACTION_SNAPSHOT vers le site (si VæloriaBridge est installé)
+
+autosave-minutes: 5
