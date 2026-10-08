@@ -312,8 +312,8 @@ def tower(w, cx, cz, h=14):
             w.put(cx + dx, h, cz + dz, PB)
             if max(abs(dx), abs(dz)) == 4 and (dx + dz) % 2 == 0:
                 w.put(cx + dx, h + 1, cz + dz, PB)
-    for y in range(0, h + 1):
-        w.put(cx - 2, y, cz, "minecraft:ladder[facing=east]")
+    for y in range(0, h + 1):  # à côté de l'axe : les meurtrières sont dans l'axe des murs
+        w.put(cx - 2, y, cz + 1, "minecraft:ladder[facing=east]")
     w.put(cx, h + 1, cz, "minecraft:lantern[hanging=false]")
 
 
@@ -451,6 +451,141 @@ def traps(w, rng):
                     w.put(x, 0, z, "minecraft:sweet_berry_bush[age=3]")
 
 
+GROUND = ("minecraft:pale_moss_block", "minecraft:tuff", "minecraft:cobbled_deepslate")
+
+
+def free(w, x0, z0, x1, z1, margin=2):
+    """Vrai si le rectangle (marge comprise) n'est que du sol nu : pas de route, de piège, d'avant-poste ni de bâtiment."""
+    for x in range(x0 - margin, x1 + margin + 1):
+        for z in range(z0 - margin, z1 + margin + 1):
+            if w.get(x, -1, z) not in GROUND or w.get(x, 0, z) not in ("minecraft:air", "minecraft:pale_moss_carpet"):
+                return False
+    return True
+
+
+def clear_carpet(w, x0, z0, x1, z1):
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if w.get(x, 0, z) == "minecraft:pale_moss_carpet":
+                w.put(x, 0, z, "minecraft:air")
+
+
+def forge(w, cx, cz, rng, along_x):
+    """Forge en ruine 11 × 15 : contreforts, fenêtres à barreaux, mezzanine avec échelle, toit à moitié effondré."""
+    hw, hd = (7, 5) if along_x else (5, 7)
+    clear_carpet(w, cx - hw, cz - hd, cx + hw, cz + hd)
+    for x in range(cx - hw, cx + hw + 1):
+        for z in range(cz - hd, cz + hd + 1):
+            w.put(x, -1, z, "minecraft:polished_deepslate" if (x + z) % 2 else DT)
+            edge_x, edge_z = abs(x - cx) == hw, abs(z - cz) == hd
+            if not (edge_x or edge_z):
+                if rng.random() < 0.55:
+                    w.put(x, 6, z, "minecraft:deepslate_tile_slab[type=bottom]")
+                continue
+            along = (x - cx) if edge_z else (z - cz)
+            door = abs(along) <= 1 and ((edge_x and along_x) or (edge_z and not along_x))
+            buttress = along % 4 == 0
+            top = 6 if buttress else int(4 + 2 * (0.5 + 0.5 * noise(x * 2, z * 2, 5.0)))
+            for y in range(0, top):
+                if door and y < 3:
+                    continue
+                window = y in (2, 3) and along % 4 == 2 and not door
+                bars = "minecraft:iron_bars[east=true,west=true]" if edge_z else "minecraft:iron_bars[north=true,south=true]"
+                w.put(x, y, z, bars if window else DT if buttress else PB)
+    # Mezzanine le long d'un grand côté, échelle pour y monter : un poste de tir à l'intérieur.
+    for k in range(-hw + 1 if along_x else -hd + 1, (hw if along_x else hd)):
+        for d in (1, 2):
+            x, z = (cx + k, cz - hd + d) if along_x else (cx - hw + d, cz + k)
+            w.put(x, 3, z, "minecraft:polished_blackstone_slab[type=top]")
+    lx, lz = (cx + 1, cz - hd + 1) if along_x else (cx - hw + 1, cz + 1)  # contre le mur, à travers la mezzanine
+    for y in range(0, 4):
+        w.put(lx, y, lz, "minecraft:ladder[facing=south]" if along_x else "minecraft:ladder[facing=east]")
+    for k in (2, -2):  # foyers éteints : décor seulement, rien d'utilisable par les joueurs
+        fx, fz = (cx + k, cz) if along_x else (cx, cz + k)
+        w.put(fx, 0, fz, "minecraft:chiseled_polished_blackstone")
+        w.put(fx, 1, fz, "minecraft:lantern[hanging=false]")
+
+
+def chapel(w, cx, cz, rng):
+    """Chapelle 9 × 13 : murs hauts, vitraux rubis, autel au losange rouge, toit en pignon."""
+    clear_carpet(w, cx - 4, cz - 6, cx + 4, cz + 6)
+    for x in range(cx - 4, cx + 5):
+        for z in range(cz - 6, cz + 7):
+            w.put(x, -1, z, "minecraft:polished_blackstone" if abs(x - cx) <= 1 else "minecraft:polished_deepslate")
+            if abs(x - cx) == 4 or abs(z - cz) == 6:
+                door = z == cz + 6 and abs(x - cx) <= 1
+                for y in range(0, 7):
+                    if door and y < 4:
+                        continue
+                    glass = abs(x - cx) == 4 and y in (2, 3, 4) and (z - cz) % 3 == 0 and abs(z - cz) < 6
+                    w.put(x, y, z, "minecraft:red_stained_glass" if glass else PB if y in (0, 6) else DT)
+        for z in range(cz - 6, cz + 7):  # toit en pignon
+            d = abs(x - cx)
+            w.put(x, 7 + (4 - d) // 2 * 1 if d < 4 else 7, z, "minecraft:deepslate_tiles")
+    for x in range(cx - 1, cx + 2):  # autel
+        w.put(x, 0, cz - 4, PB)
+    for y, half in ((1, 0), (2, 1), (3, 1), (4, 0)):
+        for x in range(cx - half, cx + half + 1):
+            w.put(x, y, cz - 6, "minecraft:redstone_block")
+    w.put(cx, 1, cz - 4, "minecraft:lantern[hanging=false]")
+
+
+def bunker(w, cx, cz):
+    """Poste de garde 5 × 5, 3 de haut, toit plein, meurtrières sur les quatre faces."""
+    clear_carpet(w, cx - 2, cz - 2, cx + 2, cz + 2)
+    for x in range(cx - 2, cx + 3):
+        for z in range(cz - 2, cz + 3):
+            w.put(x, -1, z, "minecraft:polished_deepslate")
+            w.put(x, 3, z, PB)
+            if max(abs(x - cx), abs(z - cz)) == 2:
+                for y in range(0, 3):
+                    door = z == cz + 2 and x == cx and y < 2
+                    slit = y == 1 and (x == cx or z == cz) and not door
+                    w.put(x, y, z, "minecraft:air" if door or slit else DT if y == 1 else PB)
+
+
+def obelisk(w, cx, cz):
+    """Obélisque de 10 : socle noir, bandes argent, pointe rubis. Un repère qu'on voit de loin."""
+    clear_carpet(w, cx - 1, cz - 1, cx + 1, cz + 1)
+    for x in range(cx - 1, cx + 2):
+        for z in range(cz - 1, cz + 2):
+            w.put(x, -1, z, PB)
+            w.put(x, 0, z, PB)
+    for y in range(1, 9):
+        w.put(cx, y, cz, "minecraft:calcite" if y % 3 == 0 else "minecraft:polished_blackstone")
+    w.put(cx, 9, cz, "minecraft:redstone_block")
+    w.put(cx, 10, cz, "minecraft:end_rod[facing=up]")
+
+
+def more_buildings(w, rng):
+    """Bâtiments supplémentaires, posés seulement sur du sol nu (jamais sur une route, un piège ou un avant-poste)."""
+    placed = {"forge": 0, "chapelle": 0, "poste de garde": 0, "obélisque": 0}
+    plan = [("forge", 6, 8), ("chapelle", 3, 7), ("poste de garde", 14, 3), ("obélisque", 8, 2)]
+    for kind, count, half in plan:
+        tries = 0
+        while placed[kind] < count and tries < 4000:
+            tries += 1
+            x, z = int(rng.integers(-185, 186)), int(rng.integers(-185, 186))
+            if math.hypot(x, z + 10) < 62:  # sous le dragon : zone d'atterrissage dégagée
+                continue
+            if any(math.hypot(x - o["center"][0], z - o["center"][1]) < 26 for o in OUTPOSTS.values()):
+                continue
+            along_x = bool(rng.integers(2))
+            hw, hd = {"forge": (7, 5) if along_x else (5, 7), "chapelle": (4, 6), "poste de garde": (2, 2), "obélisque": (1, 1)}[kind]
+            if not free(w, x - hw, z - hd, x + hw, z + hd, margin=3):
+                continue
+            if kind == "forge":
+                forge(w, x, z, rng, along_x)
+            elif kind == "chapelle":
+                chapel(w, x, z, rng)
+            elif kind == "poste de garde":
+                bunker(w, x, z)
+            else:
+                obelisk(w, x, z)
+            placed[kind] += 1
+    return placed
+
+
 def build_warzone():
     rng = np.random.default_rng(21)
     w = Vol()
@@ -478,6 +613,7 @@ def build_warzone():
     for key in OUTPOSTS:
         outpost(w, key, rng)
     traps(w, rng)
+    w.placed = more_buildings(w, rng)
     dragon(Lifted(w, LIFT), rng)
     # Cercle d'atterrissage sous le dragon en vol : on saute du dos, on atterrit ici (dégâts de chute coupés par la région).
     for a in range(0, 360, 2):
@@ -509,7 +645,7 @@ def render(w, path_top, path_side, scale):
              "white_stained": (235, 235, 235), "black_stained": (30, 30, 34), "redstone": (175, 24, 5), "red_nether": (69, 7, 9),
              "lantern": (230, 180, 90), "iron": (220, 220, 220), "beacon": (120, 230, 220), "shroom": (240, 140, 70),
              "ladder": (150, 110, 70), "lodestone": (150, 150, 155), "powder_snow": (248, 253, 253),
-             "sweet_berry": (150, 30, 40), "cobweb": (230, 230, 230), "dripstone": (130, 100, 85), "pressure_plate": (60, 55, 64)}
+             "sweet_berry": (150, 30, 40), "anvil": (60, 60, 64), "blast": (90, 90, 95), "end_rod": (240, 240, 230), "iron_bars": (180, 180, 185), "cobweb": (230, 230, 230), "dripstone": (130, 100, 85), "pressure_plate": (60, 55, 64)}
 
     def color(n):
         return next((c for k, c in shade.items() if k in n), (110, 110, 110))
@@ -549,6 +685,7 @@ def main():
     d = Vol(half=66, ymin=-1, ymax=70)
     dragon(d, np.random.default_rng(21))
     render(d, HERE / "apercu-dragon-dessus.png", HERE / "apercu-dragon-sud.png", 6)
+    print("bâtiments ajoutés :", w.placed)
     print("warzone :", int((w.v > 0).sum()), "blocs ·", w.v.shape[::-1], "· avant-poste extérieur :", o.v.shape[::-1])
 
 
