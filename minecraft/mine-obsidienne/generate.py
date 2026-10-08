@@ -5,7 +5,8 @@ Sorties dans minecraft/mine-obsidienne/ : vaeloria-mine-obsidienne.schem, apercu
 
 Bloc d'obsidienne de 21 × 15 × 8, couloir vide d'un bloc tout autour, puis un mur fermé sans sortie,
 coiffé d'une voûte en verre rubis sur nervures de pierre noire : personne ne sort par le haut.
-On y entre seulement en sautant depuis le balcon d'arrivée (3 blocs de chute sur le dessus de la mine).
+On y entre seulement en sautant depuis le balcon d'arrivée, par-dessus le couloir (3 blocs de chute).
+Le couloir d'un bloc autour de l'obsidienne reste vide du sol jusqu'à la voûte.
 Point de collage : les pieds du joueur au point d'arrivée, sur le balcon. Nord = -Z.
 """
 
@@ -66,10 +67,10 @@ def build():
             put(wx0, y, z, "minecraft:shroomlight")
             put(wx1, y, z, "minecraft:shroomlight")
 
-    # Balcon d'arrivée au sud : il avance au-dessus du couloir, on saute sur l'obsidienne.
+    # Balcon d'arrivée au sud, dans l'épaisseur du mur : on saute par-dessus le couloir sur l'obsidienne.
     ax, ay, az = ARRIVAL
     for x in range(ax - 2, ax + 3):
-        for z in range(OBS_Z, az + 2):
+        for z in range(OBS_Z + 1, az + 2):  # le balcon s'arrête au mur : le couloir d'un bloc reste vide sur toute sa hauteur
             put(x, ay - 1, z, "minecraft:polished_blackstone" if abs(x - ax) < 2 else PB)
     # Salle du balcon fermée : murs latéraux et mur du fond jusqu'à son plafond (y 17).
     for z in range(wz1, az + 3):
