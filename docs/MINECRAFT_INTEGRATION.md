@@ -101,6 +101,10 @@ Chaque ordre reçu porte une `action` : `GRANT_RANK`, `GIVE_KIT`, `GIVE_ITEM`, `
 
 Une commande ne peut donc ni être perdue, ni être livrée deux fois via deux paiements/webhooks identiques. Réserve : si le serveur plante **entre** l'exécution et l'accusé, la commande sera rejouée ; les commandes de livraison doivent donc être idempotentes côté jeu (ex. `lp user … parent add` plutôt que `give`) ou marquées `require_online`.
 
+## Warps farm par grade
+
+Un warp farm par grade (Guerrier → Squelette, Seigneur → Pigman, Roi → Creeper, VÆLORIAN → Enderman), livré en schématiques WorldEdit : voir [`minecraft/warps-farm`](../minecraft/warps-farm/README.md).
+
 ## Statut sans plugin
 
 Avant l'installation du plugin, l'API interroge le serveur avec le Server List Ping (`MC_PING_HOST`) pour afficher joueurs et version.
