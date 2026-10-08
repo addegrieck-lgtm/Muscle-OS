@@ -29,7 +29,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 ## Documentation
 
 - [Architecture du site](docs/SITE_ARCHITECTURE.md) · [API](docs/API_ARCHITECTURE.md) · [Base de données](docs/DATABASE.md)
-- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
+- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
 

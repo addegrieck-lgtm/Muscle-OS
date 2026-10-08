@@ -1,5 +1,6 @@
 import type { BridgeEvent } from "@vaeloria/types";
 import type { Sql, Tx as TxSql } from "../db";
+import { DEFAULT_LAG, trackLag, type LagThresholds } from "./serverHealth";
 import { grantInfluence } from "./world/influence";
 
 type Tx = Sql | TxSql;
@@ -55,7 +56,7 @@ async function factionId(tx: Tx, seasonId: string | null, name: string): Promise
 }
 
 /** Applique un événement aux tables métier. Doit être appelé dans une transaction. */
-async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null): Promise<void> {
+async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null, lag: LagThresholds): Promise<void> {
   switch (e.event) {
     case "PLAYER_JOIN":
       await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
@@ -216,17 +217,21 @@ async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null): Promise<v
       await tx`UPDATE players SET rank = ${e.rank} WHERE uuid = ${e.uuid}`;
       return;
     case "SERVER_HEARTBEAT": {
-      await tx`
+      const latest = await tx`
         INSERT INTO server_status (server, online, max_players, tps, mspt, version, updated_at)
         VALUES (${e.server}, ${e.online}, ${e.maxPlayers}, ${e.tps}, ${e.mspt ?? null}, ${e.version}, ${e.occurredAt})
         ON CONFLICT (server) DO UPDATE SET online = EXCLUDED.online, max_players = EXCLUDED.max_players, tps = EXCLUDED.tps,
           mspt = EXCLUDED.mspt, version = EXCLUDED.version, updated_at = EXCLUDED.updated_at
-        WHERE server_status.updated_at <= EXCLUDED.updated_at`;
+        WHERE server_status.updated_at <= EXCLUDED.updated_at
+        RETURNING server`;
       // Historique agrégé par tranche de 5 minutes (pic conservé) pour la page statut et les records.
       await tx`
-        INSERT INTO server_status_history (server, bucket, online, tps)
-        VALUES (${e.server}, to_timestamp(floor(extract(epoch FROM ${e.occurredAt}::timestamptz) / 300) * 300), ${e.online}, ${e.tps})
-        ON CONFLICT (server, bucket) DO UPDATE SET online = GREATEST(server_status_history.online, EXCLUDED.online), tps = LEAST(server_status_history.tps, EXCLUDED.tps)`;
+        INSERT INTO server_status_history (server, bucket, online, tps, mspt)
+        VALUES (${e.server}, to_timestamp(floor(extract(epoch FROM ${e.occurredAt}::timestamptz) / 300) * 300), ${e.online}, ${e.tps}, ${e.mspt ?? null})
+        ON CONFLICT (server, bucket) DO UPDATE SET online = GREATEST(server_status_history.online, EXCLUDED.online),
+          tps = LEAST(server_status_history.tps, EXCLUDED.tps), mspt = GREATEST(server_status_history.mspt, EXCLUDED.mspt)`;
+      // Suivi du lag uniquement sur le heartbeat le plus récent (un heartbeat renvoyé en retard ne rouvre pas d'épisode).
+      if (latest.length > 0 && e.mspt !== undefined) await trackLag(tx, e.server, e.mspt, e.tps, e.occurredAt, lag);
       return;
     }
   }
@@ -237,7 +242,7 @@ async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null): Promise<v
  * (même `id`) est ignoré ; un événement en échec est retraité s'il est renvoyé. Chaque événement a sa propre transaction afin qu'une
  * erreur isolée ne bloque pas le reste du lot ; l'erreur est conservée pour rejouer.
  */
-export async function ingestEvents(sql: Sql, events: BridgeEvent[]): Promise<IngestResult> {
+export async function ingestEvents(sql: Sql, events: BridgeEvent[], lag: LagThresholds = DEFAULT_LAG): Promise<IngestResult> {
   const result: IngestResult = { accepted: 0, duplicates: 0, failed: [] };
   // Ordre chronologique : un QUIT reçu dans le même lot qu'un JOIN est appliqué après.
   const sorted = [...events].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
@@ -251,7 +256,7 @@ export async function ingestEvents(sql: Sql, events: BridgeEvent[]): Promise<Ing
           WHERE bridge_events.processed_at IS NULL -- un événement en échec peut être renvoyé et retraité
           RETURNING id`;
         if (rows.length === 0) return false;
-        await apply(tx, e, await activeSeasonId(tx));
+        await apply(tx, e, await activeSeasonId(tx), lag);
         await tx`UPDATE bridge_events SET processed_at = now() WHERE id = ${e.id}`;
         return true;
       });

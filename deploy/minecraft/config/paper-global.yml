@@ -1,0 +1,25 @@
+# VÆLORIA — config/paper-global.yml (extrait à fusionner).
+chunk-loading-basic:
+  # Envoi des chunks aux joueurs : limité pour ne pas saturer la connexion pendant un TP / un /f home en combat.
+  player-max-chunk-send-rate: 75.0
+  player-max-chunk-load-rate: 100.0
+  player-max-chunk-generate-rate: -1.0
+chunk-system:
+  # -1 = automatique (moitié des cœurs). Les chunks se chargent hors du thread principal.
+  io-threads: -1
+  worker-threads: -1
+misc:
+  # Étale les connexions en masse (ouverture, redémarrage) au lieu de bloquer un tick.
+  max-joins-per-tick: 5
+packet-limiter:
+  # Protège contre les clients qui inondent le serveur de paquets.
+  all-packets:
+    action: KICK
+    interval: 7.0
+    max-packet-rate: 500.0
+proxies:
+  velocity:
+    # Activer si le serveur est derrière Velocity (et mettre online-mode=false dans server.properties).
+    enabled: false
+    online-mode: true
+    secret: ''
