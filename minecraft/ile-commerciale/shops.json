@@ -1,0 +1,706 @@
+[
+ {
+  "id": 1,
+  "nom": "Boutique 01",
+  "type": "Grande boutique",
+  "rangee": "nord",
+  "aile": "ouest",
+  "largeur": 9,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    69,
+    1,
+    -13
+   ],
+   "max": [
+    77,
+    5,
+    -6
+   ],
+   "porte": [
+    73,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    21,
+    1,
+    -13
+   ],
+   "max": [
+    29,
+    5,
+    -6
+   ],
+   "porte": [
+    25,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 2,
+  "nom": "Boutique 02",
+  "type": "Échoppe",
+  "rangee": "nord",
+  "aile": "ouest",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    79,
+    1,
+    -13
+   ],
+   "max": [
+    83,
+    5,
+    -6
+   ],
+   "porte": [
+    81,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    31,
+    1,
+    -13
+   ],
+   "max": [
+    35,
+    5,
+    -6
+   ],
+   "porte": [
+    33,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 3,
+  "nom": "Boutique 03",
+  "type": "Boutique",
+  "rangee": "nord",
+  "aile": "ouest",
+  "largeur": 7,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    85,
+    1,
+    -13
+   ],
+   "max": [
+    91,
+    5,
+    -6
+   ],
+   "porte": [
+    88,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    37,
+    1,
+    -13
+   ],
+   "max": [
+    43,
+    5,
+    -6
+   ],
+   "porte": [
+    40,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 4,
+  "nom": "Boutique 04",
+  "type": "Échoppe",
+  "rangee": "nord",
+  "aile": "ouest",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    93,
+    1,
+    -13
+   ],
+   "max": [
+    97,
+    5,
+    -6
+   ],
+   "porte": [
+    95,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    45,
+    1,
+    -13
+   ],
+   "max": [
+    49,
+    5,
+    -6
+   ],
+   "porte": [
+    47,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 5,
+  "nom": "Boutique 05",
+  "type": "Échoppe",
+  "rangee": "nord",
+  "aile": "est",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    113,
+    1,
+    -13
+   ],
+   "max": [
+    117,
+    5,
+    -6
+   ],
+   "porte": [
+    115,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    65,
+    1,
+    -13
+   ],
+   "max": [
+    69,
+    5,
+    -6
+   ],
+   "porte": [
+    67,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 6,
+  "nom": "Boutique 06",
+  "type": "Boutique",
+  "rangee": "nord",
+  "aile": "est",
+  "largeur": 7,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    119,
+    1,
+    -13
+   ],
+   "max": [
+    125,
+    5,
+    -6
+   ],
+   "porte": [
+    122,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    71,
+    1,
+    -13
+   ],
+   "max": [
+    77,
+    5,
+    -6
+   ],
+   "porte": [
+    74,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 7,
+  "nom": "Boutique 07",
+  "type": "Échoppe",
+  "rangee": "nord",
+  "aile": "est",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    127,
+    1,
+    -13
+   ],
+   "max": [
+    131,
+    5,
+    -6
+   ],
+   "porte": [
+    129,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    79,
+    1,
+    -13
+   ],
+   "max": [
+    83,
+    5,
+    -6
+   ],
+   "porte": [
+    81,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 8,
+  "nom": "Boutique 08",
+  "type": "Grande boutique",
+  "rangee": "nord",
+  "aile": "est",
+  "largeur": 9,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    133,
+    1,
+    -13
+   ],
+   "max": [
+    141,
+    5,
+    -6
+   ],
+   "porte": [
+    137,
+    1,
+    -5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    85,
+    1,
+    -13
+   ],
+   "max": [
+    93,
+    5,
+    -6
+   ],
+   "porte": [
+    89,
+    1,
+    -5
+   ]
+  }
+ },
+ {
+  "id": 9,
+  "nom": "Boutique 09",
+  "type": "Enseigne",
+  "rangee": "sud",
+  "aile": "ouest",
+  "largeur": 11,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    69,
+    1,
+    6
+   ],
+   "max": [
+    79,
+    5,
+    13
+   ],
+   "porte": [
+    74,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    21,
+    1,
+    6
+   ],
+   "max": [
+    31,
+    5,
+    13
+   ],
+   "porte": [
+    26,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 10,
+  "nom": "Boutique 10",
+  "type": "Échoppe",
+  "rangee": "sud",
+  "aile": "ouest",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    81,
+    1,
+    6
+   ],
+   "max": [
+    85,
+    5,
+    13
+   ],
+   "porte": [
+    83,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    33,
+    1,
+    6
+   ],
+   "max": [
+    37,
+    5,
+    13
+   ],
+   "porte": [
+    35,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 11,
+  "nom": "Boutique 11",
+  "type": "Échoppe",
+  "rangee": "sud",
+  "aile": "ouest",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    87,
+    1,
+    6
+   ],
+   "max": [
+    91,
+    5,
+    13
+   ],
+   "porte": [
+    89,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    39,
+    1,
+    6
+   ],
+   "max": [
+    43,
+    5,
+    13
+   ],
+   "porte": [
+    41,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 12,
+  "nom": "Boutique 12",
+  "type": "Échoppe",
+  "rangee": "sud",
+  "aile": "ouest",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    93,
+    1,
+    6
+   ],
+   "max": [
+    97,
+    5,
+    13
+   ],
+   "porte": [
+    95,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    45,
+    1,
+    6
+   ],
+   "max": [
+    49,
+    5,
+    13
+   ],
+   "porte": [
+    47,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 13,
+  "nom": "Boutique 13",
+  "type": "Boutique",
+  "rangee": "sud",
+  "aile": "est",
+  "largeur": 7,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    113,
+    1,
+    6
+   ],
+   "max": [
+    119,
+    5,
+    13
+   ],
+   "porte": [
+    116,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    65,
+    1,
+    6
+   ],
+   "max": [
+    71,
+    5,
+    13
+   ],
+   "porte": [
+    68,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 14,
+  "nom": "Boutique 14",
+  "type": "Boutique",
+  "rangee": "sud",
+  "aile": "est",
+  "largeur": 7,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    121,
+    1,
+    6
+   ],
+   "max": [
+    127,
+    5,
+    13
+   ],
+   "porte": [
+    124,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    73,
+    1,
+    6
+   ],
+   "max": [
+    79,
+    5,
+    13
+   ],
+   "porte": [
+    76,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 15,
+  "nom": "Boutique 15",
+  "type": "Boutique",
+  "rangee": "sud",
+  "aile": "est",
+  "largeur": 7,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    129,
+    1,
+    6
+   ],
+   "max": [
+    135,
+    5,
+    13
+   ],
+   "porte": [
+    132,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    81,
+    1,
+    6
+   ],
+   "max": [
+    87,
+    5,
+    13
+   ],
+   "porte": [
+    84,
+    1,
+    5
+   ]
+  }
+ },
+ {
+  "id": 16,
+  "nom": "Boutique 16",
+  "type": "Échoppe",
+  "rangee": "sud",
+  "aile": "est",
+  "largeur": 5,
+  "profondeur": 8,
+  "hauteur": 5,
+  "depuis_debut_ponton": {
+   "min": [
+    137,
+    1,
+    6
+   ],
+   "max": [
+    141,
+    5,
+    13
+   ],
+   "porte": [
+    139,
+    1,
+    5
+   ]
+  },
+  "depuis_arrivee_ile": {
+   "min": [
+    89,
+    1,
+    6
+   ],
+   "max": [
+    93,
+    5,
+    13
+   ],
+   "porte": [
+    91,
+    1,
+    5
+   ]
+  }
+ }
+]

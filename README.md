@@ -32,5 +32,6 @@ pnpm dev                                         # site :3000, admin :3001/admin
 - [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
+- Constructions : [Île Marchande + ponton](minecraft/ile-commerciale/README.md) (schematics WorldEdit)
 
 Serveur non officiel, non affilié à Mojang Studios ni à Microsoft.
