@@ -18,7 +18,7 @@ Commande payée ─► deliveries (métier) ─► minecraft_commands (transport
 | `COMMAND` | Commande libre (cosmétiques…) | ex. `lp user {uuid} permission set …` |
 | `ADD_POINTS` / `SYNC_PLAYER` | Information du plugin | aucune commande ; le plugin prévient le joueur |
 
-> Les commandes d'exemple sont à **adapter aux plugins réellement installés** (LuckPerms, plugin de spawners, kits).
+> Les commandes d'exemple sont à **adapter aux plugins réellement installés** (LuckPerms, plugin de spawners, kits). Configuration LuckPerms prête : `minecraft/luckperms/`.
 
 ## Statuts
 

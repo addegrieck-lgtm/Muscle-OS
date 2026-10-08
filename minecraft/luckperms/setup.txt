@@ -1,0 +1,131 @@
+lp creategroup joueur
+lp creategroup guerrier
+lp creategroup seigneur
+lp creategroup roi
+lp creategroup vaelorian
+lp creategroup helper
+lp creategroup moderateur
+lp creategroup admin
+lp creategroup fondateur
+lp group default setweight 1
+lp group default setdisplayname Joueur
+lp group default meta setprefix 1 "&#a9aeb8"
+lp group default permission set essentials.spawn true
+lp group default permission set essentials.home true
+lp group default permission set essentials.sethome true
+lp group default permission set essentials.delhome true
+lp group default permission set essentials.tpa true
+lp group default permission set essentials.tpaccept true
+lp group default permission set essentials.tpdeny true
+lp group default permission set essentials.tpacancel true
+lp group default permission set essentials.msg true
+lp group default permission set essentials.reply true
+lp group default permission set essentials.ignore true
+lp group default permission set essentials.mail true
+lp group default permission set essentials.mail.send true
+lp group default permission set essentials.afk true
+lp group default permission set essentials.list true
+lp group default permission set essentials.help true
+lp group default permission set essentials.rules true
+lp group default permission set essentials.motd true
+lp group default permission set essentials.balance true
+lp group default permission set essentials.balancetop true
+lp group default permission set essentials.pay true
+lp group default permission set essentials.warp true
+lp group default permission set essentials.warps.* true
+lp group default permission set essentials.helpop true
+lp group default permission set essentials.kit true
+lp group default permission set essentials.kits.depart true
+lp group default permission set vaeloria.link true
+lp group joueur setweight 5
+lp group joueur setdisplayname Joueur
+lp group joueur parent add default
+lp group guerrier setweight 10
+lp group guerrier setdisplayname Guerrier
+lp group guerrier parent add joueur
+lp group guerrier meta setprefix 10 "&#d9dce2[Guerrier] "
+lp group guerrier permission set essentials.sethome.multiple true
+lp group guerrier permission set essentials.sethome.multiple.guerrier true
+lp group guerrier permission set essentials.kits.guerrier true
+lp group guerrier permission set essentials.workbench true
+lp group seigneur setweight 20
+lp group seigneur setdisplayname Seigneur
+lp group seigneur parent add guerrier
+lp group seigneur meta setprefix 20 "&#c0c4cc[Seigneur] "
+lp group seigneur permission set essentials.sethome.multiple.seigneur true
+lp group seigneur permission set essentials.kits.seigneur true
+lp group seigneur permission set essentials.hat true
+lp group roi setweight 30
+lp group roi setdisplayname Roi
+lp group roi parent add seigneur
+lp group roi meta setprefix 30 "&#e2c27f[Roi] "
+lp group roi permission set essentials.sethome.multiple.roi true
+lp group roi permission set essentials.kits.roi true
+lp group roi permission set essentials.nick true
+lp group roi permission set essentials.chat.color true
+lp group vaelorian setweight 40
+lp group vaelorian setdisplayname VÆLORIAN
+lp group vaelorian parent add roi
+lp group vaelorian meta setprefix 40 "&#d21f2f[VÆLORIAN] "
+lp group vaelorian permission set essentials.sethome.multiple.vaelorian true
+lp group vaelorian permission set essentials.kits.vaelorian true
+lp group vaelorian permission set essentials.nick.color true
+lp group vaelorian permission set essentials.chat.format true
+lp group vaelorian permission set essentials.chat.rgb true
+lp group helper setweight 100
+lp group helper setdisplayname Helper
+lp group helper meta setprefix 100 "&#5fb3d9[Helper] "
+lp group helper permission set essentials.helpop.receive true
+lp group helper permission set essentials.mute true
+lp group helper permission set essentials.mute.notify true
+lp group helper permission set essentials.kick true
+lp group helper permission set essentials.kick.notify true
+lp group helper permission set essentials.seen true
+lp group moderateur setweight 200
+lp group moderateur setdisplayname Modérateur
+lp group moderateur parent add helper
+lp group moderateur meta setprefix 200 "&#3c8f5a[Modo] "
+lp group moderateur permission set essentials.mute.offline true
+lp group moderateur permission set essentials.tempban true
+lp group moderateur permission set essentials.ban true
+lp group moderateur permission set essentials.ban.notify true
+lp group moderateur permission set essentials.unban true
+lp group moderateur permission set essentials.jail true
+lp group moderateur permission set essentials.vanish true
+lp group moderateur permission set essentials.invsee true
+lp group moderateur permission set essentials.tp true
+lp group moderateur permission set essentials.tphere true
+lp group moderateur permission set essentials.socialspy true
+lp group moderateur permission set essentials.whois true
+lp group moderateur permission set essentials.gamemode true
+lp group moderateur permission set essentials.gamemode.spectator true
+lp group admin setweight 300
+lp group admin setdisplayname Admin
+lp group admin parent add moderateur
+lp group admin meta setprefix 300 "&#b3262f[Admin] "
+lp group admin permission set essentials.* true
+lp group admin permission set minecraft.command.* true
+lp group admin permission set vaeloria.bridge.admin true
+lp group admin permission set luckperms.user.info true
+lp group admin permission set luckperms.user.parent.info true
+lp group admin permission set luckperms.user.permission.info true
+lp group admin permission set luckperms.group.info true
+lp group admin permission set luckperms.group.list true
+lp group admin permission set luckperms.track.info true
+lp group admin permission set luckperms.track.list true
+lp group fondateur setweight 1000
+lp group fondateur setdisplayname Fondateur
+lp group fondateur parent add admin
+lp group fondateur meta setprefix 1000 "&#d4af37[Fondateur] "
+lp group fondateur permission set * true
+lp createtrack grades
+lp track grades append joueur
+lp track grades append guerrier
+lp track grades append seigneur
+lp track grades append roi
+lp track grades append vaelorian
+lp createtrack staff
+lp track staff append helper
+lp track staff append moderateur
+lp track staff append admin
+lp track staff append fondateur
