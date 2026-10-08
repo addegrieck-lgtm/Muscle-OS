@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Configuration lue depuis config.yml, immuable : un rechargement crée une nouvelle instance. */
-record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
+record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks, int maxShown,
                    Map<String, String> palette, Shine logo, String header, String footer,
                    int compactAbove, String compactHeader, String compactFooter,
                    Thresholds ping, Thresholds tps, List<Rank> ranks) {
@@ -58,6 +58,7 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
                 c.getString("server-name", "Factions"),
                 Math.max(1, c.getInt("refresh-ticks", 3)),
                 Math.max(1, c.getInt("names-refresh-ticks", 40)),
+                c.getInt("max-shown", 75),
                 palette, logo,
                 String.join("\n", c.getStringList("header")),
                 String.join("\n", c.getStringList("footer")),

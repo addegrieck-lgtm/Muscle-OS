@@ -53,6 +53,11 @@ footer:
   - "<ruby_hi>vaeloria.fr</ruby_hi> <graphite>│</graphite> <silver>/link</silver> <ash>pour lier ton compte"
   - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬▬▬▬▬▬▬▬▬▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
 
+# Nombre maximum de vrais joueurs dans le TAB de chacun (0 = sans limite). Chacun se voit toujours
+# lui-même, puis les grades les plus hauts, puis l'ordre alphabétique. Les joueurs masqués restent
+# connectés et visibles en jeu ; le compteur <online> les compte toujours.
+max-shown: 75
+
 # Mode compact : au-delà de « above » joueurs (faux joueurs compris), le TAB passe aux grades courts
 # (« compact » de chaque grade) et à l'en-tête / pied de page ci-dessous. Minecraft affiche 20 joueurs par
 # colonne et la largeur de chaque colonne est celle du nom le plus long : sans ce mode, un seul

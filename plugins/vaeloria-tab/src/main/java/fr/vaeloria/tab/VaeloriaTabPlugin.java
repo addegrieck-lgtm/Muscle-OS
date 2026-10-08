@@ -65,6 +65,7 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
     public void onDisable() {
         if (task != null) task.cancel();
         for (Player p : Bukkit.getOnlinePlayers()) {
+            for (Player other : Bukkit.getOnlinePlayers()) if (p.canSee(other)) p.listPlayer(other);
             p.sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
             p.playerListName(null);
             p.setPlayerListOrder(0);
@@ -125,6 +126,17 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
         }
     }
 
+    /**
+     * Places libres dans le TAB pour les faux joueurs : max-shown moins les vrais joueurs connectés
+     * (Integer.MAX_VALUE sans plafond). API pour VaeloriaFakePlayers, par réflexion. Thread-safe.
+     */
+    public static int fakeSlots() {
+        VaeloriaTabPlugin plugin = getPlugin(VaeloriaTabPlugin.class);
+        TabSettings s = plugin.settings;
+        if (s == null || s.maxShown() <= 0) return Integer.MAX_VALUE;
+        return Math.max(0, s.maxShown() - Bukkit.getOnlinePlayers().size());
+    }
+
     TabSettings settings() {
         return settings;
     }
@@ -171,6 +183,28 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
             if (names) updateName(p);
             TagResolver tags = playerTags(s, p, logo, tps);
             p.sendPlayerListHeaderAndFooter(mm.deserialize(header, tags), mm.deserialize(footer, tags));
+        }
+        if (names) applyLimit(s.maxShown());
+    }
+
+    /**
+     * Au plus {@code max} vrais joueurs dans le TAB de chacun : lui-même, puis les grades les plus hauts,
+     * puis l'ordre alphabétique. Les faux joueurs de VaeloriaFakePlayers sont gérés par ce plugin.
+     */
+    private void applyLimit(int max) {
+        List<Player> ordered = new java.util.ArrayList<>(Bukkit.getOnlinePlayers());
+        ordered.sort(java.util.Comparator
+                .comparingInt((Player p) -> { Rank r = ranks.get(p.getUniqueId()); return r == null ? 0 : r.order(); })
+                .reversed()
+                .thenComparing(Player::getName, String.CASE_INSENSITIVE_ORDER));
+        for (Player viewer : ordered) {
+            List<Player> visible = ordered.stream().filter(viewer::canSee).toList();
+            java.util.Set<Player> shown = TabLimit.shown(visible, viewer, max);
+            for (Player target : visible) {
+                boolean listed = viewer.isListed(target);
+                if (shown.contains(target) && !listed) viewer.listPlayer(target);
+                else if (!shown.contains(target) && listed) viewer.unlistPlayer(target);
+            }
         }
     }
 
