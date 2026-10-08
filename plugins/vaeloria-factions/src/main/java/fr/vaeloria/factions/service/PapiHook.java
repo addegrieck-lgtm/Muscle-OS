@@ -50,6 +50,9 @@ final class PapiHook extends PlaceholderExpansion {
             case "war" -> f == null ? "" : plugin.wars().scoreboardLine(f);
             case "totems" -> f == null ? "0" : String.valueOf(f.totemsWon);
             case "raid" -> f != null && f.inRaid() ? "oui" : "non";
+            case "streak" -> fp == null ? "0" : String.valueOf(fp.streak);
+            case "bounty_percent" -> String.valueOf(plugin.bounties().percent(fp));
+            case "bounty" -> player.getPlayer() == null ? "0" : plugin.bank().format(plugin.bounties().value(player.getPlayer()));
             default -> null;
         };
     }

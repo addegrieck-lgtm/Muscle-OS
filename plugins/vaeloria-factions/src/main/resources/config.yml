@@ -270,6 +270,37 @@ missions:
     - {id: presence, type: PLAYTIME_MINUTES, target: 600, reward: 5000, label: "Cumuler 10 h de jeu entre membres"}
     - {id: conquete, type: CAPTURE_OUTPOST, target: 1, reward: 12000, label: "Capturer un avant-poste"}
 
+# ── Convoi (/f convoi admin) ──────────────────────────────────────
+# Toutes les interval-minutes, une caisse tombe en warzone (sur un point d'atterrissage défini dans l'interface, sinon
+# dans un chunk de warzone au hasard). Rester open-seconds à côté l'ouvre et donne la Clé du convoi.
+# Le porteur brille et sa position est annoncée toutes les reveal-seconds. Il gagne en rapportant la clé :
+#   - à un avant-poste tenu par sa faction ;
+#   - ou, si sa faction n'en tient aucun, en sortant de la warzone.
+# La clé ne se range pas (coffre, ender chest, entonnoir) et ne se perd pas ; tué, le porteur la laisse tomber.
+convoy:
+  enabled: true
+  interval-minutes: 25
+  min-online: 5
+  open-seconds: 5
+  duration-minutes: 15         # temps pour ouvrir la caisse ET rapporter la clé
+  reveal-seconds: 30
+  fall-height: 40
+  reward:
+    money: 25000               # versé à la banque de la faction du porteur
+    commands: []               # ex. "crate key give {player} convoi 1" — {player}, {faction}
+
+# ── Primes ────────────────────────────────────────────────────────
+# Un joueur en série de kills a la tête mise à prix : un pourcentage de SA fortune (argent du marché), versé à celui
+# qui l'abat. Annonce à tout le serveur à chaque palier puis tous les announce-every kills.
+# Les kills farmés (même victime trop souvent, même IP) ne comptent pas.
+bounty:
+  enabled: true
+  tiers:
+    - {kills: 5, percent: 5}
+    - {kills: 15, percent: 10}
+  announce-every: 5
+  max-amount: 0                # plafond d'une prime (0 = aucun)
+
 # ── Confort ───────────────────────────────────────────────────────
 nametags:
   enabled: true                # pseudo coloré (et [Faction]) au-dessus des têtes selon la relation

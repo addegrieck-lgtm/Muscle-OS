@@ -121,6 +121,14 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.OUTPOST), "outpost", "ap");
         reg("koth", "[liste|admin|creer|supprimer|lancer|arreter]", "KOTH", false, use, (s, p, a) -> zoneCommand(s, p, a, fr.vaeloria.factions.model.Zone.Kind.KOTH),
                 (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer", "lancer", "arreter") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.KOTH));
+        reg("convoi", "[admin|lancer|arreter]", "Convoi : la caisse de la warzone", false, use, this::convoy,
+                (s, a) -> s.hasPermission("vaeloria.factions.admin") ? List.of("admin", "lancer", "arreter") : List.of(), "convoy");
+        reg("prime", "[joueur]", "Prime sur la tête d'un joueur", false, use, (s, p, a) -> {
+            Player t = a.length > 0 ? Bukkit.getPlayerExact(a[0]) : p;
+            if (t == null) { Msg.send(s, "error.player-offline", "player", a.length > 0 ? a[0] : "?"); return; }
+            plugin.bounties().show(s, t);
+        }, (s, a) -> onlineNames(), "bounty");
+        reg("primes", "", "Têtes mises à prix", false, use, (s, p, a) -> plugin.bounties().top(s), null, "bounties");
         reg("logs", "[page]", "Journal de la faction", true, use, this::logs, null, "journal", "log");
         reg("discord", "[lien|off|test|ping]", "Alertes Discord de la faction", true, use, this::discord,
                 (s, a) -> List.of("off", "test", "ping"), "webhook");
@@ -1156,6 +1164,37 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         m().markDirty();
         log(f, "ACCÈS", p, (added ? "accès donné à " : "accès retiré à ") + label + " (chunk " + here.x() + ", " + here.z() + ")");
         Msg.send(p, added ? "access.granted" : "access.revoked", "target", label, "x", here.x(), "z", here.z());
+    }
+
+    private void convoy(CommandSender s, Player p, String[] a) {
+        var cv = plugin.convoy();
+        if (a.length == 0) {
+            switch (cv.phase()) {
+                case IDLE -> Msg.send(s, "convoy.status-idle", "time", Msg.duration(cv.nextIn()));
+                case FALLING, LANDED -> {
+                    var l = cv.crateLocation();
+                    Msg.send(s, "convoy.status-crate", "x", l == null ? "?" : String.valueOf(l.getBlockX()), "z", l == null ? "?" : String.valueOf(l.getBlockZ()));
+                }
+                case CARRIED -> {
+                    Player c = cv.carrier() == null ? null : Bukkit.getPlayer(cv.carrier());
+                    Msg.send(s, c == null ? "convoy.status-dropped" : "convoy.status-carried", "player", c == null ? "" : c.getName());
+                }
+            }
+            return;
+        }
+        if (!s.hasPermission("vaeloria.factions.admin")) { Msg.send(s, "error.no-permission"); return; }
+        switch (a[0].toLowerCase(Locale.ROOT)) {
+            case "admin", "menu", "gui" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                plugin.convoyAdmin().open(p);
+            }
+            case "lancer", "start" -> {
+                var r = cv.start(false);
+                if (r != fr.vaeloria.factions.service.ConvoyService.StartResult.OK) Msg.send(s, "convoy.start-fail." + r.name().toLowerCase(Locale.ROOT));
+            }
+            case "arreter", "arrêter", "stop" -> cv.end(null, "stopped");
+            default -> usage(s, "convoi");
+        }
     }
 
     private void logs(CommandSender s, Player p, String[] a) {

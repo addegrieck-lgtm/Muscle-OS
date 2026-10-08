@@ -104,6 +104,17 @@ public final class Settings {
     public java.util.List<MissionDef> missionPool = new java.util.ArrayList<>();
     // Confort
     public boolean nametags;
+    // Convoi
+    public boolean convoyEnabled;
+    public int convoyIntervalMinutes, convoyMinOnline, convoyOpenSeconds, convoyDurationMinutes, convoyRevealSeconds, convoyFallHeight;
+    public double convoyRewardMoney;
+    public java.util.List<String> convoyRewardCommands = new java.util.ArrayList<>();
+    // Primes
+    public boolean bountyEnabled;
+    public double bountyMaxAmount;
+    public int bountyAnnounceEvery;
+    /** Paliers de prime triés par nombre de kills croissant : {kills, pourcentage}. */
+    public java.util.List<int[]> bountyTiers = new java.util.ArrayList<>();
 
     /** Une mission du catalogue. */
     public record MissionDef(String id, String type, int target, double reward, String label) {}
@@ -296,6 +307,27 @@ public final class Settings {
                     reward instanceof Number r ? r.doubleValue() : 0, label == null ? String.valueOf(id) : String.valueOf(label)));
         }
         nametags = c.getBoolean("nametags.enabled", true);
+
+        convoyEnabled = c.getBoolean("convoy.enabled", true);
+        convoyIntervalMinutes = Math.max(1, c.getInt("convoy.interval-minutes", 25));
+        convoyMinOnline = Math.max(0, c.getInt("convoy.min-online", 5));
+        convoyOpenSeconds = Math.max(0, c.getInt("convoy.open-seconds", 5));
+        convoyDurationMinutes = Math.max(1, c.getInt("convoy.duration-minutes", 15));
+        convoyRevealSeconds = Math.max(5, c.getInt("convoy.reveal-seconds", 30));
+        convoyFallHeight = Math.max(5, c.getInt("convoy.fall-height", 40));
+        convoyRewardMoney = Math.max(0, c.getDouble("convoy.reward.money", 25000));
+        convoyRewardCommands = new java.util.ArrayList<>(c.getStringList("convoy.reward.commands"));
+
+        bountyEnabled = c.getBoolean("bounty.enabled", true);
+        bountyMaxAmount = Math.max(0, c.getDouble("bounty.max-amount", 0));
+        bountyAnnounceEvery = Math.max(1, c.getInt("bounty.announce-every", 5));
+        bountyTiers = new java.util.ArrayList<>();
+        for (java.util.Map<?, ?> m : c.getMapList("bounty.tiers")) {
+            if (m.get("kills") instanceof Number k && m.get("percent") instanceof Number pc) {
+                bountyTiers.add(new int[]{Math.max(1, k.intValue()), Math.max(0, Math.min(100, pc.intValue()))});
+            }
+        }
+        bountyTiers.sort(java.util.Comparator.comparingInt(t -> t[0]));
 
         warEnabled = c.getBoolean("war.enabled", true);
         warPreparationMinutes = Math.max(0, c.getInt("war.preparation-minutes", 15));

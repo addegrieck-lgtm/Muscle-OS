@@ -10,6 +10,8 @@ public final class FPlayer {
     public int kills;
     public int deaths;
     public long lastSeen;
+    /** Série de kills en cours (remise à zéro à la mort) : sert aux primes. */
+    public int streak;
 
     public transient ChatMode chatMode = ChatMode.PUBLIC;
     public transient boolean autoClaim;

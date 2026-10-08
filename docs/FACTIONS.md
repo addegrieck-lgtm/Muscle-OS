@@ -223,6 +223,37 @@ Sans toucher aux fichiers :
 
 Chaque changement est écrit dans `config.yml`, commentaires conservés, et appliqué immédiatement.
 
+## Convoi (`/f convoi`)
+- **Toutes les 25 minutes**, une caisse tombe du ciel en warzone, sur un point d'atterrissage défini par le staff ou, à défaut, dans un chunk de warzone au hasard. Annonce, titre et barre de boss pour tout le serveur.
+- Clic droit sur la caisse, puis rester **5 secondes** à côté pour l'ouvrir. Un coup reçu ou un pas de côté interrompt l'ouverture.
+- Le joueur reçoit la **Clé du convoi**. Le porteur brille, et sa position est annoncée toutes les 30 secondes.
+- **Pour gagner**, le porteur rapporte la clé :
+  - à **un avant-poste tenu par sa faction** ;
+  - ou, si sa faction n'en tient **aucun**, en **sortant de la warzone**.
+  Avec un avant-poste, sortir de la warzone ne suffit pas : il faut l'atteindre.
+- La clé ne se range nulle part (coffre, coffre de l'Ender, entonnoir), ne disparaît pas et ne brûle pas. Tué, le porteur la laisse tomber ; déconnecté, il la laisse sur place. Qui la ramasse devient le nouveau porteur.
+- Sans vainqueur au bout de 15 minutes, le convoi s'arrête et la clé disparaît.
+- Récompense : 25 000 $ dans la banque de la faction du porteur (ou pour le joueur s'il n'a pas de faction), plus des commandes console (ex. `crate key give {player} convoi 1`).
+
+### Interface admin : `/f convoi admin`
+- **Lancer** un convoi ou **arrêter** le convoi en cours.
+- **Points d'atterrissage** : ajouter à sa position, se téléporter, supprimer.
+- **Warzone** : choisir quels chunks forment la warzone (ce chunk, un carré de rayon N, retirer, tout vider) et voir les bordures. Au-delà de la warzone se trouvent les avant-postes.
+- **Avant-postes** : créer, déplacer, rayon, et **attribuer à une faction** ou libérer.
+- **Gains** : argent (±5 000 ou montant exact) et commandes.
+- **Réglages** : activation, fréquence, temps d'ouverture, durée, joueurs minimum, fréquence d'annonce de la position du porteur.
+
+## Primes (`/f prime`, `/f primes`)
+- Un joueur en **série de kills** a la tête mise à prix, en pourcentage de **sa propre fortune** :
+  - **5 % dès 5 kills** ;
+  - **10 % dès 15 kills**.
+- **Annonce** à tout le serveur, avec le nom, la série, le pourcentage et le montant. Elle part à chaque palier, puis tous les 5 kills (« Alice est en série de 5 kills ! Sa tête vaut 5 % de sa fortune : 4 500 $ »).
+- Celui qui l'abat **empoche la prime**, prélevée sur l'argent réel de la victime, et l'annonce est publique. La série s'arrête à toute mort.
+- Les kills farmés (même victime trop souvent, même IP) ne comptent ni pour la série ni pour la prime.
+- `/f prime [joueur]` affiche une prime ; `/f primes` liste les têtes mises à prix.
+- Placeholders : `%vfactions_streak%`, `%vfactions_bounty_percent%`, `%vfactions_bounty%`.
+- Paliers, plafond et fréquence d'annonce : `config.yml → bounty`.
+
 ## Missions quotidiennes (`/f missions`)
 - Chaque jour à minuit, 3 missions sont tirées du catalogue, **les mêmes pour toutes les factions**.
 - Chaque faction progresse de son côté et touche la récompense en banque, avec annonce, journal et Discord.
@@ -268,6 +299,7 @@ Chaque changement est écrit dans `config.yml`, commentaires conservés, et appl
 | Totem | `totem`, `totem liste` ; staff : `totem admin\|creer\|supprimer\|lancer\|arreter` |
 | Progression | `ameliorations`, `missions`, `avantposte [liste]`, `koth [liste]` ; staff : `avantposte creer\|supprimer`, `koth creer\|supprimer\|lancer\|arreter` |
 | Territoire partagé | `acces <joueur\|faction>`, `acces liste` |
+| Convoi et primes | `convoi`, `prime [joueur]`, `primes` ; staff : `convoi admin\|lancer\|arreter` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.
@@ -282,6 +314,14 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (convoi et primes)
+- 37 tests unitaires, dont les paliers et montants des primes, les annonces et la condition de victoire du convoi.
+- Essai sur Paper 1.21.4 avec Vault, EssentialsX, VæloriaShop et deux bots :
+  - **primes** : série de 5 annoncée (« 5 % de sa fortune : 4 500 $ ») ; le tueur empoche 4 500 $, prélevés sur la victime (90 000 → 85 500 $) ;
+  - **convoi n°1** : caisse tombée et ouverte, clé laissée au sol par le porteur déconnecté, ramassée par Bob (Loups, sans avant-poste) qui gagne en sortant de la warzone (+25 000 $) ;
+  - **convoi n°2** : Alice (Lions, avec un avant-poste attribué depuis l'interface) ne gagne pas en sortant de la warzone, mais gagne en atteignant son avant-poste (+25 000 $) ;
+  - **interface admin** : chunk ajouté à la warzone, point d'atterrissage, fréquence et gains enregistrés.
 
 ## Ce qui a été vérifié (interface admin du KOTH)
 - Interface cliquée par un bot sur Paper 1.21.4 :

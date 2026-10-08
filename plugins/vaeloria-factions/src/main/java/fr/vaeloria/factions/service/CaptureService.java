@@ -112,6 +112,18 @@ public final class CaptureService {
         plugin.manager().markDirty();
     }
 
+    /** Attribue un avant-poste à une faction (interface admin). */
+    public void assign(Zone z, Faction f) {
+        Faction previous = plugin.manager().byId(z.holder);
+        z.holder = f.id;
+        z.heldSince = System.currentTimeMillis();
+        z.lastIncome = System.currentTimeMillis();
+        reset(z);
+        plugin.manager().markDirty();
+        plugin.logs().add(f, "AVANT-POSTE", "staff", "l'avant-poste " + z.name + " nous a été attribué");
+        if (previous != null && previous != f) plugin.logs().add(previous, "AVANT-POSTE", "staff", "l'avant-poste " + z.name + " nous a été retiré");
+    }
+
     /** Libère un avant-poste (plus de détenteur). */
     public void release(Zone z) {
         Faction h = plugin.manager().byId(z.holder);

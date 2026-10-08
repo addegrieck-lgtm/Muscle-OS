@@ -180,6 +180,8 @@ public final class CombatListener implements Listener {
             }
         }
         if (killer != null) plugin.raid().onKill(manager.factionOf(killer), fac);
+        if (killer != null) plugin.bounties().onDeath(victim, killer, !farmed);
+        else plugin.bounties().resetStreak(victim);
         manager.markDirty();
         if (zone != null && zone.isSafezone()) return;
         if (victim.hasPermission("vaeloria.factions.bypass.powerloss")) return;

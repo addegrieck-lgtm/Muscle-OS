@@ -147,6 +147,18 @@ public final class KothAdminMenu {
                 open(pl);
             });
         } else {
+            m.set(20, Menu.item(Material.NAME_TAG, c("<gold><b>Attribuer à une faction"), List.of(
+                    c("<gray>Tenu par : <gold><h>", "h", cs().holderName(z)), c("<yellow>Clic : taper le nom de la faction"))), (pl, ct) ->
+                    plugin.prompts().ask(pl, "Faction qui tiendra l'avant-poste " + z.name + " :", name -> {
+                        var f = plugin.manager().byName(name.trim());
+                        if (f == null || f.system) {
+                            say(pl, "<red>Faction introuvable : <white><n>", "n", name);
+                        } else {
+                            cs().assign(z, f);
+                            say(pl, "<green>Avant-poste <white><z></white> attribué à <gold><f></gold>.", "z", z.name, "f", f.name);
+                        }
+                        openZone(pl, z);
+                    }));
             m.set(16, Menu.item(Material.WHITE_DYE, c("<white><b>Libérer"), List.of(
                     c("<gray>Retire l'avant-poste à <gold><h>", "h", cs().holderName(z)), c("<yellow>Clic : libérer"))), (pl, ct) -> {
                 cs().release(z);

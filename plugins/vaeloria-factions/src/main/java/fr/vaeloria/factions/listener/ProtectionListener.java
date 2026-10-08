@@ -98,6 +98,7 @@ public final class ProtectionListener implements Listener {
     public void onInteract(PlayerInteractEvent e) {
         Block b = e.getClickedBlock();
         if (b == null) return;
+        if (plugin.convoy().isCrate(b)) return; // caisse du convoi : gérée par ConvoyListener
         Player p = e.getPlayer();
         if (e.getAction() == Action.PHYSICAL) {
             FPerm perm = b.getType() == Material.FARMLAND || b.getType() == Material.TURTLE_EGG ? FPerm.BUILD : FPerm.DOOR;

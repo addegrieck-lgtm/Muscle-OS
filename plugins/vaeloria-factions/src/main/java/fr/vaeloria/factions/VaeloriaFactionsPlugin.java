@@ -79,6 +79,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private fr.vaeloria.factions.service.CaptureService captures;
     private fr.vaeloria.factions.service.MissionService missions;
     private fr.vaeloria.factions.gui.KothAdminMenu kothAdmin;
+    private fr.vaeloria.factions.service.BountyService bounties;
+    private fr.vaeloria.factions.service.ConvoyService convoy;
+    private fr.vaeloria.factions.gui.ConvoyAdminMenu convoyAdmin;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -118,6 +121,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         captures = new fr.vaeloria.factions.service.CaptureService(this, settings, state);
         missions = new fr.vaeloria.factions.service.MissionService(this, settings, state);
         kothAdmin = new fr.vaeloria.factions.gui.KothAdminMenu(this);
+        bounties = new fr.vaeloria.factions.service.BountyService(this);
+        convoy = new fr.vaeloria.factions.service.ConvoyService(this, settings, state);
+        convoyAdmin = new fr.vaeloria.factions.gui.ConvoyAdminMenu(this);
         manager.setExtraPower(captures::outpostPower);
         missions.roll();
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
@@ -151,6 +157,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         pm.registerEvents(prompts, this);
         pm.registerEvents(new fr.vaeloria.factions.listener.SpawnerListener(this), this);
         pm.registerEvents(new fr.vaeloria.factions.listener.MissionListener(this), this);
+        pm.registerEvents(new fr.vaeloria.factions.listener.ConvoyListener(this), this);
         if (fr.vaeloria.factions.service.Papi.register(this)) getLogger().info("PlaceholderAPI : placeholders %vfactions_…% disponibles.");
 
         FactionCommand cmd = new FactionCommand(this);
@@ -187,6 +194,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             wars.tick();
             totems.tick();
             captures.tick();
+            convoy.tick();
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
@@ -307,6 +315,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         raid.hideAll();
         totems.shutdown();
         captures.shutdown();
+        convoy.shutdown();
         scoreboard.clear();
         obsidian.unregisterRecipe();
         save(false);
@@ -338,6 +347,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public fr.vaeloria.factions.service.CaptureService captures() { return captures; }
     public fr.vaeloria.factions.service.MissionService missions() { return missions; }
     public fr.vaeloria.factions.gui.KothAdminMenu kothAdmin() { return kothAdmin; }
+    public fr.vaeloria.factions.service.BountyService bounties() { return bounties; }
+    public fr.vaeloria.factions.service.ConvoyService convoy() { return convoy; }
+    public fr.vaeloria.factions.gui.ConvoyAdminMenu convoyAdmin() { return convoyAdmin; }
 
     /** Modifie config.yml depuis un menu : écrit le fichier (commentaires conservés) et applique aussitôt. */
     public void setConfigValue(String path, Object value) {

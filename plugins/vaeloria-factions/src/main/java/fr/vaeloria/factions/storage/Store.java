@@ -51,6 +51,8 @@ public final class Store {
         public List<String> missionsToday = new ArrayList<>();
         public Map<String, Map<String, Integer>> missionProgress = new HashMap<>();
         public Map<String, List<String>> missionsCompleted = new HashMap<>();
+        /** Points d'atterrissage du convoi (vide = un chunk de warzone au hasard). */
+        public List<fr.vaeloria.factions.model.Pos> convoyDrops = new ArrayList<>();
     }
 
     public List<Faction> loadFactions() throws IOException {
@@ -79,6 +81,7 @@ public final class Store {
         if (s.missionsToday == null) s.missionsToday = new ArrayList<>();
         if (s.missionProgress == null) s.missionProgress = new HashMap<>();
         if (s.missionsCompleted == null) s.missionsCompleted = new HashMap<>();
+        if (s.convoyDrops == null) s.convoyDrops = new ArrayList<>();
         for (fr.vaeloria.factions.model.War w : s.wars) if (w.participants == null) w.participants = new java.util.HashSet<>();
         return s;
     }
