@@ -66,11 +66,13 @@ class ScheduleTest {
         Schedule s = schedule(0.15, 0.10);
         LocalDateTime t = at(2026, 10, 9, 0);
         for (int i = 0; i < 24 * 14 * 4; i++, t = t.plusMinutes(15)) {
-            int target = s.target(t, 2, 30);
-            assertTrue(target >= 2 && target <= 30, t + " → " + target);
-            assertEquals(target, schedule(0.15, 0.10).target(t, 2, 30));
+            int target = s.target(t, 12, 120, 150);
+            assertTrue(target >= 12 * 0.7 && target <= 150, t + " → " + target);
+            assertEquals(target, schedule(0.15, 0.10).target(t, 12, 120, 150));
         }
-        assertEquals(30, schedule(0, 0).target(at(2026, 10, 10, 21), 0, 30)); // samedi 21 h = 100 %
+        Schedule flat = schedule(0, 0);
+        assertEquals(120, flat.target(at(2026, 10, 10, 21), 12, 120, 150)); // samedi 21 h = 100 % → pic
+        assertEquals(13, flat.target(at(2026, 10, 8, 4), 12, 120, 150));    // jeudi 4 h = 1 % → creux
     }
 
     @Test

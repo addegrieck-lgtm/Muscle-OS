@@ -4,30 +4,22 @@
 # Restaurer au redémarrage les faux joueurs créés par commande (fichier fakes.yml).
 persist: true
 
-# Pseudos utilisés en priorité par /fp add et le mode ambiance (3 à 16 caractères : lettres, chiffres, _).
-# Une fois la liste épuisée, des pseudos sont générés aléatoirement.
-names:
-  - Kaelith
-  - Drakonis_
-  - SkyWarden
-  - NoxFury
-  - LeoMineur
-  - Arkhane
-  - Vortyx
-  - Elyndra
-  - TheoPvP
-  - Maxou_77
+# Pseudos utilisés EN PRIORITÉ par /fp add et le mode ambiance (3 à 16 caractères : lettres, chiffres, _).
+# Vide = tous les pseudos sont générés (Lucas59, KrakenFR, patate_nuage, DarkHunter…), ce qui évite de revoir
+# toujours les mêmes noms. Ajoute ici des pseudos précis seulement si tu veux qu'ils soient souvent connectés.
+names: []
 
 messages:
-  # Laisser vide ("") pour ne rien afficher.
-  join: "<yellow><name> a rejoint la partie</yellow>"
-  quit: "<yellow><name> a quitté la partie</yellow>"
+  # Laisser vide ("") pour ne rien afficher. Par défaut : le message vanilla, traduit dans la langue de chaque
+  # joueur, exactement comme pour un vrai joueur. Si ton serveur a des messages perso, mets le même format ici.
+  join: "<yellow><lang:multiplayer.player.joined:'<name>'>"
+  quit: "<yellow><lang:multiplayer.player.left:'<name>'>"
 
 tab:
   # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
   enabled: true
   # Nom affiché dans le TAB ("" = pseudo brut).
-  display-name: "<gray><name>"
+  display-name: ""
   ping:
     min: 15
     max: 90
@@ -51,20 +43,29 @@ bodies:
   # Les corps tournent la tête vers le joueur le plus proche (8 blocs).
   look-at-players: true
 
-# Mode ambiance : des faux joueurs arrivent et partent tout seuls, UN PAR UN, pour viser une cible.
-# Seuls les faux joueurs créés par ce mode comptent dans la cible (ceux de /fp spawn ou /fp add s'ajoutent).
+# Mode ambiance : des faux joueurs arrivent et partent tout seuls, UN PAR UN, pour suivre le planning.
+# Seuls les faux joueurs créés par ce mode comptent (ceux de /fp spawn ou /fp add s'ajoutent en plus).
 auto:
-  enabled: false
-  # Plancher et pic. Avec le planning, la cible = pic × % de la courbe, jamais sous min.
-  min: 3
-  max: 10
-  # Délai aléatoire entre deux arrivées/départs (raccourci automatiquement si l'écart à la cible est grand).
-  step-seconds:
-    min: 15
-    max: 90
-  # Une fois la cible atteinte : chance, à chaque pas, qu'un faux joueur parte (un autre le remplacera).
-  churn-chance: 0.15
-  # Sans planning uniquement : toutes les N secondes la cible monte (join-chance) ou descend (leave-chance) de 1.
+  enabled: true
+  # Moyenne visée quand la courbe est au plus bas (nuit) et à 100 % (samedi soir, vacances).
+  min: 12
+  max: 120
+  # Plafond absolu : la variation aléatoire du jour peut faire dépasser max de quelques joueurs.
+  hard-cap: 140
+  # Délai aléatoire entre deux arrivées / deux départs (divisé jusqu'à 6× quand on est loin de la cible,
+  # par exemple au démarrage du serveur : ~100 arrivées en une dizaine de minutes).
+  join-delay-seconds:
+    min: 4
+    max: 45
+  leave-delay-seconds:
+    min: 4
+    max: 45
+  # Durée de connexion de chaque faux joueur : beaucoup de sessions courtes, quelques longues (moyenne ≈ 1 h).
+  # À la fin de sa session il part et un autre arrive : ça fait tourner les pseudos dans le TAB.
+  session-minutes:
+    min: 10
+    max: 180
+  # Sans planning (schedule.enabled: false) : toutes les N secondes la cible monte ou descend de 1.
   interval-seconds: 60
   join-chance: 0.5
   leave-chance: 0.3
@@ -120,16 +121,106 @@ schedule:
       - {name: "vacances d'été",           zones: "A,B,C", from: "2027-07-03", to: "2027-08-31"}
 
 chat:
-  format: "<gray><name></gray> <dark_gray>»</dark_gray> <white><message>"
+  # Doit être IDENTIQUE au format de chat de ton serveur (plugin de chat, grades…), sinon ça se voit.
+  # <name> = pseudo, <message> = texte. Par défaut : format vanilla « <Pseudo> message ».
+  format: '\<<name>> <message>'
+
+  # Messages spontanés. Fréquence (par minute) = per-minute-base + per-minute-per-player × nombre de faux joueurs
+  # → ~0,5 message/min à 12 faux joueurs, ~2,7/min à 120.
   auto:
-    # Messages automatiques des faux joueurs.
-    enabled: false
-    interval-seconds: 90
-    chance: 0.5
+    enabled: true
+    per-minute-base: 0.3
+    per-minute-per-player: 0.02
+    min-gap-seconds: 8
+    # Un message ne revient pas avant que N autres aient été envoyés.
+    no-repeat: 25
     messages:
-      - "salut tout le monde"
       - "qqn pour un 1v1 ?"
+      - "qui veut faire un duel"
+      - "le koth c'est a quelle heure ?"
+      - "je recrute pour ma faction mp moi"
+      - "qqn a du fer a vendre ?"
+      - "jachete des diamants"
+      - "ya un event ce soir ?"
+      - "trop bien le serveur"
+      - "gg a ceux qui ont gagné le koth"
+      - "jsuis mort betement mdr"
+      - "quelqun veut farm avec moi"
+      - "c'est quoi la commande pour le spawn"
+      - "/spawn"
+      - "jai perdu tout mon stuff ptdr"
+      - "le pvp est trop bien ici"
+      - "qui est chaud pour un raid"
+      - "ma base vient de se faire raid"
+      - "on est combien de fr ici"
+      - "jsuis nouveau vous conseillez quoi ?"
+      - "le shop il est ou"
+      - "c'est quoi le meilleur grade"
+      - "jsuis afk 5 min"
+      - "re"
+      - "mdr"
+      - "ptdr"
       - "gg"
-      - "le KOTH c'est quand ?"
-      - "je cherche une faction"
-      - "lag un peu non ?"
+      - "ah ouais"
+      - "jpp"
+      - "quelqun a vu mon pote"
+      - "qui veut rejoindre ma fac"
+      - "le serv lag un peu non"
+      - "ah non c'est mon co"
+      - "jvais manger je reviens"
+      - "le nether est blindé de monde"
+      - "qqn a un enchant sharp 5"
+      - "vous etes dans quelle faction"
+      - "on se fait un pvp au spawn ?"
+      - "je cherche une fac active"
+      - "trop dur le boss"
+      - "j'ai enfin full diams"
+
+  # Juste après une connexion : parfois un bonjour, 3 à 12 s plus tard.
+  on-join:
+    enabled: true
+    chance: 0.12
+    delay-seconds: {min: 3, max: 12}
+    messages: ["slt", "salut", "yo", "cc", "re", "bonjour", "slt tout le monde", "re tlm", "wesh", "hello"]
+
+  # Juste avant un départ : parfois un au revoir (la déconnexion suit 3 à 8 s après).
+  on-leave:
+    enabled: true
+    chance: 0.08
+    messages: ["a+", "bon j'y vais", "a demain", "je vais manger", "bye", "jdois y aller", "allez a+ tlm", "ciao"]
+    # Entre 22 h et 6 h.
+    night-messages: ["bn", "bonne nuit", "bonne nuit tlm", "bon dodo", "a demain bn", "jvais dormir"]
+
+  # Quand un VRAI joueur se connecte : parfois un faux joueur le salue. <player> = son pseudo.
+  greet-real-players:
+    enabled: true
+    chance: 0.2
+    delay-seconds: {min: 3, max: 10}
+    messages: ["slt <player>", "yo <player>", "cc <player>", "re <player>", "wb <player>", "slt"]
+
+  # Réponses aux messages des VRAIS joueurs (mot entier, sans accents ni majuscules). <player> = son pseudo.
+  replies:
+    enabled: true
+    chance: 0.35
+    cooldown-seconds: 20
+    delay-seconds: {min: 2, max: 7}
+    # Quand un vrai joueur écrit le pseudo d'un faux joueur, celui-ci répond parfois.
+    when-named-chance: 0.5
+    when-named: ["?", "oui ?", "quoi", "ouais ?", "jsuis la", "hein ?"]
+    rules:
+      - triggers: ["salut", "slt", "bonjour", "cc", "coucou", "yo", "hello", "wesh", "bjr"]
+        answers: ["slt", "yo", "cc", "salut <player>", "slt ça va ?", "yo <player>"]
+      - triggers: ["ca va", "cv", "sa va", "la forme"]
+        answers: ["oui et toi ?", "tranquille", "ça va et toi", "bien bien", "tkt ça va"]
+      - triggers: ["gg", "bien joue", "gg wp"]
+        answers: ["gg", "gg wp", "ggg", "bien joué"]
+      - triggers: ["bn", "bonne nuit", "jvais dormir"]
+        answers: ["bn", "bonne nuit", "bn <player>"]
+      - triggers: ["re"]
+        answers: ["wb", "re", "wb <player>"]
+      - triggers: ["bye", "ciao", "a plus", "a demain"]
+        answers: ["a+", "bye", "a+ <player>"]
+      - triggers: ["1v1", "duel"]
+        answers: ["moi", "go", "jsuis occupé dsl", "apres si tu veux", "tu vas perdre mdr"]
+      - triggers: ["koth"]
+        answers: ["ce soir je crois", "regarde le discord", "jsais pas", "ouais jsuis chaud"]

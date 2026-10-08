@@ -139,10 +139,13 @@ public final class Schedule {
         return daily * (1 + noise * n);
     }
 
-    /** Nombre de faux joueurs visé, entre floor et peak. */
-    public int target(LocalDateTime time, int floor, int peak) {
-        double value = peak * percent(time) / 100.0 * randomFactor(time);
-        return (int) Math.max(floor, Math.min(peak, Math.round(value)));
+    /**
+     * Nombre de faux joueurs visé : {@code low} quand la courbe est à 0 %, {@code peak} à 100 % (en moyenne),
+     * multiplié par la variation aléatoire, puis borné à [0, cap].
+     */
+    public int target(LocalDateTime time, int low, int peak, int cap) {
+        double value = (low + (peak - low) * percent(time) / 100.0) * randomFactor(time);
+        return (int) Math.max(0, Math.min(cap, Math.round(value)));
     }
 
     /** Libellé lisible de la journée (pour /fp schedule). */

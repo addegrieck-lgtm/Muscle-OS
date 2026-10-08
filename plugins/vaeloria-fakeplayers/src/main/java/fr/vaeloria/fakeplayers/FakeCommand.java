@@ -102,8 +102,8 @@ final class FakeCommand implements TabExecutor {
                 boolean on = args[1].equalsIgnoreCase("on");
                 plugin.getConfig().set("auto.enabled", on);
                 plugin.saveConfig();
-                if (!on) manager.all().stream().filter(FakePlayer::auto).forEach(f -> manager.remove(f.name(), false));
-                return ok(sender, "Mode ambiance " + (on ? "activé." : "désactivé."));
+                return ok(sender, on ? "Mode ambiance activé : les faux joueurs arrivent petit à petit."
+                        : "Mode ambiance désactivé : les faux joueurs « auto » partent petit à petit.");
             }
             case "schedule" -> {
                 return schedule(sender);
@@ -161,13 +161,13 @@ final class FakeCommand implements TabExecutor {
         sender.sendMessage(Component.text("Aujourd'hui : " + schedule.describe(today) + " · demain : "
                 + schedule.describe(today.plusDays(1)), NamedTextColor.GRAY));
         sender.sendMessage(Component.text("Cible : " + plugin.ambientTarget() + " (" + Math.round(schedule.percent(now))
-                + " % du pic de " + max + ") · connectés (auto) : " + autos
+                + " % de la courbe ; " + min + " au creux, " + max + " au pic) · connectés (auto) : " + autos
                 + (autoOn ? "" : " · mode ambiance INACTIF (/fp auto on)"), NamedTextColor.GRAY));
         StringBuilder forecast = new StringBuilder("Prévision :");
         LocalDateTime hour = now.withMinute(0).withSecond(0).withNano(0);
         for (int i = 1; i <= 12; i++) {
             LocalDateTime t = hour.plusHours(i);
-            forecast.append(' ').append(t.getHour()).append("h=").append(schedule.target(t, min, max));
+            forecast.append(' ').append(t.getHour()).append("h=").append(schedule.target(t, min, max, plugin.hardCap()));
         }
         sender.sendMessage(Component.text(forecast.toString(), NamedTextColor.GRAY));
         return true;

@@ -14,6 +14,10 @@ public final class FakePlayer {
     private volatile Skin skin;
     private int ping;
     private UUID bodyId;
+    /** Mode ambiance : fin de session prévue (System.currentTimeMillis), 0 = jamais. */
+    private long leaveAt;
+    /** Départ annoncé (message d'au revoir envoyé), déconnexion imminente. */
+    private boolean leaving;
     private Location bodyLocation;
 
     /** Texture signée Mojang (propriété « textures »). */
@@ -45,4 +49,8 @@ public final class FakePlayer {
     public Location bodyLocation() { return bodyLocation == null ? null : bodyLocation.clone(); }
     public void bodyLocation(Location location) { this.bodyLocation = location == null ? null : location.clone(); }
     public boolean hasBody() { return bodyLocation != null; }
+    public long leaveAt() { return leaveAt; }
+    public void leaveAt(long leaveAt) { this.leaveAt = leaveAt; }
+    public boolean leaving() { return leaving; }
+    public void leaving(boolean leaving) { this.leaving = leaving; }
 }

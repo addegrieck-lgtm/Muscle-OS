@@ -45,7 +45,9 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     private ZoneId zone = ZoneId.systemDefault();
     /** Sans planning : cible qui dérive lentement entre auto.min et auto.max. */
     private int driftTarget = -1;
-    private long nextStepAt;
+    private long nextJoinAt;
+    private long nextLeaveAt;
+    private AmbientChat chat;
     /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
     private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
 
@@ -72,6 +74,8 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         manager.services(tab, bodies);
 
         getServer().getPluginManager().registerEvents(this, this);
+        chat = new AmbientChat(this);
+        getServer().getPluginManager().registerEvents(chat, this);
         FakeCommand command = new FakeCommand(this);
         getCommand("fakeplayers").setExecutor(command);
         getCommand("fakeplayers").setTabCompleter(command);
@@ -108,9 +112,15 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         ConfigurationSection auto = getConfig().getConfigurationSection("auto");
         int min = auto == null ? 0 : Math.max(0, auto.getInt("min", 3));
         int max = auto == null ? 0 : Math.max(min, auto.getInt("max", 10));
-        if (schedule != null) return schedule.target(now(), min, max);
+        if (schedule != null) return schedule.target(now(), min, max, hardCap());
         if (driftTarget < 0) driftTarget = min;
         return Math.max(min, Math.min(max, driftTarget));
+    }
+
+    /** Plafond absolu du mode ambiance (la variation aléatoire peut dépasser auto.max). */
+    int hardCap() {
+        int max = Math.max(0, getConfig().getInt("auto.max", 10));
+        return Math.max(max, getConfig().getInt("auto.hard-cap", (int) Math.round(max * 1.25)));
     }
 
     /** Programme n arrivées réparties au hasard sur la durée donnée. */
@@ -178,52 +188,86 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         seconds++;
         manager.tick(seconds);
         ambient();
-        autoChat();
+        chat.tick();
     }
 
+    /**
+     * Mode ambiance. Chaque faux joueur « auto » a une durée de session ; quand elle est écoulée il part et un autre
+     * le remplace. Arrivées et départs sont espacés d'un délai aléatoire (raccourci si l'écart à la cible est grand),
+     * jamais plus d'une arrivée et d'un départ par seconde.
+     */
     private void ambient() {
         while (!pendingArrivals.isEmpty() && pendingArrivals.peek() <= seconds) {
             pendingArrivals.poll();
-            spawnRandom(false, false);
+            FakePlayer fake = spawnRandom(false, false);
+            if (fake != null) chat.onFakeJoined(fake);
         }
         ConfigurationSection auto = getConfig().getConfigurationSection("auto");
-        if (auto == null || !auto.getBoolean("enabled", false)) return;
+        if (auto == null) return;
         ThreadLocalRandom r = ThreadLocalRandom.current();
+        List<FakePlayer> autos = manager.all().stream().filter(f -> f.auto() && !f.leaving()).toList();
+        if (!auto.getBoolean("enabled", false)) {
+            // Mode coupé : les faux joueurs « auto » s'en vont petit à petit.
+            if (!autos.isEmpty() && seconds >= nextLeaveAt) {
+                depart(autos.get(r.nextInt(autos.size())));
+                nextLeaveAt = seconds + delay(auto, "leave-delay-seconds", autos.size());
+            }
+            return;
+        }
         if (schedule == null && seconds % Math.max(5, auto.getLong("interval-seconds", 60)) == 0) {
             int min = auto.getInt("min", 3), max = Math.max(min, auto.getInt("max", 10));
             if (driftTarget < 0) driftTarget = min;
             if (r.nextDouble() < auto.getDouble("join-chance", 0.5)) driftTarget = Math.min(max, driftTarget + 1);
             else if (r.nextDouble() < auto.getDouble("leave-chance", 0.3)) driftTarget = Math.max(min, driftTarget - 1);
         }
-        if (seconds < nextStepAt) return;
 
-        // Un pas à la fois : une arrivée ou un départ, séparés d'un délai aléatoire.
-        int target = ambientTarget();
-        List<FakePlayer> autos = manager.all().stream().filter(FakePlayer::auto).toList();
-        int gap = Math.abs(target - autos.size());
-        if (autos.size() < target) {
-            spawnRandom(true, false);
-        } else if (autos.size() > target) {
-            manager.remove(autos.get(r.nextInt(autos.size())).name(), false);
-        } else if (!autos.isEmpty() && r.nextDouble() < auto.getDouble("churn-chance", 0.15)) {
-            // Rotation : quelqu'un part, un autre arrivera au pas suivant.
-            manager.remove(autos.get(r.nextInt(autos.size())).name(), false);
+        long now = System.currentTimeMillis();
+        for (FakePlayer f : autos) { // fin de session : au plus un départ par seconde
+            if (f.leaveAt() > 0 && now >= f.leaveAt()) { depart(f); break; }
         }
-        long stepMin = Math.max(1, auto.getLong("step-seconds.min", 15));
-        long stepMax = Math.max(stepMin, auto.getLong("step-seconds.max", 90));
-        long delay = stepMin + r.nextLong(stepMax - stepMin + 1);
-        nextStepAt = seconds + Math.max(1, delay / Math.max(1, gap / 5)); // rattrape plus vite un gros écart
+        int target = ambientTarget(), count = autos.size();
+        if (count < target && seconds >= nextJoinAt) {
+            FakePlayer fake = spawnRandom(true, false);
+            if (fake != null) {
+                fake.leaveAt(now + sessionMillis(auto));
+                chat.onFakeJoined(fake);
+            }
+            nextJoinAt = seconds + delay(auto, "join-delay-seconds", target - count);
+        } else if (count > target && seconds >= nextLeaveAt) {
+            depart(autos.get(r.nextInt(autos.size())));
+            nextLeaveAt = seconds + delay(auto, "leave-delay-seconds", count - target);
+        }
     }
 
-    private void autoChat() {
-        ConfigurationSection chat = getConfig().getConfigurationSection("chat.auto");
-        if (chat == null || !chat.getBoolean("enabled", false) || manager.count() == 0) return;
-        if (seconds % Math.max(5, chat.getLong("interval-seconds", 90)) != 0) return;
-        List<String> messages = chat.getStringList("messages");
-        if (messages.isEmpty() || ThreadLocalRandom.current().nextDouble() >= chat.getDouble("chance", 0.5)) return;
-        List<FakePlayer> all = List.copyOf(manager.all());
-        ThreadLocalRandom r = ThreadLocalRandom.current();
-        manager.chat(all.get(r.nextInt(all.size())), messages.get(r.nextInt(messages.size())));
+    /** Délai aléatoire avant la prochaine arrivée/le prochain départ, divisé (jusqu'à 6×) quand l'écart est grand. */
+    private static long delay(ConfigurationSection auto, String path, int gap) {
+        long min = Math.max(1, auto.getLong(path + ".min", 4));
+        long max = Math.max(min, auto.getLong(path + ".max", 45));
+        long base = min + ThreadLocalRandom.current().nextLong(max - min + 1);
+        int divisor = Math.max(1, Math.min(6, gap / 10));
+        return Math.max(1, base / divisor);
+    }
+
+    /** Durée de session : beaucoup de sessions courtes, quelques longues (moyenne ≈ min + (max - min) / 3). */
+    private static long sessionMillis(ConfigurationSection auto) {
+        double min = Math.max(1, auto.getDouble("session-minutes.min", 10));
+        double max = Math.max(min, auto.getDouble("session-minutes.max", 180));
+        double u = ThreadLocalRandom.current().nextDouble();
+        return (long) ((min + (max - min) * u * u) * 60_000);
+    }
+
+    /** Départ d'un faux joueur, précédé parfois d'un « a+ » quelques secondes avant. */
+    void depart(FakePlayer fake) {
+        if (fake.leaving()) return;
+        fake.leaving(true);
+        long ticks = chat.onFakeLeaving(fake);
+        if (ticks <= 0) {
+            manager.remove(fake.name(), false);
+        } else {
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                if (manager.get(fake.name()) == fake) manager.remove(fake.name(), false);
+            }, ticks);
+        }
     }
 
     /** Crée un faux joueur au pseudo aléatoire, sans corps. Retourne null si aucun pseudo libre. */
