@@ -20,6 +20,7 @@ export const NAV = [
 
 /** Menu mobile : la navigation principale, puis le reste du site. */
 const MORE = [
+  { href: "/vote", label: "Voter" },
   { href: "/fondateurs", label: "Fondateurs" },
   { href: "/boutique", label: "Boutique" },
   { href: "/journal", label: "Journal" },

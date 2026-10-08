@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticPaths: [string, number, MetadataRoute.Sitemap[number]["changeFrequency"]][] = [
     ["/", 1, "daily"], ["/rejoindre", 0.9, "daily"], ["/jouer", 0.9, "monthly"], ["/monde", 0.8, "daily"], ["/empires", 0.8, "hourly"],
-    ["/guerres", 0.8, "hourly"], ["/classements", 0.7, "hourly"], ["/evenements", 0.7, "daily"], ["/conseil", 0.6, "daily"],
+    ["/guerres", 0.8, "hourly"], ["/classements", 0.7, "hourly"], ["/evenements", 0.7, "daily"], ["/conseil", 0.6, "daily"], ["/vote", 0.6, "daily"],
     ["/fondateurs", 0.7, "daily"], ["/journal", 0.6, "weekly"], ["/roadmap", 0.6, "weekly"],
     ["/pvp", 0.8, "monthly"], ["/factions", 0.8, "monthly"], ["/seasons", 0.8, "weekly"], ["/news", 0.7, "daily"], ["/guides", 0.8, "monthly"], ["/faq", 0.6, "monthly"], ["/beta", 0.6, "weekly"],
     ["/boutique", 0.8, "daily"], ["/rules", 0.4, "monthly"], ["/staff", 0.3, "monthly"], ["/support", 0.4, "monthly"], ["/status", 0.3, "hourly"],

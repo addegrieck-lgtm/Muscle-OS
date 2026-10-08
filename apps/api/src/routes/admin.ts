@@ -237,7 +237,7 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
     const world = await sql<{ name: string; n: number }[]>`
       SELECT name, count(*)::int AS n FROM analytics_events
       WHERE created_at > now() - make_interval(days => ${days})
-        AND name IN ('register', 'founder_join', 'account_linked', 'empire_create', 'empire_join', 'referral_click', 'referral_register', 'vote', 'share_empire', 'cta_click', 'map_view', 'war_view', 'event_view', 'ranking_view', 'empire_view')
+        AND name IN ('register', 'founder_join', 'account_linked', 'empire_create', 'empire_join', 'referral_click', 'referral_register', 'vote', 'share_empire', 'cta_click', 'map_view', 'war_view', 'event_view', 'ranking_view', 'empire_view', 'server_vote_open', 'server_vote')
       GROUP BY name`;
     return { days, steps: f, world: Object.fromEntries(world.map((r) => [r.name, r.n])) };
   });

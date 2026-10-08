@@ -2,6 +2,7 @@ name: VaeloriaBridge
 version: '${version}'
 main: fr.vaeloria.bridge.VaeloriaBridgePlugin
 api-version: '1.21'
+softdepend: [Votifier]
 description: Pont sécurisé entre le serveur Minecraft VÆLORIA et l'API (événements, statut, commandes web).
 authors: [VÆLORIA]
 commands:

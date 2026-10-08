@@ -31,4 +31,21 @@ public final class Events {
         o.addProperty("username", name);
         return o;
     }
+
+    /**
+     * Vote Votifier. Le pseudo est celui saisi sur le site de vote : on n'envoie que des valeurs
+     * plausibles (un lot rejeté par l'API ferait perdre les autres événements du lot).
+     * @return null si le vote est inexploitable.
+     */
+    public static JsonObject serverVote(String server, String service, String username, String address) {
+        if (service == null || username == null) return null;
+        String name = username.trim();
+        String svc = service.trim();
+        if (!name.matches("[A-Za-z0-9_]{3,16}") || svc.isEmpty() || svc.length() > 64) return null;
+        JsonObject o = base("SERVER_VOTE", server);
+        o.addProperty("service", svc);
+        o.addProperty("username", name);
+        if (address != null && !address.isBlank() && address.length() <= 64) o.addProperty("address", address.trim());
+        return o;
+    }
 }

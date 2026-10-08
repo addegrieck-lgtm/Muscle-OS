@@ -98,3 +98,17 @@ export const POLL: Field[] = [
 ];
 
 export const REJECT: Field[] = [{ name: "reason", label: "Motif du rejet", kind: "text", required: true }];
+
+export const VOTE_SITE: Field[] = [
+  { name: "name", label: "Nom affiché", kind: "text", required: true },
+  { name: "key", label: "Clé", kind: "text", required: true },
+  { name: "voteUrl", label: "Page de vote de VÆLORIA sur le site", kind: "url", column: "vote_url", required: true },
+  { name: "verifier", label: "Vérification « J'ai voté »", kind: "select", options: [["serveur-prive.net", "serveur-prive.net (jeton API)"], ["serveur-minecraft.com", "serveur-minecraft.com (ID du serveur)"], ["liste-serveurs-minecraft.org", "liste-serveurs-minecraft.org (server_id)"], ["none", "Aucune (Votifier uniquement)"]] },
+  { name: "verificationKey", label: "Clé de vérification (jeton ou ID fourni par le site, jamais affichée)", kind: "text", column: "verification_key", nullIfEmpty: true },
+  { name: "votifierService", label: "Nom du service Votifier (votes reçus en jeu)", kind: "text", column: "votifier_service", nullIfEmpty: true },
+  { name: "cooldownMinutes", label: "Délai entre deux votes (minutes)", kind: "number", column: "cooldown_minutes", required: true },
+  { name: "rewardLabel", label: "Récompense affichée (ex. « 1 clé de vote »)", kind: "text", column: "reward_label" },
+  { name: "rewardCommand", label: "Commande en jeu ({username}, {uuid}) — joueur connecté", kind: "text", column: "reward_command", nullIfEmpty: true },
+  { name: "position", label: "Ordre", kind: "number", required: true },
+  { name: "active", label: "Affiché sur /vote", kind: "checkbox" },
+];

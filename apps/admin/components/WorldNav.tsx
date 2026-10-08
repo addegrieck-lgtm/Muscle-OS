@@ -5,7 +5,7 @@ import { deleteWorld } from "@/lib/worldActions";
 import { WorldForm } from "./WorldForm";
 
 const LINKS = [
-  ["/world", "Fondateurs & réglages"], ["/world/empires", "Empires"], ["/world/wars", "Guerres"], ["/world/polls", "Conseil"],
+  ["/world", "Fondateurs & réglages"], ["/world/empires", "Empires"], ["/world/wars", "Guerres"], ["/world/polls", "Conseil"], ["/world/votes", "Votes"],
   ["/world/journal", "Journal"], ["/world/roadmap", "Roadmap"], ["/world/zones", "Carte"], ["/world/influence", "Influence"], ["/world/referrals", "Parrainages"],
 ] as const;
 

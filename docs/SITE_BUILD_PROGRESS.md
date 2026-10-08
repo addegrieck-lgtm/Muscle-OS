@@ -1,6 +1,6 @@
 # Avancement de la construction
 
-Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test automatisé ou une exécution réelle décrite ici ; rien n'est déclaré terminé sans cela.
+Dernière mise à jour : 8 octobre 2026. « Testé » = vérifié par un test automatisé ou une exécution réelle décrite ici ; rien n'est déclaré terminé sans cela.
 
 ## Synthèse
 
@@ -131,6 +131,19 @@ Tests de cette étape : API 90 / 90 ✅, site 4 / 4 ✅, typecheck du workspace 
 
 Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60 s (une action apparaît sur les pages publiques avec ce délai ; l'îlot personnel est immédiat). Les parrainages et votes d'un même foyer ne sont pas distingués au-delà de « un compte Discord = une personne » et du plafond quotidien.
 
+## Votes pour le serveur (8 octobre 2026)
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| Page `/vote` : sites, récompenses, délai, « Prochain vote », classement du mois | ✅ | Build ; captures desktop/mobile, 0 débordement à 390 px ; aperçu statique exporté |
+| « J'ai voté » vérifié auprès de serveur-prive.net, serveur-minecraft.com, liste-serveurs-minecraft.org | ✅ | Tests API (formats d'URL des 3 sites, vote trouvé / absent / site injoignable) ; navigateur : appel réel à serveur-prive.net avec une clé fictive → « Aucun vote trouvé » affiché |
+| Votifier → `SERVER_VOTE` (plugin, sans dépendance de compilation) | 🟡 | Tests API (idempotence, délai partagé avec le site) ; tests Java du filtrage ; **pas encore testé avec un vrai NuVotifier** |
+| Récompenses : influence plafonnée + commande en jeu par site | ✅ | Tests API |
+| Anti-abus : délai, même IP pour deux joueurs, IP relayée seulement avec le jeton interne | ✅ | Tests API |
+| Admin → Monde → Votes (sites, statistiques, derniers votes) ; funnel marketing | ✅ | Build admin |
+
+Tests de cette étape : API 102 / 102 ✅ (dont 12 votes), site 4 / 4 ✅, plugin 5 / 5 ✅, typecheck du workspace ✅.
+
 ## Décisions attendues du propriétaire
 
 1. Prestataire de paiement (Stripe / PayPal / Tebex).
@@ -139,3 +152,4 @@ Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60
 4. Lien Discord définitif et date d'ouverture de la Saison I (modifiable en base).
 5. Hébergeur du VPS et du serveur Minecraft.
 6. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.
+7. Votes : URL de vote et clé de chaque site (fiches à créer), récompenses en jeu, délais exacts de revote.

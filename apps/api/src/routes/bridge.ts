@@ -52,10 +52,11 @@ export async function bridgeRoutes(app: FastifyInstance, ctx: AppContext) {
 
   app.post("/events", { config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (req) => {
     const { events } = parse(BridgeEventBatch, req.body);
-    const result = await ingestEvents(sql, events);
+    const result = await ingestEvents(sql, events, { votePepper: ctx.env.WEB_INTERNAL_TOKEN });
     if (result.accepted > 0) {
       ctx.cache.invalidate("status:");
       ctx.cache.invalidate("players:");
+      if (events.some((e) => e.event === "SERVER_VOTE")) ctx.cache.invalidate("world:vote");
     }
     return result;
   });

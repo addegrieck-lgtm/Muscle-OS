@@ -10,6 +10,9 @@ import { createEmpire, CRESTS, EMPIRE_COLORS, EmpireError, joinEmpire, leaveEmpi
 import { castVote, myVotes, PollError } from "../services/world/polls";
 import { referralStats } from "../services/world/referrals";
 import { iso } from "../services/status";
+import { claimWebVote, myServerVotes, VoteError } from "../services/votes/votes";
+import { isIP } from "node:net";
+import { safeEqualString } from "../lib/hmac";
 
 /** Espace joueur. Toutes les routes exigent une session. */
 export async function meRoutes(app: FastifyInstance, ctx: AppContext) {
@@ -113,6 +116,40 @@ export async function meRoutes(app: FastifyInstance, ctx: AppContext) {
     }
     ctx.cache.invalidate("world:"); // le vote change aussi l'influence (empires, classements)
     return { ok: true };
+  });
+
+  // ───── Votes pour le serveur ─────
+  /**
+   * IP du joueur pour la vérification auprès du site de vote. Le site (Next) relaie l'IP du visiteur
+   * dans `x-vaeloria-client-ip`, accepté uniquement avec le jeton interne ; sinon l'IP de l'appelant.
+   */
+  const clientIp = (req: { headers: Record<string, string | string[] | undefined>; ip: string }): string => {
+    const t = req.headers["x-internal-token"];
+    const relayed = req.headers["x-vaeloria-client-ip"];
+    if (ctx.env.WEB_INTERNAL_TOKEN && typeof t === "string" && safeEqualString(t, ctx.env.WEB_INTERNAL_TOKEN) && typeof relayed === "string" && isIP(relayed.trim())) return relayed.trim();
+    return req.ip.replace(/^::ffff:/, "");
+  };
+
+  app.get("/server-votes", async (req) => {
+    const user = await requireUser(sql, req);
+    return myServerVotes(sql, user.id);
+  });
+
+  app.post("/server-votes/:site/claim", { config: perUser(30) }, async (req) => {
+    const user = await requireUser(sql, req);
+    const { site } = parse(z.object({ site: z.string().regex(/^[a-z0-9-]{2,40}$/) }), req.params);
+    const b = parse(z.object({ uuid: z.string().uuid().optional() }), req.body ?? {});
+    try {
+      const r = await claimWebVote(sql, ctx.voteFetch ?? fetch, { userId: user.id, siteKey: site, ip: clientIp(req), pepper: ctx.env.WEB_INTERNAL_TOKEN ?? "", playerUuid: b.uuid });
+      ctx.cache.invalidate("world:");
+      return { ok: true, ...r };
+    } catch (e) {
+      if (e instanceof VoteError) {
+        const status = { not_found: 404, not_linked: 403, not_configured: 409, cooldown: 409, not_voted: 409, ip_used: 409, unavailable: 503 }[e.code];
+        throw new HttpError(status, e.code, e.message, e.nextAt ? { nextAt: e.nextAt } : undefined);
+      }
+      throw e;
+    }
   });
 
   app.get("/orders", async (req) => {

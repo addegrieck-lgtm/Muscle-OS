@@ -98,6 +98,29 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
       .refine((z_) => z_.x2 > z_.x1 && z_.z2 > z_.z1, { message: "x2 > x1 et z2 > z1" }),
     (v) => v, "key");
 
+  // ───── Votes (sites de classement) ─────
+  crud("vote-sites", "vote_sites", "id",
+    z.object({ key: z.string().regex(/^[a-z0-9-]{2,40}$/), name: z.string().min(2).max(60), voteUrl: z.string().url().max(300),
+      verifier: z.enum(["none", "serveur-prive.net", "serveur-minecraft.com", "liste-serveurs-minecraft.org"]),
+      verificationKey: z.string().max(200).nullable().default(null), votifierService: z.string().max(64).nullable().default(null),
+      cooldownMinutes: z.number().int().min(30).max(10080), rewardLabel: z.string().max(200).default(""),
+      rewardCommand: z.string().max(300).nullable().default(null), position: z.number().int().default(0), active: z.boolean().default(false) }),
+    (v) => ({ key: v.key, name: v.name, vote_url: v.voteUrl, verifier: v.verifier, verification_key: v.verificationKey, votifier_service: v.votifierService,
+      cooldown_minutes: v.cooldownMinutes, reward_label: v.rewardLabel, reward_command: v.rewardCommand, position: v.position, active: v.active }),
+    "position, name");
+
+  app.get("/votes", async () => {
+    const [bySite, recent] = await Promise.all([
+      sql`SELECT s.name, s.active,
+                 count(v.id) FILTER (WHERE v.voted_at >= date_trunc('month', now()))::int AS month,
+                 count(v.id) FILTER (WHERE v.voted_at >= now() - interval '24 hours')::int AS day,
+                 count(v.id) FILTER (WHERE v.source = 'web')::int AS web, count(v.id) FILTER (WHERE v.source = 'votifier')::int AS votifier
+          FROM vote_sites s LEFT JOIN server_votes v ON v.site_id = s.id GROUP BY s.id ORDER BY s.position, s.name`,
+      sql`SELECT v.username, s.name AS site, v.source, v.voted_at AS "votedAt" FROM server_votes v JOIN vote_sites s ON s.id = v.site_id ORDER BY v.voted_at DESC LIMIT 50`,
+    ]);
+    return { bySite, recent };
+  });
+
   // ───── Influence ─────
   app.get("/influence", async () => ({ items: await sql`SELECT kind, label, points, daily_cap AS "dailyCap", once_per_user AS "oncePerUser", requires_linked AS "requiresLinked", active FROM influence_rules ORDER BY kind` }));
   app.put("/influence/:kind", async (req) => {

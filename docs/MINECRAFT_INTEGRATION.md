@@ -47,6 +47,12 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 | `ECONOMY_TRANSACTION` | plugin économie | solde joueur |
 | `PLAYER_RANK_CHANGE` | plugin de grades | rang affiché |
 
+### Votes (Votifier)
+
+| Événement | Émis par | Effet |
+|---|---|---|
+| `SERVER_VOTE` (`service`, `username`, `address?`) | VæloriaBridge, automatiquement si NuVotifier est installé (`softdepend`) | vote compté une fois par site / joueur / délai ; influence + commande de récompense du site. Voir `VOTES.md` |
+
 ### Brancher le plugin Factions / KOTH
 
 Le plugin Factions du réseau n'est pas encore choisi. Il suffit d'appeler l'API publique du bridge depuis ses listeners :

@@ -6,6 +6,7 @@ import { parse } from "../lib/validate";
 import { getEvent, getUpcomingEvents, pastEvents } from "../services/content";
 import { getEmpire, listEmpires } from "../services/world/empires";
 import { founderStats, listFounders } from "../services/world/founders";
+import { votePage } from "../services/votes/votes";
 import { listPolls } from "../services/world/polls";
 import { getRanking, RANKING_IDS } from "../services/world/rankings";
 import { recordClick } from "../services/world/referrals";
@@ -31,6 +32,12 @@ export async function worldRoutes(app: FastifyInstance, ctx: AppContext) {
         warsActive: activeWars.length, events: events.slice(0, 4), poll: polls.find((p) => p.status === "open") ?? null, journal: journal.slice(0, 3),
       };
     });
+  });
+
+  /** Sites de vote actifs et meilleurs voteurs du mois. */
+  app.get("/vote", async (_req, reply) => {
+    reply.header("cache-control", cacheFor(30));
+    return cached("vote", 30, () => votePage(sql));
   });
 
   app.get("/founders", async (_req, reply) => {

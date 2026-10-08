@@ -143,3 +143,26 @@ export const RANKING_CATEGORIES = [
   { id: "saison", label: "Saison", description: "Performance globale de la saison", unit: "pts" },
   { id: "recruteurs", label: "Recruteurs", description: "Recrues qualifiées", unit: "recrues" },
 ] as const;
+
+/** Vote pour le serveur sur les sites de classement (/vote). */
+export interface VoteSiteView {
+  key: string;
+  name: string;
+  voteUrl: string;
+  cooldownMinutes: number;
+  rewardLabel: string;
+  /** Le bouton « J'ai voté » peut vérifier le vote (sinon : comptabilisé en jeu via Votifier). */
+  verifiable: boolean;
+}
+
+export interface VotePage {
+  sites: VoteSiteView[];
+  /** Mois en cours (UTC) : total et meilleurs voteurs. */
+  month: { start: string; total: number; top: { username: string; votes: number }[] };
+}
+
+export interface MyServerVotes {
+  player: { uuid: string; username: string } | null;
+  sites: { key: string; lastVotedAt: string | null; nextAt: string | null }[];
+  monthVotes: number;
+}

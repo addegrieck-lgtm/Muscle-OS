@@ -16,7 +16,7 @@ const WORLD_STEPS: [string, string][] = [
 ];
 const WORLD_OTHER: [string, string][] = [
   ["referral_click", "Clics d'invitation"], ["referral_register", "Inscriptions parrainées"], ["vote", "Votes au Conseil"], ["share_empire", "Partages d'empire"],
-  ["map_view", "Vues de la carte"], ["empire_view", "Vues d'empire"], ["war_view", "Vues de guerre"], ["event_view", "Vues d'événement"], ["ranking_view", "Vues de classement"],
+  ["map_view", "Vues de la carte"], ["empire_view", "Vues d'empire"], ["server_vote_open", "Clics « Voter »"], ["server_vote", "Votes comptabilisés"], ["war_view", "Vues de guerre"], ["event_view", "Vues d'événement"], ["ranking_view", "Vues de classement"],
 ];
 
 const STEPS: [string, string][] = [

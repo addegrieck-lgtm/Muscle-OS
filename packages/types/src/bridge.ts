@@ -47,6 +47,8 @@ export const BridgeEvent = z.discriminatedUnion("event", [
     attackerScore: z.number().int().min(0), defenderScore: z.number().int().min(0),
     attackerTerritories: z.number().int().min(0).optional(), defenderTerritories: z.number().int().min(0).optional(), participants: z.number().int().min(0).optional(),
   }),
+  // Vote reçu par Votifier / NuVotifier. Pseudo tel que saisi sur le site de vote (non garanti valide).
+  z.object({ ...base, event: z.literal("SERVER_VOTE"), service: z.string().min(1).max(64), username: z.string().min(1).max(32), address: z.string().max(64).nullable().optional() }),
   z.object({ ...base, event: z.literal("KOTH_START"), koth: z.string().max(64), durationSeconds: z.number().int().min(60).max(86_400).optional() }),
   z.object({
     ...base, event: z.literal("EVENT_START"), eventId: z.string().min(1).max(64), title: z.string().min(3).max(120),

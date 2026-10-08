@@ -3,6 +3,7 @@ import type { Env } from "./env";
 import type { TtlCache } from "./lib/cache";
 import type { pingMinecraft } from "./lib/minecraftPing";
 import type { MojangLookup } from "./services/identity";
+import type { VoteFetch } from "./services/votes/verifiers";
 import type { PaymentProvider } from "./services/payments/provider";
 
 export interface AppContext {
@@ -16,6 +17,8 @@ export interface AppContext {
   pinger?: typeof pingMinecraft;
   mojang?: MojangLookup;
   discordFetch?: typeof fetch;
+  /** Appels aux sites de vote (vérification « J'ai voté »). */
+  voteFetch?: VoteFetch;
 }
 
 declare module "fastify" {
