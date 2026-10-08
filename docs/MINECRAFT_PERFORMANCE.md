@@ -30,17 +30,32 @@ Modèles de configuration prêts à fusionner : [`deploy/minecraft/`](../deploy/
   - côté Velocity : forwarding `modern` et `compression-threshold = 256` ;
   - côté Paper : `network-compression-threshold=-1`, `online-mode=false`, `proxies.velocity.enabled: true` avec le même secret.
 
-## 4. Combat 1.8 en 1.21 : OldCombatMechanics
+## 4. Combat 1.8 en 1.21
 
-Modules à activer et à **imposer à tous les joueurs** (dans OCM 2.x : un seul *modeset* autorisé, pas de choix par joueur) :
+### Plugin maison : VaeloriaCombat (`plugins/vaeloria-combat`)
+
+Ce plugin couvre ce qu'un plugin peut faire sur les 4 facteurs du §1 :
+
+| Facteur | Ce que fait VaeloriaCombat |
+|---|---|
+| MSPT | mesure la durée **réelle** de chaque tick (`ServerTickEndEvent`). Si le MSPT moyen sur 5 s reste ≥ 45 ms pendant 10 s, il passe en **mode dégradé** : la distance de simulation baisse à 3 chunks (fermes, mobs et redstone éloignés tournent moins) et le staff est prévenu. Retour à la normale après 60 s sous 30 ms. La distance d'affichage ne change jamais. |
+| Ping | ping lissé et **gigue** (stabilité) de chaque joueur, toutes les secondes. `/ping [joueur]`, alerte staff si ping ≥ 150 ms ou gigue ≥ 40 ms. Le plugin ne peut pas réduire le ping : c'est l'hébergement (§2) qui le fait. |
+| Combat identique | pas de recharge d'attaque, invulnérabilité fixe entre deux coups, pas de coup balayé, **knockback 1.8 déterministe** (mêmes formules que la 1.8.9, résistance au recul ignorée par défaut), appliqué à chaque joueur à la connexion et à chaque `/vcombat reload`. |
+| Rubberband | le recul est posé sur le **paquet de vélocité vanilla** (`PlayerVelocityEvent`), que GrimAC sait anticiper. Le plugin ne remplace pas un anticheat (§5). |
+
+Commandes : `/ping [joueur]`, `/pvpstatus` (TPS, MSPT 5 s / p95 / max / 1 min, mode, ping moyen ; le staff voit aussi les 3 connexions les plus instables), `/vcombat reload`.
+Permissions : `vaeloria.combat.alerts` (alertes, op par défaut), `vaeloria.combat.admin`.
+Réglages commentés : `plugins/VaeloriaCombat/config.yml`. Le jar est produit par la CI (artefact `vaeloria-combat`) ou par `gradle build` dans `plugins/vaeloria-combat`.
+
+**VaeloriaCombat remplace les modules `disable-attack-cooldown`, `attack-frequency`, `old-player-knockback` et `disable-sword-sweep` d'OldCombatMechanics.** Si les deux plugins sont installés, désactiver ces modules dans OCM : deux plugins qui modifient le même recul donnent un combat incohérent.
+
+### OldCombatMechanics (pour le reste)
+
+Modules complémentaires à activer et à **imposer à tous les joueurs** (dans OCM 2.x : un seul *modeset* autorisé, pas de choix par joueur). Sans VaeloriaCombat, activer aussi `disable-attack-cooldown`, `attack-frequency`, `old-player-knockback` et `disable-sword-sweep`.
 
 | Module | Effet |
 |---|---|
-| `disable-attack-cooldown` | plus de recharge d'attaque 1.9 |
-| `attack-frequency` | délai entre coups de 1.8 (`playerDelay: 20`) |
-| `old-player-knockback` | knockback 1.8 |
 | `old-tool-damage`, `old-critical-hits` | dégâts des armes et coups critiques de 1.8 |
-| `disable-sword-sweep` | pas de coup balayé |
 | `old-golden-apples` | pommes (et pommes de Notch) de 1.8 |
 | `old-potion-effects` | durées et valeurs des potions de 1.8 |
 | `old-player-regen` | régénération de 1.8 |
@@ -107,7 +122,7 @@ Ce sont des **extraits à fusionner** dans les fichiers générés par Paper, pa
 - [ ] Dédié ou cœurs réservés, CPU rapide sur un cœur, NVMe, datacenter en France, anti-DDoS jeu
 - [ ] Java 21 + `start.sh` (flags d'Aikar, `-Xms` = `-Xmx`)
 - [ ] Paper 1.21 à jour ; extraits de `deploy/minecraft/` fusionnés
-- [ ] OldCombatMechanics : un seul modeset imposé, modules du §4
+- [ ] VaeloriaCombat installé ; OldCombatMechanics pour le reste (pommes, potions, régénération…), sans les 4 modules qu'il remplace
 - [ ] GrimAC testé avec OCM, sanctions activées seulement après validation
 - [ ] Empilement des mobs, limites par chunk, monde prégénéré + bordure
 - [ ] `DISCORD_ALERTS_WEBHOOK_URL` configuré sur un salon staff

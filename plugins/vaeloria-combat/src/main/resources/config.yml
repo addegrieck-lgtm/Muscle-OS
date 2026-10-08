@@ -1,0 +1,43 @@
+# VaeloriaCombat — PvP fluide et identique pour tous.
+# Après modification : /vcombat reload (appliqué immédiatement à tous les joueurs connectés).
+# Ne PAS utiliser en même temps que les modules équivalents d'OldCombatMechanics
+# (disable-attack-cooldown, attack-frequency, old-player-knockback, disable-sword-sweep) : un seul plugin doit les gérer.
+
+combat:
+  # Pas de recharge d'attaque 1.9 : chaque clic frappe à pleine puissance.
+  disable-attack-cooldown: true
+  attack-speed: 1024.0
+  # Invulnérabilité après un coup, en ticks. 20 = comportement 1.8 (un coup compte toutes les ~10 ticks).
+  max-no-damage-ticks: 20
+  # Pas de coup balayé à l'épée.
+  disable-sweep: true
+
+knockback:
+  enabled: true
+  # Valeurs 1.8.9 vanilla. Ajuster par petites touches (0.02) et tester à deux avant de mettre en production.
+  friction: 2.0            # la vitesse actuelle de la victime est divisée par ce nombre
+  horizontal: 0.4
+  vertical: 0.4
+  vertical-limit: 0.4      # hauteur maximale du recul (évite les combos qui envoient en l'air)
+  extra-horizontal: 0.5    # bonus par niveau (sprint = 1, + enchantement Recul)
+  extra-vertical: 0.1
+  # La 1.8 n'avait pas de résistance au recul (armure en netherite) : true = même recul pour tout le monde.
+  ignore-knockback-resistance: true
+
+performance:
+  # Mode dégradé automatique quand le serveur sature.
+  lag-guard: true
+  degrade-mspt: 45            # MSPT moyen (5 s) à partir duquel la pression est comptée
+  degrade-after-seconds: 10   # ... pendant au moins ce temps
+  recover-mspt: 30            # retour à la normale sous ce MSPT
+  recover-after-seconds: 60   # ... maintenu pendant ce temps
+  # Distance de simulation en mode dégradé (la distance d'affichage ne change jamais).
+  degraded-simulation-distance: 3
+  # Messages aux joueurs ayant vaeloria.combat.alerts.
+  staff-alerts: true
+
+ping:
+  # Alerte staff quand un joueur dépasse l'un de ces seuils (une fois par épisode).
+  warn-ping-ms: 150
+  warn-jitter-ms: 40
+  staff-alerts: true
