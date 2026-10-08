@@ -73,6 +73,19 @@ def nbt_compound(name, children: list[bytes]):
     return _tag(10, name, b"".join(children) + b"\x00")
 
 
+def nbt_byte(name, v):
+    return _tag(1, name, struct.pack(">b", v))
+
+
+def nbt_string(name, v: str):
+    return _tag(8, name, _str(v))
+
+
+def nbt_compound_list(name, payloads: list[bytes]):
+    """Liste de compounds ; chaque payload = enfants concaténés, sans le TAG_End final."""
+    return _tag(9, name, bytes([10]) + struct.pack(">i", len(payloads)) + b"".join(p + b"\x00" for p in payloads))
+
+
 def nbt_empty_compound_list(name):
     return _tag(9, name, bytes([10]) + struct.pack(">i", 0))
 
@@ -87,8 +100,11 @@ def varints(values: np.ndarray) -> bytes:
     return bytes(out)
 
 
-def write_schem(path: Path, blocks: np.ndarray, palette: list[str], origin: tuple[int, int, int]):
-    """blocks : indices de palette, forme (Y, Z, X). origin : point de collage (x, y, z) dans le volume."""
+def write_schem(path: Path, blocks: np.ndarray, palette: list[str], origin: tuple[int, int, int], block_entities=None):
+    """blocks : indices de palette, forme (Y, Z, X). origin : point de collage (x, y, z) dans le volume.
+
+    block_entities : [(x, y, z, id, [(slot, item_id, count), ...]), ...] en coordonnées du volume (ex. distributeurs remplis).
+    """
     h, l, w = blocks.shape
     data = varints(blocks.reshape(-1))  # ordre x + z*W + y*W*L
     root = nbt_compound(
@@ -104,7 +120,11 @@ def write_schem(path: Path, blocks: np.ndarray, palette: list[str], origin: tupl
             nbt_int("PaletteMax", len(palette)),
             nbt_compound("Palette", [nbt_int(name, i) for i, name in enumerate(palette)]),
             nbt_bytes("BlockData", data),
-            nbt_empty_compound_list("BlockEntities"),
+            nbt_compound_list("BlockEntities", [
+                nbt_ints("Pos", [x, y, z]) + nbt_string("Id", be_id)
+                + nbt_compound_list("Items", [nbt_byte("Slot", slot) + nbt_string("id", item) + nbt_int("count", n) for slot, item, n in items])
+                for x, y, z, be_id, items in (block_entities or [])
+            ]),
         ],
     )
     buf = io.BytesIO()

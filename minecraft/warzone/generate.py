@@ -2,7 +2,7 @@
 
 Usage : python3 minecraft/warzone/generate.py   (Pillow + numpy ; réutilise minecraft/spawn)
 Sorties dans minecraft/warzone/ :
-  vaeloria-warzone.schem              la warzone : 17 × 17 chunks (272 × 272), dragon, bâtiments, 3 avant-postes
+  vaeloria-warzone.schem              la warzone : 25 × 25 chunks (400 × 400), dragon, bâtiments, 3 avant-postes, pièges
   vaeloria-avant-poste-exterieur.schem  délimitation d'un avant-poste extérieur de 3 × 3 chunks, à coller 4 fois
   apercu-*.png
 
@@ -26,7 +26,7 @@ _spawn = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_spawn)
 LOGO_BLOCKS, Palette, write_schem, logo_grid = _spawn.LOGO_BLOCKS, _spawn.Palette, _spawn.write_schem, _spawn.logo_grid
 
-HALF = 136  # bord : chunks -8..8 autour du chunk central → x, z de -136 à 135
+HALF = 200  # bord : chunks -12..12 autour du chunk central → x, z de -200 à 199
 YMIN, YMAX = -8, 108
 LIFT = 44  # le dragon vole : son point le plus bas reste à plus de 44 blocs du sol, hors de portée d'une perle (~37)
 PB = "minecraft:polished_blackstone_bricks"
@@ -34,12 +34,12 @@ DT = "minecraft:deepslate_tiles"
 
 # Les trois avant-postes intérieurs : un chunk chacun, centrés sur des centres de chunk, à 120° autour du dragon.
 OUTPOSTS = {
-    "rubis": {"center": (0, -80), "glass": "minecraft:red_stained_glass", "line": "minecraft:red_nether_bricks"},
-    "argent": {"center": (64, 48), "glass": "minecraft:white_stained_glass", "line": "minecraft:calcite"},
-    "onyx": {"center": (-64, 48), "glass": "minecraft:black_stained_glass", "line": "minecraft:polished_blackstone"},
+    "rubis": {"center": (0, -112), "glass": "minecraft:red_stained_glass", "line": "minecraft:red_nether_bricks"},
+    "argent": {"center": (96, 64), "glass": "minecraft:white_stained_glass", "line": "minecraft:calcite"},
+    "onyx": {"center": (-96, 64), "glass": "minecraft:black_stained_glass", "line": "minecraft:polished_blackstone"},
 }
 GATES = {"nord": (0, -1), "est": (1, 0), "sud": (0, 1), "ouest": (-1, 0)}
-OUTER_D = 336  # centre des avant-postes extérieurs : 176 blocs au-delà du bord de la warzone
+OUTER_D = 400  # centre des avant-postes extérieurs : 176 blocs au-delà du bord de la warzone
 ARRIVAL = (0, 34, -4)  # pieds du joueur sur la plateforme, dans le repère du dragon (avant élévation)
 
 
@@ -49,6 +49,7 @@ class Vol:
         self.pal = Palette()
         n = 2 * half
         self.v = np.zeros((ymax - ymin + 1, n, n), dtype=np.int32)
+        self.block_entities = []  # (x, y, z, id, items) en coordonnées locales
 
     def ok(self, x, y, z):
         return -self.half <= x < self.half and -self.half <= z < self.half and self.ymin <= y <= self.ymax
@@ -109,7 +110,9 @@ def ground(w, rng):
             if top == "minecraft:pale_moss_block" and rng.random() < 0.18:
                 w.put(x, 0, z, "minecraft:pale_moss_carpet")
     # Cratères de bataille : creux peu profonds, fond en pierre noire, une veine de rubis.
-    for cx, cz, r in ((-30, -40, 5), (40, -20, 6), (20, 70, 5), (-90, -10, 6), (95, -70, 5), (-40, 100, 5), (100, 95, 4), (-100, -95, 4)):
+    frost = {(60, -30), (-60, 145)}  # cratères de givre : fond en neige poudreuse
+    for cx, cz, r in ((-45, -60, 6), (60, -30, 7), (30, 105, 6), (-135, -15, 7), (140, -105, 6), (-60, 145, 6), (150, 140, 5),
+                      (-150, -140, 5), (-170, 90, 5), (175, 5, 5)):
         for x in range(cx - r, cx + r + 1):
             for z in range(cz - r, cz + r + 1):
                 d = math.hypot(x - cx, z - cz)
@@ -117,7 +120,12 @@ def ground(w, rng):
                     depth = 1 if d > r * 0.55 else 2
                     for y in range(-depth, 1):
                         w.put(x, y, z, "minecraft:air")
-                    w.put(x, -depth - 1, z, "minecraft:deepslate_redstone_ore" if rng.random() < 0.08 else "minecraft:blackstone")
+                    if (cx, cz) in frost:
+                        for y in range(-depth - 1, -depth + 1):
+                            w.put(x, y, z, "minecraft:powder_snow")
+                        w.put(x, -depth - 2, z, "minecraft:blackstone")
+                    else:
+                        w.put(x, -depth - 1, z, "minecraft:deepslate_redstone_ore" if rng.random() < 0.08 else "minecraft:blackstone")
 
 
 def road(w, a, b, width=2):
@@ -135,7 +143,7 @@ def road(w, a, b, width=2):
 
 def border(w, rng):
     """Muret de 2 blocs sur le bord exact des chunks, pilier à chaque coin de chunk, 4 portes et des brèches."""
-    breaches = {(-1, 40), (-1, -72), (1, 72), (1, -40)}  # (côté, position) : brèches à travers le muret
+    breaches = {(-1, 59), (-1, -106), (1, 106), (1, -59)}  # (côté, position) : brèches à travers le muret
 
     def wall_at(t, c):
         return all(abs(t - p) > 2 for s, p in breaches if s == c)
@@ -325,6 +333,10 @@ def ruin(w, cx, cz, rng, wdt=7, dpt=9):
                     continue
                 window = y == 2 and (dx % 3 == 0) and abs(dz) == dpt // 2 and not door
                 w.put(x, y, z, "minecraft:air" if window else ("minecraft:cracked_polished_blackstone_bricks" if rng.random() < 0.3 else PB))
+    # Piège : toiles d'araignée derrière la porte et dans un coin. On entre, on est ralenti, on se fait cueillir.
+    w.put(cx, 0, cz + dpt // 2 - 1, "minecraft:cobweb")
+    w.put(cx, 1, cz + dpt // 2 - 1, "minecraft:cobweb")
+    w.put(cx - wdt // 2 + 1, 0, cz - dpt // 2 + 1, "minecraft:cobweb")
     for dx in range(-wdt // 2 + 1, 1):  # reste de toit d'un côté
         for dz in range(-dpt // 2 + 1, dpt // 2):
             if rng.random() < 0.7:
@@ -388,6 +400,12 @@ def outpost(w, key, rng):
                 w.put(x, y, z, "minecraft:calcite" if y < h - 1 else "minecraft:chiseled_polished_blackstone")
         for a, b in (((cx - 5, cz - 2), (cx - 5, cz + 2)), ((cx + 3, cz + 5), (cx + 5, cz + 4))):
             wall_seg(w, a, b, 2, rng)
+        for sx in (-1, 1):  # piège : quatre plaques de neige poudreuse au ras du sol, couleur argent
+            for sz in (-1, 1):
+                for dx in (2, 3):
+                    for dz in (2, 3):
+                        for y in (-2, -1):
+                            w.put(cx + sx * dx, y, cz + sz * dz, "minecraft:powder_snow")
         beacon(0)
     else:
         # Cour fermée : murs de 4, deux portes face à face. Des goulots, pas de fenêtres.
@@ -405,6 +423,34 @@ def outpost(w, key, rng):
         beacon(0)
 
 
+def traps(w, rng):
+    """Petits pièges répartis dans la warzone. Tout est déjà construit : rien à poser en jeu."""
+    # Fosses à pics : 3 × 3, 5 de profondeur, stalagmites au fond, une échelle pour ressortir lentement.
+    for px, pz in ((24, -150), (-24, -150), (140, 46), (84, 110), (-140, 46), (-84, 110), (172, -72), (-172, -72)):
+        for x in range(px - 1, px + 2):
+            for z in range(pz - 1, pz + 2):
+                for y in range(-5, 1):
+                    w.put(x, y, z, "minecraft:air")
+                w.put(x, -6, z, "minecraft:tuff")
+                if (x + z) % 2 == 0:
+                    w.put(x, -5, z, "minecraft:pointed_dripstone[thickness=tip,vertical_direction=up]")
+        for y in range(-5, 0):
+            w.put(px - 1, y, pz, "minecraft:ladder[facing=east]")
+    # Plaques piégées : une plaque de pierre noire sur la route, un distributeur de flèches caché dessous.
+    arrows = [(slot, "minecraft:arrow", 64) for slot in range(9)]
+    for x, z in ((1, -60), (-1, -170), (-1, 60), (1, 170), (60, 1), (170, -1), (-60, -1), (-170, 1), (48, 32), (-48, 32)):
+        w.put(x, -1, z, "minecraft:dispenser[facing=up]")
+        w.put(x, 0, z, "minecraft:polished_blackstone_pressure_plate")
+        w.block_entities.append((x, -1, z, "minecraft:dispenser", arrows))
+    # Ronces rubis : buissons de baies sur les approches des avant-postes. Elles ralentissent et blessent.
+    for cx, cz in ((-24, -112), (24, -112), (112, 40), (80, 92), (-112, 40), (-80, 92)):
+        for x in range(cx - 2, cx + 3):
+            for z in range(cz - 2, cz + 3):
+                if rng.random() < 0.65:
+                    w.put(x, -1, z, "minecraft:coarse_dirt")
+                    w.put(x, 0, z, "minecraft:sweet_berry_bush[age=3]")
+
+
 def build_warzone():
     rng = np.random.default_rng(21)
     w = Vol()
@@ -415,27 +461,30 @@ def build_warzone():
     for name, (dx, dz) in GATES.items():
         road(w, (dx * 30, dz * 30), (dx * (HALF - 1), dz * (HALF - 1)))
     border(w, rng)
-    # Tours de guet aux quatre diagonales : point haut entre deux avant-postes.
-    for x, z in ((-100, -100), (100, -100), (100, 100), (-100, 100)):
+    # Tours de guet aux quatre diagonales : point haut entre deux portes.
+    for x, z in ((-150, -150), (150, -150), (150, 150), (-150, 150)):
         tower(w, x, z)
-    # Ruines, murs brisés, piliers : couvert réparti dans chaque secteur.
-    for x, z in ((-40, -70), (40, -60), (-110, 30), (110, 20), (30, 100), (-20, 112), (-70, -40), (75, -30), (-60, 85), (90, 70)):
+    # Ruines, murs brisés, piliers : couvert réparti dans chaque secteur, jamais sur les routes.
+    for x, z in ((-60, -100), (60, -90), (-160, 45), (160, 30), (45, 150), (-30, 165), (-100, -60), (110, -45),
+                 (-90, 125), (130, 100), (-130, -110), (130, -120), (-40, 60), (175, -160), (-175, 170)):
         ruin(w, x, z, rng)
-    for a, b, h in (((-20, -55), (-10, -50), 3), ((20, -50), (28, -46), 2), ((50, 20), (52, 30), 3), ((-52, 22), (-50, 30), 2),
-                    ((-15, 70), (-5, 74), 2), ((10, 60), (16, 66), 3), ((-118, -60), (-110, -60), 2), ((112, -55), (118, -48), 2),
-                    ((70, 112), (80, 112), 2), ((-90, 110), (-84, 116), 3)):
+    for a, b, h in (((-30, -80), (-15, -73), 3), ((30, -73), (41, -68), 2), ((73, 30), (76, 44), 3), ((-76, 32), (-73, 44), 2),
+                    ((-22, 103), (-7, 109), 2), ((15, 88), (24, 97), 3), ((-173, -88), (-162, -88), 2), ((165, -81), (173, -71), 2),
+                    ((103, 165), (118, 165), 2), ((-132, 162), (-123, 171), 3), ((60, -180), (75, -180), 2), ((-75, -182), (-60, -176), 3)):
         wall_seg(w, a, b, h, rng)
-    for x, z in ((-25, -25), (25, -25), (-30, 30), (30, 30), (0, 60), (-80, 0), (80, 0), (0, -110), (60, -100), (-60, -100)):
+    for x, z in ((-37, -37), (37, -37), (-44, 44), (44, 44), (12, 90), (-118, 12), (118, -12), (14, -165), (90, -150), (-90, -150),
+                 (150, 60), (-150, 60), (60, 180), (-60, 180)):
         pillar(w, x, z, 5)
     for key in OUTPOSTS:
         outpost(w, key, rng)
+    traps(w, rng)
     dragon(Lifted(w, LIFT), rng)
     # Cercle d'atterrissage sous le dragon en vol : on saute du dos, on atterrit ici (dégâts de chute coupés par la région).
     for a in range(0, 360, 2):
         for rr in (49, 50):
             x, z = round(rr * math.cos(math.radians(a))), round(-10 + rr * math.sin(math.radians(a)))
-            if w.get(x, -1, z) not in (PB, "minecraft:polished_blackstone"):
-                w.put(x, -1, z, "minecraft:red_nether_bricks")
+            if w.get(x, -1, z) in ("minecraft:pale_moss_block", "minecraft:tuff", "minecraft:cobbled_deepslate"):
+                w.put(x, -1, z, "minecraft:red_nether_bricks")  # seulement sur le sol nu : routes et pièges intacts
     return w
 
 
@@ -459,7 +508,8 @@ def render(w, path_top, path_side, scale):
              "blackstone": (53, 48, 56), "calcite": (223, 224, 220), "quartz": (236, 230, 223), "red_stained": (190, 40, 40),
              "white_stained": (235, 235, 235), "black_stained": (30, 30, 34), "redstone": (175, 24, 5), "red_nether": (69, 7, 9),
              "lantern": (230, 180, 90), "iron": (220, 220, 220), "beacon": (120, 230, 220), "shroom": (240, 140, 70),
-             "ladder": (150, 110, 70), "lodestone": (150, 150, 155)}
+             "ladder": (150, 110, 70), "lodestone": (150, 150, 155), "powder_snow": (248, 253, 253),
+             "sweet_berry": (150, 30, 40), "cobweb": (230, 230, 230), "dripstone": (130, 100, 85), "pressure_plate": (60, 55, 64)}
 
     def color(n):
         return next((c for k, c in shade.items() if k in n), (110, 110, 110))
@@ -490,10 +540,11 @@ def render(w, path_top, path_side, scale):
 
 def main():
     w = build_warzone()
-    write_schem(HERE / "vaeloria-warzone.schem", w.v, w.pal.names, (HALF, -YMIN, HALF))
+    bes = [(x + HALF, y - YMIN, z + HALF, i, items) for x, y, z, i, items in w.block_entities]
+    write_schem(HERE / "vaeloria-warzone.schem", w.v, w.pal.names, (HALF, -YMIN, HALF), bes)
     o = build_outer()
     write_schem(HERE / "vaeloria-avant-poste-exterieur.schem", o.v, o.pal.names, (24, 1, 24))
-    render(w, HERE / "apercu-warzone-dessus.png", HERE / "apercu-warzone-sud.png", 3)
+    render(w, HERE / "apercu-warzone-dessus.png", HERE / "apercu-warzone-sud.png", 2)
     # Vue rapprochée du dragon.
     d = Vol(half=66, ymin=-1, ymax=70)
     dragon(d, np.random.default_rng(21))
