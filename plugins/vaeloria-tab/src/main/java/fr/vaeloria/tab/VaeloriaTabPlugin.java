@@ -18,28 +18,38 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.CachedServerIcon;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.InputStream;
 
 import java.util.List;
 import java.util.Locale;
 
 /**
- * VaeloriaTab : liste des joueurs aux couleurs du logo VÆLORIA.
- * En-tête avec wordmark argent animé et Æ rubis, pied de page (joueurs, ping, TPS, serveur, grade),
- * noms préfixés par le grade et liste triée par grade.
+ * VaeloriaTab : présentation en jeu aux couleurs du logo VÆLORIA.
+ * TAB : en-tête avec wordmark argent animé et Æ rubis, pied de page (joueurs, ping, TPS, serveur, grade),
+ * noms préfixés et triés par grade. Écran Multijoueur : voir {@link ServerListListener}.
  */
 public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
     private final MiniMessage mm = MiniMessage.miniMessage();
 
-    private TabSettings settings;
-    private TagResolver paletteTags;
+    // Lus aussi par le ping de la liste des serveurs, hors du thread principal.
+    private volatile TabSettings settings;
+    private volatile ServerListSettings serverList;
+    private volatile TagResolver paletteTags;
+    private volatile CachedServerIcon icon;
+    private volatile int frame;
     private BukkitTask task;
-    private int frame;
     private long ticks;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new ServerListListener(this), this);
         if (!load()) {
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -68,10 +78,13 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
             return false;
         }
         settings = next;
+        ServerListSettings nextList = ServerListSettings.load(getConfig());
+        icon = loadIcon();
 
         TagResolver.Builder palette = TagResolver.builder();
         settings.palette().forEach((name, hex) -> palette.resolver(Placeholder.styling(name, TextColor.fromHexString(hex))));
         paletteTags = palette.build();
+        serverList = nextList; // en dernier : le ping (asynchrone) ne lit rien d'incomplet au premier chargement
 
         // Sans déclaration, une permission inconnue est accordée aux ops : chaque op serait « Fondateur ».
         PluginManager pm = getServer().getPluginManager();
@@ -80,6 +93,8 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
                 pm.addPermission(new Permission(r.permission(), PermissionDefault.FALSE));
             }
         }
+        if (nextList.maintenance()) getLogger().warning("Mode maintenance actif : seuls les joueurs avec "
+                + ServerListListener.MAINTENANCE_BYPASS + " peuvent se connecter.");
 
         if (task != null) task.cancel();
         ticks = 0;
@@ -88,10 +103,44 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
         return true;
     }
 
+    /** Icône 64×64 : server-icon.png du dossier du plugin si présent, sinon celle du logo embarquée. */
+    private CachedServerIcon loadIcon() {
+        File custom = new File(getDataFolder(), "server-icon.png");
+        try (InputStream in = custom.isFile() ? new java.io.FileInputStream(custom) : getResource("server-icon.png")) {
+            if (in == null) return null;
+            BufferedImage img = ImageIO.read(in);
+            return img == null ? null : Bukkit.loadServerIcon(img);
+        } catch (Exception e) {
+            getLogger().warning("Icône de serveur ignorée (PNG 64×64 attendu) : " + e.getMessage());
+            return null;
+        }
+    }
+
+    TabSettings settings() {
+        return settings;
+    }
+
+    ServerListSettings serverList() {
+        return serverList;
+    }
+
+    TagResolver paletteTags() {
+        return paletteTags;
+    }
+
+    CachedServerIcon icon() {
+        return icon;
+    }
+
+    /** Wordmark à l'image courante de l'animation. */
+    Component logo() {
+        return mm.deserialize(settings.logo().render(frame), paletteTags);
+    }
+
     private void tick() {
         TabSettings s = settings;
         frame++;
-        Component logo = mm.deserialize(s.logo().render(frame), paletteTags);
+        Component logo = logo();
         double tps = Math.min(20.0, Bukkit.getTPS()[0]);
         boolean names = ticks % s.namesRefreshTicks() < s.refreshTicks();
         ticks += s.refreshTicks();
@@ -146,7 +195,8 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             sender.sendMessage(load()
-                    ? mm.deserialize("<#D21F2F>◆</#D21F2F> <#D9DCE2>VaeloriaTab rechargé.")
+                    ? mm.deserialize("<#D21F2F>◆</#D21F2F> <#D9DCE2>VaeloriaTab rechargé"
+                            + (serverList.maintenance() ? " <#D21F2F>(maintenance active)" : "") + ".")
                     : mm.deserialize("<#D21F2F>config.yml invalide, voir la console : ancienne configuration conservée."));
             return true;
         }

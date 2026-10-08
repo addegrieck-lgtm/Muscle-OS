@@ -98,3 +98,55 @@ ranks:
     order: 0
     display: "<steel>Joueur</steel>"
     format: "<steel><player>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Écran Multijoueur (liste des serveurs)
+# Variables : <logo>, <online>, <max>, <server> et les couleurs de la palette.
+# Icône : celle du logo (brand/server-icon.png) est embarquée ; pour la remplacer,
+# déposer un PNG 64×64 nommé server-icon.png dans plugins/VaeloriaTab/.
+# ─────────────────────────────────────────────────────────────────────────────
+server-list:
+  enabled: true
+
+  motd:
+    # Chaque ligne doit tenir sur ~270 px (environ 45 caractères), sinon elle est coupée.
+    # Centre chaque ligne au pixel près (police Minecraft par défaut).
+    center: true
+    line1: "<ruby_hi>◆</ruby_hi>   <logo>   <ruby_hi>◆</ruby_hi>"
+    # Messages de la 2e ligne, en rotation.
+    rotate-seconds: 8
+    line2:
+      - "<ash>LE RETOUR DE LA <ruby_hi><bold>VRAIE GUERRE</bold></ruby_hi>."
+      - "<silver>Faction <ruby>◆</ruby> PvP 1.8 <ruby>◆</ruby> Guerres d'empires"
+      - "<ash>Boutique et classements sur <ruby_hi>vaeloria.fr"
+
+  # Bulle affichée au survol du compteur de joueurs.
+  # Texte « § » côté client : seules les 16 couleurs Minecraft passent. Les gris de la charte
+  # seraient convertis en bleu, d'où <white>, <gray>, <dark_gray> et <dark_red> (rubis) ici.
+  hover:
+    lines:
+      - ""
+      - "  <dark_red>◆</dark_red> <white><bold>VÆLORIA</bold></white> <dark_red>◆</dark_red>"
+      - "  <gray>Faction & PvP — Minecraft 1.21"
+      - ""
+      - "  <gray>En ligne : <white><online></white><dark_gray>/<max>"
+      - "  <gray>Site : <dark_red>vaeloria.fr"
+      - "  <gray>Lier ton compte : <white>/link"
+      - ""
+    # Ajoute quelques joueurs connectés sous les lignes (respecte hide-online-players du serveur).
+    show-players: true
+    max-players: 8
+
+  # Texte de version montré aux clients d'une version incompatible.
+  # Même contrainte que la bulle : 16 couleurs Minecraft.
+  version-text: "<dark_red>VÆLORIA</dark_red> <gray>1.21+"
+  # Capacité affichée (-1 = celle de server.properties).
+  max-players: -1
+
+  # Maintenance : MOTD dédié, « Maintenance » à la place du compteur, connexions refusées
+  # sauf pour la permission vaeloria.maintenance.bypass. Activer puis /vtab reload.
+  maintenance:
+    enabled: false
+    line2: "<ruby_hi><bold>MAINTENANCE</bold></ruby_hi> <ash>· infos sur <silver>vaeloria.fr"
+    version-text: "<dark_red>Maintenance"
+    kick-message: "<ruby_hi>◆</ruby_hi> <snow><bold>VÆLORIA</bold></snow> <ruby_hi>◆</ruby_hi>\n\n<silver>Le serveur est en maintenance.\n<ash>Infos et retour : <ruby_hi>vaeloria.fr"

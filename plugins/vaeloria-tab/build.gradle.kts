@@ -17,6 +17,8 @@ repositories {
 dependencies {
     // Fournie par le serveur (Adventure et MiniMessage inclus) : non incluse dans le jar.
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    // Adventure (fourni par Paper en jeu) pour tester le centrage du MOTD.
+    testImplementation("net.kyori:adventure-text-minimessage:4.20.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -27,4 +29,6 @@ tasks.test {
 
 tasks.processResources {
     filesMatching("plugin.yml") { expand("version" to project.version) }
+    // Icône 64×64 du logo, source unique : brand/.
+    from("../../brand/server-icon.png")
 }

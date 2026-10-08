@@ -2,7 +2,7 @@ name: VaeloriaTab
 version: '${version}'
 main: fr.vaeloria.tab.VaeloriaTabPlugin
 api-version: '1.21'
-description: Liste des joueurs (TAB) aux couleurs du logo VÆLORIA — en-tête animé, pied de page, grades et tri.
+description: TAB et écran Multijoueur aux couleurs du logo VÆLORIA — en-tête animé, grades, MOTD, icône, maintenance.
 authors: [VÆLORIA]
 commands:
   vtab:
@@ -11,4 +11,7 @@ commands:
     permission: vaeloria.tab.admin
 permissions:
   vaeloria.tab.admin:
+    default: op
+  vaeloria.maintenance.bypass:
+    description: Se connecter pendant la maintenance
     default: op
