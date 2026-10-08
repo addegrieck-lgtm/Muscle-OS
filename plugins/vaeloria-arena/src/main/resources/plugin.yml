@@ -2,13 +2,21 @@ name: VaeloriaArena
 version: '${version}'
 main: fr.vaeloria.arena.VaeloriaArenaPlugin
 api-version: '1.21'
-description: Combats de bots en équipes, stuff diamant P4 U3, dans une arène.
+description: Combats de bots en équipes (P4 U3, hache Sharpness V) à l'arène du spawn, avec paris en monnaie du serveur.
 authors: [VÆLORIA]
+softdepend: [Vault]
 commands:
   botarena:
-    description: Combats de bots P4 U3 dans l'arène
+    description: Combats de bots P4 U3 dans l'arène (administration)
     aliases: [arenebots]
     permission: vaeloria.arena.admin
+  pari:
+    description: Parier sa monnaie sur l'équipe gagnante du combat de bots
+    usage: /pari [rouge|bleu] [mise]
+    aliases: [parier, bet]
+    permission: vaeloria.arena.bet
 permissions:
   vaeloria.arena.admin:
     default: op
+  vaeloria.arena.bet:
+    default: true

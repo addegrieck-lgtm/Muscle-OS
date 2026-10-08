@@ -1,5 +1,6 @@
 package fr.vaeloria.arena;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -33,6 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +44,14 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Un combat de bots en P4 U3 : apparition, compte à rebours, IA de combat (ciblage, golden apples,
- * strafe), limites de l'arène, annonces aux spectateurs et nettoyage.
+ * Un combat de bots en P4 U3 : apparition, paris, compte à rebours, IA de combat (ciblage, golden apples,
+ * strafe), limites de l'arène, annonces aux spectateurs, paiement des paris et nettoyage.
  *
  * Les bots sont des zombies sans IA « monstre » utile : ils ne ciblent que l'équipe adverse,
  * ne brûlent pas, ne lâchent rien et sont supprimés à la fin du combat.
  */
 final class ArenaMatch {
-    enum State { COUNTDOWN, FIGHT, ENDED }
+    enum State { BETTING, COUNTDOWN, FIGHT, ENDED }
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
     private static final long TICK_PERIOD = 5L;
@@ -82,18 +85,26 @@ final class ArenaMatch {
     private final List<Chunk> ticketed = new ArrayList<>();
     private final Map<Team, org.bukkit.scoreboard.Team> sbTeams = new EnumMap<>(Team.class);
 
+    private final BetDesk desk; // null : combat sans paris (Vault absent ou paris désactivés)
+    private final BossBar bar = BossBar.bossBar(Component.empty(), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+    private final Set<UUID> barViewers = new HashSet<>();
+
     private State state = State.COUNTDOWN;
     private BukkitTask task;
     private long ticks;
     private int countdown;
+    private int betting;
+    private boolean cleaned;
 
-    ArenaMatch(VaeloriaArenaPlugin plugin, Location center, double radius, int perTeam) {
+    ArenaMatch(VaeloriaArenaPlugin plugin, Location center, double radius, int perTeam, Bank bank) {
         this.plugin = plugin;
         this.cfg = plugin.getConfig();
         this.center = center.clone();
         this.radius = radius;
         this.perTeam = perTeam;
         this.tally = new MatchTally(perTeam);
+        boolean bets = bank != null && cfg.getBoolean("bets.enabled", true) && cfg.getInt("bets.duration-seconds", 60) > 0;
+        this.desk = bets ? new BetDesk(plugin, bank, cfg.getConfigurationSection("bets")) : null;
     }
 
     State state() {
@@ -129,8 +140,22 @@ final class ArenaMatch {
             }
         }
         countdown = Math.max(0, cfg.getInt("match.countdown-seconds", 5));
-        broadcast("<gold>⚔ Combat de bots <white>" + perTeam + "v" + perTeam
-                + "</white> en <aqua>P4 U3</aqua> dans l'arène !");
+        String where = cfg.getString("match.where", "à l'arène du spawn");
+        String head = "<gold>⚔ Combat de bots <white>" + perTeam + "v" + perTeam + "</white> en <aqua>P4 U3</aqua> "
+                + "<white>(" + kit.weaponLabel() + ")</white> " + Msg.esc(where) + " !";
+        if (desk != null) {
+            state = State.BETTING;
+            betting = cfg.getInt("bets.duration-seconds", 60);
+            Component msg = Msg.of(head + " <yellow>Paris ouverts " + betting + " s</yellow> : "
+                    + "<click:suggest_command:'/pari rouge '><hover:show_text:'<red>Miser sur Rouge'><red><bold>[Parier Rouge]</bold></red></hover></click> "
+                    + "<click:suggest_command:'/pari bleu '><hover:show_text:'<blue>Miser sur Bleu'><blue><bold>[Parier Bleu]</bold></blue></hover></click>"
+                    + " <gray>ou <white>/pari rouge|bleu <mise></white>");
+            for (Player p : betAudience()) p.sendMessage(msg);
+            plugin.getComponentLogger().info(msg);
+        } else {
+            broadcast(head);
+        }
+        updateBar();
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 1L, TICK_PERIOD);
     }
 
@@ -197,6 +222,11 @@ final class ArenaMatch {
 
     private void tick() {
         ticks += TICK_PERIOD;
+        if (ticks % 20 < TICK_PERIOD) updateBar();
+        if (state == State.BETTING) {
+            if (ticks % 20 < TICK_PERIOD) bettingStep();
+            return;
+        }
         if (state == State.COUNTDOWN) {
             if (ticks % 20 < TICK_PERIOD) countdownStep();
             return;
@@ -217,6 +247,19 @@ final class ArenaMatch {
             maybeStrafe(z);
             refreshName(z, bot);
         }
+    }
+
+    private void bettingStep() {
+        betting--;
+        if (betting == 30 || betting == 10) {
+            Component msg = Msg.of("<yellow>Plus que " + betting + " s pour parier !</yellow> " + oddsLine()
+                    + " <gray>— <white>/pari rouge|bleu <mise>");
+            for (Player p : betAudience()) p.sendMessage(msg);
+        }
+        if (betting > 0) return;
+        desk.close();
+        broadcast("<gold>Paris fermés.</gold> " + oddsLine());
+        state = State.COUNTDOWN;
     }
 
     private void countdownStep() {
@@ -277,14 +320,14 @@ final class ArenaMatch {
         bot.gapples--;
         bot.lastGappleTick = ticks;
 
-        // Comme un joueur : la pomme en main un instant, puis l'épée revient.
-        ItemStack sword = z.getEquipment().getItemInMainHand();
+        // Comme un joueur : la pomme en main un instant, puis l'arme revient.
+        ItemStack weapon = z.getEquipment().getItemInMainHand();
         z.getEquipment().setItemInMainHand(new ItemStack(Material.GOLDEN_APPLE));
         z.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1));
         z.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0));
         z.getWorld().playSound(z.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (z.isValid()) z.getEquipment().setItemInMainHand(sword);
+            if (z.isValid()) z.getEquipment().setItemInMainHand(weapon);
         }, 16L);
     }
 
@@ -372,6 +415,7 @@ final class ArenaMatch {
                 .ifPresent(mvp -> broadcast("<gray>MVP : <white><mvp></white> (" + mvp.kills + " kill" + (mvp.kills > 1 ? "s" : "") + ")",
                         Placeholder.unparsed("mvp", mvp.name)));
         sound(Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f);
+        if (desk != null) desk.settle(winner);
         long delay = Math.max(1, cfg.getLong("match.cleanup-delay-seconds", 5)) * 20L;
         Bukkit.getScheduler().runTaskLater(plugin, this::cleanup, delay);
         if (task != null) task.cancel();
@@ -379,12 +423,17 @@ final class ArenaMatch {
 
     /** Arrêt immédiat (commande stop, désactivation du plugin). */
     void abort() {
-        if (state != State.ENDED) broadcast("<red>Combat de bots annulé.");
+        if (state != State.ENDED) {
+            broadcast("<red>Combat de bots annulé.");
+            if (desk != null) desk.refundAll("Combat annulé.");
+        }
         state = State.ENDED;
         cleanup();
     }
 
     private void cleanup() {
+        if (cleaned) return; // /botarena stop pendant le délai de fin, puis nettoyage programmé
+        cleaned = true;
         if (task != null) task.cancel();
         for (UUID id : new ArrayList<>(bots.keySet())) {
             Entity e = Bukkit.getEntity(id);
@@ -392,6 +441,11 @@ final class ArenaMatch {
         }
         bots.clear();
         lastAttacker.clear();
+        for (UUID id : barViewers) {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null) p.hideBossBar(bar);
+        }
+        barViewers.clear();
         for (org.bukkit.scoreboard.Team t : sbTeams.values()) {
             try {
                 t.unregister();
@@ -402,6 +456,81 @@ final class ArenaMatch {
         for (Chunk c : ticketed) c.removePluginChunkTicket(plugin);
         ticketed.clear();
         plugin.matchFinished(this);
+    }
+
+    // ------------------------------------------------------------------ paris
+
+    void bet(Player p, Team team, double amount) {
+        if (desk == null) {
+            p.sendMessage(Msg.of("<red>Pas de paris sur ce combat."));
+            return;
+        }
+        desk.place(p, team, amount);
+        updateBar();
+    }
+
+    void betInfo(Player p) {
+        if (desk == null) {
+            p.sendMessage(Msg.of("<gray>Pas de paris sur ce combat."));
+            return;
+        }
+        BetBook book = desk.book();
+        p.sendMessage(Msg.of((book.isOpen() ? "<green>Paris ouverts (" + betting + " s).</green> " : "<gray>Paris fermés.</gray> ") + oddsLine()));
+        book.bet(p.getUniqueId()).ifPresent(b -> p.sendMessage(Msg.of("<gray>Ta mise : <white>" + desk.money(b.amount())
+                + "</white> sur " + Msg.team(b.team()) + "<gray>, gain si victoire ≈ <gold>"
+                + desk.money(BetBook.floorCents(b.amount() * book.odds(b.team()))))));
+    }
+
+    private String oddsLine() {
+        BetBook book = desk.book();
+        StringBuilder sb = new StringBuilder();
+        for (Team t : Team.values()) {
+            if (!sb.isEmpty()) sb.append(" <dark_gray>·</dark_gray> ");
+            sb.append(Msg.team(t)).append(" <white>").append(desk.money(book.pool(t))).append("</white> <gray>(")
+                    .append(book.bettors(t)).append(" parieur").append(book.bettors(t) > 1 ? "s" : "").append(", cote <gold>")
+                    .append(Msg.odds(book.odds(t))).append("</gold>)</gray>");
+        }
+        return sb.toString();
+    }
+
+    /** Pendant les paris, tout le serveur (bets.announce-server-wide) ; sinon les spectateurs. */
+    private Collection<Player> betAudience() {
+        if (cfg.getBoolean("bets.announce-server-wide", true)) return List.copyOf(Bukkit.getOnlinePlayers());
+        return audience();
+    }
+
+    private void updateBar() {
+        String text;
+        float progress = 1f;
+        if (state == State.BETTING) {
+            text = "<yellow>Paris ouverts <white>" + betting + " s</white> — " + oddsLine() + " <gray>— /pari";
+            progress = Math.max(0f, Math.min(1f, betting / (float) Math.max(1, cfg.getInt("bets.duration-seconds", 60))));
+        } else if (state == State.ENDED) {
+            return;
+        } else {
+            String pot = desk == null || desk.book().bets().isEmpty() ? ""
+                    : " <dark_gray>|</dark_gray> <gold>cagnotte " + desk.money(desk.book().pool(Team.ROUGE) + desk.book().pool(Team.BLEU)) + "</gold>";
+            text = "<red>Rouge " + tally.alive(Team.ROUGE) + "</red> <gray>vs</gray> <blue>" + tally.alive(Team.BLEU)
+                    + " Bleu</blue>" + pot;
+            int limit = cfg.getInt("match.max-duration-seconds", 300);
+            if (state == State.FIGHT && limit > 0) progress = Math.max(0f, 1f - ticks / (limit * 20f));
+        }
+        bar.name(Msg.MM.deserialize(text));
+        bar.progress(progress);
+
+        Set<UUID> want = new HashSet<>();
+        for (Player p : state == State.BETTING ? betAudience() : audience()) want.add(p.getUniqueId());
+        if (desk != null) desk.book().bets().keySet().forEach(want::add);
+        for (UUID id : Set.copyOf(barViewers)) {
+            if (want.contains(id)) continue;
+            Player p = Bukkit.getPlayer(id);
+            if (p != null) p.hideBossBar(bar);
+            barViewers.remove(id);
+        }
+        for (UUID id : want) {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null && barViewers.add(id)) p.showBossBar(bar);
+        }
     }
 
     // ------------------------------------------------------------------ spectateurs
@@ -421,7 +550,7 @@ final class ArenaMatch {
     }
 
     private void broadcast(String mini, TagResolver... resolvers) {
-        Component msg = MM.deserialize("<dark_gray>[<gold>Arène</gold>]</dark_gray> " + mini, resolvers);
+        Component msg = Msg.of(mini, resolvers);
         for (Player p : audience()) p.sendMessage(msg);
         plugin.getComponentLogger().info(msg);
     }

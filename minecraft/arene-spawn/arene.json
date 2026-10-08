@@ -1,0 +1,26 @@
+{
+ "plugin": "VaeloriaArena",
+ "rayon_plugin": 18,
+ "centre_depuis_bout_du_ponton": [
+  -81,
+  -4,
+  0
+ ],
+ "centre_depuis_bord_de_l_ile": [
+  -41,
+  -4,
+  0
+ ],
+ "fosse": {
+  "rayon": 20,
+  "profondeur": 5
+ },
+ "gradins": {
+  "rangs": 4,
+  "rayon_exterieur": 32
+ },
+ "equipes": {
+  "rouge": "ouest (x négatif)",
+  "bleu": "est (x positif)"
+ }
+}

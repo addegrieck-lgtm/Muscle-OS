@@ -26,7 +26,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 | `cd plugins/vaeloria-combat && gradle build` | Jar du plugin PvP (combat 1.8, MSPT, ping) + tests |
-| `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 |
+| `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 (paris en monnaie) |
 
 ## Documentation
 
@@ -34,6 +34,6 @@ pnpm dev                                         # site :3000, admin :3001/admin
 - [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Arène de bots P4 U3](docs/ARENA_BOTS.md) · [Warps farm par grade](minecraft/warps-farm/README.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
-- Constructions : [Île Marchande flottante + ponton](minecraft/ile-commerciale/README.md) (schematics WorldEdit)
+- Constructions : [Île Marchande flottante + ponton](minecraft/ile-commerciale/README.md) · [Arène de bots du spawn](minecraft/arene-spawn/README.md) (schematics WorldEdit)
 
 Serveur non officiel, non affilié à Mojang Studios ni à Microsoft.

@@ -1,11 +1,11 @@
-# VæloriaArena — combats de bots en P4 U3.
+# VæloriaArena — combats de bots en P4 U3, avec paris en monnaie du serveur (Vault).
 # Centre défini en jeu avec /botarena setcentre [rayon] (sol plat conseillé : les bots apparaissent à la hauteur du centre).
 arena:
   world: ""
   x: 0.5
   y: 64.0
   z: 0.5
-  radius: 20          # les bots ne peuvent pas sortir de ce cercle
+  radius: 18          # les bots ne peuvent pas sortir de ce cercle (18 pour la fosse de minecraft/arene-spawn)
 
 match:
   default-team-size: 3
@@ -15,22 +15,42 @@ match:
   countdown-seconds: 5
   max-duration-seconds: 300   # 0 = illimité ; à la fin : plus de survivants, puis plus de kills
   cleanup-delay-seconds: 5
+  where: "à l'arène du spawn"  # dans l'annonce : « Combat de bots 3v3 … à l'arène du spawn ! »
 
 bot:
-  # Stuff : armure diamant Protection / Unbreaking, épée diamant Sharpness / Unbreaking.
+  # Stuff : armure diamant Protection / Unbreaking, arme Sharpness / Unbreaking.
+  weapon: DIAMOND_AXE        # ex. DIAMOND_SWORD, NETHERITE_AXE
   protection: 4
   unbreaking: 3
   sharpness: 5
   fire-aspect: 0
   health: 20
   speed: 0.3                 # zombie normal : 0.23
-  base-attack-damage: 1.0    # comme un joueur : 1 + épée
+  base-attack-damage: 1.0    # comme un joueur : 1 + arme
   golden-apples: 6
   gapple-health-threshold: 8 # en demi-cœurs
   gapple-cooldown-seconds: 4
   strafe: true               # déplacements latéraux et sauts près de la cible, façon PvP 1.8
   glowing: true              # contour à la couleur de l'équipe
   names: [Kael, Vex, Draven, Nyx, Orin, Sly, Thorne, Zephyr, Ragn, Lyss, Morrow, Isk, Valk, Riven, Sarn, Jax, Ember, Corvus, Hale, Wren]
+
+# Paris : avant le combat, chaque joueur mise sa monnaie sur Rouge ou Bleu (/pari rouge 500).
+# Pari mutuel : les gagnants se partagent la mise des perdants au prorata de leur mise.
+# Mises d'un seul côté, égalité ou combat annulé : tout le monde est remboursé. Nécessite Vault + un plugin d'économie.
+bets:
+  enabled: true
+  duration-seconds: 60       # durée des paris avant le compte à rebours
+  min: 100
+  max: 100000                # mise maximum par joueur et par combat
+  house-cut-percent: 0       # part prélevée par le serveur sur la mise des perdants (0 = tout aux gagnants)
+  announce-server-wide: true # annonce et barre de paris pour tous les joueurs connectés, pas seulement à l'arène
+
+# Combats lancés tout seuls à l'arène du spawn.
+auto:
+  enabled: false
+  interval-minutes: 20       # temps entre la fin d'un combat et le suivant
+  min-players-online: 3
+  team-sizes: [1, 2, 3, 5]   # taille tirée au hasard à chaque combat
 
 spectators:
   range: 48                  # joueurs à moins de rayon + range du centre : messages, titres, sons

@@ -26,22 +26,43 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * VæloriaArena : des bots s'affrontent en équipes (Rouge / Bleu) dans une arène, en stuff diamant P4 U3.
- * Spectacle pour les joueurs autour (titres, kill feed, MVP) ; les bots ne touchent jamais les joueurs.
+ * VæloriaArena : des bots s'affrontent en équipes (Rouge / Bleu) dans une arène, en stuff diamant P4 U3,
+ * hache Sharpness V en main. Avant chaque combat, les joueurs parient leur monnaie sur une équipe (pari mutuel,
+ * via Vault). Spectacle pour les joueurs autour (titres, kill feed, MVP) ; les bots ne touchent jamais les joueurs.
  */
 public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
     private NamespacedKey botKey;
     private ArenaMatch match;
+    private Bank bank;
+    private long lastMatchEndMillis = System.currentTimeMillis();
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         botKey = new NamespacedKey(this, "bot");
+        bank = Bank.create();
+        if (bank == null) getLogger().warning("Vault ou plugin d'économie absent : les combats auront lieu SANS paris.");
+        BetDesk.refundLeftovers(this, bank);
         getServer().getPluginManager().registerEvents(this, this);
         // Bots laissés par un arrêt brutal du serveur.
         for (World w : Bukkit.getWorlds()) w.getEntities().forEach(this::removeIfOrphan);
+        Bukkit.getScheduler().runTaskTimer(this, this::autoMatch, 20L * 60, 20L * 30);
+    }
+
+    /** Combats automatiques à l'arène du spawn (auto.enabled), s'il y a assez de joueurs connectés. */
+    private void autoMatch() {
+        if (!getConfig().getBoolean("auto.enabled", false) || match != null) return;
+        if (Bukkit.getOnlinePlayers().size() < getConfig().getInt("auto.min-players-online", 3)) return;
+        long interval = getConfig().getLong("auto.interval-minutes", 20) * 60_000L;
+        if (System.currentTimeMillis() - lastMatchEndMillis < interval) return;
+        List<Integer> sizes = getConfig().getIntegerList("auto.team-sizes");
+        int size = sizes.isEmpty() ? getConfig().getInt("match.default-team-size", 3)
+                : sizes.get(ThreadLocalRandom.current().nextInt(sizes.size()));
+        String error = startMatch(Math.max(1, Math.min(size, getConfig().getInt("match.max-team-size", 10))));
+        if (error != null) getLogger().warning("Combat automatique impossible : " + error);
     }
 
     @Override
@@ -54,7 +75,10 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
     }
 
     void matchFinished(ArenaMatch m) {
-        if (match == m) match = null;
+        if (match == m) {
+            match = null;
+            lastMatchEndMillis = System.currentTimeMillis();
+        }
     }
 
     private boolean isTaggedBot(Entity e) {
@@ -73,6 +97,10 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("pari")) {
+            pari(sender, label, args);
+            return true;
+        }
         String sub = args.length == 0 ? "aide" : args[0].toLowerCase(Locale.ROOT);
         switch (sub) {
             case "setcentre", "setcenter" -> setCenter(sender, args);
@@ -84,11 +112,14 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
             case "statut", "status" -> sender.sendMessage(match == null ? "§7Aucun combat en cours." : "§6Arène : §f" + match.status());
             case "reload" -> {
                 reloadConfig();
+                if (bank == null) bank = Bank.create();
                 sender.sendMessage("§aConfiguration rechargée (appliquée au prochain combat).");
             }
             default -> {
                 sender.sendMessage("§6/" + label + " setcentre [rayon] §7— centre de l'arène à ta position");
-                sender.sendMessage("§6/" + label + " start [bots par équipe] §7— lance un combat P4 U3");
+                sender.sendMessage("§6/" + label + " start [bots par équipe] §7— lance un combat P4 U3 (paris d'abord)");
+                sender.sendMessage("§7Paris : " + (bank == null ? "§cdésactivés (Vault absent)" : "§aactifs") + "§7 — combats auto : "
+                        + (getConfig().getBoolean("auto.enabled") ? "§aoui" : "§cnon"));
                 sender.sendMessage("§6/" + label + " stop §7| §6statut §7| §6reload");
             }
         }
@@ -117,16 +148,48 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
         sender.sendMessage("§aCentre de l'arène défini ici, rayon " + getConfig().getInt("arena.radius") + " blocs.");
     }
 
+    private void pari(CommandSender sender, String label, String[] args) {
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage("§cCommande réservée aux joueurs.");
+            return;
+        }
+        if (match == null) {
+            p.sendMessage(Msg.of("<gray>Aucun combat en cours. Les paris ouvrent à l'annonce du prochain combat de bots."));
+            return;
+        }
+        if (args.length == 0) {
+            match.betInfo(p);
+            return;
+        }
+        Team team = switch (args[0].toLowerCase(Locale.ROOT)) {
+            case "rouge", "r", "red" -> Team.ROUGE;
+            case "bleu", "b", "blue" -> Team.BLEU;
+            default -> null;
+        };
+        Double amount = args.length > 1 ? parseAmount(args[1]) : null;
+        if (team == null || amount == null) {
+            p.sendMessage(Msg.of("<gray>Usage : <white>/" + label + " rouge|bleu <mise></white> — ex. /" + label + " rouge 500"));
+            return;
+        }
+        match.bet(p, team, amount);
+    }
+
+    /** « 500 », « 1,5k », « 2m ». Null si invalide. */
+    static Double parseAmount(String s) {
+        String t = s.trim().toLowerCase(Locale.ROOT).replace(',', '.').replace("_", "");
+        double mult = 1;
+        if (t.endsWith("k")) mult = 1_000;
+        else if (t.endsWith("m")) mult = 1_000_000;
+        if (mult > 1) t = t.substring(0, t.length() - 1);
+        try {
+            double v = Double.parseDouble(t) * mult;
+            return Double.isFinite(v) && v > 0 ? Math.floor(v * 100) / 100.0 : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     private void start(CommandSender sender, String[] args) {
-        if (match != null) {
-            sender.sendMessage("§cUn combat est déjà en cours (/botarena stop).");
-            return;
-        }
-        World world = Bukkit.getWorld(getConfig().getString("arena.world", ""));
-        if (world == null) {
-            sender.sendMessage("§cArène non configurée : place-toi au centre et fais /botarena setcentre.");
-            return;
-        }
         int max = getConfig().getInt("match.max-team-size", 10);
         int size = getConfig().getInt("match.default-team-size", 3);
         if (args.length > 1) {
@@ -137,11 +200,20 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
             }
             size = n;
         }
+        String error = startMatch(size);
+        sender.sendMessage(error == null ? "§aCombat " + size + "v" + size + " lancé." : "§c" + error);
+    }
+
+    /** Lance un combat ; message d'erreur ou null. */
+    private String startMatch(int size) {
+        if (match != null) return "Un combat est déjà en cours (/botarena stop).";
+        World world = Bukkit.getWorld(getConfig().getString("arena.world", ""));
+        if (world == null) return "Arène non configurée : place-toi au centre et fais /botarena setcentre.";
         Location center = new Location(world, getConfig().getDouble("arena.x"), getConfig().getDouble("arena.y"),
                 getConfig().getDouble("arena.z"));
-        match = new ArenaMatch(this, center, getConfig().getDouble("arena.radius", 20), size);
+        match = new ArenaMatch(this, center, getConfig().getDouble("arena.radius", 18), size, bank);
         match.start();
-        sender.sendMessage("§aCombat " + size + "v" + size + " lancé.");
+        return null;
     }
 
     private static Integer parseInt(String s) {
@@ -154,6 +226,11 @@ public final class VaeloriaArenaPlugin extends JavaPlugin implements Listener {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (command.getName().equalsIgnoreCase("pari")) {
+            if (args.length == 1) return List.of("rouge", "bleu").stream().filter(t -> t.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+            if (args.length == 2) return List.of("100", "500", "1000", "5000");
+            return List.of();
+        }
         if (args.length == 1) {
             String p = args[0].toLowerCase(Locale.ROOT);
             return List.of("setcentre", "start", "stop", "statut", "reload").stream().filter(s -> s.startsWith(p)).toList();

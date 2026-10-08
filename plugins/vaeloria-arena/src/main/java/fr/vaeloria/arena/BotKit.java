@@ -6,18 +6,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
-/** Stuff des bots : armure diamant P4 U3 et épée diamant, niveaux réglables dans config.yml. */
+/** Stuff des bots : armure diamant P4 U3 et arme (hache diamant Sharpness V par défaut), réglables dans config.yml. */
 final class BotKit {
     private final int protection;
     private final int unbreaking;
     private final int sharpness;
     private final int fireAspect;
+    private final Material weapon;
 
     BotKit(ConfigurationSection bot) {
         this.protection = bot.getInt("protection", 4);
         this.unbreaking = bot.getInt("unbreaking", 3);
         this.sharpness = bot.getInt("sharpness", 5);
         this.fireAspect = bot.getInt("fire-aspect", 0);
+        Material m = Material.matchMaterial(bot.getString("weapon", "DIAMOND_AXE"));
+        this.weapon = m != null && m.isItem() ? m : Material.DIAMOND_AXE;
     }
 
     void equip(EntityEquipment eq) {
@@ -25,7 +28,7 @@ final class BotKit {
         eq.setChestplate(armor(new ItemStack(Material.DIAMOND_CHESTPLATE)));
         eq.setLeggings(armor(new ItemStack(Material.DIAMOND_LEGGINGS)));
         eq.setBoots(armor(new ItemStack(Material.DIAMOND_BOOTS)));
-        eq.setItemInMainHand(sword());
+        eq.setItemInMainHand(weapon());
         eq.setHelmetDropChance(0f);
         eq.setChestplateDropChance(0f);
         eq.setLeggingsDropChance(0f);
@@ -34,12 +37,18 @@ final class BotKit {
         eq.setItemInOffHandDropChance(0f);
     }
 
-    ItemStack sword() {
-        ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
-        enchant(sword, Enchantment.SHARPNESS, sharpness);
-        enchant(sword, Enchantment.UNBREAKING, unbreaking);
-        enchant(sword, Enchantment.FIRE_ASPECT, fireAspect);
-        return sword;
+    /** « Hache en diamant Tranchant V », traduit dans la langue du joueur. */
+    String weaponLabel() {
+        String label = "<lang:" + weapon.translationKey() + ">";
+        return sharpness > 0 ? label + " <lang:enchantment.minecraft.sharpness> <lang:enchantment.level." + sharpness + ">" : label;
+    }
+
+    ItemStack weapon() {
+        ItemStack item = new ItemStack(weapon);
+        enchant(item, Enchantment.SHARPNESS, sharpness);
+        enchant(item, Enchantment.UNBREAKING, unbreaking);
+        enchant(item, Enchantment.FIRE_ASPECT, fireAspect);
+        return item;
     }
 
     private ItemStack armor(ItemStack item) {
