@@ -56,4 +56,15 @@ class TotemTest {
         assertFalse(f.matches(sat));
         assertTrue(daily.matches(sat.withHour(18).withMinute(15)));
     }
+
+    @Test
+    void digTimerTakesSevenAndAHalfSeconds() {
+        int total = DigTimer.ticksFor(7.5);
+        assertEquals(150, total);
+        assertFalse(DigTimer.done(149, total));
+        assertTrue(DigTimer.done(150, total));
+        assertEquals(0.5f, DigTimer.progress(75, total));
+        assertEquals(1f, DigTimer.progress(400, total));
+        assertEquals(1, DigTimer.ticksFor(0));
+    }
 }

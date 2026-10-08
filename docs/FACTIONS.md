@@ -81,7 +81,8 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
 ## Événement Totem
 - Une colonne de **5 blocs d'obsidienne** (hauteur et matériau réglables) apparaît, idéalement en warzone.
 - **La faction qui casse tous les blocs d'affilée gagne.** Si une autre faction casse un bloc, le totem se **reconstruit** et c'est elle qui prend la main, avec ce premier bloc déjà compté.
-- Un coup = un bloc (`totem.instant-break`). Il faut être dans une faction pour frapper. En dehors de l'événement, la colonne est intouchable : ni casse, ni pose, ni explosion, ni piston.
+- **Uniquement à l'épée en diamant** (`totem.required-item`), et **7,5 s de frappe continue par bloc** (`totem.break-seconds`). Il faut être dans une faction pour frapper.
+- Le serveur chronomètre lui-même la casse : les fissures sont visibles par tous, et un pourcentage s'affiche dans la barre d'action. Lâcher le clic, changer d'objet, détourner le regard ou s'éloigner remet le bloc à zéro. Si deux joueurs frappent le même bloc, le premier à finir le casse. En dehors de l'événement, la colonne est intouchable : ni casse, ni pose, ni explosion, ni piston.
 - Affichage :
   - hologramme au-dessus du totem (faction en tête, progression, temps restant) ;
   - barre de boss pour tout le serveur ;
@@ -96,7 +97,14 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
   - le compteur « Totems » dans `/f info` et le classement `/f top totems`.
 - Programmation automatique : `totem.schedule` (ex. `"SAMEDI 21:00"`, `"TOUS 20:30 citadelle"`). Le lancement automatique ne se fait qu'avec au moins `min-online` joueurs connectés.
 - Sans vainqueur au bout de `duration-minutes` (30), le totem s'effondre.
-- Staff :
+- **Interface admin `/f totem admin`** (sans toucher aux fichiers) :
+  - **Totems** : lancer, se téléporter, supprimer, créer ici (nom saisi dans le chat) ;
+  - **Horaires** : ajouter (jour, puis heure saisie dans le chat, avec ou sans nom de totem), supprimer, joueurs minimum ;
+  - **Gains** : argent en banque (±1000 ou montant exact), power de faction, commandes console (ajout, suppression) ;
+  - **Réglages** : activation, temps de casse, arme requise, durée, hauteur, hologramme ;
+  - lancement et arrêt du totem en cours.
+  Chaque changement est écrit dans `config.yml`, commentaires conservés, et appliqué immédiatement.
+- Staff, en commandes :
   - `/f totem creer <nom>` : à faire debout sur la case de base ;
   - `/f totem supprimer <nom>` ;
   - `/f totem lancer [nom] [minutes]` ;
@@ -139,6 +147,18 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (casse à l'épée et interface admin)
+- 29 tests unitaires, dont le chrono de 7,5 s (150 ticks).
+- Essai sur Paper 1.21.4 :
+  - à mains nues : refus, le bloc tient ;
+  - épée lâchée à 3 s : le bloc tient ;
+  - épée tenue jusqu'au bout : le bloc casse, le bloc voisin reste intact.
+- Interface cliquée par un bot :
+  - gains +1000 ;
+  - horaire « Samedi 18h45 — citadelle » ajouté par le chat ;
+  - temps de casse -0,5 s, arme suivante ;
+  - tout se retrouve dans `config.yml`, commentaires conservés.
 
 ## Ce qui a été vérifié (Totem)
 - 28 tests unitaires, dont la règle « tous d'affilée » avec reprise et la lecture des horaires.

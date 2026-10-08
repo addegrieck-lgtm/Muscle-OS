@@ -108,8 +108,8 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("bouclier", "[heure 0-23|off]", "Bouclier anti-pillage quotidien", true, use, this::shield, (s, a) -> List.of("0", "2", "4", "20", "22", "off"), "shield");
         reg("guerre", "[declarer <faction>|abandonner]", "Guerres officielles", true, use, this::war,
                 (s, a) -> a.length <= 1 ? List.of("declarer", "abandonner") : factionNames(), "war");
-        reg("totem", "[liste|creer|supprimer|lancer|arreter]", "Événement Totem", false, use, this::totem,
-                (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin") ? List.of("liste", "creer", "supprimer", "lancer", "arreter") : List.of("liste"))
+        reg("totem", "[liste|admin|creer|supprimer|lancer|arreter]", "Événement Totem", false, use, this::totem,
+                (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin") ? List.of("admin", "liste", "creer", "supprimer", "lancer", "arreter") : List.of("liste"))
                         : plugin.totems().definitions().stream().map(d -> d.name).toList());
         reg("logs", "[page]", "Journal de la faction", true, use, this::logs, null, "journal", "log");
         reg("discord", "[lien|off|test|ping]", "Alertes Discord de la faction", true, use, this::discord,
@@ -999,6 +999,10 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         }
         if (!s.hasPermission("vaeloria.factions.admin")) { Msg.send(s, "error.no-permission"); return; }
         switch (sub) {
+            case "admin", "gui", "menu" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                plugin.totemAdmin().open(p);
+            }
             case "creer", "créer", "create" -> {
                 if (p == null) { Msg.send(s, "error.player-only"); return; }
                 if (a.length < 2 || !a[1].matches("[A-Za-z0-9_-]{2,24}")) { Msg.send(s, "error.usage", "usage", "/f totem creer <nom>"); return; }

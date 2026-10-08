@@ -46,6 +46,17 @@ public final class TotemService {
 
     private Active active;
     private String lastScheduleKey;
+    /** Casses en cours : joueur → bloc visé et ticks écoulés. */
+    private final java.util.Map<java.util.UUID, Dig> digs = new java.util.HashMap<>();
+    /** Identifiant d'« entité » des fissures affichées, un par hauteur de bloc. */
+    private static final int CRACK_ID = 0x7A7E0000;
+
+    private static final class Dig {
+        final Block block;
+        int ticks;
+
+        Dig(Block block) { this.block = block; }
+    }
 
     private static final class Active {
         final TotemDef def;
@@ -113,6 +124,16 @@ public final class TotemService {
         for (Block b : blocks(d)) if (b.getType() == settings.totemMaterial) b.setType(Material.AIR, false);
     }
 
+    /** Retire les colonnes de tous les totems inactifs (avant un changement de hauteur). */
+    public void clearAll() {
+        for (TotemDef d : state.totems.values()) clear(d);
+    }
+
+    /** Reconstruit les colonnes de tous les totems. */
+    public void rebuildAll() {
+        for (TotemDef d : state.totems.values()) build(d);
+    }
+
     // ── État ──
 
     public boolean isActive() { return active != null; }
@@ -155,7 +176,7 @@ public final class TotemService {
         for (Player p : Bukkit.getOnlinePlayers()) p.showBossBar(active.bar);
         refresh();
         Bukkit.broadcast(Msg.prefixed("totem.started", "totem", d.name, "x", d.x, "y", d.y, "z", d.z,
-                "height", settings.totemHeight, "minutes", duration));
+                "height", settings.totemHeight, "minutes", duration, "item", itemName()));
         Title t = Title.title(Msg.get("totem.start-title"), Msg.get("totem.start-subtitle", "totem", d.name, "x", d.x, "z", d.z),
                 Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(3), Duration.ofMillis(500)));
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -180,8 +201,105 @@ public final class TotemService {
     }
 
     private void cleanup(Active a) {
+        for (Dig d : digs.values()) clearCrack(d.block);
+        digs.clear();
         for (Player p : Bukkit.getOnlinePlayers()) p.hideBossBar(a.bar);
         if (a.hologram != null && a.hologram.isValid()) a.hologram.remove();
+    }
+
+    // ── Casse chronométrée ──
+
+    public enum DigStart { STARTED, NOT_ACTIVE, NO_FACTION, WRONG_ITEM }
+
+    public boolean holdsRequiredItem(Player p) {
+        return settings.totemRequiredItem == null || p.getInventory().getItemInMainHand().getType() == settings.totemRequiredItem;
+    }
+
+    /** Le joueur commence à frapper un bloc du totem (clic gauche maintenu). */
+    public DigStart startDig(Player p, Block b) {
+        if (active == null || !active.def.contains(b, settings.totemHeight)) return DigStart.NOT_ACTIVE;
+        if (plugin.manager().factionOf(p) == null) return DigStart.NO_FACTION;
+        if (!holdsRequiredItem(p)) return DigStart.WRONG_ITEM;
+        Dig previous = digs.put(p.getUniqueId(), new Dig(b));
+        if (previous != null && !previous.block.equals(b)) clearCrack(previous.block);
+        return DigStart.STARTED;
+    }
+
+    public void abortDig(Player p) {
+        Dig d = digs.remove(p.getUniqueId());
+        if (d != null && digs.values().stream().noneMatch(o -> o.block.equals(d.block))) clearCrack(d.block);
+    }
+
+    private void sendCrack(Block b, float progress) {
+        Location l = b.getLocation();
+        int id = CRACK_ID + (b.getY() & 0xFFFF);
+        for (Player o : b.getWorld().getPlayers()) {
+            if (o.getLocation().distanceSquared(l) < 48 * 48) o.sendBlockDamage(l, progress, id);
+        }
+    }
+
+    private void clearCrack(Block b) { sendCrack(b, 0f); }
+
+    /** Chaque tick : fait avancer les casses valides, annule les autres. */
+    public void tickDigs() {
+        if (digs.isEmpty()) return;
+        int total = fr.vaeloria.factions.rules.DigTimer.ticksFor(settings.totemBreakSeconds);
+        // Parcours d'une copie : terminer une casse annule celles des autres joueurs sur le même bloc.
+        for (var e : new ArrayList<>(digs.entrySet())) {
+            if (digs.get(e.getKey()) != e.getValue()) continue;
+            Player p = Bukkit.getPlayer(e.getKey());
+            Dig d = e.getValue();
+            boolean valid = p != null && p.isOnline() && !p.isDead() && active != null
+                    && active.def.contains(d.block, settings.totemHeight) && d.block.getType() == settings.totemMaterial
+                    && holdsRequiredItem(p) && lookingAtTotem(p, d.block);
+            if (!valid) {
+                digs.remove(e.getKey());
+                if (digs.values().stream().noneMatch(o -> o.block.equals(d.block))) clearCrack(d.block);
+                if (p != null && active != null && !holdsRequiredItem(p)) p.sendActionBar(Msg.get("totem.wrong-item", "item", itemName()));
+                continue;
+            }
+            d.ticks++;
+            float progress = fr.vaeloria.factions.rules.DigTimer.progress(d.ticks, total);
+            if (d.ticks % 2 == 0) sendCrack(d.block, progress);
+            if (d.ticks % 4 == 0) {
+                p.sendActionBar(Msg.get("totem.dig-progress", "percent", Math.round(progress * 100),
+                        "seconds", String.format(java.util.Locale.ROOT, "%.1f", Math.max(0, (total - d.ticks) / 20.0))));
+                d.block.getWorld().playSound(d.block.getLocation(), Sound.BLOCK_STONE_HIT, 0.5f, 0.8f);
+            }
+            if (fr.vaeloria.factions.rules.DigTimer.done(d.ticks, total)) {
+                digs.remove(e.getKey());
+                Block b = d.block;
+                // Les autres joueurs qui frappaient ce bloc repartent de zéro.
+                digs.values().removeIf(o -> o.block.equals(b));
+                clearCrack(b);
+                HitResult r = hit(p, b);
+                if (r == HitResult.BROKEN) {
+                    b.getWorld().spawnParticle(Particle.BLOCK, b.getLocation().add(0.5, 0.5, 0.5), 40, 0.3, 0.3, 0.3, b.getBlockData());
+                    b.getWorld().playSound(b.getLocation(), Sound.BLOCK_STONE_BREAK, 1f, 0.6f);
+                    b.setType(Material.AIR, false);
+                }
+                if (r == HitResult.WON || active == null) {
+                    digs.clear();
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Le joueur vise-t-il toujours le totem ? On accepte toute la colonne : à la jointure de deux blocs, le lancer de
+     * rayon du serveur tombe facilement sur le voisin, et le client signale de lui-même un changement de bloc.
+     */
+    private boolean lookingAtTotem(Player p, Block b) {
+        if (p.getEyeLocation().distanceSquared(b.getLocation().add(0.5, 0.5, 0.5)) > 6.5 * 6.5) return false;
+        Block target = p.getTargetBlockExact(6);
+        return target != null && active != null && active.def.contains(target, settings.totemHeight);
+    }
+
+    public String itemName() {
+        return settings.totemRequiredItem == null ? "n'importe quel objet"
+                : settings.totemRequiredItem == Material.DIAMOND_SWORD ? "une épée en diamant"
+                : settings.totemRequiredItem.name().toLowerCase(Locale.ROOT).replace('_', ' ');
     }
 
     public enum HitResult { NOT_ACTIVE, NO_FACTION, BROKEN, WON }

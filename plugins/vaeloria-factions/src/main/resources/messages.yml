@@ -339,7 +339,7 @@ war:
     target_too_few_members: "<red><white><faction></white> a moins de <min> membres."
 
 totem:
-  started: "<dark_purple><b>✦ TOTEM</b></dark_purple> <gray>Le totem <white><totem></white> est apparu en <white><x>, <y>, <z></white> ! <white><height></white> blocs à abattre en <white><minutes></white> min. La faction qui les casse <u>tous d'affilée</u> l'emporte."
+  started: "<dark_purple><b>✦ TOTEM</b></dark_purple> <gray>Le totem <white><totem></white> est apparu en <white><x>, <y>, <z></white> ! <white><height></white> blocs à abattre en <white><minutes></white> min, avec <white><item></white>. La faction qui les casse <u>tous d'affilée</u> l'emporte."
   start-title: "<dark_purple><b>✦ TOTEM</b>"
   start-subtitle: "<white><totem></white> <gray>en <white><x>, <z>"
   first-hit: "<dark_purple>✦</dark_purple> <gold><faction></gold> <gray>(<player>) frappe le totem : encore <white><left></white> bloc(s) !"
@@ -357,6 +357,8 @@ totem:
   idle: "<gray>Aucun totem en cours. Prochains : <white><next>"
   no-schedule: "sur décision du staff"
   not-active: "<dark_purple>Le totem n'est pas encore actif."
+  wrong-item: "<red>Le totem ne se frappe qu'avec <white><item></white> en main."
+  dig-progress: "<dark_purple>⛏ Totem <white><percent>%</white> <gray>— encore <white><seconds></white> s, ne lâche pas !"
   need-faction: "<red>Il faut une faction pour frapper le totem."
   none-defined: "<gray>Aucun totem défini. <white>/f totem creer ‹nom›</white> (sur la case de base)."
   list-line: "<dark_purple>✦</dark_purple> <white><totem></white> <gray>— <world> <x>, <y>, <z>"

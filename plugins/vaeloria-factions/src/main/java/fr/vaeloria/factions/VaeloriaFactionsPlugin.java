@@ -72,6 +72,8 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private CombatService combat;
     private WarService wars;
     private fr.vaeloria.factions.service.TotemService totems;
+    private fr.vaeloria.factions.service.ChatPrompt prompts;
+    private fr.vaeloria.factions.gui.TotemAdminMenu totemAdmin;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -104,6 +106,8 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         wars = new WarService(settings, manager, state, bridge, discord, logs);
         totems = new fr.vaeloria.factions.service.TotemService(this, settings, state);
         totems.purgeOrphans();
+        prompts = new fr.vaeloria.factions.service.ChatPrompt(this);
+        totemAdmin = new fr.vaeloria.factions.gui.TotemAdminMenu(this);
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
         bank = Banks.detect();
         raid = new RaidService(settings, manager, state);
@@ -127,6 +131,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         pm.registerEvents(new ChatListener(this), this);
         pm.registerEvents(new MenuListener(this), this);
         pm.registerEvents(new fr.vaeloria.factions.listener.TotemListener(this), this);
+        pm.registerEvents(prompts, this);
 
         FactionCommand cmd = new FactionCommand(this);
         PluginCommand f = getCommand("f");
@@ -157,6 +162,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
+        tasks.add(sch.runTaskTimer(this, () -> totems.tickDigs(), 1L, 1L));
         long autosave = settings.autosaveMinutes * 1200L;
         tasks.add(sch.runTaskTimer(this, () -> { if (manager.consumeDirty()) save(true); }, autosave, autosave));
         long snap = settings.snapshotMinutes * 1200L;
@@ -295,5 +301,15 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public CombatService combat() { return combat; }
     public WarService wars() { return wars; }
     public fr.vaeloria.factions.service.TotemService totems() { return totems; }
+    public fr.vaeloria.factions.service.ChatPrompt prompts() { return prompts; }
+    public fr.vaeloria.factions.gui.TotemAdminMenu totemAdmin() { return totemAdmin; }
+
+    /** Modifie config.yml depuis un menu : écrit le fichier (commentaires conservés) et applique aussitôt. */
+    public void setConfigValue(String path, Object value) {
+        getConfig().set(path, value);
+        saveConfig();
+        settings.load(getConfig());
+        for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
+    }
     public fr.vaeloria.factions.rules.FarmGuard farmGuard() { return farmGuard; }
 }

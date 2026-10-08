@@ -69,7 +69,10 @@ public final class Settings {
     public String discordUrlPattern, discordGlobalWebhook;
     public Set<String> discordEvents = new HashSet<>();
     // Totem
-    public boolean totemEnabled, totemInstantBreak, totemHologram;
+    public boolean totemEnabled, totemHologram;
+    public double totemBreakSeconds;
+    /** Objet obligatoire pour frapper le totem ; null = n'importe lequel. */
+    public Material totemRequiredItem;
     public int totemHeight, totemDurationMinutes, totemMinOnline;
     public Material totemMaterial = Material.OBSIDIAN;
     public double totemRewardMoney, totemRewardPower;
@@ -196,7 +199,9 @@ public final class Settings {
         totemHeight = Math.max(1, Math.min(20, c.getInt("totem.height", 5)));
         Material tm = Material.matchMaterial(c.getString("totem.material", "OBSIDIAN"));
         totemMaterial = tm == null || !tm.isBlock() ? Material.OBSIDIAN : tm;
-        totemInstantBreak = c.getBoolean("totem.instant-break", true);
+        totemBreakSeconds = Math.max(0.5, Math.min(120, c.getDouble("totem.break-seconds", 7.5)));
+        String req = c.getString("totem.required-item", "DIAMOND_SWORD");
+        totemRequiredItem = req == null || req.isBlank() || req.equalsIgnoreCase("AUCUN") || req.equalsIgnoreCase("ANY") ? null : Material.matchMaterial(req);
         totemHologram = c.getBoolean("totem.hologram", true);
         totemDurationMinutes = Math.max(1, c.getInt("totem.duration-minutes", 30));
         totemMinOnline = Math.max(0, c.getInt("totem.min-online", 0));

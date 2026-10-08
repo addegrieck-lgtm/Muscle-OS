@@ -27,32 +27,34 @@ public final class TotemListener implements Listener {
 
     private TotemService t() { return plugin.totems(); }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    /** Clic gauche sur le totem : démarre la casse chronométrée (épée en diamant, 7,5 s par défaut). */
+    @EventHandler(priority = EventPriority.HIGH)
     public void onDamage(BlockDamageEvent e) {
-        if (plugin.settings().totemInstantBreak && t().isActiveBlock(e.getBlock()) && plugin.manager().factionOf(e.getPlayer()) != null) {
-            e.setInstaBreak(true);
+        Block b = e.getBlock();
+        if (!t().isTotemBlock(b) || plugin.manager().fplayer(e.getPlayer()).adminBypass) return;
+        e.setInstaBreak(false);
+        switch (t().startDig(e.getPlayer(), b)) {
+            case NOT_ACTIVE -> e.getPlayer().sendActionBar(Msg.get("totem.not-active"));
+            case NO_FACTION -> e.getPlayer().sendActionBar(Msg.get("totem.need-faction"));
+            case WRONG_ITEM -> e.getPlayer().sendActionBar(Msg.get("totem.wrong-item", "item", t().itemName()));
+            default -> { }
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onAbort(org.bukkit.event.block.BlockDamageAbortEvent e) {
+        t().abortDig(e.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(org.bukkit.event.player.PlayerQuitEvent e) {
+        t().abortDig(e.getPlayer());
+    }
+
+    /** Le totem ne se casse jamais « normalement » : uniquement par la casse chronométrée du plugin. */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) {
-        Block b = e.getBlock();
-        if (!t().isTotemBlock(b)) return;
-        if (plugin.manager().fplayer(e.getPlayer()).adminBypass) return;
-        switch (t().hit(e.getPlayer(), b)) {
-            case NOT_ACTIVE -> {
-                e.setCancelled(true);
-                e.getPlayer().sendActionBar(Msg.get("totem.not-active"));
-            }
-            case NO_FACTION -> {
-                e.setCancelled(true);
-                e.getPlayer().sendActionBar(Msg.get("totem.need-faction"));
-            }
-            default -> {
-                e.setDropItems(false);
-                e.setExpToDrop(0);
-            }
-        }
+        if (t().isTotemBlock(e.getBlock()) && !plugin.manager().fplayer(e.getPlayer()).adminBypass) e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

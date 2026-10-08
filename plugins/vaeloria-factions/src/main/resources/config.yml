@@ -164,12 +164,14 @@ discord:
 # ── Totem ─────────────────────────────────────────────────────────
 # Une colonne de blocs à abattre : la faction qui casse TOUS les blocs d'affilée gagne. Si une autre faction
 # casse un bloc, le totem se reconstruit et elle prend la main.
+# Tout se règle aussi en jeu : /f totem admin (totems, horaires, gains, réglages).
 # Création : place-toi sur la case de base et tape /f totem creer <nom> (mets la zone en warzone).
 totem:
   enabled: true
   height: 5
   material: OBSIDIAN
-  instant-break: true          # un coup = un bloc (sinon il faut miner l'obsidienne normalement)
+  required-item: DIAMOND_SWORD # arme obligatoire pour frapper le totem (AUCUN = n'importe quoi)
+  break-seconds: 7.5           # temps de frappe continue pour casser UN bloc
   hologram: true
   duration-minutes: 30         # sans vainqueur à la fin : le totem s'effondre
   min-online: 10               # joueurs connectés minimum pour un lancement programmé
