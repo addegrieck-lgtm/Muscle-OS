@@ -27,7 +27,8 @@ _spec.loader.exec_module(_spawn)
 LOGO_BLOCKS, Palette, write_schem, logo_grid = _spawn.LOGO_BLOCKS, _spawn.Palette, _spawn.write_schem, _spawn.logo_grid
 
 HALF = 136  # bord : chunks -8..8 autour du chunk central → x, z de -136 à 135
-YMIN, YMAX = -8, 62
+YMIN, YMAX = -8, 108
+LIFT = 44  # le dragon vole : son point le plus bas reste à plus de 44 blocs du sol, hors de portée d'une perle (~37)
 PB = "minecraft:polished_blackstone_bricks"
 DT = "minecraft:deepslate_tiles"
 
@@ -39,7 +40,7 @@ OUTPOSTS = {
 }
 GATES = {"nord": (0, -1), "est": (1, 0), "sud": (0, 1), "ouest": (-1, 0)}
 OUTER_D = 336  # centre des avant-postes extérieurs : 176 blocs au-delà du bord de la warzone
-ARRIVAL = (0, 34, -4)  # pieds du joueur sur la plateforme, sur le dos du dragon
+ARRIVAL = (0, 34, -4)  # pieds du joueur sur la plateforme, dans le repère du dragon (avant élévation)
 
 
 class Vol:
@@ -63,6 +64,22 @@ class Vol:
 
     def air(self, x, y, z):
         return self.ok(x, y, z) and self.v[y - self.ymin, z + self.half, x + self.half] == 0
+
+
+class Lifted:
+    """Vue décalée en hauteur d'un volume : le dragon se construit comme au sol, puis flotte LIFT blocs plus haut."""
+
+    def __init__(self, w, dy):
+        self.w, self.dy = w, dy
+
+    def put(self, x, y, z, name):
+        self.w.put(x, y + self.dy, z, name)
+
+    def air(self, x, y, z):
+        return self.w.air(x, y + self.dy, z)
+
+    def get(self, x, y, z):
+        return self.w.get(x, y + self.dy, z)
 
 
 def noise(x, z, s):
@@ -200,12 +217,11 @@ def triangle(w, a, b, c, name, step=0.45):
 
 
 def dragon(w, rng):
-    """Dragon couché au centre, la tête au nord. On arrive sur son dos ; on descend par la queue ou par les ailes."""
+    """Dragon en plein vol, la tête au nord, construit autour de y = 0 puis élevé par Lifted. On arrive sur son dos."""
     # Corps : du bassin (sud) au poitrail (nord). Le dos culmine sous la plateforme d'arrivée.
     body = spline([(0, 15, 22, 8.5), (0, 19, 10, 10.5), (0, 22, -4, 11.5), (0, 21, -16, 10.5)], 10)
     neck = spline([(0, 21, -16, 9), (0, 27, -27, 7), (0, 36, -34, 5.5), (0, 42, -38, 5)], 10)
-    tail = spline([(0, 15, 22, 8), (12, 12, 34, 7), (30, 9, 34, 6), (42, 6, 18, 5), (44, 4, -4, 4),
-                   (36, 2, -22, 3), (22, 1, -30, 2.2), (12, 1, -30, 1.6)], 10)
+    tail = spline([(0, 15, 22, 8), (0, 14, 36, 6.5), (4, 13, 50, 5), (-2, 12, 64, 3.5), (3, 12, 76, 2.5), (0, 13, 86, 1.6)], 10)
     for pts in (body, neck, tail):
         tube(w, pts, rng)
     # Tête : crâne, mâchoire, museau, cornes argent, yeux rubis.
@@ -219,30 +235,32 @@ def dragon(w, rng):
         w.put(s * 4, 44, -45, "minecraft:shroomlight")
         for z in (-52, -54):  # crocs
             w.put(s * 2, 36, z, "minecraft:calcite")
-    # Pattes repliées, griffes argent.
-    for s in (-1, 1):
-        for a, b, paw in (((s * 9, 14, -10, 5.5), (s * 15, 6, -18, 3.5), (s * 16, 1, -24, 3)),
-                          ((s * 9, 12, 14, 6), (s * 16, 5, 20, 4), (s * 17, 1, 13, 3))):
-            tube(w, spline([a, b, paw], 6), rng)
-            px, _, pz, _ = paw
-            for k in (-2, 0, 2):  # trois griffes vers l'avant
-                for d in range(3):
-                    w.put(round(px + k), 0, round(pz - 3 - d), "minecraft:calcite")
-    # Ailes repliées le long du corps, membrane rubis tendue entre des os noirs, extrémités posées au sol.
-    for s in (-1, 1):
-        shoulder = (s * 10, 30, -10)
-        elbow = (s * 26, 24, -2)
-        fingers = [(s * 40, 0, -18), (s * 46, 0, 2), (s * 40, 0, 22), (s * 28, 0, 32)]
+    # Pattes repliées sous le corps, tendues vers l'arrière comme en plein vol ; griffes argent.
+    for s_ in (-1, 1):
+        for leg in ([(s_ * 9, 14, -10, 5), (s_ * 12, 9, -14, 3.5), (s_ * 12, 7, -20, 2.5)],
+                    [(s_ * 9, 12, 14, 5.5), (s_ * 12, 7, 20, 4), (s_ * 11, 6, 28, 3)]):
+            tube(w, spline(leg, 6), rng)
+            px, py, pz, _ = leg[-1]
+            for k in (-1, 0, 1):
+                for d in range(2):
+                    w.put(round(px + k), round(py) - 2, round(pz + (1 if pz > 0 else -1) * (2 + d)), "minecraft:calcite")
+    # Ailes grandes ouvertes, légèrement relevées : os noirs, membrane rubis. Envergure de 116 blocs.
+    for s_ in (-1, 1):
+        shoulder = (s_ * 10, 30, -8)
+        elbow = (s_ * 30, 37, -6)
+        fingers = [(s_ * 52, 33, -16), (s_ * 58, 30, -1), (s_ * 53, 27, 13), (s_ * 41, 25, 23), (s_ * 25, 26, 22)]
         for p in [elbow] + fingers:
             for q in line_pts(shoulder if p is elbow else elbow, p, 0.4):
-                for dx in (0, 1):
-                    X, Y, Z = (round(v) for v in q)
-                    if Y >= 0:
-                        w.put(X + dx * s, Y, Z, "minecraft:polished_blackstone")
+                X, Y, Z = (round(v) for v in q)
+                for dy in (0, 1):
+                    w.put(X, Y + dy, Z, "minecraft:polished_blackstone")
         triangle(w, shoulder, elbow, fingers[0], "minecraft:red_stained_glass")
-        for a, b in zip(fingers, fingers[1:]):
-            triangle(w, elbow, a, b, "minecraft:red_stained_glass")
-        triangle(w, shoulder, elbow, (s * 10, 16, 16), "minecraft:red_stained_glass")
+        for f1, f2 in zip(fingers, fingers[1:]):
+            triangle(w, elbow, f1, f2, "minecraft:red_stained_glass")
+        triangle(w, elbow, fingers[-1], (s_ * 9, 24, 16), "minecraft:red_stained_glass")
+        triangle(w, shoulder, elbow, (s_ * 9, 24, 16), "minecraft:red_stained_glass")
+        for f in fingers[:4]:  # griffe argent au bout de chaque doigt
+            w.put(round(f[0]) + s_, round(f[1]), round(f[2]), "minecraft:calcite")
     # Épines rubis sur la nuque et la queue, en dehors du chemin de descente.
     for pts in (neck[2:-2:3],):
         for x, y, z, r in pts:
@@ -411,7 +429,13 @@ def build_warzone():
         pillar(w, x, z, 5)
     for key in OUTPOSTS:
         outpost(w, key, rng)
-    dragon(w, rng)
+    dragon(Lifted(w, LIFT), rng)
+    # Cercle d'atterrissage sous le dragon en vol : on saute du dos, on atterrit ici (dégâts de chute coupés par la région).
+    for a in range(0, 360, 2):
+        for rr in (49, 50):
+            x, z = round(rr * math.cos(math.radians(a))), round(-10 + rr * math.sin(math.radians(a)))
+            if w.get(x, -1, z) not in (PB, "minecraft:polished_blackstone"):
+                w.put(x, -1, z, "minecraft:red_nether_bricks")
     return w
 
 
@@ -471,7 +495,7 @@ def main():
     write_schem(HERE / "vaeloria-avant-poste-exterieur.schem", o.v, o.pal.names, (24, 1, 24))
     render(w, HERE / "apercu-warzone-dessus.png", HERE / "apercu-warzone-sud.png", 3)
     # Vue rapprochée du dragon.
-    d = Vol(half=60, ymin=-1, ymax=YMAX)
+    d = Vol(half=66, ymin=-1, ymax=70)
     dragon(d, np.random.default_rng(21))
     render(d, HERE / "apercu-dragon-dessus.png", HERE / "apercu-dragon-sud.png", 6)
     print("warzone :", int((w.v > 0).sum()), "blocs ·", w.v.shape[::-1], "· avant-poste extérieur :", o.v.shape[::-1])
