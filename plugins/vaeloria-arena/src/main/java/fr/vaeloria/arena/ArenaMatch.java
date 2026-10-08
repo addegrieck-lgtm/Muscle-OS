@@ -103,7 +103,7 @@ final class ArenaMatch {
         this.radius = radius;
         this.perTeam = perTeam;
         this.tally = new MatchTally(perTeam);
-        boolean bets = bank != null && cfg.getBoolean("bets.enabled", true) && cfg.getInt("bets.duration-seconds", 60) > 0;
+        boolean bets = bank != null && cfg.getBoolean("bets.enabled", true) && cfg.getInt("bets.duration-seconds", 30) > 0;
         this.desk = bets ? new BetDesk(plugin, bank, cfg.getConfigurationSection("bets")) : null;
     }
 
@@ -130,7 +130,7 @@ final class ArenaMatch {
         int n = 0;
         for (Team team : Team.values()) {
             List<double[]> offsets = ArenaGeometry.spawnOffsets(team, perTeam,
-                    cfg.getDouble("match.separation", 16), cfg.getDouble("match.spacing", 3));
+                    cfg.getDouble("match.separation", 10), cfg.getDouble("match.spacing", 3));
             for (int i = 0; i < offsets.size(); i++) {
                 String name = n < names.size() ? names.get(n) : team.label + "#" + (i + 1);
                 n++;
@@ -139,13 +139,13 @@ final class ArenaMatch {
                 spawnBot(at, team, name, kit);
             }
         }
-        countdown = Math.max(0, cfg.getInt("match.countdown-seconds", 5));
+        countdown = Math.max(0, cfg.getInt("match.countdown-seconds", 3));
         String where = cfg.getString("match.where", "à l'arène du spawn");
         String head = "<gold>⚔ Combat de bots <white>" + perTeam + "v" + perTeam + "</white> en <aqua>P4 U3</aqua> "
                 + "<white>(" + kit.weaponLabel() + ")</white> " + Msg.esc(where) + " !";
         if (desk != null) {
             state = State.BETTING;
-            betting = cfg.getInt("bets.duration-seconds", 60);
+            betting = cfg.getInt("bets.duration-seconds", 30);
             Component msg = Msg.of(head + " <yellow>Paris ouverts " + betting + " s</yellow> : "
                     + "<click:suggest_command:'/pari rouge '><hover:show_text:'<red>Miser sur Rouge'><red><bold>[Parier Rouge]</bold></red></hover></click> "
                     + "<click:suggest_command:'/pari bleu '><hover:show_text:'<blue>Miser sur Bleu'><blue><bold>[Parier Bleu]</bold></blue></hover></click>"
@@ -172,7 +172,7 @@ final class ArenaMatch {
             mob.setGlowing(b.getBoolean("glowing", true));
             mob.setCustomNameVisible(true);
             setBase(mob, Attribute.MAX_HEALTH, b.getDouble("health", 20));
-            setBase(mob, Attribute.MOVEMENT_SPEED, b.getDouble("speed", 0.3));
+            setBase(mob, Attribute.MOVEMENT_SPEED, b.getDouble("speed", 0.35));
             setBase(mob, Attribute.ATTACK_DAMAGE, b.getDouble("base-attack-damage", 1.0));
             setBase(mob, Attribute.FOLLOW_RANGE, radius * 2 + 16);
             setBase(mob, Attribute.SPAWN_REINFORCEMENTS, 0);
@@ -181,7 +181,7 @@ final class ArenaMatch {
             kit.equip(mob.getEquipment());
             mob.getPersistentDataContainer().set(plugin.botKey(), PersistentDataType.STRING, team.name());
         });
-        Bot bot = new Bot(z.getUniqueId(), team, name, b.getInt("golden-apples", 6));
+        Bot bot = new Bot(z.getUniqueId(), team, name, b.getInt("golden-apples", 2));
         bots.put(bot.id, bot);
         sbTeams.get(team).addEntry(bot.id.toString());
         refreshName(z, bot);
@@ -233,7 +233,7 @@ final class ArenaMatch {
         }
         if (state != State.FIGHT) return;
 
-        int limit = cfg.getInt("match.max-duration-seconds", 300);
+        int limit = cfg.getInt("match.max-duration-seconds", 120);
         if (limit > 0 && ticks >= limit * 20L) {
             broadcast("<yellow>⏱ Temps écoulé !");
             end(tally.winner());
@@ -314,7 +314,7 @@ final class ArenaMatch {
 
     private void maybeEatGapple(Zombie z, Bot bot) {
         ConfigurationSection b = cfg.getConfigurationSection("bot");
-        if (bot.gapples <= 0 || z.getHealth() > b.getDouble("gapple-health-threshold", 8)) return;
+        if (bot.gapples <= 0 || z.getHealth() > b.getDouble("gapple-health-threshold", 6)) return;
         long cooldown = b.getLong("gapple-cooldown-seconds", 4) * 20L;
         if (ticks - bot.lastGappleTick < cooldown) return;
         bot.gapples--;
@@ -504,7 +504,7 @@ final class ArenaMatch {
         float progress = 1f;
         if (state == State.BETTING) {
             text = "<yellow>Paris ouverts <white>" + betting + " s</white> — " + oddsLine() + " <gray>— /pari";
-            progress = Math.max(0f, Math.min(1f, betting / (float) Math.max(1, cfg.getInt("bets.duration-seconds", 60))));
+            progress = Math.max(0f, Math.min(1f, betting / (float) Math.max(1, cfg.getInt("bets.duration-seconds", 30))));
         } else if (state == State.ENDED) {
             return;
         } else {
@@ -512,7 +512,7 @@ final class ArenaMatch {
                     : " <dark_gray>|</dark_gray> <gold>cagnotte " + desk.money(desk.book().pool(Team.ROUGE) + desk.book().pool(Team.BLEU)) + "</gold>";
             text = "<red>Rouge " + tally.alive(Team.ROUGE) + "</red> <gray>vs</gray> <blue>" + tally.alive(Team.BLEU)
                     + " Bleu</blue>" + pot;
-            int limit = cfg.getInt("match.max-duration-seconds", 300);
+            int limit = cfg.getInt("match.max-duration-seconds", 120);
             if (state == State.FIGHT && limit > 0) progress = Math.max(0f, 1f - ticks / (limit * 20f));
         }
         bar.name(Msg.MM.deserialize(text));

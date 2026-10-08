@@ -10,10 +10,10 @@ arena:
 match:
   default-team-size: 3
   max-team-size: 10
-  separation: 16      # distance entre les deux lignes d'apparition
+  separation: 10      # distance entre les deux lignes d'apparition
   spacing: 3          # écart entre bots d'une même équipe
-  countdown-seconds: 5
-  max-duration-seconds: 300   # 0 = illimité ; à la fin : plus de survivants, puis plus de kills
+  countdown-seconds: 3
+  max-duration-seconds: 120   # 0 = illimité ; à la fin : plus de survivants, puis plus de kills
   cleanup-delay-seconds: 5
   where: "à l'arène du spawn"  # dans l'annonce : « Combat de bots 3v3 … à l'arène du spawn ! »
 
@@ -25,10 +25,10 @@ bot:
   sharpness: 5
   fire-aspect: 0
   health: 20
-  speed: 0.3                 # zombie normal : 0.23
+  speed: 0.35                # zombie normal : 0.23
   base-attack-damage: 1.0    # comme un joueur : 1 + arme
-  golden-apples: 6
-  gapple-health-threshold: 8 # en demi-cœurs
+  golden-apples: 2           # le réglage qui allonge le plus les combats
+  gapple-health-threshold: 6 # en demi-cœurs
   gapple-cooldown-seconds: 4
   strafe: true               # déplacements latéraux et sauts près de la cible, façon PvP 1.8
   glowing: true              # contour à la couleur de l'équipe
@@ -39,7 +39,7 @@ bot:
 # Mises d'un seul côté, égalité ou combat annulé : tout le monde est remboursé. Nécessite Vault + un plugin d'économie.
 bets:
   enabled: true
-  duration-seconds: 60       # durée des paris avant le compte à rebours
+  duration-seconds: 30       # durée des paris avant le compte à rebours
   min: 100
   max: 100000                # mise maximum par joueur et par combat
   house-cut-percent: 0       # part prélevée par le serveur sur la mise des perdants (0 = tout aux gagnants)

@@ -1,6 +1,6 @@
 # Arène de bots P4 U3 — VæloriaArena
 
-Plugin Paper 1.21 (`plugins/vaeloria-arena`, Java 21), indépendant de VæloriaBridge. Build : `gradle build` → `build/libs/vaeloria-arena-0.2.0.jar`. **Vault** et un plugin d'économie sont nécessaires pour les paris ; sans eux, les combats ont lieu sans paris.
+Plugin Paper 1.21 (`plugins/vaeloria-arena`, Java 21), indépendant de VæloriaBridge. Build : `gradle build` → `build/libs/vaeloria-arena-0.2.1.jar`. **Vault** et un plugin d'économie sont nécessaires pour les paris ; sans eux, les combats ont lieu sans paris.
 
 Des bots s'affrontent en deux équipes, **Rouge** et **Bleu**, en stuff diamant **Protection IV / Unbreaking III** avec une **hache en diamant Sharpness V**. Avant chaque combat, les joueurs **parient leur monnaie** sur l'équipe gagnante. Les joueurs autour regardent le combat : compte à rebours, kill feed, titre de victoire et MVP.
 
@@ -20,8 +20,8 @@ L'arène du spawn est fournie en schematic : [minecraft/arene-spawn](../minecraf
 ## Déroulement
 
 1. Les bots apparaissent sur deux lignes face à face et restent immobiles pendant les paris et le compte à rebours.
-2. **Paris** (`bets.duration-seconds`, 60 s par défaut) : l'annonce part à tout le serveur avec des boutons cliquables [Parier Rouge] / [Parier Bleu]. Une barre de boss affiche le temps restant, la cagnotte de chaque équipe, le nombre de parieurs et les cotes. Des rappels sont envoyés à 30 s et à 10 s.
-3. Au « COMBAT ! », chaque bot cible le bot adverse vivant le plus proche. Il strafe et saute près de sa cible (style PvP 1.8). Sous 4 ❤ il mange une golden apple (régénération II et absorption, 6 pommes par défaut).
+2. **Paris** (`bets.duration-seconds`, 30 s par défaut) : l'annonce part à tout le serveur avec des boutons cliquables [Parier Rouge] / [Parier Bleu]. Une barre de boss affiche le temps restant, la cagnotte de chaque équipe, le nombre de parieurs et les cotes. Un rappel est envoyé 10 s avant la fermeture.
+3. Au « COMBAT ! », chaque bot cible le bot adverse vivant le plus proche. Il strafe et saute près de sa cible (style PvP 1.8). Sous 3 ❤ il mange une golden apple (régénération II et absorption, 2 pommes par défaut). Un combat dure au plus 2 minutes (`match.max-duration-seconds`).
 4. Une équipe éliminée a perdu. Si `match.max-duration-seconds` est atteint, la victoire va à l'équipe qui a le plus de survivants, puis le plus de kills, sinon c'est une égalité.
 5. Les gains sont versés (voir ci-dessous). Après `cleanup-delay-seconds`, les bots sont supprimés.
 
