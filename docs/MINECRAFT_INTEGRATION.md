@@ -75,6 +75,29 @@ VaeloriaBridgePlugin.emit(e);
 
 Le site fonctionne entièrement **avant** la synchronisation Minecraft : empires, fondateurs, Conseil et parrainage ne dépendent que des comptes du site. Les guerres et événements peuvent aussi être saisis à la main dans l'admin (Monde → Guerres). `PLAYER_QUIT` crédite l'influence « temps de jeu » (1 / heure, plafonnée) au compte lié.
 
+## Plugins VÆLORIA branchés (8 octobre 2026)
+
+Les 4 plugins du serveur détectent VæloriaBridge tout seuls (`softdepend`) et appellent son `emit()` par réflexion : il suffit d'installer **VaeloriaBridge** à côté d'eux.
+
+| Plugin | Réglage | Événements envoyés | Effet sur le site |
+|---|---|---|---|
+| VaeloriaFactions 1.0.0 | toujours actif (`bridge.snapshot-minutes: 5`) | `FACTION_CREATE/DISBAND/JOIN/LEAVE`, `FACTION_CLAIM/UNCLAIM`, `FACTION_SNAPSHOT`, `WAR_START/END`, `KOTH_START/CAPTURE` | factions, territoire, power, guerres, KOTH en direct, classements |
+| VaeloriaVote 1.0.0 | `bridge.enabled: true` | `VOTE` (`uuid`, `username`, `site`) | page `/voter` : votes du mois, du jour, 20 meilleurs votants ; bloc « Voter » de l'accueil |
+| VaeloriaShop 1.0.0 | `bridge.enabled: true`, `bridge.min-purchase` | `SHOP_PURCHASE`, `AUCTION_SALE` (≥ `min-purchase`), `MERCHANT_RANK` | rang de marchand du joueur (`players.merchant_level/merchant_rank`) ; achats conservés dans `bridge_events` |
+| VaeloriaCombat 0.1.0 | — | aucun (le TPS/MSPT part déjà dans `SERVER_HEARTBEAT`) | — |
+
+Format vérifié en lisant le bytecode des jars : les champs correspondent à `packages/types/src/bridge.ts`. **Important** : un type inconnu fait rejeter tout le lot (400) ; l'API doit donc être déployée avec ces types **avant** d'activer `bridge.enabled` dans Vote et Shop.
+
+### Mise en service, pas à pas
+
+1. Déployer l'API (migrations automatiques, dont `005_votes_market.sql`).
+2. Générer un secret : `openssl rand -hex 32`. Côté API : `BRIDGE_KEYS=factions-1:<secret>`.
+3. Serveur Minecraft : `plugins/VaeloriaBridge/config.yml` → `api.url` (ex. `https://api.vaeloria.fr`), `api.key-id: factions-1`, `api.secret: <secret>`, `server-name: factions`. Redémarrer, vérifier avec `/vbridge`.
+4. `VaeloriaVote/config.yml` et `VaeloriaShop/config.yml` → `bridge: enabled: true`, puis `/votes reload` et `/shop admin reload`.
+5. Sites de vote : renseigner `sites:` dans `VaeloriaVote/config.yml` **et** `VOTE_SITES` dans `apps/web/content/gameplay.ts` (même nom, même lien), sinon le site affiche « Lien bientôt disponible ».
+
+Les valeurs de jeu affichées sur le site (prix, power, récompenses, roue…) sont recopiées des configs dans `apps/web/content/gameplay.ts` : à modifier au même endroit quand une config change.
+
 ## File d'événements et pannes
 
 - Événements mis en file en mémoire, envoyés par lots (≤ 200) toutes les 5 s, hors thread principal.

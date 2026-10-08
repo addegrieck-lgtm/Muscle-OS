@@ -144,6 +144,18 @@ Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60
 
 Tests : API 96 / 96.
 
+## Site aligné sur les plugins du serveur (8 octobre 2026)
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| `/voter` : 3 sites, cagnotte, roue (chances calculées depuis la config), votes du mois et meilleurs votants | ✅ | Votes signés HMAC envoyés à l'API locale → classement affiché ; captures desktop/mobile |
+| API : événements `VOTE`, `SHOP_PURCHASE`, `AUCTION_SALE`, `MERCHANT_RANK` ; `GET /api/v1/votes` | ✅ | 2 nouveaux tests (votes non dupliqués, rang sans balises MiniMessage) |
+| `/economie` (marché, rangs de marchand, générateurs, outils, HDV, boutiques de joueurs), `/commandes` | ✅ | Routes 200, 0 débordement à 390 px |
+| `/factions`, `/pvp`, guides : vraies valeurs des plugins (plus de « [À CONFIRMER] » dans les guides), nouveau guide « Voter » | ✅ | Build |
+| Liens des 3 sites de vote | ⬜ | Encore « exemple.fr » dans le plugin : à choisir |
+
+Tests : API 98 / 98, typecheck ✅, build site ✅.
+
 ## Décisions attendues du propriétaire
 
 1. Prestataire de paiement (Stripe / PayPal / Tebex).
@@ -151,4 +163,5 @@ Tests : API 96 / 96.
 3. Informations légales de la structure.
 4. Lien Discord définitif et date d'ouverture de la Saison I (modifiable en base).
 5. Hébergeur du VPS et du serveur Minecraft.
-6. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.
+6. Les 3 sites de vote (nom + lien) — à mettre dans VaeloriaVote **et** `apps/web/content/gameplay.ts`.
+7. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.

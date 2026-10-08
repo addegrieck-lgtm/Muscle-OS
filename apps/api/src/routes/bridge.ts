@@ -57,6 +57,7 @@ export async function bridgeRoutes(app: FastifyInstance, ctx: AppContext) {
     if (result.accepted > 0) {
       ctx.cache.invalidate("status:");
       ctx.cache.invalidate("players:");
+      if (events.some((e) => e.event === "VOTE")) ctx.cache.invalidate("votes:");
     }
     // Alertes de lag : envoyées en arrière-plan pour ne pas retarder la réponse au plugin.
     if (events.some((e) => e.event === "SERVER_HEARTBEAT")) {

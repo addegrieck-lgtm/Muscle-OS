@@ -21,3 +21,5 @@ plugins/vaeloria-vote/build
 plugins/vaeloria-vote/.gradle
 plugins/vaeloria-arena/build
 plugins/vaeloria-arena/.gradle
+plugins/vaeloria-crates/build
+plugins/vaeloria-crates/.gradle

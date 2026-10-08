@@ -112,6 +112,28 @@ export async function v1Routes(app: FastifyInstance, ctx: AppContext) {
     return cache.wrap("stats", 120_000, () => getStats(sql));
   });
 
+  /** Votes du mois en cours (heure de Paris, comme la journée de VaeloriaVote) : total et meilleurs votants. */
+  app.get("/votes", async (_req, reply) => {
+    reply.header("cache-control", cacheFor(60));
+    return cache.wrap("votes:month", 60_000, async () => {
+      const [month] = await sql<{ month: string; total: number; today: number; voters: number }[]>`
+        WITH bounds AS (SELECT date_trunc('month', now() AT TIME ZONE 'Europe/Paris') AT TIME ZONE 'Europe/Paris' AS start,
+                               date_trunc('day', now() AT TIME ZONE 'Europe/Paris') AT TIME ZONE 'Europe/Paris' AS day)
+        SELECT to_char(now() AT TIME ZONE 'Europe/Paris', 'YYYY-MM') AS month,
+               count(*) FILTER (WHERE v.voted_at >= b.start)::int AS total,
+               count(*) FILTER (WHERE v.voted_at >= b.day)::int AS today,
+               count(DISTINCT v.player_uuid) FILTER (WHERE v.voted_at >= b.start)::int AS voters
+        FROM bounds b LEFT JOIN votes v ON v.voted_at >= b.start
+        GROUP BY b.start, b.day`;
+      const top = await sql<{ rank: number; uuid: string; username: string; votes: number }[]>`
+        SELECT (row_number() OVER (ORDER BY count(*) DESC, max(v.voted_at)))::int AS rank, p.uuid, p.username, count(*)::int AS votes
+        FROM votes v JOIN players p ON p.uuid = v.player_uuid
+        WHERE v.voted_at >= date_trunc('month', now() AT TIME ZONE 'Europe/Paris') AT TIME ZONE 'Europe/Paris'
+        GROUP BY p.uuid, p.username ORDER BY votes DESC, max(v.voted_at) LIMIT 20`;
+      return { month: month?.month ?? "", total: month?.total ?? 0, today: month?.today ?? 0, voters: month?.voters ?? 0, top };
+    });
+  });
+
   app.get("/shop/products", async (_req, reply) => {
     reply.header("cache-control", cacheFor(300));
     return { items: (await cache.wrap("shop:catalog", 30_000, () => getCatalog(sql))).products };

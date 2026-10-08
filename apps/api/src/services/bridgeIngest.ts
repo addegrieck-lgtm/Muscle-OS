@@ -55,6 +55,8 @@ async function factionId(tx: Tx, seasonId: string | null, name: string): Promise
   return f?.id ?? null;
 }
 
+const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").trim().slice(0, 64);
+
 /** Applique un événement aux tables métier. Doit être appelé dans une transaction. */
 async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null, lag: LagThresholds): Promise<void> {
   switch (e.event) {
@@ -215,6 +217,21 @@ async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null, lag: LagTh
     case "PLAYER_RANK_CHANGE":
       await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
       await tx`UPDATE players SET rank = ${e.rank} WHERE uuid = ${e.uuid}`;
+      return;
+    case "VOTE":
+      await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
+      await tx`INSERT INTO votes (event_id, player_uuid, site, voted_at) VALUES (${e.id}, ${e.uuid}, ${e.site}, ${e.occurredAt})
+               ON CONFLICT (event_id) DO NOTHING`;
+      return;
+    case "MERCHANT_RANK":
+      await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
+      // Le plugin envoie le nom au format MiniMessage (« <silver>Marchand ») : seul le texte est gardé.
+      await tx`UPDATE players SET merchant_level = ${e.level}, merchant_rank = ${stripTags(e.rank)} WHERE uuid = ${e.uuid}`;
+      return;
+    case "SHOP_PURCHASE":
+    case "AUCTION_SALE":
+      // Gros achats au marché / à l'hôtel des ventes : conservés dans bridge_events pour le suivi, sans effet sur le site.
+      await upsertPlayer(tx, e.uuid, e.username, e.server, e.occurredAt);
       return;
     case "SERVER_HEARTBEAT": {
       const latest = await tx`

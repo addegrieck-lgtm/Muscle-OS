@@ -157,3 +157,33 @@ describe("joueurs en ligne", () => {
     await fresh.close();
   });
 });
+
+describe("plugins VaeloriaVote et VaeloriaShop", () => {
+  it("compte les votes une seule fois et les expose dans /api/v1/votes", async () => {
+    const vote = ev({ event: "VOTE", ...alice, site: "site1" });
+    const batch = { events: [vote, ev({ event: "VOTE", ...alice, site: "site2" }), ev({ event: "VOTE", ...bob, site: "site1" })] };
+    expect((await post("/bridge/v1/events", batch)).json().accepted).toBe(3);
+    // Renvoi du même événement (réponse perdue) : pas de double compte.
+    expect((await post("/bridge/v1/events", { events: [vote] })).json().duplicates).toBe(1);
+
+    const res = await app.inject({ method: "GET", url: "/api/v1/votes" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.total).toBe(3);
+    expect(body.voters).toBe(2);
+    expect(body.top[0]).toMatchObject({ rank: 1, username: "Alice", votes: 2 });
+  });
+
+  it("enregistre le rang de marchand sans les balises MiniMessage et accepte achats et ventes HDV", async () => {
+    const res = await post("/bridge/v1/events", {
+      events: [
+        ev({ event: "MERCHANT_RANK", ...bob, level: 6, rank: "<gradient:#D21F2F:#E2C27F><b>Prince marchand</gradient>" }),
+        ev({ event: "SHOP_PURCHASE", ...bob, item: "SPAWNER_IRON_GOLEM", amount: 1, price: 1_000_000 }),
+        ev({ event: "AUCTION_SALE", ...alice, seller: bob.uuid, sellerName: bob.username, item: "ELYTRA", amount: 1, price: 300_000 }),
+      ],
+    });
+    expect(res.json().accepted).toBe(3);
+    const [p] = await sql`SELECT merchant_level, merchant_rank FROM players WHERE uuid = ${bob.uuid}`;
+    expect(p).toMatchObject({ merchant_level: 6, merchant_rank: "Prince marchand" });
+  });
+});

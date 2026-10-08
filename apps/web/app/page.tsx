@@ -11,6 +11,7 @@ import { PollTeaser } from "@/components/world/PollPreview";
 import { WarCard } from "@/components/world/WarCard";
 import { WorldMap } from "@/components/world/WorldMap";
 import { FALLBACK_FAQ } from "@/content/faq";
+import { dailyPot } from "@/content/gameplay";
 import { api, orNull } from "@/lib/api";
 import { JsonLd, faqLd, pageMeta } from "@/lib/seo";
 
@@ -23,11 +24,12 @@ export const metadata = pageMeta({
 });
 
 export default async function HomePage() {
-  const [status, home, map, faq] = await Promise.all([
+  const [status, home, map, faq, votes] = await Promise.all([
     orNull(api.serverStatus()),
     orNull(api.worldHome()),
     orNull(api.worldMap()),
     orNull(api.get<{ items: { question: string; answer: string }[] }>("/api/v1/faq", { revalidate: 300 })),
+    orNull(api.votes()),
   ]);
   const faqItems = faq?.items.length ? faq.items : FALLBACK_FAQ;
 
@@ -145,6 +147,25 @@ export default async function HomePage() {
             <SectionHeader eyebrow="Conseil" title="La communauté décide" action={<ButtonLink href="/conseil" variant="ghost" size="sm">Le Conseil</ButtonLink>} />
             {home?.poll ? <PollTeaser poll={home.poll} /> : <EmptyState title="Aucun vote en cours">Les prochaines décisions seront soumises au Conseil.</EmptyState>}
           </div>
+        </Container>
+      </Section>
+
+      {/* Votes */}
+      <Section className="border-t border-line/60">
+        <Container className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_auto]">
+          <div>
+            <SectionHeader
+              eyebrow="Voter"
+              title="3 votes par jour, la roue en bonus"
+              description={`${new Intl.NumberFormat("fr-FR").format(dailyPot())} $ et des objets pour une journée complète, jusqu'à ×4 avec la roue du jour. Chaque vote fait grandir VÆLORIA.`}
+            />
+            {votes && votes.total > 0 && (
+              <p className="-mt-4 text-sm text-muted">
+                {new Intl.NumberFormat("fr-FR").format(votes.total)} votes ce mois-ci{votes.top[0] ? <> · en tête : <Link href="/voter" className="font-semibold text-fg hover:text-accent">{votes.top[0].username}</Link></> : null}
+              </p>
+            )}
+          </div>
+          <ButtonLink href="/voter" size="lg" data-track="cta_click" data-track-id="home-voter">Voter maintenant</ButtonLink>
         </Container>
       </Section>
 

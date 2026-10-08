@@ -27,11 +27,12 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 | `cd plugins/vaeloria-combat && gradle build` | Jar du plugin PvP (combat 1.8, MSPT, ping) + tests |
 | `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 (paris en monnaie) |
+| `cd plugins/vaeloria-crates && gradle build` | Jar du plugin de coffres à clés + tests |
 
 ## Documentation
 
 - [Architecture du site](docs/SITE_ARCHITECTURE.md) · [API](docs/API_ARCHITECTURE.md) · [Base de données](docs/DATABASE.md)
-- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Arène de bots P4 U3](docs/ARENA_BOTS.md) · [Warps farm par grade](minecraft/warps-farm/README.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
+- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Arène de bots P4 U3](docs/ARENA_BOTS.md) · [Coffres à clés](docs/CRATES.md) · [Warps farm par grade](minecraft/warps-farm/README.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
 - Constructions : [Île Marchande flottante + ponton](minecraft/ile-commerciale/README.md) · [Arène de bots du spawn](minecraft/arene-spawn/README.md) (schematics WorldEdit)

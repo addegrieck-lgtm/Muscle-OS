@@ -48,6 +48,15 @@ export class ApiClientError extends Error {
 }
 
 /** Options de cache transmises à `fetch` (Next.js comprend `next.revalidate`). */
+/** Votes du mois (plugin VaeloriaVote → VæloriaBridge → API). */
+export interface MonthlyVotes {
+  month: string;
+  total: number;
+  today: number;
+  voters: number;
+  top: { rank: number; uuid: string; username: string; votes: number }[];
+}
+
 export type CacheHint = { revalidate?: number | false; tags?: string[] };
 
 export interface ApiClientOptions {
@@ -116,6 +125,7 @@ export function createApiClient({ baseUrl, headers, timeoutMs = 4000 }: ApiClien
     roadmap: () => get<{ items: RoadmapStep[] }>("/api/v1/roadmap", { revalidate: 300, tags: ["world"] }),
     event: (slug: string) => get<GameEvent>(`/api/v1/events/${enc(slug)}`, { revalidate: 30, tags: ["events"] }),
     pastEvents: () => get<{ items: GameEvent[] }>("/api/v1/events-past", { revalidate: 300, tags: ["events"] }),
+    votes: () => get<MonthlyVotes>("/api/v1/votes", { revalidate: 60, tags: ["votes"] }),
     stats: () => get<{ players: number; factions: number; kills: number; betaSignups: number }>("/api/v1/stats", { revalidate: 120 }),
   };
 }
