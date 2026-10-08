@@ -16,12 +16,17 @@ export const NAV = [
   { href: "/classements", label: "Classements" },
   { href: "/evenements", label: "Événements", match: ["/evenement/"] },
   { href: "/conseil", label: "Conseil" },
+  { href: "/voter", label: "Voter" },
 ];
 
 /** Menu mobile : la navigation principale, puis le reste du site. */
 const MORE = [
   { href: "/fondateurs", label: "Fondateurs" },
   { href: "/boutique", label: "Boutique" },
+  { href: "/factions", label: "Factions" },
+  { href: "/economie", label: "Économie" },
+  { href: "/pvp", label: "PvP" },
+  { href: "/commandes", label: "Commandes" },
   { href: "/journal", label: "Journal" },
   { href: "/roadmap", label: "Roadmap" },
   { href: "/news", label: "News" },
@@ -44,7 +49,7 @@ export function Navbar() {
         Aller au contenu
       </a>
       <nav aria-label="Navigation principale" className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" aria-label="VÆLORIA — accueil">
+        <Link href="/" aria-label="VÆLORIA — accueil" className="shrink-0">
           <Wordmark />
         </Link>
         <ul className="hidden items-center gap-0.5 xl:flex">
@@ -55,7 +60,7 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("relative rounded-md px-2.5 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
+                  className={cn("relative whitespace-nowrap rounded-md px-2 py-2 font-display text-sm font-semibold uppercase tracking-[0.06em] transition-colors", active ? "text-fg after:absolute after:inset-x-2 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
                 >
                   {item.label}
                 </Link>
@@ -67,7 +72,7 @@ export function Navbar() {
           <CartButton />
           {/* Masqués sur mobile : le menu et la barre fixe du bas les portent déjà. */}
           <div className="hidden items-center gap-2 sm:flex">
-            <Link href="/compte" className={buttonClass("ghost", "sm")}>
+            <Link href="/login" className={buttonClass("ghost", "sm")}>
               Connexion
             </Link>
             <Link href="/rejoindre" data-track="cta_click" data-track-id="nav-rejoindre" className={buttonClass("primary", "sm")}>
@@ -93,7 +98,7 @@ export function Navbar() {
         <div id="menu-mobile" className="fixed inset-x-0 top-16 z-40 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
           <div className="grid grid-cols-2 gap-2">
             <Link href="/rejoindre" data-track="cta_click" data-track-id="menu-rejoindre" className={buttonClass("primary", "lg")}>Rejoindre</Link>
-            <Link href="/compte" className={buttonClass("secondary", "lg")}>Connexion</Link>
+            <Link href="/login" className={buttonClass("secondary", "lg")}>Connexion</Link>
           </div>
           <ul className="mt-4 flex flex-col">
             {NAV.map((item) => (

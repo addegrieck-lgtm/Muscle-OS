@@ -12,7 +12,7 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 | 4 | Pages serveur | ✅ Terminée (contenus légaux à renseigner) | 90 |
 | 5 | API | 🟡 Avancée | 85 |
 | 6 | Database | ✅ Terminée | 90 |
-| 7 | Authentication | 🟡 Implémentée et testée ; connexion Discord réelle à activer (identifiants) | 80 |
+| 7 | Authentication | ✅ Comptes e-mail + mot de passe, rôles, accès admin ; Discord optionnel ; e-mails (vérification, oubli) à faire | 90 |
 | 8 | Minecraft Bridge | 🟡 Avancée, pas encore testée sur un vrai serveur Paper | 75 |
 | 9 | Profils joueur / faction | ✅ Terminée | 85 |
 | 10 | Classements | ✅ Terminée | 85 |
@@ -131,6 +131,31 @@ Tests de cette étape : API 90 / 90 ✅, site 4 / 4 ✅, typecheck du workspace 
 
 Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60 s (une action apparaît sur les pages publiques avec ce délai ; l'îlot personnel est immédiat). Les parrainages et votes d'un même foyer ne sont pas distingués au-delà de « un compte Discord = une personne » et du plafond quotidien.
 
+## Comptes et accès au back-office (8 octobre 2026)
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| Inscription / connexion e-mail + mot de passe (scrypt, verrou, limites) | ✅ | 6 tests API ; E2E navigateur |
+| Formulaire conservé après une erreur (pseudo, e-mail, case) | ✅ | E2E |
+| Back-office protégé par le compte du site (rôle admin/owner) | ✅ | E2E : sans session → connexion ; joueur → 403 ; propriétaire → 200 |
+| Premier propriétaire par `ADMIN_SETUP_CODE` (Mon compte → Accès équipe) | ✅ | Tests API + E2E (mauvais code refusé et journalisé) |
+| Admin → Équipe : donner / retirer l'accès par e-mail, dernier propriétaire protégé | ✅ | Tests API + E2E (second compte devient admin et entre) |
+| Vérification d'e-mail, mot de passe oublié | ⬜ | Nécessite un service d'envoi d'e-mails |
+
+Tests : API 96 / 96.
+
+## Site aligné sur les plugins du serveur (8 octobre 2026)
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| `/voter` : 3 sites, cagnotte, roue (chances calculées depuis la config), votes du mois et meilleurs votants | ✅ | Votes signés HMAC envoyés à l'API locale → classement affiché ; captures desktop/mobile |
+| API : événements `VOTE`, `SHOP_PURCHASE`, `AUCTION_SALE`, `MERCHANT_RANK` ; `GET /api/v1/votes` | ✅ | 2 nouveaux tests (votes non dupliqués, rang sans balises MiniMessage) |
+| `/economie` (marché, rangs de marchand, générateurs, outils, HDV, boutiques de joueurs), `/commandes` | ✅ | Routes 200, 0 débordement à 390 px |
+| `/factions`, `/pvp`, guides : vraies valeurs des plugins (plus de « [À CONFIRMER] » dans les guides), nouveau guide « Voter » | ✅ | Build |
+| Liens des 3 sites de vote | ⬜ | Encore « exemple.fr » dans le plugin : à choisir |
+
+Tests : API 98 / 98, typecheck ✅, build site ✅.
+
 ## Décisions attendues du propriétaire
 
 1. Prestataire de paiement (Stripe / PayPal / Tebex).
@@ -138,4 +163,5 @@ Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60
 3. Informations légales de la structure.
 4. Lien Discord définitif et date d'ouverture de la Saison I (modifiable en base).
 5. Hébergeur du VPS et du serveur Minecraft.
-6. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.
+6. Les 3 sites de vote (nom + lien) — à mettre dans VaeloriaVote **et** `apps/web/content/gameplay.ts`.
+7. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.

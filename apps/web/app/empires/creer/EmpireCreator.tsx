@@ -28,8 +28,11 @@ export function EmpireCreator() {
   if (state.status === "anonymous")
     return (
       <Card className="space-y-3 text-center">
-        <p className="font-display text-lg font-bold uppercase tracking-[0.05em]">Connecte-toi pour fonder ton empire</p>
-        <ButtonLink href={loginHref("/empires/creer")} size="lg">Se connecter avec Discord</ButtonLink>
+        <p className="font-display text-lg font-bold uppercase tracking-[0.05em]">Crée ton compte pour fonder ton empire</p>
+        <div className="flex flex-col justify-center gap-2 sm:flex-row">
+          <ButtonLink href={loginHref("/empires/creer", true)} size="lg">Créer mon compte</ButtonLink>
+          <ButtonLink href={loginHref("/empires/creer")} size="lg" variant="secondary">Se connecter</ButtonLink>
+        </div>
       </Card>
     );
 

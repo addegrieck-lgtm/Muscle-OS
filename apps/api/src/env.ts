@@ -12,11 +12,24 @@ const Env = z.object({
   MC_PING_PORT: z.coerce.number().int().default(25565),
   DISCORD_WEBHOOK_URL: z.string().url().optional().or(z.literal("")),
 
+  // ── Alertes de performance (MSPT du heartbeat VæloriaBridge) ──
+  /** Webhook Discord du salon staff qui reçoit les alertes de lag (vide = alertes visibles dans l'admin uniquement). */
+  DISCORD_ALERTS_WEBHOOK_URL: z.string().url().optional().or(z.literal("")),
+  /** MSPT à partir duquel le serveur est considéré en lag (50 ms = 20 TPS tout juste tenus). */
+  LAG_ALERT_MSPT: z.coerce.number().positive().default(40),
+  /** Durée pendant laquelle le lag doit persister avant d'ouvrir une alerte. */
+  LAG_ALERT_MINUTES: z.coerce.number().min(0).default(3),
+
   // ── Comptes ──
   /** Jeton partagé site ↔ API pour les routes /internal (connexion). */
   WEB_INTERNAL_TOKEN: z.string().min(24).optional(),
   DISCORD_CLIENT_ID: z.string().optional(),
   DISCORD_CLIENT_SECRET: z.string().optional(),
+  /**
+   * Code secret permettant à un compte connecté de devenir propriétaire (accès au back-office).
+   * À définir au déploiement, utiliser une fois, puis retirer. Vide = désactivé.
+   */
+  ADMIN_SETUP_CODE: z.string().min(16, "ADMIN_SETUP_CODE : 16 caractères minimum").optional().or(z.literal("")),
   /** Connexion sans Discord pour le développement uniquement (refusée en production). */
   DEV_LOGIN: z.enum(["0", "1"]).default("0"),
 

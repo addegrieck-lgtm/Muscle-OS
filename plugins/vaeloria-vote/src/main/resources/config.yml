@@ -1,0 +1,118 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                  VæloriaVote — configuration                 ║
+# ║   3 sites, rappel toutes les 30 min, cagnotte + roue du jour ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Après modification : /votes reload
+#
+# DÉROULÉ D'UNE JOURNÉE
+#   1. Chaque vote remplit la CAGNOTTE DU JOUR (rewards.per-vote).
+#   2. Le 3e site voté ajoute le BONUS DE FIDÉLITÉ (rewards.all-sites-bonus) et débloque la ROUE.
+#   3. /roue : roue classique (×1, ×2 ou ×3, jamais rien perdu) ou quitte ou double (×4 ou ×0).
+#   4. Les votes suivants de la journée (sites à délai court) sont versés directement, ×1.
+#   Cagnotte jamais lancée : versée ×1 au changement de jour. On ne perd que si on choisit le quitte ou double.
+#
+# ÉQUILIBRAGE (repères de VaeloriaShop, shop.yml)
+#   Débutant à la houe I : ~1 500 à 3 000 $/h · Joueur équipé : ~6 000 à 12 000 $/h.
+#   Journée complète (3 votes + bonus, ~2 minutes de clics) :
+#     ×1 → 1 400 $ + objets (~2 600 $ de valeur)  = ~1 h de farm débutant : ça vaut le coup pour un nouveau.
+#     ×3 → 4 200 $ + objets                       = ~30 min de farm équipé : sympa, jamais décisif.
+#     ×4 → 5 600 $ + objets.
+#   Les objets choisis ne sont PAS rachetables par /vendre (steak cuit, fioles d'XP, carottes et pommes dorées) :
+#   les votes ne fabriquent pas d'argent en plus de la somme ci-dessous. Pas d'obsidienne ni de TNT : les raids
+#   restent une affaire de farm. Ajoutez un objet rachetable seulement en petite quantité.
+
+timezone: "Europe/Paris"        # minuit de cette zone = nouvelle journée (roue, bonus, cagnotte)
+
+# ── Les 3 sites ─────────────────────────────────────────────────────
+# Remplacez nom et lien quand vous aurez choisi. cooldown-minutes = délai du site entre deux votes
+# (24 h = 1440, 3 h = 180, 1 h 30 = 90). Le rappel s'arrête quand les 3 sont faits et reprend à la fin des délais.
+#
+# Trois façons de recevoir un vote (à brancher plus tard, site par site) :
+#   a) API de vérification : le joueur clique « J'ai voté » (/vote verifier), le plugin interroge le site.
+#      check-url accepte {key} {player} {uuid} {ip}. success-regex = texte présent dans la réponse si le vote est valide.
+#      Exemple : check-url: "https://exemple-site.fr/api/vote/{key}/{ip}"  success-regex: '"vote"\s*:\s*(true|1)'
+#   b) NuVotifier : le site envoie le vote tout seul. votifier-service = nom du service affiché par NuVotifier.
+#   c) /votes give <joueur> <site> depuis la console (site web, autre plugin).
+sites:
+  site1:
+    name: "Site 1"
+    url: "https://exemple.fr/vote/vaeloria"
+    cooldown-minutes: 1440
+    check-url: ""
+    api-key: ""
+    success-regex: ''
+    votifier-service: ""
+  site2:
+    name: "Site 2"
+    url: "https://exemple.fr/vote/vaeloria"
+    cooldown-minutes: 1440
+    check-url: ""
+    api-key: ""
+    success-regex: ''
+    votifier-service: ""
+  site3:
+    name: "Site 3"
+    url: "https://exemple.fr/vote/vaeloria"
+    cooldown-minutes: 1440
+    check-url: ""
+    api-key: ""
+    success-regex: ''
+    votifier-service: ""
+
+verification:
+  # true = « J'ai voté » crédite les sites SANS API, sans rien vérifier. Pour tester seulement : à false en production.
+  test-mode: false
+  timeout-seconds: 6
+
+# ── Récompenses ─────────────────────────────────────────────────────
+# Objets : nom Minecraft (IRON_INGOT, GOLDEN_APPLE…) : quantité. Argent versé par Vault (le même que VaeloriaShop).
+rewards:
+  per-vote:                     # pour CHAQUE site voté
+    money: 300
+    items:
+      COOKED_BEEF: 8            # boutique : 6 $ l'unité, non rachetable
+      EXPERIENCE_BOTTLE: 4      # boutique : 40 $, non rachetable
+  all-sites-bonus:              # une fois par jour, au 3e site
+    money: 500
+    items:
+      GOLDEN_APPLE: 1           # boutique : 350 $, non rachetable
+      GOLDEN_CARROT: 8          # boutique : 30 $, non rachetable
+
+economy:
+  # Plafond d'argent versé par les votes par joueur et par jour, roue comprise (0 = aucun).
+  # 6 000 laisse passer un ×4 complet (5 600) et bloque les excès si un site a un délai très court.
+  max-money-per-day: 6000
+  # Sans Vault seulement : commande console pour verser l'argent ({player}, {amount}).
+  money-command: "eco give {player} {amount}"
+  currency-symbol: "$"
+
+# ── Roue du jour ────────────────────────────────────────────────────
+# multiplicateur: poids. Les chances sont affichées aux joueurs en survolant les boutons.
+wheel:
+  required-sites: 3             # votes du jour nécessaires pour débloquer la roue
+  classic:                      # moyenne ×1,65 — jamais de perte
+    1: 50
+    2: 35
+    3: 15
+  risky:                        # quitte ou double — moyenne ×1,6 : un frisson, pas un meilleur calcul
+    4: 40
+    0: 60
+  broadcast-min-multiplier: 3   # annonce à tout le serveur à partir de ×3 (preuve sociale : ça donne envie de voter)
+  broadcast-loss: true          # annonce aussi les quitte ou double perdus
+
+# ── Rappels ─────────────────────────────────────────────────────────
+# Tant qu'un des sites est votable (ou que la roue n'est pas lancée), rappel cliquable toutes les N minutes.
+# Permission vaeloria.vote.noreminder pour l'exclure (staff).
+reminder:
+  interval-minutes: 30
+  first-delay-seconds: 20       # premier rappel peu après la connexion
+  title: true
+  sound: true
+
+# « X a voté pour VÆLORIA (2/3) [/vote] » à tout le serveur.
+broadcast-votes: true
+
+# Envoie un événement VOTE au site via VaeloriaBridge (classement des votants sur /voter).
+# L'API le connaît depuis la migration 005 : passer à true une fois l'API déployée et le bridge configuré.
+bridge:
+  enabled: false

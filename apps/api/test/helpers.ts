@@ -30,10 +30,10 @@ export async function freshDb(): Promise<Sql> {
   return sql;
 }
 
-export async function testApp(sql: Sql, overrides: Partial<Parameters<typeof buildApp>[0]> = {}): Promise<FastifyInstance> {
+export async function testApp(sql: Sql, overrides: Partial<Parameters<typeof buildApp>[0]> = {}, envExtra: Record<string, string> = {}): Promise<FastifyInstance> {
   const env = loadEnv({
     NODE_ENV: "test", DATABASE_URL: TEST_DB, ADMIN_API_TOKEN: ADMIN_TOKEN, WEB_INTERNAL_TOKEN: INTERNAL_TOKEN, DEV_LOGIN: "1",
-    PAYMENT_PROVIDER: "sandbox", SANDBOX_WEBHOOK_SECRET: SANDBOX_SECRET,
+    PAYMENT_PROVIDER: "sandbox", SANDBOX_WEBHOOK_SECRET: SANDBOX_SECRET, ...envExtra,
   } as NodeJS.ProcessEnv);
   return buildApp({
     sql,
