@@ -4,9 +4,14 @@ import { adminApi } from "@/lib/api";
 
 type Dashboard = {
   kpi: Record<string, number>;
-  servers: { server: string; online: number; maxPlayers: number; tps: number | null; mspt: number | null; version: string; updatedAt: string; fresh: boolean }[];
+  servers: { server: string; online: number; maxPlayers: number; tps: number | null; mspt: number | null; version: string; updatedAt: string; fresh: boolean; lagSince: string | null }[];
   events: { id: string; title: string; type: string; startsAt: string }[];
+  alerts: { id: string; server: string; startedAt: string; resolvedAt: string | null; peakMspt: number; minTps: number | null }[];
+  lagAlertMspt: number;
 };
+
+const paris = (iso: string) => new Date(iso).toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
+const minutes = (from: string, to: string | null) => Math.max(1, Math.round(((to ? Date.parse(to) : Date.now()) - Date.parse(from)) / 60_000));
 
 export default async function DashboardPage() {
   let d: Dashboard;
@@ -38,9 +43,27 @@ export default async function DashboardPage() {
               <td className={s.fresh ? "text-success" : "text-danger"}>{s.fresh ? "En ligne" : "Silencieux"}</td>
               <td>{s.online}/{s.maxPlayers}</td>
               <td className={s.tps !== null && s.tps < 18 ? "text-warning" : ""}>{s.tps ?? "—"}</td>
-              <td>{s.mspt ?? "—"}</td>
+              <td className={s.mspt === null ? "" : s.mspt >= d.lagAlertMspt ? "text-danger" : s.mspt >= d.lagAlertMspt * 0.75 ? "text-warning" : "text-success"}>
+                {s.mspt ?? "—"}{s.lagSince && <span className="ml-2 text-xs text-muted">lag depuis {minutes(s.lagSince, null)} min</span>}
+              </td>
               <td className="text-muted">{s.version}</td>
               <td className="text-muted">{new Date(s.updatedAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</td>
+            </tr>
+          ))}
+        </Table>
+      )}
+      <h2 className="mb-1 mt-10 font-semibold">Alertes de performance</h2>
+      <p className="mb-3 text-sm text-muted">MSPT ≥ {d.lagAlertMspt} ms pendant plusieurs minutes. Diagnostic : <code>/spark profiler</code> en jeu (voir docs/MINECRAFT_PERFORMANCE.md).</p>
+      {d.alerts.length === 0 ? <p className="text-sm text-muted">Aucun épisode de lag enregistré.</p> : (
+        <Table head={["Serveur", "Début", "Durée", "Pic MSPT", "TPS min", "État"]}>
+          {d.alerts.map((a) => (
+            <tr key={a.id}>
+              <td className="font-semibold">{a.server}</td>
+              <td className="text-muted">{paris(a.startedAt)}</td>
+              <td>{minutes(a.startedAt, a.resolvedAt)} min</td>
+              <td className="text-danger">{a.peakMspt}</td>
+              <td>{a.minTps ?? "—"}</td>
+              <td className={a.resolvedAt ? "text-success" : "text-danger"}>{a.resolvedAt ? "Résolu" : "En cours"}</td>
             </tr>
           ))}
         </Table>

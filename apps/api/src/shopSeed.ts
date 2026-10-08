@@ -34,13 +34,13 @@ const sync: Delivery = { action: "SYNC_PLAYER", command: null };
 const EXAMPLES: Example[] = [
   // Grades : rapportent des points comme tout achat, et débloquent le grade + son kit
   { slug: "grade-guerrier", name: "Guerrier", category: "grades", priceCents: 1500, type: "RANK", sortOrder: 1, short: "Grade Guerrier + Kit Guerrier",
-    description: "Débloque le grade Guerrier et le Kit Guerrier.", deliveries: [rankGrant("guerrier"), ...KITS.guerrier!.items, sync] },
+    description: "Débloque le grade Guerrier, le Kit Guerrier et le warp /warp farm-guerrier.", deliveries: [rankGrant("guerrier"), ...KITS.guerrier!.items, sync] },
   { slug: "grade-seigneur", name: "Seigneur", category: "grades", priceCents: 3500, type: "RANK", sortOrder: 2, short: "Grade Seigneur + Kit Seigneur",
-    description: "Débloque le grade Seigneur et le Kit Seigneur.", deliveries: [rankGrant("seigneur"), ...KITS.seigneur!.items, sync] },
+    description: "Débloque le grade Seigneur, le Kit Seigneur et le warp /warp farm-seigneur.", deliveries: [rankGrant("seigneur"), ...KITS.seigneur!.items, sync] },
   { slug: "grade-roi", name: "Roi", category: "grades", priceCents: 6500, type: "RANK", sortOrder: 3, short: "Grade Roi + Kit Roi",
-    description: "Débloque le grade Roi et le Kit Roi.", deliveries: [rankGrant("roi"), ...KITS.roi!.items, sync] },
+    description: "Débloque le grade Roi, le Kit Roi et le warp /warp farm-roi.", deliveries: [rankGrant("roi"), ...KITS.roi!.items, sync] },
   { slug: "grade-vaelorian", name: "VÆLORIAN", category: "grades", priceCents: 10000, type: "RANK", sortOrder: 4, short: "Grade VÆLORIAN + Kit VÆLORIAN",
-    description: "Débloque le grade VÆLORIAN et le Kit VÆLORIAN.", deliveries: [rankGrant("vaelorian"), ...KITS.vaelorian!.items, sync] },
+    description: "Débloque le grade VÆLORIAN, le Kit VÆLORIAN et le warp /warp farm-vaelorian.", deliveries: [rankGrant("vaelorian"), ...KITS.vaelorian!.items, sync] },
 
   { slug: "spawner-zombie", name: "Spawner Zombie", category: "spawners", priceCents: 500, type: "SPAWNER", sortOrder: 1, short: "1 spawner à zombies",
     description: "Un spawner à zombies à poser dans ta base.", deliveries: [spawners(1)] },

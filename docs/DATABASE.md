@@ -17,7 +17,7 @@ PostgreSQL 16. Schéma : `apps/api/migrations/001_init.sql`. Migrations appliqu�
 | Jeu | `players`, `username_history`, `seasons`, `player_season_stats`, `player_achievements`, `factions`, `faction_members`, `claims`, `leaderboards` (archives figées) |
 | Contenu | `events`, `news`, `faq`, `site_settings`, `incidents` |
 | Boutique / finances | `products`, `orders`, `order_counters`, `order_items`, `payments`, `payment_webhook_events`, `refunds`, `transactions`, `entitlements`, `minecraft_commands` (sert aussi de table de livraisons) |
-| Intégration | `bridge_events` (journal + idempotence), `bridge_nonces` (anti-rejeu), `server_status`, `server_status_history` (pic par tranche de 5 min) |
+| Intégration | `bridge_events` (journal + idempotence), `bridge_nonces` (anti-rejeu), `server_status`, `server_status_history` (pic par tranche de 5 min, MSPT inclus), `server_alerts` (épisodes de lag, migration 005) |
 | Sécurité | `api_keys` (hash SHA-256 uniquement), `audit_logs` |
 | Acquisition | `analytics_events`, `beta_signups`, `referral_codes`, `referrals` |
 | Exploitation | `notifications`, `cost_items`, `infra_metrics` |
