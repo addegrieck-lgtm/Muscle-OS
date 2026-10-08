@@ -15,7 +15,11 @@ Les permissions de **factions** ne sont pas incluses : elles dépendent du plugi
 ## Installation
 
 1. Installer les plugins, démarrer le serveur une fois.
-2. Coller le contenu de `setup.txt` dans la console du serveur (relancer le script ne casse rien : les commandes déjà appliquées sont ignorées).
+2. Charger les grades, au choix :
+   - **en une commande** : déposer `vaeloria.json.gz` dans `plugins/LuckPerms/`, puis taper en console `lp import vaeloria.json.gz`. L'import remplace le contenu des groupes du même nom : à faire sur une installation neuve ;
+   - **ligne par ligne** : coller le contenu de `setup.txt` dans la console (relancer le script ne casse rien).
+
+   `vaeloria.json.gz` est généré depuis `setup.txt` : après toute modification, `python3 build-import.py setup.txt vaeloria.json.gz`.
 3. Se donner le grade fondateur : `lp user <pseudo> parent add fondateur`.
 4. Compléter `plugins/Essentials/config.yml` (voir plus bas), puis `/essentials reload`.
 
