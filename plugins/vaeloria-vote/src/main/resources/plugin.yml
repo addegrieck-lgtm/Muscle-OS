@@ -1,0 +1,30 @@
+name: VaeloriaVote
+version: '${version}'
+main: fr.vaeloria.vote.VaeloriaVotePlugin
+api-version: '1.21'
+description: "Votes VÆLORIA : 3 sites, rappel toutes les 30 minutes, cagnotte et roue du jour (×1 à ×3, ou ×4 / rien)."
+authors: [VÆLORIA]
+softdepend: [Vault, Votifier, NuVotifier, VaeloriaShop, VaeloriaBridge]
+commands:
+  vote:
+    description: Voter pour VÆLORIA et voir ses récompenses
+    usage: /vote [verifier]
+    aliases: [voter]
+    permission: vaeloria.vote.use
+  roue:
+    description: Roue du jour, débloquée par les votes
+    usage: /roue [classique|risque]
+    aliases: [wheel, spin]
+    permission: vaeloria.vote.use
+  votes:
+    description: Administration des votes
+    usage: /votes give <joueur> <site> | info <joueur> | reload
+    permission: vaeloria.vote.admin
+permissions:
+  vaeloria.vote.use:
+    default: true
+  vaeloria.vote.noreminder:
+    description: Ne reçoit pas les rappels de vote (staff)
+    default: false
+  vaeloria.vote.admin:
+    default: op

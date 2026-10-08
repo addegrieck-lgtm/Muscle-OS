@@ -34,7 +34,7 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 |---|---|---|
 | `PLAYER_JOIN` / `PLAYER_QUIT` (+`sessionSeconds`) | VæloriaBridge | joueur créé/mis à jour, historique de pseudo, temps de jeu |
 | `PLAYER_KILL` (`killer`, `victim`, `weapon`) | VæloriaBridge | kills/morts de saison, kills de faction |
-| `SERVER_HEARTBEAT` (`online`, `maxPlayers`, `tps`, `mspt`, `version`) | VæloriaBridge, toutes les 30 s | statut, historique, record de joueurs |
+| `SERVER_HEARTBEAT` (`online`, `maxPlayers`, `tps`, `mspt`, `version`) | VæloriaBridge, toutes les 30 s | statut, historique (pic MSPT par 5 min), record de joueurs, alertes de lag (voir [MINECRAFT_PERFORMANCE.md](MINECRAFT_PERFORMANCE.md)) |
 | `FACTION_CREATE` / `DISBAND` / `JOIN` / `LEAVE` | plugin Factions via `emit()` | factions et membres |
 | `FACTION_CLAIM` / `UNCLAIM` | plugin Factions | claims, classement Territoire |
 | `FACTION_SNAPSHOT` (`power`, `maxPower`, `wealth`, `claims`) | plugin Factions, périodique | Power, richesse |

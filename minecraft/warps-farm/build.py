@@ -5,8 +5,9 @@
 
 Un warp par grade, plus grand à chaque grade. Le mob le plus fort d'un warp est celui du grade :
 Guerrier → Squelette, Seigneur → Pigman, Roi → Creeper, VÆLORIAN → Enderman. Un warp peut contenir
-des mobs plus faibles, jamais plus forts. Identité visuelle : noir (blackstone), anthracite (deepslate),
-argent (fer), rubis (rouge) — mêmes couleurs que brand/build.py et packages/config/theme.css.
+des mobs plus faibles, jamais plus forts. Identité visuelle du spawn (cf. minecraft/ile-commerciale) :
+briques de blackstone polie, chemins en deepslate tiles bordés de polished deepslate, plateforme ronde
+tuff / red nether bricks, blason V noir sur calcite cerclé de rouge, pale oak, lanternes, accents rouges.
 
 Principe d'une cellule (vue en coupe, walkway à gauche) :
 
@@ -24,7 +25,7 @@ import os
 import struct
 
 OUT = os.path.dirname(os.path.abspath(__file__))
-DATA_VERSION = 3953  # Minecraft 1.21 : WorldEdit met à niveau les blocs à l'import sur 1.21.x plus récent
+DATA_VERSION = 4189  # Minecraft 1.21.4, comme le gabarit du spawn et l'Île Marchande (panneaux en pale oak)
 
 # ---------- NBT minimal (big-endian, gzip) ----------
 BYTE, SHORT, INT, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY = 1, 2, 3, 7, 8, 9, 10, 11
@@ -136,38 +137,29 @@ NOIR_BRUT = "blackstone"
 NOIR_LISSE = "polished_blackstone"
 ANTH = "deepslate_tiles"
 ANTH_LISSE = "polished_deepslate"
-RUBIS = "red_concrete"
+RUBIS = "red_nether_bricks"
 RUBIS_VIF = "redstone_block"
+TUFF = "tuff"
 
-# Écusson (S argent, A anthracite, R rubis), d'après le symbole du pack logo
-EMBLEMS = {
-    "big": [
-        "S....S....S",
-        "SS..SAS..SS",
-        "SASSAAASSAS",
-        "SAAAARAAAAS",
-        "SAAARRRAAAS",
-        "SAARRRRRAAS",
-        "SARRRRRRRAS",
-        "SAARRRRRAAS",
-        "SAAARRRAAAS",
-        ".SAAARAAAS.",
-        "..SAAAAAS..",
-        "...SAAAS...",
-        "....SSS....",
-        ".....S.....",
-    ],
-    "small": [
-        "S.SSS.S",
-        "SSAAASS",
-        "SAARAAS",
-        "SARRRAS",
-        "SAARAAS",
-        ".SAAAS.",
-        "..SAS..",
-        "...S...",
-    ],
-}
+
+def blason(r):
+    """Blason du spawn : grand V noir sur un disque de calcite cerclé de rouge. {(dx, dy): bloc}."""
+    out = {}
+    for dx in range(-r, r + 1):
+        for dy in range(-r, r + 1):
+            d = (dx * dx + dy * dy) ** 0.5
+            if d > r + 0.3:
+                continue
+            if d > r - 0.8:
+                out[(dx, dy)] = RUBIS
+                continue
+            out[(dx, dy)] = "calcite"
+            top, bottom = r - 2, -(r - 2)
+            if bottom <= dy <= top:
+                off = (r - 2.2) * (dy - bottom) / (top - bottom)  # écart des deux branches, 0 en bas
+                if abs(abs(dx) - off) <= (0.75 if r >= 6 else 0.5):
+                    out[(dx, dy)] = "black_concrete"
+    return out
 
 
 def sign_entity(lines):
@@ -252,14 +244,13 @@ def build_tier(t):
                 w.set(X(h), R - 3, zp, f"end_rod[facing={face}]")
             w.set(X(h), 8, z0 + 4, f"red_wall_banner[facing={face}]")
             sign = (X(h), 5, z0 + 4)
-            w.set(*sign, f"dark_oak_wall_sign[facing={face},waterlogged=false]")
+            w.set(*sign, f"pale_oak_wall_sign[facing={face},waterlogged=false]")
             w.entities[sign] = sign_entity(["", "SPAWNER", MOBS[mob]["label"].upper(), ""])
 
-    # Walkway : sol, filet central avec losanges rubis, toit, lanternes
-    w.fill(-h, 0, -1, h, 0, 10 * n - 1, NOIR)
-    w.fill(-h, 0, -1, -h, 0, 10 * n - 1, ANTH_LISSE)
-    w.fill(h, 0, -1, h, 0, 10 * n - 1, ANTH_LISSE)
-    w.fill(0, 0, zN + 1, 0, 0, zS - 1, NOIR_LISSE)
+    # Walkway : chemin du spawn (deepslate tiles bordé de polished deepslate), losanges rouges, toit, lanternes
+    w.fill(-h, 0, zN + 4, h, 0, zc, ANTH)
+    w.fill(-h, 0, zN + 4, -h, 0, zc, ANTH_LISSE)
+    w.fill(h, 0, zN + 4, h, 0, zc, ANTH_LISSE)
     w.fill(-(h + 1), R, -1, h + 1, R, 10 * n - 1, ANTH)
     w.fill(0, R, -1, 0, R, 10 * n - 1, acc)
     for k in range(n):
@@ -276,13 +267,10 @@ def build_tier(t):
     w.fill(-dw, 1, zN + 1, dw, 1, zN + 2, ANTH_LISSE)
     w.fill(-dw, 1, zN + 3, dw, 1, zN + 3, "polished_blackstone_brick_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]")
     w.fill(-dw, 0, zN + 1, dw, 0, zN + 3, NOIR)
-    rows = EMBLEMS[t["emblem"]]
-    ew = len(rows[0])
-    for r, line in enumerate(rows):
-        for c, ch in enumerate(line):
-            if ch != ".":
-                w.set(c - ew // 2, 2 + len(rows) - 1 - r, zN, {"S": acc if acc != RUBIS_VIF else "iron_block",
-                                                               "A": ANTH, "R": RUBIS_VIF}[ch])
+    br = 6 if t["emblem"] == "big" else 4
+    for (dx, dy), st in blason(br).items():
+        w.set(dx, 2 + br + dy, zN, st)
+    ew = 2 * br + 1
     for bx in (-(ew // 2 + 2), ew // 2 + 2):
         w.set(bx, 6, zN + 1, "red_wall_banner[facing=south]")
         w.set(bx, R - 3, zN + 1, "end_rod[facing=south]")
@@ -291,13 +279,14 @@ def build_tier(t):
             w.fill(x, R - 2, z, x, R - 1, z, chain)
             w.set(x, R - 3, z, lantern)
 
-    # Arrivée : losange rubis + filets (filet – losange – filet), piliers, lanternes, panneaux
+    # Arrivée : plateforme ronde du spawn (tuff, anneau de red nether bricks, polished deepslate) + filets
     r = t["plaza"] // 2 - 1
     for x in range(-W + 1, W):
         for z in range(10 * n, zS):
-            d = abs(x) + abs(z - zc)
-            if d <= r:
-                w.set(x, 0, z, RUBIS_VIF if d == 0 else (acc if d == r else RUBIS))
+            d = (x * x + (z - zc) ** 2) ** 0.5
+            if d <= r + 0.4:
+                w.set(x, 0, z, ANTH_LISSE if d > r - 0.6 else RUBIS if d > r - 1.6 else TUFF)
+    w.set(0, 0, zc, RUBIS_VIF)
     w.fill(-W + 1, 0, zc, -r - 1, 0, zc, acc)
     w.fill(r + 1, 0, zc, W - 1, 0, zc, acc)
     for px in (-W + 2, W - 2):
@@ -318,7 +307,7 @@ def build_tier(t):
     ]
     for i, lines in enumerate(signs):
         pos = (i - 1, 3, zS - 1)
-        w.set(*pos, "dark_oak_wall_sign[facing=north,waterlogged=false]")
+        w.set(*pos, "pale_oak_wall_sign[facing=north,waterlogged=false]")
         w.entities[pos] = sign_entity(lines)
 
     return w, (0, 1, zc), spawners
@@ -364,8 +353,9 @@ COLORS = {
     "polished_blackstone_bricks": (48, 42, 50), "blackstone": (42, 35, 41), "polished_blackstone": (56, 50, 60),
     "deepslate_tiles": (54, 54, 56), "polished_deepslate": (72, 72, 74), "chiseled_deepslate": (60, 60, 62),
     "iron_block": (220, 222, 228), "gold_block": (226, 194, 127), "redstone_block": (210, 31, 47),
-    "red_concrete": (163, 18, 30), "water": (52, 96, 190), "spawner": (30, 40, 60), "lantern": (232, 168, 75),
-    "end_rod": (240, 234, 220), "red_wall_banner": (163, 18, 30), "chain": (60, 65, 80), "dark_oak_wall_sign": (79, 50, 24),
+    "red_nether_bricks": (114, 18, 24), "tuff": (108, 109, 102), "calcite": (223, 224, 220),
+    "black_concrete": (8, 10, 15), "water": (52, 96, 190), "spawner": (30, 40, 60), "lantern": (232, 168, 75),
+    "end_rod": (240, 234, 220), "red_wall_banner": (163, 18, 30), "chain": (60, 65, 80), "pale_oak_wall_sign": (226, 214, 212),
     "polished_blackstone_brick_stairs": (48, 42, 50),
 }
 
@@ -413,7 +403,7 @@ def render(w, warp, spawners, t, size_out):
         ly += 26
     ly += 14
     for c, label in (((52, 96, 190), "eau (pousse vers la fosse)"), ((56, 50, 60), "fosse / sol"),
-                     (color(t["accent"]), "filet de grade"), ((163, 18, 30), "losange rubis")):
+                     (color(t["accent"]), "filet de grade"), ((114, 18, 24), "anneau rouge (red nether bricks)")):
         d.rectangle([lx, ly, lx + 16, ly + 16], fill=c)
         d.text((lx + 26, ly), label, font=font(13), fill=(169, 174, 184))
         ly += 24

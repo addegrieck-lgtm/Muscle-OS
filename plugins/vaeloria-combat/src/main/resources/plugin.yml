@@ -1,0 +1,30 @@
+name: VaeloriaCombat
+version: '${version}'
+main: fr.vaeloria.combat.VaeloriaCombatPlugin
+api-version: '1.21'
+description: PvP VÆLORIA — combat 1.8 identique pour tous, surveillance du MSPT avec mode dégradé, suivi du ping.
+authors: [VÆLORIA]
+commands:
+  ping:
+    description: Ton ping (ou celui d'un joueur) et sa stabilité
+    usage: /ping [joueur]
+    permission: vaeloria.combat.ping
+  pvpstatus:
+    description: Santé du serveur pour le PvP (TPS, MSPT, ping moyen)
+    permission: vaeloria.combat.status
+  vcombat:
+    description: Administration de VaeloriaCombat
+    usage: /vcombat reload
+    permission: vaeloria.combat.admin
+permissions:
+  vaeloria.combat.ping:
+    default: true
+  vaeloria.combat.status:
+    default: true
+  vaeloria.combat.alerts:
+    description: Reçoit les alertes de lag et de ping instable
+    default: op
+  vaeloria.combat.admin:
+    default: op
+    children:
+      vaeloria.combat.alerts: true

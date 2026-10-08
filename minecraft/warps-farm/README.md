@@ -15,16 +15,20 @@ Aperçus : `previews/farm-*.png` (plan) et `previews/coupe-cellule.png` (coupe d
 
 ## Identité visuelle
 
-La salle reprend la palette du pack logo (`brand/build.py`) :
+Les salles reprennent l'identité visuelle du spawn, la même que l'[Île Marchande](../ile-commerciale/README.md) :
 
-- **Noir** : blackstone, briques de blackstone polie.
-- **Anthracite** : tuiles et deepslate polie pour les piliers et le toit.
-- **Rubis** : losanges en béton rouge et bloc de redstone, bannières rouges.
-- **Argent** : bloc de fer pour les filets.
+| Élément | Dans les warps farm |
+|---|---|
+| Murs | briques de blackstone polie, piliers et toits en deepslate tiles |
+| Chemin | allée centrale en deepslate tiles bordée de polished deepslate, comme les chemins du spawn, avec un losange rouge devant chaque cellule |
+| Arrivée | plateforme ronde du spawn : tuff, anneau de red nether bricks, polished deepslate, et un bloc de redstone au centre |
+| Blason | grand V noir sur calcite, cerclé de rouge, sur le mur de l'abside |
+| Rouge | bannières rouges, red nether bricks, blocs de redstone |
+| Bois, lumière | panneaux en pale oak, lanternes suspendues, end rods |
 
-Le filet change de matière selon le grade : fer pour Guerrier et Seigneur, or pour Roi (sa couleur sur le site) et rubis pour VÆLORIAN.
+Le filet de grade change de matière selon le grade : fer pour Guerrier et Seigneur, or pour Roi (sa couleur sur le site) et redstone pour VÆLORIAN. On le retrouve sur la façade des cellules, au faîte du toit et de part et d'autre de la plateforme d'arrivée.
 
-Le joueur arrive au sud, sur un grand losange rubis traversé par un filet (filet – losange – filet), face au nord. L'allée centrale mène à l'abside. L'écusson VÆLORIA est sur le mur de l'abside, au-dessus d'une estrade. Les cellules les plus fortes sont au fond, près de l'abside.
+Le joueur arrive au sud, au centre de la plateforme, face au nord. L'allée centrale mène à l'abside, où le blason domine une estrade. Les cellules les plus fortes sont au fond, près de l'abside.
 
 ## Fonctionnement d'une cellule
 
@@ -75,6 +79,6 @@ Toute la salle est générée par `build.py` : nombre et ordre des spawners, mat
 python3 minecraft/warps-farm/build.py   # régénère schematics/ et previews/ (Pillow requis pour les aperçus)
 ```
 
-Les schématiques sont au format Sponge v2 (`.schem`), avec DataVersion 1.21. WorldEdit les met à niveau à l'import sur les versions 1.21.x plus récentes.
+Les schématiques sont au format Sponge v2 (`.schem`), en Minecraft 1.21.4 comme le gabarit du spawn, à cause des panneaux en pale oak.
 
 **À valider sur un serveur de test** avant l'ouverture : les cellules suivent les règles vanilla 1.21, mais aucune n'a encore été posée en jeu.

@@ -70,9 +70,12 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
         (SELECT count(*)::int FROM incidents WHERE resolved_at IS NULL) AS "openIncidents"`;
     const servers = await sql`
       SELECT server, online, max_players AS "maxPlayers", tps, mspt, version, updated_at AS "updatedAt",
-             updated_at > now() - interval '90 seconds' AS fresh FROM server_status ORDER BY server`;
+             updated_at > now() - interval '90 seconds' AS fresh, lag_since AS "lagSince" FROM server_status ORDER BY server`;
+    const alerts = await sql`
+      SELECT id, server, started_at AS "startedAt", resolved_at AS "resolvedAt", peak_mspt AS "peakMspt", min_tps AS "minTps"
+      FROM server_alerts ORDER BY started_at DESC LIMIT 10`;
     const events = await sql`SELECT id, title, type, starts_at AS "startsAt" FROM events WHERE starts_at > now() ORDER BY starts_at LIMIT 5`;
-    return { kpi, servers, events };
+    return { kpi, servers, events, alerts, lagAlertMspt: ctx.env.LAG_ALERT_MSPT };
   });
 
   // ───── Joueurs ─────

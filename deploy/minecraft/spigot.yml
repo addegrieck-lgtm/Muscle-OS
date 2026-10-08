@@ -1,0 +1,42 @@
+# VÆLORIA — spigot.yml (extrait à fusionner).
+settings:
+  # Threads réseau. 4 suffit jusqu'à ~300 joueurs.
+  netty-threads: 4
+  # usercache.json écrit à l'arrêt seulement, pas à chaque connexion.
+  save-user-cache-on-stop-only: true
+
+world-settings:
+  default:
+    # Entités hors de ce rayon d'un joueur : tickées au ralenti. N'affecte pas les joueurs.
+    entity-activation-range:
+      animals: 16
+      monsters: 24
+      raiders: 48
+      misc: 8
+      water: 8
+      villagers: 16
+      flying-monsters: 32
+      tick-inactive-villagers: false
+    # Distance à laquelle le client reçoit les entités. players élevé = on voit les ennemis arriver.
+    entity-tracking-range:
+      players: 64
+      animals: 48
+      monsters: 48
+      misc: 32
+      other: 64
+    # Fusion des items et de l'XP au sol (fermes, morts PvP avec stuff).
+    merge-radius:
+      item: 3.5
+      exp: 4.0
+    # Mobs issus de spawners sans IA : gain énorme sur les fermes Faction, aucun impact sur le loot.
+    nerf-spawner-mobs: true
+    # Flèches plantées supprimées après 15 s (au lieu de 60).
+    arrow-despawn-rate: 300
+    trident-despawn-rate: 300
+    # Plafond de TNT par tick : garder 100 pour les canons de raid ; baisser si les raids font tomber le TPS.
+    max-tnt-per-tick: 100
+    # Hoppers : vérification chaque tick, transfert toutes les 8 ticks (vanilla).
+    ticks-per:
+      hopper-transfer: 8
+      hopper-check: 1
+    hopper-amount: 1

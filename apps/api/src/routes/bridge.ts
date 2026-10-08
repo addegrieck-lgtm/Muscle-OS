@@ -7,6 +7,7 @@ import { SIGNATURE_MAX_SKEW_MS, safeEqualHex, signPayload } from "../lib/hmac";
 import { parse } from "../lib/validate";
 import { ingestEvents } from "../services/bridgeIngest";
 import { ackCommand, claimCommands } from "../services/commands";
+import { notifyServerAlerts } from "../services/serverHealth";
 import { createLinkCode } from "../services/identity";
 import { MinecraftUsername, MinecraftUuid } from "@vaeloria/types";
 
@@ -52,10 +53,15 @@ export async function bridgeRoutes(app: FastifyInstance, ctx: AppContext) {
 
   app.post("/events", { config: { rateLimit: { max: 600, timeWindow: "1 minute" } } }, async (req) => {
     const { events } = parse(BridgeEventBatch, req.body);
-    const result = await ingestEvents(sql, events);
+    const result = await ingestEvents(sql, events, { alertMspt: ctx.env.LAG_ALERT_MSPT, sustainMinutes: ctx.env.LAG_ALERT_MINUTES });
     if (result.accepted > 0) {
       ctx.cache.invalidate("status:");
       ctx.cache.invalidate("players:");
+    }
+    // Alertes de lag : envoyées en arrière-plan pour ne pas retarder la réponse au plugin.
+    if (events.some((e) => e.event === "SERVER_HEARTBEAT")) {
+      notifyServerAlerts(sql, ctx.env.DISCORD_ALERTS_WEBHOOK_URL || undefined, ctx.discordFetch)
+        .catch((err) => req.log.warn({ err }, "alerte de performance non envoyée"));
     }
     return result;
   });

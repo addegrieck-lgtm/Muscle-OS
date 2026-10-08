@@ -1,0 +1,66 @@
+# VÆLORIA — config/paper-world-defaults.yml (extrait à fusionner).
+chunks:
+  # Les joueurs ne peuvent pas entrer (ender pearl, knockback, elytra) dans un chunk non chargé : pas de freeze.
+  prevent-moving-into-unloaded-chunks: true
+  # Évite qu'un chunk sature de projectiles (spam de flèches / perles autour d'une base).
+  entity-per-chunk-save-limit:
+    arrow: 16
+    ender_pearl: 8
+    experience_orb: 16
+    fireball: 8
+    small_fireball: 8
+    snowball: 8
+    egg: 8
+    spectral_arrow: 16
+    trident: 16
+  max-auto-save-chunks-per-tick: 8
+  delay-chunk-unloads-by: 10s
+collisions:
+  # Les mobs empilés dans une ferme ne calculent pas des milliers de collisions.
+  max-entity-collisions: 2
+  fix-climbing-bypassing-cramming-rule: true
+environment:
+  # Calcul d'explosions mis en cache : indispensable pour les raids TNT et les canons.
+  optimize-explosions: true
+  treasure-maps:
+    enabled: false
+entities:
+  spawning:
+    # Items au sol supprimés plus vite pour les déchets courants (le stuff PvP reste 5 min, comme en vanilla).
+    alt-item-despawn-rate:
+      enabled: true
+      items:
+        cobblestone: 300
+        netherrack: 300
+        rotten_flesh: 300
+        bone: 600
+        arrow: 300
+        string: 600
+        spider_eye: 600
+        gunpowder: 600
+    despawn-ranges:
+      monster:
+        soft: 30
+        hard: 56
+misc:
+  # Redstone réécrite : bien moins de calculs pour le même comportement (fermes, portes, canons).
+  redstone-implementation: ALTERNATE_CURRENT
+  update-pathfinding-on-block-update: false
+hopper:
+  # Un hopper plein arrête de chercher pendant un moment.
+  cooldown-when-full: true
+  # Laisser à false si un plugin (filtres de hoppers, logs) écoute InventoryMoveItemEvent.
+  disable-move-event: false
+  ignore-occluding-blocks: true
+tick-rates:
+  # Spawners tickés 1 fois sur 2 : imperceptible, moitié moins de CPU.
+  mob-spawner: 2
+  grass-spread: 4
+  container-update: 1
+  behavior:
+    villager:
+      validatenearbypoi: 60
+  sensor:
+    villager:
+      secondarypoisensor: 80
+      nearestbedsensor: 80
