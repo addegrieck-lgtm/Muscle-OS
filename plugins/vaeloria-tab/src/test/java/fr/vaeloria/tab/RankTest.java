@@ -25,4 +25,12 @@ class RankTest {
         assertEquals(joueur, Rank.resolve(ranks, p -> false));
         assertNull(Rank.resolve(List.of(admin), p -> false));
     }
+
+    @Test
+    void formatPropreAuGradeSinonCommun() {
+        assertEquals("propre", Rank.or("propre", "commun"));
+        assertEquals("commun", Rank.or(null, "commun"));
+        assertEquals("commun", Rank.or("  ", "commun"));
+        assertNull(admin.chat());
+    }
 }

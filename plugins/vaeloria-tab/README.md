@@ -1,6 +1,6 @@
 # VaeloriaTab
 
-TAB et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Java 21). Aucune dépendance externe.
+TAB, chat, annonces de connexion et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Java 21). Aucune dépendance externe.
 
 ![Aperçu du TAB](apercu.png)
 
@@ -10,6 +10,14 @@ TAB et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Jav
 - **Pied de page** : joueurs visibles / max, ping et TPS colorés selon des seuils, serveur, grade du joueur, `vaeloria.fr` et `/link`.
 - **Noms** : préfixe de grade (Fondateur, Admin, Modo, VÆLORIAN…) et **tri** de la liste par grade.
 - Charte du logo (`brand/build.py`) disponible comme balises MiniMessage : `<ruby>`, `<ruby_hi>`, `<ruby_lo>`, `<snow>`, `<silver>`, `<steel>`, `<ash>`, `<graphite>`.
+
+## Chat et connexions
+
+- **Chat** : chaque message est précédé du nom au format du grade, le même que dans le TAB (`FONDATEUR │ Pseudo » message`). Survol du nom : grade et serveur ; clic : `/msg Pseudo`. Un grade peut avoir son propre format (`ranks.<grade>.chat`, ex. message blanc pour le staff). Le texte tapé par les joueurs n'interprète aucune balise.
+- **Connexion / déconnexion** : `[+] Pseudo` / `[-] Pseudo` avec le grade, annonce dédiée par grade possible (`ranks.<grade>.join` / `quit`, ex. « ⚔ Le Fondateur … entre dans la bataille. »), annonce de **toute première connexion** avec le numéro du joueur, et message privé de bienvenue avec liens cliquables vers vaeloria.fr et `/link`.
+- **Discrétion** : aucune annonce pour les joueurs en vanish ni pour la permission `vaeloria.join.silent`.
+
+Avec EssentialsX : mettre `custom-join-message: ""` et `custom-quit-message: ""` dans `plugins/Essentials/config.yml`, vider `motd.txt`, et retirer **EssentialsChat** (ou tout autre plugin de format de chat), sinon les deux formats se superposent.
 
 ## Écran Multijoueur
 
@@ -37,6 +45,7 @@ Chaque grade de `config.yml` a une permission ; le joueur reçoit le grade d'`or
 
 ```
 /lp group vaelorian permission set vaeloria.rank.vaelorian
+/lp user TonPseudo permission set vaeloria.rank.fondateur
 ```
 
 Ces permissions sont déclarées à `false` par défaut : un op n'apparaît pas « Fondateur » sans qu'on le lui donne. Les grades sont relus toutes les `names-refresh-ticks` (2 s par défaut), un changement LuckPerms apparaît donc sans reconnexion.

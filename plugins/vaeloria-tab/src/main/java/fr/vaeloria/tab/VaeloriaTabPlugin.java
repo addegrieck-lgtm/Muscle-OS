@@ -9,10 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -27,18 +23,24 @@ import java.io.InputStream;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * VaeloriaTab : présentation en jeu aux couleurs du logo VÆLORIA.
  * TAB : en-tête avec wordmark argent animé et Æ rubis, pied de page (joueurs, ping, TPS, serveur, grade),
- * noms préfixés et triés par grade. Écran Multijoueur : voir {@link ServerListListener}.
+ * noms préfixés et triés par grade. Écran Multijoueur : {@link ServerListListener}. Chat et annonces : {@link ChatListener}.
  */
-public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
+public final class VaeloriaTabPlugin extends JavaPlugin {
     private final MiniMessage mm = MiniMessage.miniMessage();
 
     // Lus aussi par le ping de la liste des serveurs, hors du thread principal.
     private volatile TabSettings settings;
     private volatile ServerListSettings serverList;
+    private volatile MessagesSettings messages;
+    /** Grade de chaque joueur connecté, lu par le chat (asynchrone). */
+    private final Map<UUID, Rank> ranks = new ConcurrentHashMap<>();
     private volatile TagResolver paletteTags;
     private volatile CachedServerIcon icon;
     private volatile int frame;
@@ -48,8 +50,8 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new ServerListListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         if (!load()) {
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -79,11 +81,13 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
         }
         settings = next;
         ServerListSettings nextList = ServerListSettings.load(getConfig());
+        MessagesSettings nextMessages = MessagesSettings.load(getConfig());
         icon = loadIcon();
 
         TagResolver.Builder palette = TagResolver.builder();
         settings.palette().forEach((name, hex) -> palette.resolver(Placeholder.styling(name, TextColor.fromHexString(hex))));
         paletteTags = palette.build();
+        messages = nextMessages;
         serverList = nextList; // en dernier : le ping (asynchrone) ne lit rien d'incomplet au premier chargement
 
         // Sans déclaration, une permission inconnue est accordée aux ops : chaque op serait « Fondateur ».
@@ -92,6 +96,9 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
             if (!r.isDefault() && pm.getPermission(r.permission()) == null) {
                 pm.addPermission(new Permission(r.permission(), PermissionDefault.FALSE));
             }
+        }
+        if (!nextMessages.silentPermission().isBlank() && pm.getPermission(nextMessages.silentPermission()) == null) {
+            pm.addPermission(new Permission(nextMessages.silentPermission(), PermissionDefault.FALSE));
         }
         if (nextList.maintenance()) getLogger().warning("Mode maintenance actif : seuls les joueurs avec "
                 + ServerListListener.MAINTENANCE_BYPASS + " peuvent se connecter.");
@@ -122,6 +129,10 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
 
     ServerListSettings serverList() {
         return serverList;
+    }
+
+    MessagesSettings messages() {
+        return messages;
     }
 
     TagResolver paletteTags() {
@@ -155,7 +166,7 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
     private TagResolver playerTags(TabSettings s, Player p, Component logo, double tps) {
         int ping = p.getPing();
         long visible = Bukkit.getOnlinePlayers().stream().filter(p::canSee).count();
-        Rank rank = rankOf(p);
+        Rank rank = cachedRank(p);
         return TagResolver.resolver(
                 paletteTags,
                 Placeholder.component("logo", logo),
@@ -175,20 +186,44 @@ public final class VaeloriaTabPlugin extends JavaPlugin implements Listener {
         return Rank.resolve(settings.ranks(), p::hasPermission);
     }
 
-    private void updateName(Player p) {
-        Rank rank = rankOf(p);
-        if (rank == null) {
-            p.playerListName(null);
-            p.setPlayerListOrder(0);
-            return;
-        }
-        p.playerListName(mm.deserialize(rank.format(), TagResolver.resolver(paletteTags, Placeholder.unparsed("player", p.getName()))));
-        p.setPlayerListOrder(rank.order());
+    /** Grade en cache (thread du chat) ; calculé s'il manque. */
+    Rank cachedRank(Player p) {
+        Rank r = ranks.get(p.getUniqueId());
+        return r != null ? r : rankOf(p);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onJoin(PlayerJoinEvent e) {
-        if (settings != null) updateName(e.getPlayer());
+    void forget(Player p) {
+        ranks.remove(p.getUniqueId());
+    }
+
+    /** Nom du joueur au format de son grade, le même que dans le TAB. */
+    Component tabName(Player p, Rank rank) {
+        if (rank == null) return Component.text(p.getName());
+        return mm.deserialize(rank.format(), TagResolver.resolver(paletteTags, Placeholder.unparsed("player", p.getName())));
+    }
+
+    /** Variables communes au chat et aux annonces. */
+    TagResolver playerTags(Player p, Rank rank, Component tabName) {
+        return TagResolver.resolver(
+                Placeholder.unparsed("player", p.getName()),
+                Placeholder.component("tab_name", tabName),
+                Placeholder.component("rank", rank == null ? Component.empty() : mm.deserialize(rank.display(), paletteTags)),
+                Placeholder.unparsed("server", settings.serverName()));
+    }
+
+    /** Recalcule le grade : nom et ordre dans le TAB, cache du chat. */
+    Rank updateName(Player p) {
+        Rank rank = rankOf(p);
+        if (rank == null) {
+            ranks.remove(p.getUniqueId());
+            p.playerListName(null);
+            p.setPlayerListOrder(0);
+            return null;
+        }
+        ranks.put(p.getUniqueId(), rank);
+        p.playerListName(tabName(p, rank));
+        p.setPlayerListOrder(rank.order());
+        return rank;
     }
 
     @Override

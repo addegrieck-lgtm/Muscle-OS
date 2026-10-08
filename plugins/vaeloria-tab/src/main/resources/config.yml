@@ -1,9 +1,9 @@
-# VaeloriaTab — liste des joueurs (TAB) aux couleurs du logo VÆLORIA.
+# VaeloriaTab — TAB, chat, annonces et écran Multijoueur aux couleurs du logo VÆLORIA.
 # Format : MiniMessage (https://docs.advntr.dev/minimessage/format.html).
 #
 # Couleurs de la charte, utilisables comme balises : <ruby>, <ruby_hi>, <ruby_lo>,
 # <silver>, <steel>, <ash>, <graphite>, <snow>.
-# Variables : <logo> (wordmark animé), <player>, <rank>, <online>, <max>, <ping>, <tps>,
+# Variables du TAB : <logo> (wordmark animé), <player>, <rank>, <online>, <max>, <ping>, <tps>,
 # <server>, <world>, et les couleurs dynamiques <ping_color>, <tps_color>.
 
 # Nom du serveur dans le réseau, affiché dans le pied de page.
@@ -67,37 +67,84 @@ tps:
   medium: "#A9AEB8"
   bad: "#D21F2F"
 
-# Grades affichés dans la liste. Le grade retenu est celui d'« order » le plus élevé dont
-# le joueur a la permission (à donner via LuckPerms, ex. /lp user X permission set vaeloria.rank.vaelorian).
+# Grades : TAB, chat et annonces. Le grade retenu est celui d'« order » le plus élevé dont
+# le joueur a la permission (à donner via LuckPerms, ex. /lp user TonPseudo permission set vaeloria.rank.fondateur).
 # Les permissions sont créées par défaut à false : un op n'en hérite pas automatiquement.
 # « order » trie aussi la liste : plus il est élevé, plus le joueur apparaît haut.
 # « default » (sans permission) s'applique à tous les autres joueurs.
+#   display : nom du grade (<rank>)          format : nom dans le TAB (<tab_name>)
+#   chat / join / quit (facultatifs) : remplacent les formats communs des sections chat et join-quit.
 ranks:
   fondateur:
     permission: "vaeloria.rank.fondateur"
     order: 100
     display: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi>"
     format: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi> <graphite>│</graphite> <snow><player>"
+    chat: "<name> <ruby_hi>»</ruby_hi> <snow><message>"
+    join: "<ruby_hi>⚔</ruby_hi> <ruby_hi><bold>Le Fondateur</bold></ruby_hi> <snow><player></snow> <ash>entre dans la bataille."
   admin:
     permission: "vaeloria.rank.admin"
     order: 90
     display: "<ruby_hi>ADMIN</ruby_hi>"
     format: "<ruby_hi>ADMIN</ruby_hi> <graphite>│</graphite> <snow><player>"
+    chat: "<name> <ruby>»</ruby> <snow><message>"
   moderateur:
     permission: "vaeloria.rank.moderateur"
     order: 80
     display: "<ruby>MODÉRATEUR</ruby>"
     format: "<ruby>MODO</ruby> <graphite>│</graphite> <silver><player>"
+    chat: "<name> <ruby>»</ruby> <snow><message>"
   vaelorian:
     permission: "vaeloria.rank.vaelorian"
     order: 50
     display: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient>"
     format: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <ruby_hi>◆</ruby_hi> <silver><player>"
+    join: "<ruby_hi>◆</ruby_hi> <tab_name> <ash>rejoint le front."
   default:
     permission: ""
     order: 0
     display: "<steel>Joueur</steel>"
     format: "<steel><player>"
+    chat: "<name> <graphite>»</graphite> <steel><message>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Chat : chaque message est précédé du nom du joueur au format de son grade.
+# Variables : <name> (nom au format du grade, survol + clic), <message>, <player>, <rank>,
+# <server>. Le texte tapé par les joueurs n'interprète aucune balise.
+# Si EssentialsChat (ou un autre plugin de chat) est installé, le retirer ou désactiver son format.
+# ─────────────────────────────────────────────────────────────────────────────
+chat:
+  enabled: true
+  # Format des grades sans « chat » propre.
+  format: "<name> <graphite>»</graphite> <silver><message>"
+  # Bulle au survol du nom, et commande proposée au clic (vide = aucune).
+  hover: "<rank>\n<ash>Serveur <silver><server></silver>\n\n<ash>Clique pour lui écrire"
+  click: "/msg <player> "
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Connexion / déconnexion. Désactiver ceux d'Essentials : custom-join-message: "" et
+# custom-quit-message: "" dans plugins/Essentials/config.yml, et vider motd.txt.
+# Variables : <tab_name>, <player>, <rank>, <online>, <server> ; <unique> pour first-join.
+# Format vide = pas d'annonce. Joueurs en vanish et permission silent-permission : aucune annonce.
+# ─────────────────────────────────────────────────────────────────────────────
+join-quit:
+  enabled: true
+  join: "<graphite>[<ruby_hi>+</ruby_hi>]</graphite> <tab_name>"
+  quit: "<graphite>[<ruby_lo>-</ruby_lo>]</graphite> <tab_name>"
+  # Toute première connexion du joueur, annoncée à tous.
+  first-join: "<ruby_hi>◆</ruby_hi> <snow><bold>BIENVENUE</bold></snow> <ash>à</ash> <silver><player></silver><ash>, <silver><unique></silver><ash>e guerrier de <silver><bold>VÆLORIA</bold></silver><ash> !"
+  silent-permission: "vaeloria.join.silent"
+  # Message privé envoyé au joueur à chaque connexion.
+  welcome:
+    - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬▬ <ruby_hi>◆</ruby_hi> ▬▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
+    - "<silver><bold>             V Æ L O R I A"
+    - "<ash>     Le retour de la <ruby_hi><bold>vraie guerre</bold></ruby_hi>."
+    - ""
+    - "<ash>  Bienvenue <snow><player></snow>, tu es <rank><ash>."
+    - "<ash>  <silver><online></silver> joueurs en ligne sur <silver><server></silver>."
+    - "<ash>  Site, boutique, classements : <click:open_url:'https://vaeloria.fr'><hover:show_text:'<ash>Ouvrir vaeloria.fr'><ruby_hi><u>vaeloria.fr</u></ruby_hi></hover></click>"
+    - "<ash>  Lie ton compte au site : <click:run_command:'/link'><hover:show_text:'<ash>Cliquer pour obtenir ton code'><silver>/link</silver></hover></click>"
+    - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬▬▬▬▬▬▬▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Écran Multijoueur (liste des serveurs)

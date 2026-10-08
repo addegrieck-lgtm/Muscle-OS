@@ -48,7 +48,8 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
                 ConfigurationSection r = rs.getConfigurationSection(key);
                 if (r == null) continue;
                 ranks.add(new Rank(key, r.getString("permission", ""), r.getInt("order", 0),
-                        r.getString("display", key), r.getString("format", "<player>")));
+                        r.getString("display", key), r.getString("format", "<player>"),
+                        r.getString("chat"), r.getString("join"), r.getString("quit")));
             }
         }
 
