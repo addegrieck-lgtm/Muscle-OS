@@ -66,7 +66,7 @@ final class ChatListener implements Listener {
         if (m == null || !m.joinQuitEnabled()) return;
 
         TagResolver tags = TagResolver.resolver(plugin.paletteTags(), plugin.playerTags(p, rank, plugin.tabName(p, rank)),
-                Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size())));
+                Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size() + FakePlayersHook.count())));
         if (silent(p, m)) {
             e.joinMessage(null);
         } else if (firstJoin(p) && !m.firstJoin().isBlank()) {
@@ -91,7 +91,7 @@ final class ChatListener implements Listener {
             return;
         }
         TagResolver tags = TagResolver.resolver(plugin.paletteTags(), plugin.playerTags(p, rank, plugin.tabName(p, rank)),
-                Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size() - 1)));
+                Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size() - 1 + FakePlayersHook.count())));
         e.quitMessage(announce(Rank.or(rank == null ? null : rank.quit(), m.quit()), tags));
     }
 

@@ -125,7 +125,7 @@ chat:
 # Connexion / déconnexion. VaeloriaTab passe après EssentialsX : ses custom-join-message
 # et custom-quit-message sont remplacés, rien à changer chez lui. Vider seulement
 # plugins/Essentials/motd.txt pour éviter un double message de bienvenue.
-# Variables : <tab_name>, <player>, <rank>, <online>, <server> ; <unique> pour first-join.
+# Variables : <tab_name>, <player>, <rank>, <online> (faux joueurs compris), <server> ; <unique> pour first-join.
 # Format vide = pas d'annonce. Joueurs en vanish et permission silent-permission : aucune annonce.
 # ─────────────────────────────────────────────────────────────────────────────
 join-quit:
