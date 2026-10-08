@@ -117,10 +117,10 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("missions", "", "Missions quotidiennes", false, use, (s, p, a) -> plugin.missions().show(s, p == null ? null : m().factionOf(p)), null, "quetes", "quests");
         reg("acces", "[joueur|faction|liste]", "Accès à ce chunk pour un joueur ou une faction", true, use, this::access,
                 (s, a) -> { List<String> l = factionOrPlayerNames(); l.add(0, "liste"); return l; }, "access", "accès");
-        reg("avantposte", "[liste|creer|supprimer]", "Avant-postes", false, use, (s, p, a) -> zoneCommand(s, p, a, fr.vaeloria.factions.model.Zone.Kind.OUTPOST),
-                (s, a) -> a.length <= 1 ? List.of("liste", "creer", "supprimer") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.OUTPOST), "outpost", "ap");
-        reg("koth", "[liste|creer|supprimer|lancer|arreter]", "KOTH", false, use, (s, p, a) -> zoneCommand(s, p, a, fr.vaeloria.factions.model.Zone.Kind.KOTH),
-                (s, a) -> a.length <= 1 ? List.of("liste", "creer", "supprimer", "lancer", "arreter") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.KOTH));
+        reg("avantposte", "[liste|admin|creer|supprimer]", "Avant-postes", false, use, (s, p, a) -> zoneCommand(s, p, a, fr.vaeloria.factions.model.Zone.Kind.OUTPOST),
+                (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.OUTPOST), "outpost", "ap");
+        reg("koth", "[liste|admin|creer|supprimer|lancer|arreter]", "KOTH", false, use, (s, p, a) -> zoneCommand(s, p, a, fr.vaeloria.factions.model.Zone.Kind.KOTH),
+                (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer", "lancer", "arreter") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.KOTH));
         reg("logs", "[page]", "Journal de la faction", true, use, this::logs, null, "journal", "log");
         reg("discord", "[lien|off|test|ping]", "Alertes Discord de la faction", true, use, this::discord,
                 (s, a) -> List.of("off", "test", "ping"), "webhook");
@@ -1092,6 +1092,11 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         }
         if (!s.hasPermission("vaeloria.factions.admin")) { Msg.send(s, "error.no-permission"); return; }
         switch (sub) {
+            case "admin", "gui", "menu" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                if (koth) plugin.kothAdmin().open(p);
+                else plugin.kothAdmin().openZones(p, kind);
+            }
             case "creer", "créer", "create" -> {
                 if (p == null) { Msg.send(s, "error.player-only"); return; }
                 if (a.length < 2 || !a[1].matches("[A-Za-z0-9_-]{2,24}")) { Msg.send(s, "error.usage", "usage", "/f " + (koth ? "koth" : "avantposte") + " creer <nom> [rayon]"); return; }

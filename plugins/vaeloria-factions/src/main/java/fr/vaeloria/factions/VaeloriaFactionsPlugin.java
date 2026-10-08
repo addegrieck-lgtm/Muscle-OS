@@ -78,6 +78,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private fr.vaeloria.factions.gui.UpgradeMenu upgradeMenu;
     private fr.vaeloria.factions.service.CaptureService captures;
     private fr.vaeloria.factions.service.MissionService missions;
+    private fr.vaeloria.factions.gui.KothAdminMenu kothAdmin;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -116,6 +117,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         upgradeMenu = new fr.vaeloria.factions.gui.UpgradeMenu(this);
         captures = new fr.vaeloria.factions.service.CaptureService(this, settings, state);
         missions = new fr.vaeloria.factions.service.MissionService(this, settings, state);
+        kothAdmin = new fr.vaeloria.factions.gui.KothAdminMenu(this);
         manager.setExtraPower(captures::outpostPower);
         missions.roll();
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
@@ -335,6 +337,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public fr.vaeloria.factions.gui.UpgradeMenu upgradeMenu() { return upgradeMenu; }
     public fr.vaeloria.factions.service.CaptureService captures() { return captures; }
     public fr.vaeloria.factions.service.MissionService missions() { return missions; }
+    public fr.vaeloria.factions.gui.KothAdminMenu kothAdmin() { return kothAdmin; }
 
     /** Modifie config.yml depuis un menu : écrit le fichier (commentaires conservés) et applique aussitôt. */
     public void setConfigValue(String path, Object value) {

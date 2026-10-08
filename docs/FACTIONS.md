@@ -203,6 +203,26 @@ Coûts et bonus se règlent dans `config.yml → upgrades`. Pour le staff : `/f 
 - Affichage : barre de boss pour tout le serveur, titres, Discord, et publication sur le site (`KOTH_START` / `KOTH_CAPTURE`).
 - Staff : `/f koth creer <nom> [rayon]`, `lancer [nom] [minutes]`, `arreter`, `supprimer`.
 
+### Interface admin : `/f koth admin` (ou `/f avantposte admin`)
+Sans toucher aux fichiers :
+- **Points de capture.** Zones de KOTH et avant-postes, chacun avec sa fiche :
+  - **déplacer ici** : le centre devient ta position, la capture en cours repart de zéro ;
+  - **rayon** de 2 à 30 blocs (±1, ou ±5 avec Maj), la zone couvrant ±5 blocs en hauteur ;
+  - se téléporter ;
+  - lancer (KOTH) ou libérer (avant-poste) ;
+  - supprimer, après confirmation tapée dans le chat ;
+  - **créer ici**, avec le nom tapé dans le chat.
+- **Horaires du KOTH.** On choisit le jour, puis on tape l'heure dans le chat (avec ou sans nom de zone). Maj + clic supprime un horaire. Le nombre minimum de joueurs se règle au même endroit.
+- **Gains :**
+  - KOTH : argent en banque (±5 000 ou montant exact), power, commandes ;
+  - avant-postes : revenu (±500 ou montant exact), fréquence, bonus de power.
+- **Réglages :**
+  - activation du KOTH et des avant-postes ;
+  - temps à tenir pour gagner un KOTH (±30 s) et durée de l'événement ;
+  - temps de capture d'un avant-poste (±10 s).
+
+Chaque changement est écrit dans `config.yml`, commentaires conservés, et appliqué immédiatement.
+
 ## Missions quotidiennes (`/f missions`)
 - Chaque jour à minuit, 3 missions sont tirées du catalogue, **les mêmes pour toutes les factions**.
 - Chaque faction progresse de son côté et touche la récompense en banque, avec annonce, journal et Discord.
@@ -262,6 +282,15 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (interface admin du KOTH)
+- Interface cliquée par un bot sur Paper 1.21.4 :
+  - zone « roi » créée par le chat, rayon 6 → 7, puis déplacée ;
+  - temps à tenir 300 → 330 s ;
+  - gain du KOTH 60 000 → 65 000 $, revenu d'avant-poste 1 500 → 2 000 $ ;
+  - horaire « Dimanche 20h15 — roi » ajouté ;
+  - avant-poste « mine » créé puis libéré ;
+  - tout se retrouve dans `config.yml` et `data/state.json`.
 
 ## Ce qui a été vérifié (économie commune avec VæloriaShop)
 - Essai sur Paper 1.21.4 avec Vault, EssentialsX, VæloriaShop et VæloriaFactions :

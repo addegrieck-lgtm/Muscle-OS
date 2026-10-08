@@ -97,6 +97,30 @@ public final class CaptureService {
         return true;
     }
 
+    /** Déplace le centre d'une zone (interface admin). La capture en cours repart de zéro. */
+    public void move(Zone z, Location l) {
+        z.world = l.getWorld().getName();
+        z.x = l.getBlockX();
+        z.y = l.getBlockY();
+        z.z = l.getBlockZ();
+        reset(z);
+        plugin.manager().markDirty();
+    }
+
+    public void setRadius(Zone z, int radius) {
+        z.radius = Math.max(2, Math.min(30, radius));
+        plugin.manager().markDirty();
+    }
+
+    /** Libère un avant-poste (plus de détenteur). */
+    public void release(Zone z) {
+        Faction h = plugin.manager().byId(z.holder);
+        z.holder = null;
+        reset(z);
+        plugin.manager().markDirty();
+        if (h != null) plugin.logs().add(h, "AVANT-POSTE", "staff", "l'avant-poste " + z.name + " a été libéré");
+    }
+
     /** Nombre d'avant-postes tenus par une faction (bonus de power). */
     public int heldBy(Faction f) {
         int n = 0;
