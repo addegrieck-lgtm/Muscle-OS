@@ -26,6 +26,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 | `cd plugins/vaeloria-fakeplayers && gradle build` | Jar du plugin de faux joueurs ([doc](plugins/vaeloria-fakeplayers/README.md)) |
+| `cd plugins/vaeloria-tab && gradle build` | Jar du TAB et de l'écran Multijoueur aux couleurs du logo ([VaeloriaTab](plugins/vaeloria-tab/README.md)) |
 
 ## Documentation
 

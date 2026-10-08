@@ -1,0 +1,152 @@
+# VaeloriaTab — liste des joueurs (TAB) aux couleurs du logo VÆLORIA.
+# Format : MiniMessage (https://docs.advntr.dev/minimessage/format.html).
+#
+# Couleurs de la charte, utilisables comme balises : <ruby>, <ruby_hi>, <ruby_lo>,
+# <silver>, <steel>, <ash>, <graphite>, <snow>.
+# Variables : <logo> (wordmark animé), <player>, <rank>, <online>, <max>, <ping>, <tps>,
+# <server>, <world>, et les couleurs dynamiques <ping_color>, <tps_color>.
+
+# Nom du serveur dans le réseau, affiché dans le pied de page.
+server-name: "Factions"
+
+# Fréquence de rafraîchissement de l'en-tête (ticks, 20 = 1 s). Pilote la vitesse du reflet.
+refresh-ticks: 3
+# Fréquence de recalcul des grades dans la liste (ticks).
+names-refresh-ticks: 40
+
+# Charte du logo (brand/build.py).
+palette:
+  ruby: "#A3121E"
+  ruby_hi: "#D21F2F"
+  ruby_lo: "#5E0710"
+  snow: "#FFFFFF"
+  silver: "#D9DCE2"
+  steel: "#A9AEB8"
+  ash: "#6E737E"
+  graphite: "#2A2C33"
+
+# Wordmark : lettres argent avec un reflet qui balaie le nom, l'Æ en rubis comme sur le logo.
+logo:
+  text: "V Æ L O R I A"
+  accent: "Æ"
+  accent-color: "#D21F2F"
+  base-color: "#A9AEB8"
+  shine-color: "#FFFFFF"
+  # Largeur du reflet (en caractères) et pause entre deux passages (en images).
+  shine-width: 3
+  pause-frames: 18
+  bold: true
+
+header:
+  - ""
+  - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬ <ruby_hi>◆</ruby_hi> ▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
+  - ""
+  - "<logo>"
+  - "<ash>LE RETOUR DE LA <ruby_hi><bold>VRAIE GUERRE</bold></ruby_hi>."
+  - ""
+
+footer:
+  - ""
+  - "<ash>Joueurs <snow><online></snow><steel>/<max></steel>  <ruby>◆</ruby>  Ping <ping_color><ping>ms</ping_color>  <ruby>◆</ruby>  TPS <tps_color><tps></tps_color>"
+  - "<ash>Serveur <silver><server></silver>  <ruby>◆</ruby>  Grade <rank>"
+  - ""
+  - "<ruby_hi>vaeloria.fr</ruby_hi> <graphite>│</graphite> <silver>/link</silver> <ash>pour lier ton compte"
+  - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬▬▬▬▬▬▬▬▬▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
+
+# Couleurs du ping (ms) et du TPS selon les seuils.
+ping:
+  good-below: 80
+  medium-below: 180
+  good: "#E6E8EC"
+  medium: "#A9AEB8"
+  bad: "#D21F2F"
+tps:
+  good-above: 19.0
+  medium-above: 16.0
+  good: "#E6E8EC"
+  medium: "#A9AEB8"
+  bad: "#D21F2F"
+
+# Grades affichés dans la liste. Le grade retenu est celui d'« order » le plus élevé dont
+# le joueur a la permission (à donner via LuckPerms, ex. /lp user X permission set vaeloria.rank.vaelorian).
+# Les permissions sont créées par défaut à false : un op n'en hérite pas automatiquement.
+# « order » trie aussi la liste : plus il est élevé, plus le joueur apparaît haut.
+# « default » (sans permission) s'applique à tous les autres joueurs.
+ranks:
+  fondateur:
+    permission: "vaeloria.rank.fondateur"
+    order: 100
+    display: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi>"
+    format: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi> <graphite>│</graphite> <snow><player>"
+  admin:
+    permission: "vaeloria.rank.admin"
+    order: 90
+    display: "<ruby_hi>ADMIN</ruby_hi>"
+    format: "<ruby_hi>ADMIN</ruby_hi> <graphite>│</graphite> <snow><player>"
+  moderateur:
+    permission: "vaeloria.rank.moderateur"
+    order: 80
+    display: "<ruby>MODÉRATEUR</ruby>"
+    format: "<ruby>MODO</ruby> <graphite>│</graphite> <silver><player>"
+  vaelorian:
+    permission: "vaeloria.rank.vaelorian"
+    order: 50
+    display: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient>"
+    format: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <ruby_hi>◆</ruby_hi> <silver><player>"
+  default:
+    permission: ""
+    order: 0
+    display: "<steel>Joueur</steel>"
+    format: "<steel><player>"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Écran Multijoueur (liste des serveurs)
+# Variables : <logo>, <online>, <max>, <server> et les couleurs de la palette.
+# Icône : celle du logo (brand/server-icon.png) est embarquée ; pour la remplacer,
+# déposer un PNG 64×64 nommé server-icon.png dans plugins/VaeloriaTab/.
+# ─────────────────────────────────────────────────────────────────────────────
+server-list:
+  enabled: true
+
+  motd:
+    # Chaque ligne doit tenir sur ~270 px (environ 45 caractères), sinon elle est coupée.
+    # Centre chaque ligne au pixel près (police Minecraft par défaut).
+    center: true
+    line1: "<ruby_hi>◆</ruby_hi>   <logo>   <ruby_hi>◆</ruby_hi>"
+    # Messages de la 2e ligne, en rotation.
+    rotate-seconds: 8
+    line2:
+      - "<ash>LE RETOUR DE LA <ruby_hi><bold>VRAIE GUERRE</bold></ruby_hi>."
+      - "<silver>Faction <ruby>◆</ruby> PvP 1.8 <ruby>◆</ruby> Guerres d'empires"
+      - "<ash>Boutique et classements sur <ruby_hi>vaeloria.fr"
+
+  # Bulle affichée au survol du compteur de joueurs.
+  # Texte « § » côté client : seules les 16 couleurs Minecraft passent. Les gris de la charte
+  # seraient convertis en bleu, d'où <white>, <gray>, <dark_gray> et <dark_red> (rubis) ici.
+  hover:
+    lines:
+      - ""
+      - "  <dark_red>◆</dark_red> <white><bold>VÆLORIA</bold></white> <dark_red>◆</dark_red>"
+      - "  <gray>Faction & PvP — Minecraft 1.21"
+      - ""
+      - "  <gray>En ligne : <white><online></white><dark_gray>/<max>"
+      - "  <gray>Site : <dark_red>vaeloria.fr"
+      - "  <gray>Lier ton compte : <white>/link"
+      - ""
+    # Ajoute quelques joueurs connectés sous les lignes (respecte hide-online-players du serveur).
+    show-players: true
+    max-players: 8
+
+  # Texte de version montré aux clients d'une version incompatible.
+  # Même contrainte que la bulle : 16 couleurs Minecraft.
+  version-text: "<dark_red>VÆLORIA</dark_red> <gray>1.21+"
+  # Capacité affichée (-1 = celle de server.properties).
+  max-players: -1
+
+  # Maintenance : MOTD dédié, « Maintenance » à la place du compteur, connexions refusées
+  # sauf pour la permission vaeloria.maintenance.bypass. Activer puis /vtab reload.
+  maintenance:
+    enabled: false
+    line2: "<ruby_hi><bold>MAINTENANCE</bold></ruby_hi> <ash>· infos sur <silver>vaeloria.fr"
+    version-text: "<dark_red>Maintenance"
+    kick-message: "<ruby_hi>◆</ruby_hi> <snow><bold>VÆLORIA</bold></snow> <ruby_hi>◆</ruby_hi>\n\n<silver>Le serveur est en maintenance.\n<ash>Infos et retour : <ruby_hi>vaeloria.fr"

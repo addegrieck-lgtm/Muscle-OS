@@ -11,7 +11,7 @@ Le plugin est le **seul** composant du serveur qui communique avec l'extérieur.
 
 ## Installation
 
-Icône de la liste des serveurs : copier `brand/server-icon.png` (64×64) à la racine du serveur Minecraft.
+Icône, MOTD et TAB : installer le plugin [VaeloriaTab](../plugins/vaeloria-tab/README.md), qui embarque `brand/server-icon.png` (64×64). Sans lui, copier cette icône à la racine du serveur Minecraft.
 
 
 1. Copier le jar dans `plugins/`, démarrer une fois.

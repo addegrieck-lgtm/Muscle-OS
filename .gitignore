@@ -17,3 +17,5 @@ plugins/vaeloria-bridge/build
 plugins/vaeloria-bridge/.gradle
 plugins/vaeloria-fakeplayers/build
 plugins/vaeloria-fakeplayers/.gradle
+plugins/vaeloria-tab/build
+plugins/vaeloria-tab/.gradle
