@@ -5,6 +5,7 @@ import { Analytics } from "@/components/Analytics";
 import { Footer } from "@/components/Footer";
 import { MobilePlayBar } from "@/components/MobilePlayBar";
 import { Navbar } from "@/components/Navbar";
+import { CartProvider } from "@/components/shop/cart";
 import { PREVIEW } from "@/lib/preview";
 import { JsonLd, SITE_URL } from "@/lib/seo";
 import "./globals.css";
@@ -45,10 +46,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Aperçu du site — les données en direct (joueurs, classements, saison) arriveront avec l&apos;ouverture du serveur.
           </p>
         )}
-        <Navbar />
-        <main id="contenu">{children}</main>
-        <Footer />
-        <MobilePlayBar />
+        <CartProvider>
+          <Navbar />
+          <main id="contenu">{children}</main>
+          <Footer />
+          <MobilePlayBar />
+        </CartProvider>
         <Analytics />
       </body>
     </html>

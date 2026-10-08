@@ -11,7 +11,31 @@ import type {
   Season,
   ServerStatus,
   ServiceStatus,
+  ShopCatalog,
+  ShopProduct,
+  EmpireCard,
+  EmpireDetail,
+  FounderRow,
+  FounderStats,
+  JournalEntry,
+  MapData,
+  PollView,
+  RankingEntry,
+  RoadmapStep,
+  WarDetail,
+  WarView,
 } from "@vaeloria/types";
+
+export interface WorldHome {
+  founders: FounderStats;
+  empires: EmpireCard[];
+  empireCount: number;
+  wars: WarView[];
+  warsActive: number;
+  events: GameEvent[];
+  poll: PollView | null;
+  journal: JournalEntry[];
+}
 
 export class ApiClientError extends Error {
   constructor(
@@ -75,6 +99,23 @@ export function createApiClient({ baseUrl, headers, timeoutMs = 4000 }: ApiClien
       get<Paginated<NewsArticle>>(`/api/v1/news?page=${page}${category ? `&category=${enc(category)}` : ""}`, { revalidate: 120, tags: ["news"] }),
     article: (slug: string) => get<NewsArticle>(`/api/v1/news/${enc(slug)}`, { revalidate: 300, tags: ["news"] }),
     products: () => get<{ items: Product[] }>("/api/v1/shop/products", { revalidate: 300, tags: ["shop"] }),
+    shopCatalog: () => get<ShopCatalog>("/api/v1/shop/catalog", { revalidate: 30, tags: ["shop"] }),
+    shopProduct: (slug: string) => get<ShopProduct>(`/api/v1/shop/products/${enc(slug)}`, { revalidate: 30, tags: ["shop"] }),
+    worldHome: () => get<WorldHome>("/api/v1/world/home", { revalidate: 20, tags: ["world"] }),
+    founders: () => get<FounderStats>("/api/v1/founders", { revalidate: 15, tags: ["world"] }),
+    founderList: (sort: "number" | "recruiters" | "influence", page = 1) =>
+      get<{ items: FounderRow[]; total: number; page: number; pageSize: number }>(`/api/v1/founders/list?sort=${sort}&page=${page}`, { revalidate: 30, tags: ["world"] }),
+    empires: (limit = 200) => get<{ items: EmpireCard[]; total: number }>(`/api/v1/empires?limit=${limit}`, { revalidate: 20, tags: ["world"] }),
+    empire: (slug: string) => get<EmpireDetail>(`/api/v1/empires/${enc(slug)}`, { revalidate: 20, tags: ["world"] }),
+    wars: (status?: "planned" | "active" | "ended") => get<{ items: WarView[] }>(`/api/v1/wars${status ? `?status=${status}` : ""}`, { revalidate: 15, tags: ["world"] }),
+    war: (slug: string) => get<WarDetail>(`/api/v1/wars/${enc(slug)}`, { revalidate: 10, tags: ["world"] }),
+    worldMap: () => get<MapData>("/api/v1/world/map", { revalidate: 60, tags: ["world"] }),
+    ranking: (category: string) => get<{ category: string; entries: RankingEntry[] }>(`/api/v1/rankings/${enc(category)}`, { revalidate: 60, tags: ["world"] }),
+    polls: () => get<{ items: PollView[] }>("/api/v1/council/polls", { revalidate: 15, tags: ["world"] }),
+    journal: () => get<{ items: JournalEntry[] }>("/api/v1/journal", { revalidate: 120, tags: ["world"] }),
+    roadmap: () => get<{ items: RoadmapStep[] }>("/api/v1/roadmap", { revalidate: 300, tags: ["world"] }),
+    event: (slug: string) => get<GameEvent>(`/api/v1/events/${enc(slug)}`, { revalidate: 30, tags: ["events"] }),
+    pastEvents: () => get<{ items: GameEvent[] }>("/api/v1/events-past", { revalidate: 300, tags: ["events"] }),
     stats: () => get<{ players: number; factions: number; kills: number; betaSignups: number }>("/api/v1/stats", { revalidate: 120 }),
   };
 }

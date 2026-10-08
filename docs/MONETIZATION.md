@@ -1,5 +1,7 @@
 # Monétisation
 
+> La boutique complète (points, grades, livraison, admin) est documentée dans `SHOP_ARCHITECTURE.md` et les fichiers `SHOP_*.md`.
+
 ## Règles
 
 - **Aucun avantage de combat vendu.** Cosmétiques, tags, effets, pets, grades de confort, packs.

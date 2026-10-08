@@ -5,7 +5,8 @@ import { MinecraftUsername } from "@vaeloria/types";
 import type { AppContext } from "../context";
 import { notFound, HttpError } from "../lib/errors";
 import { parse } from "../lib/validate";
-import { getArticle, getFaction, getLeaderboard, getPlayer, getSeasons, getStats, getUpcomingEvents, listNews, listProducts } from "../services/content";
+import { getArticle, getFaction, getLeaderboard, getPlayer, getSeasons, getStats, getUpcomingEvents, listNews } from "../services/content";
+import { getCatalog } from "../services/shop/catalog";
 import { getServerStatus, getServices } from "../services/status";
 
 /** API consommée par le site (rendu serveur Next.js) — lecture seule, mise en cache. */
@@ -113,7 +114,7 @@ export async function v1Routes(app: FastifyInstance, ctx: AppContext) {
 
   app.get("/shop/products", async (_req, reply) => {
     reply.header("cache-control", cacheFor(300));
-    return { items: await cache.wrap("shop:products", 300_000, () => listProducts(sql)) };
+    return { items: (await cache.wrap("shop:catalog", 30_000, () => getCatalog(sql))).products };
   });
 
   // ───── Écritures publiques (rate-limit strict) ─────
@@ -143,7 +144,14 @@ export async function v1Routes(app: FastifyInstance, ctx: AppContext) {
   );
 
   const AnalyticsBody = z.object({
-    name: z.enum(["page_view", "copy_ip", "click_play", "click_discord", "click_leaderboard", "beta_signup", "account_created", "account_linked", "shop_view", "checkout_start"]),
+    name: z.enum([
+      "page_view", "copy_ip", "click_play", "click_discord", "click_leaderboard", "beta_signup", "account_created", "account_linked",
+      // Boutique (côté navigateur). PAYMENT_SUCCESS, POINTS_EARNED, RANK_UNLOCKED… sont enregistrés par l'API elle-même.
+      "shop_view", "product_view", "add_to_cart", "remove_from_cart", "checkout_started", "checkout_start",
+      // Monde V2 (côté navigateur) ; REGISTER, FOUNDER_JOIN, EMPIRE_CREATE/JOIN, REFERRAL_*, VOTE sont enregistrés par l'API.
+      "event_view", "war_view", "ranking_view", "share_empire", "cta_click", "map_view", "empire_view",
+    ]),
+    props: z.record(z.union([z.string().max(100), z.number()])).optional(),
     path: z.string().max(300).optional(),
     visitorId: z.string().regex(/^[a-z0-9]{8,40}$/).optional(),
     referrer: z.string().max(500).optional(),
@@ -161,8 +169,9 @@ export async function v1Routes(app: FastifyInstance, ctx: AppContext) {
       /* referrer invalide ignoré */
     }
     await sql`
-      INSERT INTO analytics_events (name, path, visitor_id, referrer_host, utm_source, utm_medium, utm_campaign, utm_content)
-      VALUES (${e.name}, ${e.path ?? null}, ${e.visitorId ?? null}, ${referrerHost}, ${e.utm?.source ?? null}, ${e.utm?.medium ?? null}, ${e.utm?.campaign ?? null}, ${e.utm?.content ?? null})`;
+      INSERT INTO analytics_events (name, path, visitor_id, referrer_host, utm_source, utm_medium, utm_campaign, utm_content, props)
+      VALUES (${e.name}, ${e.path ?? null}, ${e.visitorId ?? null}, ${referrerHost}, ${e.utm?.source ?? null}, ${e.utm?.medium ?? null},
+              ${e.utm?.campaign ?? null}, ${e.utm?.content ?? null}, ${sql.json(Object.fromEntries(Object.entries(e.props ?? {}).slice(0, 10)))})`;
     reply.code(204);
   });
 }

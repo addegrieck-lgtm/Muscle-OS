@@ -12,14 +12,14 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 | 4 | Pages serveur | ✅ Terminée (contenus légaux à renseigner) | 90 |
 | 5 | API | 🟡 Avancée | 85 |
 | 6 | Database | ✅ Terminée | 90 |
-| 7 | Authentication | 🔴 Conçue, non implémentée | 10 |
+| 7 | Authentication | 🟡 Implémentée et testée ; connexion Discord réelle à activer (identifiants) | 80 |
 | 8 | Minecraft Bridge | 🟡 Avancée, pas encore testée sur un vrai serveur Paper | 75 |
 | 9 | Profils joueur / faction | ✅ Terminée | 85 |
 | 10 | Classements | ✅ Terminée | 85 |
 | 11 | Événements | 🟡 Affichage + admin, sans rappels | 70 |
 | 12 | Admin | 🟡 Fonctionnel | 70 |
-| 13 | Architecture boutique | 🟡 Cœur testé, pas de tunnel d'achat | 70 |
-| 14 | Intégration paiement | 🔴 Prestataire à choisir | 15 |
+| 13 | Architecture boutique | 🟢 Boutique complète (voir `SHOP_BUILD_PROGRESS.md`) | 95 |
+| 14 | Intégration paiement | 🟡 Stripe prêt + prestataire de test ; prestataire réel à choisir | 60 |
 | 15 | Analytics | 🟡 Collecte + funnel + UTM | 70 |
 | 16 | Sécurité | 🟡 Base solide, CSP et auth admin à faire | 60 |
 | 17 | Performance | 🟡 Mesures de build, Lighthouse à faire | 60 |
@@ -102,6 +102,35 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 ### 19. Bêta — 70 %
 - `/beta` : compte à rebours, inscription (pseudo + e-mail facultatif + code de parrainage), compteur affiché seulement à partir de 50 inscrits.
 
+## V2 — Portail du monde (7 octobre 2026)
+
+Identité visuelle inchangée : toutes les nouvelles pages sont construites avec `@vaeloria/ui` et les jetons de `theme.css`. Aucune donnée fictive hors développement (`db:seed --demo`).
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| Accueil V2 (hero, monde, empires, fondateurs, guerres, classement, Conseil, événements, journal) | ✅ | Build, captures mobile/desktop, aperçu sur base vide (0 / 3 000, états vides) |
+| Fondateurs : numéro sans trou, plafond et ouverture configurables, paliers avec révélation | ✅ | Tests API ; E2E : inscription → fondateur #19 puis #20 |
+| Parrainage `/invite/CODE` : clic, attribution, qualification à la liaison Minecraft, anti-abus | ✅ | Tests API ; E2E : clic enregistré, cookie, parrainage `pending` en base ; rejet depuis l'admin |
+| Influence (grand livre idempotent, plafonds, compte lié requis, recalcul) | ✅ | Tests API |
+| Empires : création (nom, tag, devise, couleur, blason), rejoindre (recrutement / code), quitter, gestion par le chef, partage | ✅ | Tests API ; E2E : création → « Votre empire est né. » → fiche « Tu diriges cet empire » |
+| Guerres (admin ou bridge `WAR_START`/`WAR_END`), fiche avec chronologie | ✅ | Tests API ; E2E admin : déclaration → visible sur l'API publique |
+| Carte du monde (zones configurables, territoires depuis les claims, événements en direct) | ✅ | Tests API ; rendu desktop/mobile |
+| Classements (7 catégories) | ✅ | Build ; routes 200 |
+| Événements en direct / à venir / passés, fiche, `KOTH_START`, `EVENT_START`/`EVENT_END` | ✅ | Tests API ; routes 200 |
+| Conseil : un vote par compte, éligibilité « compte lié », historique | ✅ | Tests API ; E2E : vote enregistré, bouton retiré |
+| Profils `/joueur/[username]` (fondateur, empire, badges, victoires/défaites) | ✅ | Build ; redirection `/player/*` |
+| Journal, roadmap interactive, page Jouer | ✅ | Routes 200 |
+| Navigation V2 + menu mobile | ✅ | Captures ; corrige un défaut existant (menu mobile tronqué par le `backdrop-filter` du header) |
+| Redirections `/leaderboards`, `/events`, `/player/*`, `/carte` ; sitemap et robots étendus | ✅ | Vérifiées en HTTP |
+| Analytics V2 (CTA, vues carte/empire/guerre/événement/classement, partage, inscription, fondateur, empire, parrainage, vote) + parcours dans `/admin/marketing` | ✅ | Événements en base pendant l'E2E |
+| Admin → Monde (9 écrans) | ✅ | 10 écrans en 200 ; E2E : réglages, guerre, rejet de parrainage |
+| Plugin : émission des nouveaux événements | 🟡 | Format documenté (`MINECRAFT_INTEGRATION.md`) ; à brancher dans les plugins Factions/KOTH/événements choisis |
+| Image OpenGraph propre à chaque empire | ⬜ | Non fait (image du site utilisée) |
+
+Tests de cette étape : API 90 / 90 ✅, site 4 / 4 ✅, typecheck du workspace ✅, build production du site ✅ (toutes les routes V2), build admin ✅, export statique de l'aperçu sur une base neuve (sans `--demo`) ✅ : 16 pages et 34 liens internes vérifiés, 0 erreur JS, 0 débordement horizontal à 390 px, aucun nom d'empire de démonstration présent. E2E navigateur du parcours joueur complet : 0 erreur console.
+
+Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60 s (une action apparaît sur les pages publiques avec ce délai ; l'îlot personnel est immédiat). Les parrainages et votes d'un même foyer ne sont pas distingués au-delà de « un compte Discord = une personne » et du plafond quotidien.
+
 ## Décisions attendues du propriétaire
 
 1. Prestataire de paiement (Stripe / PayPal / Tebex).
@@ -109,3 +138,4 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 3. Informations légales de la structure.
 4. Lien Discord définitif et date d'ouverture de la Saison I (modifiable en base).
 5. Hébergeur du VPS et du serveur Minecraft.
+6. V2 : récompenses réelles des paliers fondateurs (actuellement « [À DÉFINIR] », non affichées), dates des épisodes du journal, sondages à ouvrir au Conseil.

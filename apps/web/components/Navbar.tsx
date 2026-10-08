@@ -6,16 +6,28 @@ import { useEffect, useState } from "react";
 import { LINKS } from "@vaeloria/config";
 import { buttonClass, cn } from "@vaeloria/ui";
 import { Wordmark } from "./Logo";
+import { CartButton } from "./shop/CartButton";
 
 export const NAV = [
-  { href: "/pvp", label: "PvP" },
-  { href: "/factions", label: "Factions" },
-  { href: "/seasons", label: "Saison" },
-  { href: "/leaderboards", label: "Classements" },
-  { href: "/events", label: "Événements" },
+  { href: "/jouer", label: "Jouer" },
+  { href: "/monde", label: "Monde" },
+  { href: "/empires", label: "Empires", match: ["/empire/"] },
+  { href: "/guerres", label: "Guerres", match: ["/guerre/"] },
+  { href: "/classements", label: "Classements" },
+  { href: "/evenements", label: "Événements", match: ["/evenement/"] },
+  { href: "/conseil", label: "Conseil" },
+];
+
+/** Menu mobile : la navigation principale, puis le reste du site. */
+const MORE = [
+  { href: "/fondateurs", label: "Fondateurs" },
+  { href: "/boutique", label: "Boutique" },
+  { href: "/journal", label: "Journal" },
+  { href: "/roadmap", label: "Roadmap" },
   { href: "/news", label: "News" },
   { href: "/guides", label: "Guides" },
-  { href: "/shop", label: "Boutique" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/support", label: "Support" },
 ];
 
 export function Navbar() {
@@ -37,13 +49,13 @@ export function Navbar() {
         </Link>
         <ul className="hidden items-center gap-0.5 xl:flex">
           {NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`) || Boolean(item.match?.some((m) => pathname.startsWith(m)));
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("relative rounded-md px-3 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
+                  className={cn("relative rounded-md px-2.5 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
                 >
                   {item.label}
                 </Link>
@@ -52,13 +64,14 @@ export function Navbar() {
           })}
         </ul>
         <div className="flex items-center gap-2">
-          {/* Masqués sur mobile : la barre fixe du bas porte déjà « Jouer » et l'IP. */}
+          <CartButton />
+          {/* Masqués sur mobile : le menu et la barre fixe du bas les portent déjà. */}
           <div className="hidden items-center gap-2 sm:flex">
-            <a href={LINKS.discord} target="_blank" rel="noopener noreferrer" data-track="click_discord" className={buttonClass("ghost", "sm")}>
-              Discord
-            </a>
-            <Link href="/#jouer" data-track="click_play" className={buttonClass("primary", "sm")}>
-              Jouer
+            <Link href="/compte" className={buttonClass("ghost", "sm")}>
+              Connexion
+            </Link>
+            <Link href="/rejoindre" data-track="cta_click" data-track-id="nav-rejoindre" className={buttonClass("primary", "sm")}>
+              Rejoindre
             </Link>
           </div>
           <button
@@ -75,12 +88,26 @@ export function Navbar() {
           </button>
         </div>
       </nav>
+      {/* Hauteur explicite : le backdrop-filter du header devient le repère des éléments fixes. */}
       {open && (
-        <div id="menu-mobile" className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
-          <ul className="flex flex-col">
-            {[...NAV, { href: "/faq", label: "FAQ" }, { href: "/status", label: "Statut" }, { href: "/support", label: "Support" }, { href: "/account", label: "Mon compte" }].map((item) => (
+        <div id="menu-mobile" className="fixed inset-x-0 top-16 z-40 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            <Link href="/rejoindre" data-track="cta_click" data-track-id="menu-rejoindre" className={buttonClass("primary", "lg")}>Rejoindre</Link>
+            <Link href="/compte" className={buttonClass("secondary", "lg")}>Connexion</Link>
+          </div>
+          <ul className="mt-4 flex flex-col">
+            {NAV.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="block border-b border-line/60 py-3.5 font-display text-lg font-semibold uppercase tracking-[0.06em] text-fg">
+                <Link href={item.href} aria-current={pathname === item.href ? "page" : undefined} className="block border-b border-line/60 py-3.5 font-display text-lg font-semibold uppercase tracking-[0.06em] text-fg">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-6 grid grid-cols-2 gap-x-4">
+            {MORE.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="block py-2.5 font-display text-sm font-semibold uppercase tracking-[0.08em] text-muted hover:text-fg">
                   {item.label}
                 </Link>
               </li>

@@ -8,6 +8,14 @@ import { adminRoutes } from "./routes/admin";
 import { bridgeRoutes } from "./routes/bridge";
 import { publicRoutes } from "./routes/public";
 import { v1Routes } from "./routes/v1";
+import { adminShopRoutes } from "./routes/adminShop";
+import { internalRoutes } from "./routes/internal";
+import { meRoutes } from "./routes/me";
+import { sandboxRoutes } from "./routes/sandbox";
+import { shopRoutes } from "./routes/shop";
+import { webhookRoutes } from "./routes/webhooks";
+import { adminWorldRoutes } from "./routes/adminWorld";
+import { worldRoutes } from "./routes/world";
 
 export async function buildApp(ctx: AppContext): Promise<FastifyInstance> {
   const isProd = ctx.env.NODE_ENV === "production";
@@ -31,7 +39,8 @@ export async function buildApp(ctx: AppContext): Promise<FastifyInstance> {
 
   await app.register(cors, {
     origin: ctx.env.CORS_ORIGINS.split(",").map((s) => s.trim()),
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: false,
   });
   await app.register(rateLimit, { global: true, max: 300, timeWindow: "1 minute" });
 
@@ -58,6 +67,14 @@ export async function buildApp(ctx: AppContext): Promise<FastifyInstance> {
   await app.register((i) => publicRoutes(i, ctx), { prefix: "/public/v1" });
   await app.register((i) => bridgeRoutes(i, ctx), { prefix: "/bridge/v1" });
   await app.register((i) => adminRoutes(i, ctx), { prefix: "/admin/v1" });
+  await app.register((i) => shopRoutes(i, ctx), { prefix: "/api/v1/shop" });
+  await app.register((i) => meRoutes(i, ctx), { prefix: "/api/v1/me" });
+  await app.register((i) => worldRoutes(i, ctx), { prefix: "/api/v1" });
+  await app.register((i) => adminWorldRoutes(i, ctx), { prefix: "/admin/v1/world" });
+  await app.register((i) => internalRoutes(i, ctx), { prefix: "/internal/v1" });
+  await app.register((i) => webhookRoutes(i, ctx), { prefix: "/webhooks" });
+  await app.register((i) => adminShopRoutes(i, ctx), { prefix: "/admin/v1/shop" });
+  if (ctx.payments?.name === "sandbox" && !isProd) await app.register((i) => sandboxRoutes(i, ctx), { prefix: "/sandbox" });
 
   return app;
 }

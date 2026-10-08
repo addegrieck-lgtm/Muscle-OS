@@ -7,6 +7,8 @@ import { SIGNATURE_MAX_SKEW_MS, safeEqualHex, signPayload } from "../lib/hmac";
 import { parse } from "../lib/validate";
 import { ingestEvents } from "../services/bridgeIngest";
 import { ackCommand, claimCommands } from "../services/commands";
+import { createLinkCode } from "../services/identity";
+import { MinecraftUsername, MinecraftUuid } from "@vaeloria/types";
 
 /**
  * Canal serveur Minecraft → API. Chaque requête est signée (HMAC-SHA256) :
@@ -56,6 +58,12 @@ export async function bridgeRoutes(app: FastifyInstance, ctx: AppContext) {
       ctx.cache.invalidate("players:");
     }
     return result;
+  });
+
+  /** /link en jeu : le plugin demande un code à usage unique que le joueur saisit sur son compte. */
+  app.post("/link-codes", async (req) => {
+    const player = parse(z.object({ uuid: MinecraftUuid, username: MinecraftUsername }), req.body);
+    return createLinkCode(sql, player);
   });
 
   app.post("/commands/claim", async (req) => {

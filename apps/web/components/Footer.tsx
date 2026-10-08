@@ -3,17 +3,18 @@ import { BRAND, LINKS } from "@vaeloria/config";
 import { Wordmark } from "./Logo";
 
 const COLS = [
-  { title: "Jouer", links: [["/pvp", "PvP"], ["/factions", "Factions"], ["/seasons", "Saisons"], ["/events", "Événements"], ["/guides", "Guides"], ["/beta", "Bêta"]] },
-  { title: "Communauté", links: [["/leaderboards", "Classements"], ["/news", "News"], ["/staff", "Staff"], ["/creators", "Créateurs"], ["/discord", "Discord"]] },
-  { title: "Aide", links: [["/faq", "FAQ"], ["/rules", "Règlement"], ["/support", "Support"], ["/status", "Statut"], ["/shop", "Boutique"]] },
+  { title: "Le monde", links: [["/monde", "Carte"], ["/empires", "Empires"], ["/guerres", "Guerres"], ["/evenements", "Événements"], ["/classements", "Classements"], ["/fondateurs", "Fondateurs"]] },
+  { title: "Communauté", links: [["/conseil", "Conseil"], ["/journal", "Journal"], ["/roadmap", "Roadmap"], ["/news", "News"], ["/creators", "Créateurs"], ["/discord", "Discord"]] },
+  { title: "Jouer", links: [["/jouer", "Comment jouer"], ["/pvp", "PvP"], ["/factions", "Factions"], ["/seasons", "Saisons"], ["/guides", "Guides"], ["/boutique", "Boutique"]] },
+  { title: "Aide", links: [["/faq", "FAQ"], ["/rules", "Règlement"], ["/support", "Support"], ["/status", "Statut"], ["/staff", "Staff"], ["/beta", "Bêta"]] },
   { title: "Légal", links: [["/mentions-legales", "Mentions légales"], ["/confidentialite", "Confidentialité"], ["/cookies", "Cookies"], ["/cgv", "CGV"], ["/contact", "Contact"]] },
 ] as const;
 
 export function Footer() {
   return (
     <footer className="mt-16 border-t border-line pb-28 sm:pb-0">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(4,1fr)]">
-        <div className="col-span-2 md:col-span-1">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
+        <div className="col-span-2 sm:col-span-3 lg:col-span-1">
           <Wordmark />
           <p className="mt-3 max-w-xs text-sm text-muted">{BRAND.description}</p>
           <div className="mt-4 flex gap-4 text-sm text-muted">

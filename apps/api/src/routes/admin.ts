@@ -34,19 +34,6 @@ const EventInput = z.object({
   published: z.boolean().default(false),
 });
 
-const ProductInput = z.object({
-  slug: Slug,
-  name: z.string().min(2).max(120),
-  description: z.string().max(5000).default(""),
-  category: z.enum(["cosmetics", "ranks", "effects", "tags", "pets", "bundles"]),
-  priceCents: z.number().int().min(0).max(100_000),
-  imageUrl: z.string().url().nullable().default(null),
-  active: z.boolean().default(false),
-  stock: z.number().int().min(0).nullable().default(null),
-  promoPercent: z.number().int().min(0).max(90).nullable().default(null),
-  deliveryCommands: z.array(z.string().min(1).max(300)).max(20).default([]),
-});
-
 /**
  * Back-office. Phase 1 : authentification serveur-à-serveur par jeton (l'app admin
  * est elle-même protégée). Phase 7 : remplacé par sessions Discord + rôles.
@@ -99,7 +86,7 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
         LEFT JOIN faction_members fm ON fm.player_uuid = p.uuid
         LEFT JOIN factions f ON f.id = fm.faction_id AND f.disbanded_at IS NULL
         LEFT JOIN username_history h ON h.player_uuid = p.uuid
-        WHERE p.uuid::text = lower(${q}) OR h.username ILIKE ${q + "%"} OR d.username ILIKE ${q + "%"} OR d.discord_id = ${q} OR f.name ILIKE ${q}
+        WHERE p.uuid::text = lower(${q}) OR p.username ILIKE ${q + "%"} OR h.username ILIKE ${q + "%"} OR d.username ILIKE ${q + "%"} OR d.discord_id = ${q} OR f.name ILIKE ${q}
         ORDER BY p.username LIMIT 50`,
     };
   });
@@ -156,11 +143,6 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
   crud("events", "events", EventInput, (v) => ({
     slug: v.slug, title: v.title, type: v.type, description: v.description, starts_at: v.startsAt, ends_at: v.endsAt, location: v.location, rewards: v.rewards, published: v.published,
   }), "starts_at DESC", ["events"]);
-
-  crud("products", "products", ProductInput, (v) => ({
-    slug: v.slug, name: v.name, description: v.description, category: v.category, price_cents: v.priceCents, image_url: v.imageUrl, active: v.active,
-    stock: v.stock, promo_percent: v.promoPercent, delivery_commands: sql.json(v.deliveryCommands), updated_at: new Date().toISOString(),
-  }), "category, price_cents", ["shop"]);
 
   crud("faq", "faq", z.object({ question: z.string().min(3).max(300), answer: z.string().min(1).max(5000), position: z.number().int().default(0), published: z.boolean().default(true) }),
     (v) => v, "position", ["faq"]);
@@ -251,7 +233,13 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
         (SELECT count(DISTINCT s.player_uuid)::int FROM player_season_stats s JOIN players p ON p.uuid = s.player_uuid WHERE (s.kills + s.deaths) > 0 AND p.first_seen_at > now() - make_interval(days => ${days})) AS "firstPvp",
         (SELECT count(*)::int FROM players WHERE first_seen_at > now() - make_interval(days => ${days}) AND last_seen_at > first_seen_at + interval '1 day') AS returned,
         (SELECT count(*)::int FROM players WHERE first_seen_at > now() - make_interval(days => ${days}) AND last_seen_at > first_seen_at + interval '7 days') AS recurring`;
-    return { days, steps: f };
+    // Parcours V2 (monde) : comptes, fondateurs, empires, parrainages, Conseil. Événements serveur, comptés sur la période.
+    const world = await sql<{ name: string; n: number }[]>`
+      SELECT name, count(*)::int AS n FROM analytics_events
+      WHERE created_at > now() - make_interval(days => ${days})
+        AND name IN ('register', 'founder_join', 'account_linked', 'empire_create', 'empire_join', 'referral_click', 'referral_register', 'vote', 'share_empire', 'cta_click', 'map_view', 'war_view', 'event_view', 'ranking_view', 'empire_view')
+      GROUP BY name`;
+    return { days, steps: f, world: Object.fromEntries(world.map((r) => [r.name, r.n])) };
   });
 
   app.get("/marketing", async (req) => {

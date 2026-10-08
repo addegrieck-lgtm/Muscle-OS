@@ -38,7 +38,12 @@ Format commun : `{ id: UUID, event, server, occurredAt: ISO-8601, ... }`. Schém
 | `FACTION_CREATE` / `DISBAND` / `JOIN` / `LEAVE` | plugin Factions via `emit()` | factions et membres |
 | `FACTION_CLAIM` / `UNCLAIM` | plugin Factions | claims, classement Territoire |
 | `FACTION_SNAPSHOT` (`power`, `maxPower`, `wealth`, `claims`) | plugin Factions, périodique | Power, richesse |
+| `KOTH_START` (`koth`, `durationSeconds?`) | plugin KOTH | événement KOTH « en direct » sur /evenements et la carte |
 | `KOTH_CAPTURE` | plugin KOTH | classement KOTH |
+| `WAR_START` (`warId`, `title?`, `attacker`, `defender` = noms de faction) | plugin Factions / guerres | guerre active sur /guerres, si les deux factions sont liées à un empire (admin → Monde → Empires → « faction en jeu ») |
+| `WAR_END` (`warId`, `winner` \| null, `scores`, `territories?`, `participants?`) | plugin Factions / guerres | guerre terminée, vainqueur, influence « victoire » aux membres liés |
+| `EVENT_START` (`eventId`, `title`, `type`, `zone?`) | plugin d'événements | événement en direct (créé ou mis à jour par `eventId`) |
+| `EVENT_END` (`eventId`, `participants[]` ≤ 1000 UUID) | plugin d'événements | participants et empires comptés, influence « participation » aux joueurs liés |
 | `ECONOMY_TRANSACTION` | plugin économie | solde joueur |
 | `PLAYER_RANK_CHANGE` | plugin de grades | rang affiché |
 
@@ -55,6 +60,21 @@ e.addProperty("username", player.getName());
 VaeloriaBridgePlugin.emit(e);                 // thread-safe, non bloquant
 ```
 
+### Événements du monde (V2)
+
+VæloriaBridge relaie tel quel tout événement passé à `emit()` : aucune modification du plugin n'est nécessaire pour les guerres, KOTH et événements. Il suffit que les plugins du réseau les émettent :
+
+```java
+JsonObject e = Events.base("WAR_START", VaeloriaBridgePlugin.serverName());
+e.addProperty("warId", war.getId());          // identifiant stable : rend l'événement idempotent
+e.addProperty("title", "Guerre du Nord");
+e.addProperty("attacker", "Nightmare");        // nom de la faction en jeu
+e.addProperty("defender", "Titans");
+VaeloriaBridgePlugin.emit(e);
+```
+
+Le site fonctionne entièrement **avant** la synchronisation Minecraft : empires, fondateurs, Conseil et parrainage ne dépendent que des comptes du site. Les guerres et événements peuvent aussi être saisis à la main dans l'admin (Monde → Guerres). `PLAYER_QUIT` crédite l'influence « temps de jeu » (1 / heure, plafonnée) au compte lié.
+
 ## File d'événements et pannes
 
 - Événements mis en file en mémoire, envoyés par lots (≤ 200) toutes les 5 s, hors thread principal.
@@ -62,6 +82,12 @@ VaeloriaBridgePlugin.emit(e);                 // thread-safe, non bloquant
 - Arrêt du serveur → QUIT de chaque joueur + écriture de la file sur disque.
 - Lot rejeté pour schéma invalide (400) → journalisé puis abandonné (le renvoyer bouclerait).
 - Réponse perdue après traitement → renvoi dédupliqué par l'`id` côté API.
+
+## Boutique : ordres typés et /link
+
+Chaque ordre reçu porte une `action` : `GRANT_RANK`, `GIVE_KIT`, `GIVE_ITEM`, `GIVE_SPAWNER`, `COMMAND`, `ADD_POINTS`, `SYNC_PLAYER` (ces deux derniers sans commande : le plugin prévient le joueur). Détail dans `SHOP_DELIVERY.md`.
+
+`/link` (permission `vaeloria.link`, accordée à tous) : le plugin obtient un code à usage unique (`POST /bridge/v1/link-codes`) et l'affiche au joueur, qui le saisit sur `vaeloria.fr/compte`.
 
 ## Commandes (API → Minecraft)
 
@@ -79,9 +105,6 @@ Une commande ne peut donc ni être perdue, ni être livrée deux fois via deux p
 
 Avant l'installation du plugin, l'API interroge le serveur avec le Server List Ping (`MC_PING_HOST`) pour afficher joueurs et version.
 
-## Liaison de compte (Phase 7)
-
-Table `link_codes` prête : `/link` en jeu → code à 6 caractères valable 10 min → saisi sur le site connecté via Discord → `minecraft_accounts`. Commande `/link` et endpoint à implémenter.
 
 ## Non testé à ce stade
 

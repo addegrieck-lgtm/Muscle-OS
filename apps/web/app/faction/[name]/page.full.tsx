@@ -31,7 +31,7 @@ export default async function FactionPage({ params }: { params: Promise<{ name: 
   if (!f) notFound();
   return (
     <>
-      <PageHeader title={f.name} eyebrow="Faction" description={f.description ?? undefined} crumbs={[{ name: "Classements", path: "/leaderboards" }, { name: f.name, path: `/faction/${f.name}` }]}>
+      <PageHeader title={f.name} eyebrow="Faction" description={f.description ?? undefined} crumbs={[{ name: "Classements", path: "/classements" }, { name: f.name, path: `/faction/${f.name}` }]}>
         <div className="flex flex-wrap gap-2">
           {f.rank && <Badge tone="accent">#{f.rank} de la saison</Badge>}
           <Badge>Fondée le {formatDate(f.createdAt)}</Badge>
@@ -55,7 +55,7 @@ export default async function FactionPage({ params }: { params: Promise<{ name: 
                 {f.members.map((m) => (
                   <tr key={m.uuid}>
                     <td>
-                      <Link href={`/player/${m.username}`} className="flex items-center gap-3 font-semibold hover:text-accent">
+                      <Link href={`/joueur/${m.username}`} className="flex items-center gap-3 font-semibold hover:text-accent">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={skinHead(m.uuid, 32)} alt="" width={24} height={24} loading="lazy" className="size-6 rounded [image-rendering:pixelated]" />
                         {m.username}

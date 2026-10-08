@@ -20,6 +20,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Base éphémère + API démarrées le temps du build : l'aperçu affiche le contenu de base
+    # (FAQ, saison, article) et le catalogue D'EXEMPLE de la boutique. Aucune donnée réelle.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vaeloria
+          POSTGRES_PASSWORD: vaeloria
+          POSTGRES_DB: vaeloria
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U vaeloria" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://vaeloria:vaeloria@localhost:5432/vaeloria
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -28,11 +42,18 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Contenu de base et catalogue d'exemple
+        run: pnpm --filter @vaeloria/api db:seed
+      - name: API temporaire pour le rendu statique
+        run: |
+          pnpm --filter @vaeloria/api build
+          (cd apps/api && node dist/index.js > /tmp/api.log 2>&1 &)
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4000/health && break; sleep 1; done
       - run: pnpm --filter @vaeloria/web build:preview
         env:
           PREVIEW_BASE_PATH: /Muscle-OS
           NEXT_PUBLIC_SITE_URL: https://addegrieck-lgtm.github.io/Muscle-OS
-          API_URL: http://127.0.0.1:9
+          API_URL: http://127.0.0.1:4000
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/out

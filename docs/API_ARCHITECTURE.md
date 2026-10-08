@@ -45,6 +45,18 @@ Fastify 5, TypeScript, un seul processus (Phase 1). Point d'entrée : `apps/api/
 
 `GET /dashboard`, `GET /players?q=`, `GET /players/:uuid`, CRUD `news` `events` `products` `faq` `incidents`, `GET|POST /commands`, `POST /commands/:id/retry`, `GET|PUT /settings/maintenance`, `GET /costs`, `GET /funnel?days=`, `GET /marketing?days=`, `GET /audit`. Chaque écriture est journalisée dans `audit_logs`.
 
+### Boutique et compte (voir `SHOP_*.md`)
+
+| Préfixe | Routes |
+|---|---|
+| `/api/v1/shop` | `GET /catalog`, `GET /products/:slug`, `POST /quote`, `POST /checkout` (session), `GET /orders/:publicId` (session, acheteur seulement) |
+| `/api/v1/me` (session) | `GET /`, `POST /logout`, `POST /link`, `GET /points/:uuid`, `GET /orders` |
+| `/internal/v1` (jeton `WEB_INTERNAL_TOKEN`) | `POST /auth/discord`, `POST /auth/dev-login` (dev) |
+| `/webhooks` | `POST /payments/:provider` (signature du prestataire) |
+| `/sandbox` (test, jamais en production) | page de paiement du prestataire de test |
+| `/bridge/v1` | `POST /link-codes` (en plus des routes existantes) |
+| `/admin/v1/shop` | tableau de bord, catégories, produits, promotions, grades (+ recalcul, revues), commandes (+ relance, remboursement), livraisons (+ relance), ajustement de points, réglages |
+
 ## Format des erreurs
 
 ```json

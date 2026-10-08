@@ -150,6 +150,7 @@ public final class VaeloriaBridgePlugin extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("link")) return linkCommand(sender);
         try {
             sender.sendMessage("§6VæloriaBridge §7— serveur §f" + serverName
                     + "§7, en mémoire §f" + spool.pendingInMemory()
@@ -158,6 +159,34 @@ public final class VaeloriaBridgePlugin extends JavaPlugin implements Listener {
         } catch (IOException ex) {
             sender.sendMessage("§cErreur : " + ex.getMessage());
         }
+        return true;
+    }
+
+    /** /link : code à usage unique (10 min) pour lier ce compte Minecraft au compte VÆLORIA du site. */
+    private boolean linkCommand(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Commande réservée aux joueurs.");
+            return true;
+        }
+        JsonObject body = new JsonObject();
+        body.addProperty("uuid", player.getUniqueId().toString());
+        body.addProperty("username", player.getName());
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            String msg;
+            try {
+                ApiClient.Response res = api.post("/bridge/v1/link-codes", body.toString());
+                if (res.ok()) {
+                    String code = com.google.gson.JsonParser.parseString(res.body()).getAsJsonObject().get("code").getAsString();
+                    msg = "§6[VÆLORIA] §7Ton code : §f§l" + code + " §7— saisis-le sur §fvaeloria.fr/compte §7(valable 10 minutes).";
+                } else {
+                    msg = "§c[VÆLORIA] Impossible de générer un code pour le moment.";
+                }
+            } catch (Exception e) {
+                msg = "§c[VÆLORIA] Le site est momentanément injoignable, réessaie dans un instant.";
+            }
+            String finalMsg = msg;
+            Bukkit.getScheduler().runTask(this, () -> player.sendMessage(finalMsg));
+        });
         return true;
     }
 }
