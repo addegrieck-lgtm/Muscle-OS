@@ -2,7 +2,8 @@
 
 Usage : python3 minecraft/warzone/generate.py   (Pillow + numpy ; réutilise minecraft/spawn)
 Sorties dans minecraft/warzone/ :
-  vaeloria-warzone.schem              la warzone : 25 × 25 chunks (400 × 400), dragon, bâtiments, 3 avant-postes, pièges
+  vaeloria-warzone.schem              la warzone : 25 × 25 chunks (400 × 400), dragon, bâtiments, 3 avant-postes, pièges,
+                                      entourée d'une bande plate de 2 chunks découpée en 52 zones d'AP de 2 × 2 chunks
   vaeloria-avant-poste-exterieur.schem  délimitation d'un avant-poste extérieur de 3 × 3 chunks, à coller 4 fois
   apercu-*.png
 
@@ -27,6 +28,8 @@ _spec.loader.exec_module(_spawn)
 LOGO_BLOCKS, Palette, write_schem, logo_grid = _spawn.LOGO_BLOCKS, _spawn.Palette, _spawn.write_schem, _spawn.logo_grid
 
 HALF = 200  # bord : chunks -12..12 autour du chunk central → x, z de -200 à 199
+AP_DEPTH = 32  # bande de zones d'AP plates derrière le muret : 2 chunks de profondeur
+EXT = HALF + AP_DEPTH  # emprise totale du schematic : -232 à 231
 YMIN, YMAX = -8, 108
 LIFT = 44  # le dragon vole : son point le plus bas reste à plus de 44 blocs du sol, hors de portée d'une perle (~37)
 PB = "minecraft:polished_blackstone_bricks"
@@ -39,6 +42,8 @@ OUTPOSTS = {
     "onyx": {"center": (-96, 64), "glass": "minecraft:black_stained_glass", "line": "minecraft:polished_blackstone"},
 }
 GATES = {"nord": (0, -1), "est": (1, 0), "sud": (0, 1), "ouest": (-1, 0)}
+CAVE = (115, -112)  # grotte du KOTH (nord-est), zone de capture au centre
+CITADEL = (-115, 135)  # citadelle du Totem (sud-ouest), totem au centre
 OUTER_D = 400  # centre des avant-postes extérieurs : 176 blocs au-delà du bord de la warzone
 ARRIVAL = (0, 34, -4)  # pieds du joueur sur la plateforme, dans le repère du dragon (avant élévation)
 
@@ -586,9 +591,212 @@ def more_buildings(w, rng):
     return placed
 
 
+def chunk_of(v):
+    """Indice du chunk qui contient v (le chunk 0 va de -8 à 7)."""
+    return (v + 8) // 16
+
+
+def ap_zone(cx, cz):
+    """Zone d'AP (2 × 2 chunks) d'un chunk de la bande, ou None pour le couloir dans l'axe des portes."""
+    def pair(k):
+        if k == 0:
+            return None
+        if abs(k) >= 13:
+            return (13, 14) if k > 0 else (-14, -13)
+        lo = ((k - 1) // 2) * 2 + 1 if k > 0 else -(((-k - 1) // 2) * 2 + 2)
+        return (lo, lo + 1)
+    px, pz = pair(cx), pair(cz)
+    if px is None or pz is None:
+        return None
+    return px, pz
+
+
+def ap_band(w):
+    """Bande plate de 2 chunks à l'extérieur du muret, sur les 4 côtés, découpée en zones d'AP de 2 × 2 chunks."""
+    zones = set()
+    for x in range(-EXT, EXT):
+        for z in range(-EXT, EXT):
+            if -HALF <= x < HALF and -HALF <= z < HALF:
+                continue
+            for y in range(YMIN, -1):
+                w.put(x, y, z, "minecraft:deepslate" if y < -4 else "minecraft:tuff")
+            zone = ap_zone(chunk_of(x), chunk_of(z))
+            if zone is None:  # couloir de la porte : la route continue jusqu'au bord
+                axis = x if abs(z) >= HALF else z
+                w.put(x, -1, z, "minecraft:polished_blackstone" if abs(axis) <= 1 else PB if abs(axis) == 2 else "minecraft:polished_deepslate")
+                continue
+            (x0c, x1c), (z0c, z1c) = zone
+            zx0, zx1, zz0, zz1 = 16 * x0c - 8, 16 * x1c + 7, 16 * z0c - 8, 16 * z1c + 7
+            zones.add((zx0, zz0, zx1, zz1))
+            edge = x in (zx0, zx1) or z in (zz0, zz1)
+            w.put(x, -1, z, PB if edge else "minecraft:pale_moss_block")
+    for zx0, zz0, zx1, zz1 in zones:  # un pilier à chaque coin de zone, un repère rubis au centre
+        for x, z in ((zx0, zz0), (zx1, zz0), (zx0, zz1), (zx1, zz1)):
+            if -HALF <= x < HALF and -HALF <= z < HALF:
+                continue
+            for y in range(0, 3):
+                w.put(x, y, z, DT if y < 2 else "minecraft:chiseled_polished_blackstone")
+            w.put(x, 3, z, "minecraft:lantern[hanging=false]")
+        w.put((zx0 + zx1) // 2, -1, (zz0 + zz1) // 2, "minecraft:red_nether_bricks")
+    return sorted(zones)
+
+
+def clear_site(w, x0, z0, x1, z1, top=40):
+    """Rase un emplacement : sol neuf, tout ce qui était là (ruines, cratères) disparaît."""
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            for y in range(YMIN, -1):
+                w.put(x, y, z, "minecraft:deepslate" if y < -4 else "minecraft:tuff")
+            w.put(x, -1, z, "minecraft:tuff")
+            for y in range(0, top):
+                w.put(x, y, z, "minecraft:air")
+
+
+def cave_koth(w, rng):
+    """Colline de roche noire creusée d'une grotte. La zone de capture du KOTH est au centre, sous un puits
+    ouvert : le faisceau rubis de la balise sort par le sommet. Quatre tunnels, un puits, des stalactites."""
+    cx, cz = CAVE
+    R0, PEAK = 30, 26
+    clear_site(w, cx - R0, cz - R0, cx + R0, cz + R0)
+    rock = ["minecraft:tuff"] * 4 + ["minecraft:deepslate"] * 3 + ["minecraft:cobbled_deepslate"] * 2 + ["minecraft:blackstone"]
+    for x in range(cx - R0, cx + R0 + 1):
+        for z in range(cz - R0, cz + R0 + 1):
+            r = math.hypot(x - cx, z - cz)
+            if r > R0:
+                continue
+            h = int(PEAK * (1 - r / R0) ** 1.1 + 2 * noise(x * 2, z * 2, 7.7))
+            for y in range(0, max(h, 0) + 1):
+                n = noise(x * 1.9 + y, z * 1.9 - y, 3.1)
+                name = "minecraft:deepslate_redstone_ore" if n > 0.82 else "minecraft:calcite" if n < -0.85 else rock[int(rng.integers(len(rock)))]
+                w.put(x, y, z, name)
+            if h >= 1 and rng.random() < 0.5:
+                w.put(x, h, z, "minecraft:pale_moss_block")
+    # Salle : un dôme de 17 de rayon et 12 de haut.
+    for x in range(cx - 17, cx + 18):
+        for z in range(cz - 17, cz + 18):
+            for y in range(0, 13):
+                if ((x - cx) / 17) ** 2 + ((z - cz) / 17) ** 2 + ((y - 1) / 11.5) ** 2 < 1:
+                    w.put(x, y, z, "minecraft:air")
+            if math.hypot(x - cx, z - cz) < 17:
+                w.put(x, -1, z, "minecraft:polished_deepslate" if (x + z) % 2 else "minecraft:tuff")
+    # Quatre tunnels de 4 × 4, un par côté : aucun accès n'est privilégié.
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        for t in range(10, R0 + 2):
+            for a in range(-2, 2):
+                for y in range(0, 4):
+                    x, z = cx + dx * t + (a if dz else 0), cz + dz * t + (a if dx else 0)
+                    w.put(x, y, z, "minecraft:air")
+                    w.put(x, -1, z, "minecraft:polished_deepslate")
+        for y in range(0, 5):  # encadrement des entrées
+            for a in (-3, 2):
+                x, z = cx + dx * (R0 - 3) + (a if dz else 0), cz + dz * (R0 - 3) + (a if dx else 0)
+                w.put(x, y, z, PB)
+        for a in range(-3, 3):
+            x, z = cx + dx * (R0 - 3) + (a if dz else 0), cz + dz * (R0 - 3) + (a if dx else 0)
+            w.put(x, 4, z, PB)
+    # Puits 3 × 3 au-dessus du centre, jusqu'au sommet : on peut aussi tomber dans la grotte par là.
+    for x in range(cx - 1, cx + 2):
+        for z in range(cz - 1, cz + 2):
+            for y in range(10, PEAK + 4):
+                w.put(x, y, z, "minecraft:air")
+    # Stalactites et stalagmites, cristaux rubis éclairés.
+    for k in range(70):
+        a, rr = rng.random() * 2 * math.pi, 4 + rng.random() * 12
+        x, z = round(cx + rr * math.cos(a)), round(cz + rr * math.sin(a))
+        if max(abs(x - cx), abs(z - cz)) <= 5:
+            continue
+        ceil = next((y for y in range(12, 0, -1) if w.get(x, y, z) == "minecraft:air" and w.get(x, y + 1, z) != "minecraft:air"), None)
+        if ceil and rng.random() < 0.6:
+            w.put(x, ceil, z, "minecraft:pointed_dripstone[thickness=tip,vertical_direction=down]")
+        elif rng.random() < 0.5:
+            w.put(x, 0, z, "minecraft:pointed_dripstone[thickness=tip,vertical_direction=up]")
+        else:
+            w.put(x, 0, z, "minecraft:red_stained_glass")
+            w.put(x, 1, z, "minecraft:red_stained_glass")
+            w.put(x, -1, z, "minecraft:shroomlight")
+    # Socle et zone de capture 5 × 5 : liseré rubis, balise sous verre rouge, dans l'axe du puits.
+    for x in range(cx - 4, cx + 5):
+        for z in range(cz - 4, cz + 5):
+            w.put(x, 0, z, PB)
+    for x in range(cx - 3, cx + 4):
+        for z in range(cz - 3, cz + 4):
+            w.put(x, 1, z, "minecraft:red_nether_bricks" if max(abs(x - cx), abs(z - cz)) == 3 else "minecraft:polished_blackstone")
+    for x in (cx - 1, cx, cx + 1):
+        for z in (cz - 1, cz, cz + 1):
+            w.put(x, -1, z, "minecraft:iron_block")
+    w.put(cx, 0, cz, "minecraft:beacon")
+    w.put(cx, 1, cz, "minecraft:red_stained_glass")
+    for x, z in ((cx - 2, cz - 2), (cx + 2, cz - 2), (cx - 2, cz + 2), (cx + 2, cz + 2)):
+        w.put(x, 1, z, "minecraft:redstone_block")
+    for x, z in ((cx - 6, cz - 6), (cx + 6, cz - 6), (cx - 6, cz + 6), (cx + 6, cz + 6)):  # lanternes pendues à la voûte
+        top = next((y for y in range(12, 0, -1) if w.get(x, y + 1, z) != "minecraft:air"), 8)
+        for y in range(top - 2, top + 1):
+            w.put(x, y, z, "minecraft:chain")
+        w.put(x, top - 3, z, "minecraft:lantern[hanging=true]")
+
+
+def citadel_totem(w, rng):
+    """Citadelle du Totem : enceinte carrée à 4 portes, tours d'angle, cour, muret intérieur ouvert aux diagonales,
+    autel à trois gradins au centre. Le totem apparaît au sommet de l'autel."""
+    cx, cz = CITADEL
+    H = 26
+    clear_site(w, cx - H, cz - H, cx + H, cz + H, top=20)
+    for x in range(cx - H, cx + H + 1):
+        for z in range(cz - H, cz + H + 1):
+            w.put(x, -1, z, "minecraft:polished_deepslate" if (x + z) % 2 else DT)
+    # Enceinte de 2 d'épaisseur, 7 de haut, créneaux ; portes de 5 au milieu de chaque côté.
+    for a in range(-H + 2, H - 1):
+        for t in (H - 3, H - 2):
+            for k in range(4):
+                x, z = a, t
+                for _ in range(k):
+                    x, z = -z, x
+                gate = abs(a) <= 2
+                for y in range(0, 7):
+                    if gate and y < 5:
+                        continue
+                    w.put(cx + x, y, cz + z, PB if y in (0, 6) else DT)
+                if t == H - 2 and a % 2 == 0 and not gate:
+                    w.put(cx + x, 7, cz + z, PB)
+    for sx in (-1, 1):  # tours d'angle 7 × 7, 11 de haut, échelle intérieure
+        for sz in (-1, 1):
+            tx, tz = cx + sx * (H - 4), cz + sz * (H - 4)
+            for dx in range(-3, 4):
+                for dz in range(-3, 4):
+                    for y in range(0, 11):
+                        if max(abs(dx), abs(dz)) == 3 or y == 10:
+                            w.put(tx + dx, y, tz + dz, PB if y % 5 == 0 else DT)
+                    if max(abs(dx), abs(dz)) == 3 and (dx + dz) % 2 == 0:
+                        w.put(tx + dx, 11, tz + dz, PB)
+            for y in range(0, 11):
+                w.put(tx - sx * 2, y, tz + 1, "minecraft:ladder[facing=east]" if sx > 0 else "minecraft:ladder[facing=west]")
+            w.put(tx - sx * 3, 0, tz - 1, "minecraft:air")  # entrée de la tour depuis la cour, à côté de l'échelle
+            w.put(tx - sx * 3, 1, tz - 1, "minecraft:air")
+            w.put(tx, 12, tz, "minecraft:lantern[hanging=false]")
+    # Muret intérieur (rayon 13), ouvert seulement aux diagonales : on ne fonce pas de la porte à l'autel.
+    for a in np.linspace(0, 2 * math.pi, 900, endpoint=False):
+        x, z = round(13 * math.cos(a)), round(13 * math.sin(a))
+        if abs(abs(x) - abs(z)) <= 3:
+            continue
+        w.put(cx + x, 0, cz + z, PB)
+        w.put(cx + x, 1, cz + z, "minecraft:polished_blackstone_brick_slab[type=bottom]")
+    # Autel à trois gradins (rayons 8, 6, 4), losange rubis au sommet : le totem se dresse au centre, en y = 3.
+    for y, r in enumerate((8, 6, 4)):
+        for x in range(-r, r + 1):
+            for z in range(-r, r + 1):
+                d = math.hypot(x, z)
+                if d <= r:
+                    w.put(cx + x, y, cz + z, "minecraft:red_nether_bricks" if d > r - 1 else "minecraft:polished_blackstone")
+    for x, z in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+        w.put(cx + x, 2, cz + z, "minecraft:redstone_block")
+    for x, z in ((6, 6), (-6, 6), (6, -6), (-6, -6)):
+        w.put(cx + x, 0, cz + z, "minecraft:polished_blackstone_wall[up=true]")
+        w.put(cx + x, 1, cz + z, "minecraft:lantern[hanging=false]")
+
+
 def build_warzone():
     rng = np.random.default_rng(21)
-    w = Vol()
+    w = Vol(half=EXT)
     ground(w, rng)
     # Routes : dragon → chaque avant-poste, dragon → chaque porte.
     for key, o in OUTPOSTS.items():
@@ -596,6 +804,7 @@ def build_warzone():
     for name, (dx, dz) in GATES.items():
         road(w, (dx * 30, dz * 30), (dx * (HALF - 1), dz * (HALF - 1)))
     border(w, rng)
+    w.ap_zones = ap_band(w)
     # Tours de guet aux quatre diagonales : point haut entre deux portes.
     for x, z in ((-150, -150), (150, -150), (150, 150), (-150, 150)):
         tower(w, x, z)
@@ -613,6 +822,8 @@ def build_warzone():
     for key in OUTPOSTS:
         outpost(w, key, rng)
     traps(w, rng)
+    cave_koth(w, rng)
+    citadel_totem(w, rng)
     w.placed = more_buildings(w, rng)
     dragon(Lifted(w, LIFT), rng)
     # Cercle d'atterrissage sous le dragon en vol : on saute du dos, on atterrit ici (dégâts de chute coupés par la région).
@@ -676,8 +887,8 @@ def render(w, path_top, path_side, scale):
 
 def main():
     w = build_warzone()
-    bes = [(x + HALF, y - YMIN, z + HALF, i, items) for x, y, z, i, items in w.block_entities]
-    write_schem(HERE / "vaeloria-warzone.schem", w.v, w.pal.names, (HALF, -YMIN, HALF), bes)
+    bes = [(x + EXT, y - YMIN, z + EXT, i, items) for x, y, z, i, items in w.block_entities]
+    write_schem(HERE / "vaeloria-warzone.schem", w.v, w.pal.names, (EXT, -YMIN, EXT), bes)
     o = build_outer()
     write_schem(HERE / "vaeloria-avant-poste-exterieur.schem", o.v, o.pal.names, (24, 1, 24))
     render(w, HERE / "apercu-warzone-dessus.png", HERE / "apercu-warzone-sud.png", 2)
@@ -685,7 +896,7 @@ def main():
     d = Vol(half=66, ymin=-1, ymax=70)
     dragon(d, np.random.default_rng(21))
     render(d, HERE / "apercu-dragon-dessus.png", HERE / "apercu-dragon-sud.png", 6)
-    print("bâtiments ajoutés :", w.placed)
+    print("bâtiments ajoutés :", w.placed, "· zones d'AP :", len(w.ap_zones))
     print("warzone :", int((w.v > 0).sum()), "blocs ·", w.v.shape[::-1], "· avant-poste extérieur :", o.v.shape[::-1])
 
 
