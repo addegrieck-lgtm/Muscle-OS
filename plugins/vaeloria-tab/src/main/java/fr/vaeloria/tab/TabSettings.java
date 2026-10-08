@@ -11,6 +11,7 @@ import java.util.Map;
 /** Configuration lue depuis config.yml, immuable : un rechargement crée une nouvelle instance. */
 record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
                    Map<String, String> palette, Shine logo, String header, String footer,
+                   int compactAbove, String compactHeader, String compactFooter,
                    Thresholds ping, Thresholds tps, List<Rank> ranks) {
 
     static TabSettings load(FileConfiguration c) {
@@ -48,7 +49,7 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
                 ConfigurationSection r = rs.getConfigurationSection(key);
                 if (r == null) continue;
                 ranks.add(new Rank(key, r.getString("permission", ""), r.getInt("order", 0),
-                        r.getString("display", key), r.getString("format", "<player>"),
+                        r.getString("display", key), r.getString("format", "<player>"), r.getString("compact"),
                         r.getString("chat"), r.getString("join"), r.getString("quit")));
             }
         }
@@ -60,6 +61,14 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks,
                 palette, logo,
                 String.join("\n", c.getStringList("header")),
                 String.join("\n", c.getStringList("footer")),
+                c.getInt("compact.above", 40),
+                lines(c, "compact.header", "header"),
+                lines(c, "compact.footer", "footer"),
                 ping, tps, List.copyOf(ranks));
+    }
+
+    /** Lignes de {@code key}, ou celles de {@code fallback} si la section est absente. */
+    private static String lines(FileConfiguration c, String key, String fallback) {
+        return String.join("\n", c.getStringList(c.isList(key) ? key : fallback));
     }
 }

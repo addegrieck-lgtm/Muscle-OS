@@ -9,6 +9,7 @@ TAB, chat, annonces de connexion et écran Multijoueur aux couleurs du logo VÆL
 - **En-tête** : wordmark `V Æ L O R I A` argent balayé par un reflet blanc animé, l'**Æ en rubis** comme sur le logo, filets rubis et devise « LE RETOUR DE LA **VRAIE GUERRE**. »
 - **Pied de page** : joueurs visibles / max, ping et TPS colorés selon des seuils, serveur, grade du joueur, `vaeloria.fr` et `/link`.
 - **Noms** : préfixe de grade (Fondateur, Admin, Modo, VÆLORIAN…) et **tri** de la liste par grade.
+- **Mode compact** au-delà de `compact.above` joueurs (40 par défaut, faux joueurs compris) : grades réduits à une lettre ou un losange (`F Pseudo`, `◆ Pseudo`), en-tête et pied de page raccourcis. Minecraft affiche 20 joueurs par colonne, toutes de la largeur du nom le plus long : sans ce mode, le TAB devient très large au-delà de 60 joueurs. Retour au format complet 5 joueurs sous le seuil.
 - Charte du logo (`brand/build.py`) disponible comme balises MiniMessage : `<ruby>`, `<ruby_hi>`, `<ruby_lo>`, `<snow>`, `<silver>`, `<steel>`, `<ash>`, `<graphite>`.
 
 ## Chat et connexions

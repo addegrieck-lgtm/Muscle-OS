@@ -44,6 +44,8 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
     private volatile TagResolver paletteTags;
     private volatile CachedServerIcon icon;
     private volatile int frame;
+    /** Mode compact du TAB (beaucoup de joueurs) : grades courts, en-tête et pied de page réduits. */
+    private boolean compact;
     private BukkitTask task;
     private long ticks;
 
@@ -156,10 +158,19 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
         boolean names = ticks % s.namesRefreshTicks() < s.refreshTicks();
         ticks += s.refreshTicks();
 
+        int entries = Bukkit.getOnlinePlayers().size() + FakePlayersHook.count();
+        boolean nowCompact = Density.compact(compact, entries, s.compactAbove());
+        if (nowCompact != compact) {
+            compact = nowCompact;
+            names = true; // tous les noms changent de format d'un coup
+        }
+        String header = compact ? s.compactHeader() : s.header();
+        String footer = compact ? s.compactFooter() : s.footer();
+
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (names) updateName(p);
             TagResolver tags = playerTags(s, p, logo, tps);
-            p.sendPlayerListHeaderAndFooter(mm.deserialize(s.header(), tags), mm.deserialize(s.footer(), tags));
+            p.sendPlayerListHeaderAndFooter(mm.deserialize(header, tags), mm.deserialize(footer, tags));
         }
     }
 
@@ -221,7 +232,8 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
             return null;
         }
         ranks.put(p.getUniqueId(), rank);
-        p.playerListName(tabName(p, rank));
+        String format = compact ? Rank.or(rank.compact(), rank.format()) : rank.format();
+        p.playerListName(mm.deserialize(format, TagResolver.resolver(paletteTags, Placeholder.unparsed("player", p.getName()))));
         p.setPlayerListOrder(rank.order());
         return rank;
     }

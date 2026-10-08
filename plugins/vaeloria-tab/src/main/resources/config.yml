@@ -53,6 +53,23 @@ footer:
   - "<ruby_hi>vaeloria.fr</ruby_hi> <graphite>│</graphite> <silver>/link</silver> <ash>pour lier ton compte"
   - "<ruby_lo>▬▬▬▬▬▬▬▬▬▬<ruby>▬▬▬▬▬▬▬▬▬▬▬▬▬▬<ruby_lo>▬▬▬▬▬▬▬▬▬▬"
 
+# Mode compact : au-delà de « above » joueurs (faux joueurs compris), le TAB passe aux grades courts
+# (« compact » de chaque grade) et à l'en-tête / pied de page ci-dessous. Minecraft affiche 20 joueurs par
+# colonne et la largeur de chaque colonne est celle du nom le plus long : sans ce mode, un seul
+# « FONDATEUR │ Pseudo » élargit les 4 colonnes au-delà de 60 joueurs. Retour au mode normal 5 joueurs
+# sous le seuil. 0 = jamais compact.
+compact:
+  above: 40
+  header:
+    - ""
+    - "<logo>"
+    - "<ash>LE RETOUR DE LA <ruby_hi><bold>VRAIE GUERRE</bold></ruby_hi>."
+    - ""
+  footer:
+    - ""
+    - "<ash>Joueurs <snow><online></snow><steel>/<max></steel>  <ruby>◆</ruby>  Ping <ping_color><ping>ms</ping_color>  <ruby>◆</ruby>  <ruby_hi>vaeloria.fr"
+    - ""
+
 # Couleurs du ping (ms) et du TPS selon les seuils.
 ping:
   good-below: 80
@@ -73,6 +90,7 @@ tps:
 # « order » trie aussi la liste : plus il est élevé, plus le joueur apparaît haut.
 # « default » (sans permission) s'applique à tous les autres joueurs.
 #   display : nom du grade (<rank>)          format : nom dans le TAB (<tab_name>)
+#   compact : nom dans le TAB en mode compact (beaucoup de joueurs ; facultatif, sinon format)
 #   chat / join / quit (facultatifs) : remplacent les formats communs des sections chat et join-quit.
 ranks:
   fondateur:
@@ -80,6 +98,7 @@ ranks:
     order: 100
     display: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi>"
     format: "<ruby_hi><bold>FONDATEUR</bold></ruby_hi> <graphite>│</graphite> <snow><player>"
+    compact: "<ruby_hi><bold>F</bold></ruby_hi> <snow><player>"
     chat: "<name> <ruby_hi>»</ruby_hi> <snow><message>"
     join: "<ruby_hi>⚔</ruby_hi> <ruby_hi><bold>Le Fondateur</bold></ruby_hi> <snow><player></snow> <ash>entre dans la bataille."
   admin:
@@ -87,18 +106,21 @@ ranks:
     order: 90
     display: "<ruby_hi>ADMIN</ruby_hi>"
     format: "<ruby_hi>ADMIN</ruby_hi> <graphite>│</graphite> <snow><player>"
+    compact: "<ruby_hi>A</ruby_hi> <snow><player>"
     chat: "<name> <ruby>»</ruby> <snow><message>"
   moderateur:
     permission: "vaeloria.rank.moderateur"
     order: 80
     display: "<ruby>MODÉRATEUR</ruby>"
     format: "<ruby>MODO</ruby> <graphite>│</graphite> <silver><player>"
+    compact: "<ruby>M</ruby> <silver><player>"
     chat: "<name> <ruby>»</ruby> <snow><message>"
   vaelorian:
     permission: "vaeloria.rank.vaelorian"
     order: 50
     display: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient>"
     format: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <ruby_hi>◆</ruby_hi> <silver><player>"
+    compact: "<ruby_hi>◆</ruby_hi> <silver><player>"
     join: "<ruby_hi>◆</ruby_hi> <tab_name> <ash>rejoint le front."
   default:
     permission: ""

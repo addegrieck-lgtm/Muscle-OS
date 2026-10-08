@@ -6,13 +6,14 @@ import java.util.function.Predicate;
 
 /**
  * Grade affiché dans la liste, le chat et les annonces. {@code permission} vide = grade par défaut, accordé à tous.
- * {@code chat}, {@code join} et {@code quit} sont facultatifs ({@code null} = format commun de config.yml).
+ * {@code compact}, {@code chat}, {@code join} et {@code quit} sont facultatifs ({@code null} = format
+ * commun de config.yml ; pour {@code compact}, le format normal).
  */
-public record Rank(String key, String permission, int order, String display, String format,
+public record Rank(String key, String permission, int order, String display, String format, String compact,
                    String chat, String join, String quit) {
 
     public Rank(String key, String permission, int order, String display, String format) {
-        this(key, permission, order, display, format, null, null, null);
+        this(key, permission, order, display, format, null, null, null, null);
     }
 
     public boolean isDefault() {
