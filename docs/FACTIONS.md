@@ -23,6 +23,16 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
 - **Brèche** : un chunk soufflé par un ennemi identifié laisse les ennemis ouvrir **coffres et portes** pendant 15 minutes. La construction reste interdite.
 - L'attaquant est identifié par le joueur qui a allumé la TNT, ou sinon par la faction du chunk d'où elle part (canons). Les creepers errants ne déclenchent pas d'alerte.
 
+### Bilan de pillage
+À la fin d'un raid (verrou expiré), les défenseurs reçoivent un rapport :
+- attaquants et durée ;
+- blocs détruits, au total et par faction ;
+- coffres ouverts par l'ennemi pendant la brèche, et **objets volés** objet par objet ;
+- chunks perdus par surclaim ;
+- membres tués et ennemis abattus.
+
+Le rapport est aussi écrit dans `/f logs` (ligne « BILAN », plus une ligne « VOL » à chaque coffre pillé) et envoyé sur le Discord de la faction. Chaque faction attaquante reçoit son propre résumé : blocs détruits et butin rapporté. Un surclaim subi ouvre lui aussi une période de raid, et donc un bilan.
+
 ### Garde-fous
 - **Période de grâce** (`/f admin grace 72`) : ni explosions ni surclaim, pour l'ouverture d'une saison.
 - **Bouclier quotidien** (`/f bouclier 3` → 03h-09h, heure de Paris) : une plage de 6 h sans explosions ni surclaim. Il se change au plus tous les 3 jours, jamais pendant un raid ni pendant qu'il est actif.
@@ -147,6 +157,14 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (bilan de pillage)
+- 31 tests unitaires, dont l'accumulation par attaquant et le classement des objets volés.
+- Essai sur Paper 1.21.4 (verrou réduit à 1 min) :
+  - TNT ennemie, puis 20 diamants volés dans un coffre par la brèche ;
+  - Alice tuée par l'attaquant, puis un chunk surclaim ;
+  - bilan reçu à la fin du raid : 21 blocs, 1 coffre, 20× diamond, 1 chunk, 1 membre tué ;
+  - résumé de l'attaquant, lignes VOL et BILAN dans le journal, bilan sur Discord.
 
 ## Ce qui a été vérifié (casse à l'épée et interface admin)
 - 29 tests unitaires, dont le chrono de 7,5 s (150 ticks).

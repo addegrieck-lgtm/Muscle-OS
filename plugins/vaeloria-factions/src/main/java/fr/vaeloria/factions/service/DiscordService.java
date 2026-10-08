@@ -59,6 +59,12 @@ public final class DiscordService {
                 defender.discordPing);
     }
 
+    public void raidReport(Faction defender, String attackers, String duration, String summary, String stolen) {
+        if (!wants(Event.RAID)) return;
+        send(defender, embed("📋 Bilan du pillage", "Attaquants : **" + esc(attackers) + "** · durée " + duration + "\n" + summary
+                + (stolen.isEmpty() ? "" : "\nVolé : " + esc(stolen)), GREY), false);
+    }
+
     public void overclaimLost(Faction defender, String attacker, int x, int z) {
         if (!wants(Event.OVERCLAIM)) return;
         send(defender, embed("Territoire perdu", "**" + esc(attacker) + "** a surclaim votre chunk en **" + x + ", " + z + "**. Votre power ne couvre plus vos terres.", RED),

@@ -75,6 +75,7 @@ public final class ClaimService {
             if (plugin != null) {
                 int bx = pos.x() * 16 + 8, bz = pos.z() * 16 + 8;
                 plugin.wars().onOverclaim(f, previous, p.getUniqueId());
+                plugin.raid().onOverclaimed(previous, f, pos);
                 plugin.discord().overclaimLost(previous, f.name, bx, bz);
                 plugin.discord().overclaimWon(f, previous.name, bx, bz);
                 plugin.logs().add(previous, "SURCLAIM", p.getName() + " (" + f.name + ")", "a pris le chunk " + bx + ", " + bz);

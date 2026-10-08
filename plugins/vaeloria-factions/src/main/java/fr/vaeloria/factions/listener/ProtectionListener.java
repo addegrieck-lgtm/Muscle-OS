@@ -109,6 +109,8 @@ public final class ProtectionListener implements Listener {
             if (!access.check(p, b.getLocation(), perm)) {
                 e.setUseInteractedBlock(org.bukkit.event.Event.Result.DENY);
                 if (perm != FPerm.BUILD) e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
+            } else if (perm == FPerm.CONTAINER && access.viaBreach(p, b.getLocation(), perm)) {
+                plugin.raid().breachOpening(p, manager.factionAt(b.getLocation()));
             }
         }
         ItemStack item = e.getItem();
@@ -198,6 +200,18 @@ public final class ProtectionListener implements Listener {
         if (en instanceof Player p) return p;
         if (en instanceof Projectile pr && pr.getShooter() instanceof Player p) return p;
         return null;
+    }
+
+    // ── Butin des brèches (bilan de pillage) ──
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryOpen(org.bukkit.event.inventory.InventoryOpenEvent e) {
+        if (e.getPlayer() instanceof Player p) plugin.raid().inventoryOpened(p, e.getInventory());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryClose(org.bukkit.event.inventory.InventoryCloseEvent e) {
+        if (e.getPlayer() instanceof Player p) plugin.raid().inventoryClosed(p, e.getInventory());
     }
 
     // ── Environnement ──

@@ -63,6 +63,7 @@ public final class PlayerListener implements Listener {
         plugin.scoreboard().hide(p);
         plugin.access().forget(p.getUniqueId());
         plugin.logs().forget(p.getUniqueId());
+        plugin.raid().forgetPlayer(p.getUniqueId());
         manager.markDirty();
     }
 

@@ -43,6 +43,18 @@ public final class AccessService {
         return settings.breachAllows.contains(perm) && raid.breached(pos, owner, mine);
     }
 
+    /** Vrai si l'accès n'est permis QUE par une brèche de pillage (ennemi chez un défenseur). */
+    public boolean viaBreach(Player p, Location loc, FPerm perm) {
+        if (manager.fplayer(p).adminBypass) return false;
+        ChunkPos pos = ChunkPos.of(loc);
+        Faction owner = manager.factionAt(pos);
+        if (owner == null || owner.system) return false;
+        Faction mine = manager.factionOf(p);
+        if (mine == owner) return false;
+        if (manager.relation(mine, owner) == Relation.ALLIE && settings.allyPerms.contains(perm)) return false;
+        return settings.breachAllows.contains(perm) && raid.breached(pos, owner, mine);
+    }
+
     /** Vérifie et, si refusé, prévient le joueur (au plus une fois par seconde). */
     public boolean check(Player p, Location loc, FPerm perm) {
         if (allowed(p, loc, perm)) return true;

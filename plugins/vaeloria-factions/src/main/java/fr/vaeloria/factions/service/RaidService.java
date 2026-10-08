@@ -15,7 +15,9 @@ import org.bukkit.entity.Player;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -82,6 +84,9 @@ public final class RaidService {
     public void onRaidHit(Faction defender, Faction attacker, java.util.Set<ChunkPos> chunks, int blocks) {
         ChunkPos chunk = chunks.iterator().next();
         long now = System.currentTimeMillis();
+        fr.vaeloria.factions.model.RaidReport report = report(defender, now);
+        report.touch(attacker == null ? null : attacker.name, now);
+        report.addBlocks(attacker == null ? null : attacker.name, blocks);
         defender.raidUntil = now + settings.raidLockMinutes * 60_000L;
         defender.lastRaidChunk = chunk;
         boolean hostile = attacker != null && !attacker.id.equals(defender.id);
@@ -122,6 +127,126 @@ public final class RaidService {
         }
     }
 
+    // ── Bilan de pillage ──
+
+    private fr.vaeloria.factions.model.RaidReport report(Faction defender, long now) {
+        if (defender.raidReport == null) defender.raidReport = new fr.vaeloria.factions.model.RaidReport(now);
+        return defender.raidReport;
+    }
+
+    /** Surclaim subi : compte dans le bilan et ouvre (ou prolonge) la période de raid. */
+    public void onOverclaimed(Faction defender, Faction attacker, ChunkPos chunk) {
+        long now = System.currentTimeMillis();
+        fr.vaeloria.factions.model.RaidReport r = report(defender, now);
+        r.touch(attacker.name, now);
+        r.chunksLost++;
+        defender.raidUntil = Math.max(defender.raidUntil, now + settings.raidLockMinutes * 60_000L);
+        defender.lastRaidChunk = chunk;
+    }
+
+    /** Mort pendant un raid : membre du défenseur tué par un attaquant, ou attaquant abattu par la défense. */
+    public void onKill(Faction killer, Faction victim) {
+        if (killer == null || victim == null || killer == victim) return;
+        long now = System.currentTimeMillis();
+        if (victim.inRaid() && victim.raidReport != null && victim.raidReport.attackers.contains(killer.name)) {
+            victim.raidReport.membersKilled++;
+            victim.raidReport.touch(null, now);
+        }
+        if (killer.inRaid() && killer.raidReport != null && killer.raidReport.attackers.contains(victim.name)) {
+            killer.raidReport.enemiesKilled++;
+            killer.raidReport.touch(null, now);
+        }
+    }
+
+    /** Coffres pillés par la brèche : contenu résumé à l'ouverture, comparé à la fermeture. */
+    private record Loot(String ownerId, String attacker, java.util.Map<String, Integer> before) {}
+
+    private final Map<java.util.UUID, String> pendingBreachOpen = new HashMap<>();
+    private final Map<java.util.UUID, Loot> loot = new HashMap<>();
+
+    /** Un ennemi ouvre un conteneur grâce à une brèche ; l'inventaire s'ouvrira juste après. */
+    public void breachOpening(Player p, Faction owner) {
+        pendingBreachOpen.put(p.getUniqueId(), owner.id);
+    }
+
+    public void inventoryOpened(Player p, org.bukkit.inventory.Inventory inv) {
+        String ownerId = pendingBreachOpen.remove(p.getUniqueId());
+        if (ownerId == null) return;
+        Faction owner = manager.byId(ownerId);
+        Faction mine = manager.factionOf(p);
+        if (owner == null || mine == null) return;
+        long now = System.currentTimeMillis();
+        fr.vaeloria.factions.model.RaidReport r = report(owner, now);
+        r.containersOpened++;
+        r.touch(mine.name, now);
+        loot.put(p.getUniqueId(), new Loot(ownerId, mine.name, LogService.summarize(inv)));
+    }
+
+    public void inventoryClosed(Player p, org.bukkit.inventory.Inventory inv) {
+        Loot l = loot.remove(p.getUniqueId());
+        if (l == null) return;
+        Faction owner = manager.byId(l.ownerId());
+        if (owner == null) return;
+        Map<String, Integer> taken = new java.util.LinkedHashMap<>();
+        fr.vaeloria.factions.rules.ItemDiff.diff(l.before(), LogService.summarize(inv)).forEach((k, v) -> {
+            if (v < 0) taken.put(k, -v);
+        });
+        if (taken.isEmpty()) return;
+        report(owner, System.currentTimeMillis()).addStolen(l.attacker(), taken);
+        var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+        if (plugin != null) {
+            plugin.logs().add(owner, "VOL", p.getName() + " (" + l.attacker() + ")",
+                    "a volé " + String.join(", ", fr.vaeloria.factions.model.RaidReport.top(taken, 6)));
+        }
+    }
+
+    public void forgetPlayer(java.util.UUID uuid) {
+        pendingBreachOpen.remove(uuid);
+        loot.remove(uuid);
+    }
+
+    private void sendReport(Faction f, fr.vaeloria.factions.model.RaidReport r) {
+        long duration = Math.max(0, r.lastActivity - r.startedAt);
+        String attackers = r.attackers.isEmpty() ? "inconnus" : String.join(", ", r.attackers);
+        List<String> detail = new ArrayList<>();
+        r.blocksByAttacker.forEach((k, v) -> detail.add(k + " " + v));
+        if (r.blocksUnknown > 0) detail.add("inconnu " + r.blocksUnknown);
+        String stolen = r.stolen.isEmpty() ? "" : String.join(", ", fr.vaeloria.factions.model.RaidReport.top(r.stolen, 6));
+        for (Player p : manager.online(f)) {
+            p.sendMessage(Msg.get("raid.report.header"));
+            p.sendMessage(Msg.get("raid.report.attackers", "attackers", attackers, "duration", Msg.duration(duration)));
+            p.sendMessage(Msg.get("raid.report.blocks", "total", r.totalBlocks(), "detail", detail.isEmpty() ? "—" : String.join(", ", detail)));
+            if (r.containersOpened > 0 || !r.stolen.isEmpty()) {
+                p.sendMessage(Msg.get("raid.report.containers", "count", r.containersOpened));
+                if (!stolen.isEmpty()) p.sendMessage(Msg.get("raid.report.stolen", "items", stolen));
+            }
+            if (r.chunksLost > 0) p.sendMessage(Msg.get("raid.report.chunks", "count", r.chunksLost));
+            p.sendMessage(Msg.get("raid.report.kills", "dead", r.membersKilled, "killed", r.enemiesKilled));
+            p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1f, 0.9f);
+        }
+        String summary = r.totalBlocks() + " blocs détruits, " + r.containersOpened + " coffre(s) ouvert(s), "
+                + r.totalStolen() + " objet(s) volé(s), " + r.chunksLost + " chunk(s) perdu(s), "
+                + r.membersKilled + " membre(s) tué(s), " + r.enemiesKilled + " ennemi(s) abattu(s)";
+        var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+        if (plugin != null) {
+            plugin.logs().add(f, "BILAN", attackers, summary + " — durée " + Msg.duration(duration));
+            plugin.discord().raidReport(f, attackers, Msg.duration(duration), summary, stolen);
+        }
+        // Les attaquants reçoivent leur part.
+        for (String name : r.attackers) {
+            Faction a = manager.byName(name);
+            if (a == null) continue;
+            int blocks = r.blocksByAttacker.getOrDefault(name, 0);
+            Map<String, Integer> mine = r.stolenByAttacker.getOrDefault(name, Map.of());
+            int items = 0;
+            for (int v : mine.values()) items += v;
+            for (Player p : manager.online(a)) {
+                Msg.send(p, "raid.report.attacker-summary", "defender", f.name, "blocks", blocks, "items", items,
+                        "loot", mine.isEmpty() ? "—" : String.join(", ", fr.vaeloria.factions.model.RaidReport.top(mine, 4)));
+            }
+        }
+    }
+
     /** Un ennemi peut-il piller (coffres / portes) ce chunk fraîchement ouvert ? */
     public boolean breached(ChunkPos pos, Faction owner, Faction actor) {
         if (!settings.breachEnabled || owner == null || owner.system || actor == null) return false;
@@ -144,7 +269,13 @@ public final class RaidService {
                 f.raidUntil = 0;
                 f.raidAttackers.clear();
                 hideBar(f.id);
-                for (Player p : manager.online(f)) Msg.send(p, "raid.ended");
+                fr.vaeloria.factions.model.RaidReport report = f.raidReport;
+                f.raidReport = null;
+                if (report == null || report.isEmpty()) {
+                    for (Player p : manager.online(f)) Msg.send(p, "raid.ended");
+                } else {
+                    sendReport(f, report);
+                }
                 continue;
             }
             if (!settings.raidBossbar) continue;

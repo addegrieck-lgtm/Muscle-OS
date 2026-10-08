@@ -178,6 +178,7 @@ public final class CombatListener implements Listener {
                 plugin.wars().onKill(fk, fac, killer.getUniqueId(), victim.getUniqueId());
             }
         }
+        if (killer != null) plugin.raid().onKill(manager.factionOf(killer), fac);
         manager.markDirty();
         if (zone != null && zone.isSafezone()) return;
         if (victim.hasPermission("vaeloria.factions.bypass.powerloss")) return;

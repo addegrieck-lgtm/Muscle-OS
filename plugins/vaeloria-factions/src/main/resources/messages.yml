@@ -242,6 +242,15 @@ raid:
   ended: "<green>Le pillage est terminé. Fais le bilan des dégâts."
   join-warning: "<red><b>⚠</b> Ta faction est en plein pillage !"
   locked: "<red>Impossible pendant un pillage (encore <white><time></white>)."
+  report:
+    header: "<dark_gray><st>        </st></dark_gray> <gold><b>✎ Bilan du pillage</b></gold> <dark_gray><st>        </st>"
+    attackers: "<gray>Attaquants : <red><attackers></red> <dark_gray>·</dark_gray> durée <white><duration>"
+    blocks: "<gray>Blocs détruits : <white><total></white> <dark_gray>(<detail>)"
+    containers: "<gray>Coffres ouverts par l'ennemi : <white><count>"
+    stolen: "<gray>Objets volés : <red><items>"
+    chunks: "<gray>Chunks perdus par surclaim : <red><count>"
+    kills: "<gray>Membres tués : <red><dead></red> <dark_gray>·</dark_gray> Ennemis abattus : <green><killed>"
+    attacker-summary: "<gold>✎ Pillage de <white><defender></white> terminé : <white><blocks></white> blocs détruits, <white><items></white> objet(s) rapporté(s) <dark_gray>(<loot>)"
 
 grace:
   active: "<yellow>Période de grâce : aucune explosion ni surclaim pendant encore <white><time></white>."

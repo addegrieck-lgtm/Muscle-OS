@@ -70,6 +70,8 @@ public final class Faction {
     public transient long lastRaidAlert;
     public transient Set<String> raidAttackers;
     public transient ChunkPos lastRaidChunk;
+    /** Bilan du pillage en cours, envoyé à la fin du raid. */
+    public transient RaidReport raidReport;
 
     public Faction() {}
 
