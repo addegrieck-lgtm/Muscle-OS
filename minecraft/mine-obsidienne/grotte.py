@@ -1,12 +1,14 @@
 """Mine d'obsidienne VÆLORIA dans une grotte du spawn (Paper 1.21.4+), au format Sponge v2 (.schem, WorldEdit/FAWE).
 
 Usage : python3 minecraft/mine-obsidienne/grotte.py   (Pillow + numpy ; réutilise minecraft/spawn et generate.py)
-Sorties dans minecraft/mine-obsidienne/ : vaeloria-mine-obsidienne-grotte.schem, apercu-grotte-*.png.
+Sorties dans minecraft/mine-obsidienne/ : vaeloria-mine-obsidienne-grotte.schem (sous terre),
+vaeloria-mine-obsidienne-verriere.schem (surface), apercu-grotte-*.png.
 
-La mine est celle de generate.py, sans aucun changement : obsidienne 21 × 15 × 8, couloir vide d'un bloc
-sur toute la hauteur, mur fermé sans sortie, voûte en ogive, arrivée sur la plateforme suspendue.
-Elle est posée dans une grotte creusée dans la roche de l'île, sous la porte de guerre (nord), là où
-l'île est la plus épaisse. La grotte n'a pas d'ouverture : on arrive toujours par le warp.
+La mine est celle de generate.py en version plafond plat (build(flat=True)) : obsidienne 21 × 15 × 8,
+couloir vide d'un bloc sur toute la hauteur, mur fermé sans sortie, arrivée sur la plateforme suspendue.
+Son plafond est une verrière rubis au niveau du sol du spawn, à l'ouest de la place d'arrivée :
+depuis le spawn on voit la mine en dessous, depuis la mine on voit le ciel. Les murs sont pris dans
+une grotte creusée dans la roche de l'île ; elle n'a pas d'ouverture, on arrive toujours par le warp.
 
 Repère : celui du gabarit du spawn (x/z = 0 au centre de l'arbre, y = 0 au niveau de marche, nord = -Z).
 Point de collage : le centre de l'arbre, au niveau de marche, comme les autres modules du spawn.
@@ -35,13 +37,17 @@ def _load(name, path):
 spawn = _load("vaeloria_spawn", HERE.parent / "spawn" / "generate.py")
 mine = _load("vaeloria_mine", HERE / "generate.py")
 
-# Position de la mine dans le repère du spawn : faîtage sur l'axe nord-sud de l'arbre, centre de l'obsidienne en z = -53.
-MINE_DX = -mine.RIDGE_X  # x mine -> x spawn
-MINE_DZ = -53 - mine.OBS_Z // 2  # z mine -> z spawn
-MINE_DY = -40  # sol de l'enceinte en y = -40
-CEIL_MAX = -6  # la grotte ne monte pas au-dessus : 5 blocs de roche au moins sous la mousse
+# Position de la mine dans le repère du spawn : centre de l'obsidienne en (-32, 43), à l'ouest de la place d'arrivée,
+# sur la mousse libre (ni allée, ni lampadaire, ni arbre à moins de 2 blocs de la verrière) ; l'île y fait 29 blocs au moins.
+CENTER = (-32, 43)
+MINE_DX = CENTER[0] - mine.RIDGE_X  # x mine -> x spawn
+MINE_DZ = CENTER[1] - mine.OBS_Z // 2  # z mine -> z spawn
+MINE_DY = -mine.FLAT_Y  # verrière et haut des murs en y = 0, au niveau de marche ; sol de l'enceinte en y = -17
+CEIL_MAX = -4  # la grotte ne monte pas au-dessus : 3 blocs de roche au moins sous la mousse
 GAP = 3.0  # vide moyen entre l'enceinte et la roche
 SHELL = 4  # roche ajoutée là où l'île est trop mince (bosse sous l'île)
+RIM = 2  # bordure de la verrière au sol : rubis puis pierre noire
+SURFACE_Y = -2  # le module « verrière » couvre y -2 → 4 sur l'emprise de la bordure ; le module « grotte » tout le reste
 
 ROCK = "minecraft:cobbled_deepslate"
 ARRIVAL = (mine.ARRIVAL[0] + MINE_DX, mine.ARRIVAL[1] + MINE_DY, mine.ARRIVAL[2] + MINE_DZ)
@@ -52,18 +58,22 @@ def enclosure_dist(x, y, z):
     x0, x1, z0, z1 = -2, mine.OBS_X + 1, -2, mine.OBS_Z + 1
     dx = max(x0 - x, 0, x - x1)
     dz = max(z0 - z, 0, z - z1)
-    top = mine.roof_y(min(max(x, x0), x1))
-    dy = max(-y, 0, y - top)
+    dy = max(-y, 0, y - mine.FLAT_Y)
     return math.sqrt(dx * dx + dy * dy + dz * dz)
 
 
 def in_enclosure(x, y, z):
-    return -2 <= x <= mine.OBS_X + 1 and -2 <= z <= mine.OBS_Z + 1 and 0 <= y <= mine.roof_y(x)
+    return -2 <= x <= mine.OBS_X + 1 and -2 <= z <= mine.OBS_Z + 1 and 0 <= y <= mine.FLAT_Y
+
+
+def rim_box():
+    """Emprise de la verrière et de sa bordure, repère du spawn : (x0, z0, x1, z1)."""
+    return (-2 - RIM + MINE_DX, -2 - RIM + MINE_DZ, mine.OBS_X + 1 + RIM + MINE_DX, mine.OBS_Z + 1 + RIM + MINE_DZ)
 
 
 def build(w):
     """Creuse la grotte dans le volume du spawn w et y pose la mine. Renvoie la boîte touchée (repère spawn)."""
-    mv, mnames = mine.build()
+    mv, mnames = mine.build(flat=True)
     rng = np.random.default_rng(11)
     noise = spawn.noise2
 
@@ -82,7 +92,7 @@ def build(w):
                     continue
                 d = enclosure_dist(lx, ly, lz)
                 n = noise(x * 0.9, z * 0.9 + y * 1.3, 2.4)
-                gap = GAP + 1.6 * n + (1.5 if ly > mine.WALL_TOP else 0)  # plus haut sous la voûte
+                gap = GAP + 1.6 * n
                 if ly >= 1 and d <= gap and y <= CEIL_MAX:
                     cave.add((x, y, z))
                 elif d <= gap + SHELL and w.is_air(x, y, z):
@@ -140,6 +150,24 @@ def build(w):
                         w.put(x, y, z, mnames[b])
                     else:
                         clear(x, y, z)
+
+    # Bordure de la verrière au niveau du sol, comme les anneaux de la place : rubis, puis pierre noire ; lampadaires aux angles.
+    rx0, rz0, rx1, rz1 = rim_box()
+    for x in range(rx0, rx1 + 1):
+        for z in range(rz0, rz1 + 1):
+            if in_enclosure(x - MINE_DX, 0 - MINE_DY, z - MINE_DZ):
+                continue
+            ring = min(x - rx0, rx1 - x, z - rz0, rz1 - z)
+            w.put(x, 0, z, "minecraft:polished_blackstone_bricks" if ring == 0 else "minecraft:red_nether_bricks")
+            for y in range(1, 6):
+                clear(x, y, z)
+    for x in range(rx0, rx1 + 1):  # rien ne pousse sur la verrière
+        for z in range(rz0, rz1 + 1):
+            for y in range(1, 6):
+                clear(x, y, z)
+    for x in (rx0, rx1):
+        for z in (rz0, rz1):
+            spawn.lamp(w, x, z)
     return (bx0, by0, bz0, bx1, by1, bz1), cave
 
 
@@ -202,22 +230,28 @@ def main():
     (bx0, by0, bz0, bx1, by1, bz1), cave = build(w)
     ok = check(w, cave)
 
-    # Module : toute la boîte touchée (air compris, pour creuser la grotte au collage), point de collage = centre de l'arbre.
-    changed = np.nonzero(w.vol != before)
-    ys, zs, xs_ = changed
-    y0, y1 = ys.min(), ys.max()
-    z0, z1 = zs.min(), zs.max()
-    x0, x1 = xs_.min(), xs_.max()
-    sub = w.vol[y0:y1 + 1, z0:z1 + 1, x0:x1 + 1]
-    used = sorted(set(np.unique(sub).tolist()) | {0})
-    remap = np.zeros(len(w.pal.names), dtype=np.int32)
-    for i, u in enumerate(used):
-        remap[u] = i
-    names = [w.pal.names[u] for u in used]
-    ox, oy, oz = spawn.X0 + x0, spawn.Y0 + y0, spawn.X0 + z0
-    spawn.write_schem(HERE / "vaeloria-mine-obsidienne-grotte.schem", remap[sub], names, (-ox, -oy, -oz))
-    print("module : x", ox, "..", spawn.X0 + x1, "· y", oy, "..", spawn.Y0 + y1, "· z", oz, "..", spawn.X0 + z1,
-          "· haut du module sous la surface :", spawn.Y0 + y1 < 0)
+    # Deux modules, air compris (l'air creuse la grotte au collage), point de collage = centre de l'arbre :
+    # « grotte » = tout ce qui change sous y -2 ; « verrière » = l'emprise de la bordure, de y -2 à y 5.
+    # Ainsi aucun module ne touche la surface du spawn hors de la bordure de la verrière.
+    def export(fname, x0, y0, z0, x1, y1, z1):
+        sub = w.vol[y0 - spawn.Y0:y1 - spawn.Y0 + 1, z0 - spawn.X0:z1 - spawn.X0 + 1, x0 - spawn.X0:x1 - spawn.X0 + 1]
+        used = sorted(set(np.unique(sub).tolist()) | {0})
+        remap = np.zeros(len(w.pal.names), dtype=np.int32)
+        for i, u in enumerate(used):
+            remap[u] = i
+        spawn.write_schem(HERE / fname, remap[sub], [w.pal.names[u] for u in used], (-x0, -y0, -z0))
+        print(fname, ": x", x0, "..", x1, "· y", y0, "..", y1, "· z", z0, "..", z1)
+
+    ys, zs, xs_ = np.nonzero(w.vol != before)
+    ys = ys + spawn.Y0
+    under = ys < SURFACE_Y
+    gx, gz = xs_[under] + spawn.X0, zs[under] + spawn.X0
+    export("vaeloria-mine-obsidienne-grotte.schem", gx.min(), ys[under].min(), gz.min(), gx.max(), SURFACE_Y - 1, gz.max())
+    rx0, rz0, rx1, rz1 = rim_box()
+    above = ~under
+    sx, sz = xs_[above] + spawn.X0, zs[above] + spawn.X0
+    assert sx.min() >= rx0 and sx.max() <= rx1 and sz.min() >= rz0 and sz.max() <= rz1, "la surface change hors de la bordure"
+    export("vaeloria-mine-obsidienne-verriere.schem", rx0, SURFACE_Y, rz0, rx1, 5, rz1)
     print("arrivée (repère du spawn, pieds du joueur) :", ARRIVAL)
 
     # Aperçus : coupes nord-sud (x = 0) et est-ouest (z = centre de la mine) de l'île, cadrées sur la grotte.
@@ -232,10 +266,10 @@ def main():
         return next((c for k, c in colors.items() if k in n), (110, 110, 110))
 
     vol = w.vol
-    zc = MINE_DZ + mine.OBS_Z // 2
-    for fname, axis, at, lo, hi in (("apercu-grotte-coupe-nord-sud.png", "x", 0, -92, -10),
-                                    ("apercu-grotte-coupe-est-ouest.png", "z", zc, -40, 40)):
-        ylo, yhi = -60, 30
+    xc, zc = CENTER
+    for fname, axis, at, lo, hi in (("apercu-grotte-coupe-nord-sud.png", "x", xc, 0, 92),
+                                    ("apercu-grotte-coupe-est-ouest.png", "z", zc, -80, 20)):
+        ylo, yhi = -45, 12
         img = Image.new("RGB", (hi - lo + 1, yhi - ylo + 1), (7, 7, 10))
         for y in range(ylo, yhi + 1):
             for u in range(lo, hi + 1):
@@ -244,6 +278,16 @@ def main():
                 if b:
                     img.putpixel((u - lo, yhi - y), color(b))
         img.resize((img.width * 8, img.height * 8), Image.Resampling.NEAREST).save(HERE / fname)
+    # Vue de dessus du sud de l'île : la verrière à côté de la place d'arrivée.
+    xlo, xhi, zlo, zhi = -80, 40, 0, 92
+    img = Image.new("RGB", (xhi - xlo + 1, zhi - zlo + 1), (7, 7, 10))
+    for z in range(zlo, zhi + 1):
+        for x in range(xlo, xhi + 1):
+            col = np.nonzero(vol[:, z - spawn.X0, x - spawn.X0])[0]
+            col = [c for c in col if "chain" not in w.pal.names[vol[c, z - spawn.X0, x - spawn.X0]]]
+            if col:
+                img.putpixel((x - xlo, z - zlo), color(vol[col[-1], z - spawn.X0, x - spawn.X0]))
+    img.resize((img.width * 6, img.height * 6), Image.Resampling.NEAREST).save(HERE / "apercu-grotte-dessus.png")
     if not ok:
         raise SystemExit(1)
 

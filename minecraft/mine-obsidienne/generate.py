@@ -8,6 +8,9 @@ coiffé d'une voûte en verre rubis sur nervures de pierre noire : personne ne s
 L'obsidienne est au centre exact de l'enceinte, avec un couloir vide d'un bloc tout autour, du sol à la voûte.
 On arrive sur une plateforme suspendue sous la voûte, au-dessus du centre, et on saute (3 blocs de chute).
 Point de collage : les pieds du joueur au point d'arrivée, au centre de la plateforme. Nord = -Z.
+
+build(flat=True) : même mine, mais la voûte est remplacée par un plafond plat en verre rubis en y 17 (FLAT_Y),
+fait pour affleurer au niveau du sol (grotte.py) : on voit la mine depuis le dessus et le ciel depuis la mine.
 """
 
 from __future__ import annotations
@@ -26,6 +29,7 @@ Palette, write_schem, logo_grid = _spawn.Palette, _spawn.write_schem, _spawn.log
 
 OBS_X, OBS_Z, OBS_H = 21, 15, 8  # obsidienne : x 0..20, z 0..14, y 1..8
 WALL_TOP = 16  # haut du mur ; la voûte en ogive commence juste au-dessus
+FLAT_Y = WALL_TOP + 1  # plafond plat : haut du mur et verrière au même niveau
 ARRIVAL = (OBS_X // 2, OBS_H + 4, OBS_Z // 2)  # pieds du joueur au centre de la plateforme suspendue
 
 PB = "minecraft:polished_blackstone_bricks"
@@ -39,7 +43,12 @@ def roof_y(x):
     return WALL_TOP + 1 + (12 - abs(x - RIDGE_X))
 
 
-def build():
+def top_y(x, flat=False):
+    """Haut de l'enceinte au-dessus de la colonne x : voûte en ogive, ou plafond plat."""
+    return FLAT_Y if flat else roof_y(x)
+
+
+def build(flat=False):
     pal = Palette()
     v = np.zeros((Y1 - Y0 + 1, Z1 - Z0 + 1, X1 - X0 + 1), dtype=np.int32)
 
@@ -51,8 +60,8 @@ def build():
         for z in range(wz0, wz1 + 1):
             put(x, 0, z, "minecraft:polished_deepslate" if wx0 < x < wx1 and wz0 < z < wz1 else PB)  # sol
             if x in (wx0, wx1) or z in (wz0, wz1):
-                for y in range(1, WALL_TOP + 1):
-                    band = y % 4 == 0 or y == WALL_TOP
+                for y in range(1, (FLAT_Y if flat else WALL_TOP) + 1):
+                    band = y % 4 == 0 or y >= WALL_TOP
                     put(x, y, z, PB if band else DT)
             elif 0 <= x < OBS_X and 0 <= z < OBS_Z:
                 for y in range(1, OBS_H + 1):
@@ -66,6 +75,10 @@ def build():
         for y in (2, 6):
             put(wx0, y, z, "minecraft:shroomlight")
             put(wx1, y, z, "minecraft:shroomlight")
+
+    if flat:
+        _flat_top(put, pal, wx0, wx1, wz0, wz1)
+        return v, pal.names
 
     # Pignons nord et sud : le mur monte jusque sous la voûte.
     for x in range(wx0, wx1 + 1):
@@ -84,16 +97,7 @@ def build():
                 put(RIDGE_X - (gx - lw // 2), y, wz1, b)  # sud, vu depuis le nord : gauche = est
 
     # Plateforme d'arrivée 5 × 5 suspendue au centre, au-dessus de l'obsidienne (jamais au-dessus du couloir).
-    ax, ay, az = ARRIVAL
-    for x in range(ax - 2, ax + 3):
-        for z in range(az - 2, az + 3):
-            edge = max(abs(x - ax), abs(z - az)) == 2
-            put(x, ay - 1, z, "minecraft:red_nether_bricks" if edge else "minecraft:polished_blackstone")
-    put(ax, ay - 1, az, "minecraft:lodestone")  # point d'arrivée
-    for x in (ax - 2, ax + 2):  # quatre chaînes la tiennent à la voûte
-        for z in (az - 2, az + 2):
-            for y in range(ay, roof_y(x)):
-                put(x, y, z, "minecraft:chain")
+    _arrival_platform(put, roof_y)
 
     # Voûte : nervures en pierre noire tous les 4 blocs, verre rubis entre elles, faîtage argent.
     ribs = set(range(wz0, wz1 + 1, 4)) | {wz0, wz1}
@@ -118,6 +122,48 @@ def build():
             put(x, WALL_TOP + 3, z, "minecraft:end_rod[facing=up]")
 
     return v, pal.names
+
+
+def _arrival_platform(put, top):
+    """Plateforme d'arrivée 5 × 5 suspendue au centre, tenue par quatre chaînes jusqu'au plafond (top(x) = premier bloc du plafond)."""
+    ax, ay, az = ARRIVAL
+    for x in range(ax - 2, ax + 3):
+        for z in range(az - 2, az + 3):
+            edge = max(abs(x - ax), abs(z - az)) == 2
+            put(x, ay - 1, z, "minecraft:red_nether_bricks" if edge else "minecraft:polished_blackstone")
+    put(ax, ay - 1, az, "minecraft:lodestone")  # point d'arrivée
+    for x in (ax - 2, ax + 2):
+        for z in (az - 2, az + 2):
+            for y in range(ay, top(x)):
+                put(x, y, z, "minecraft:chain")
+
+
+def _flat_top(put, pal, wx0, wx1, wz0, wz1):
+    """Plafond plat : verrière rubis sur une grille de pierre noire, faîtage argent ; blason sur les murs nord et sud."""
+    logo = logo_grid(13, relief=False)  # 13 × 16 : tient entre le sol et le plafond
+    lw = len(logo[0])
+    for gy, row in enumerate(logo):
+        for gx, b in enumerate(row):
+            if b:
+                y = WALL_TOP - gy  # de y 16 à y 1
+                put(RIDGE_X + gx - lw // 2, y, wz0, b)  # nord, vu depuis le sud
+                put(RIDGE_X - (gx - lw // 2), y, wz1, b)  # sud, vu depuis le nord
+    _arrival_platform(put, lambda x: FLAT_Y)
+    ribs = set(range(wz0, wz1 + 1, 4)) | {wz0, wz1}
+    for x in range(wx0 + 1, wx1):
+        for z in range(wz0 + 1, wz1):
+            if x == RIDGE_X:
+                name = "minecraft:chiseled_polished_blackstone" if z in ribs else "minecraft:smooth_quartz"
+            elif z in ribs or (x - RIDGE_X) % 6 == 0:
+                name = PB
+            else:
+                name = "minecraft:red_stained_glass"
+            put(x, FLAT_Y, z, name)
+    for z in sorted(ribs):  # lanternes sous les nervures, de part et d'autre de la plateforme
+        if wz0 < z < wz1:
+            for x in (RIDGE_X - 6, RIDGE_X + 6):
+                put(x, FLAT_Y - 1, z, "minecraft:chain")
+                put(x, FLAT_Y - 2, z, "minecraft:lantern[hanging=true]")
 
 
 def main():
