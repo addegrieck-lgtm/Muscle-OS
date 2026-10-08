@@ -21,6 +21,8 @@ dependencies {
     // Plugin PacketEvents installé séparément (entrées de la liste TAB).
     compileOnly("com.github.retrooper:packetevents-spigot:2.14.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    // Lecture de phrases.yml dans les tests (fourni par Paper en jeu).
+    testImplementation("org.yaml:snakeyaml:2.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -6,7 +6,7 @@ Plugin Paper de faux joueurs, inspiré de [Fake Player Plugin](https://hangar.pa
 |---|---|---|
 | Entrée dans la liste **TAB** (pseudo, skin Mojang, ping qui varie) | paquets `PlayerInfoUpdate` | plugin [PacketEvents](https://modrinth.com/plugin/packetevents) 2.14+ |
 | Messages de **connexion / déconnexion** | `messages.join` / `messages.quit` | — |
-| **Chat** réaliste : messages spontanés (fréquence selon le nombre de faux joueurs), « slt » à l'arrivée, « a+ » / « bn » au départ, réponses aux vrais joueurs | `/fp chat`, `chat.*` | — |
+| **Chat** réaliste piloté par `phrases.yml` : ~2 900 phrases spontanées (modèles + vocabulaire faction/PvP), sujets selon l'heure, conversations entre faux joueurs, réponses selon l'intention (salut, KOTH, 1v1, vente, recrutement…), conversation suivie avec un vrai joueur, style propre à chaque faux joueur (abréviations, fautes, « mdr »), apprentissage des phrases qui font réagir (`brain.yml`) | `/fp chat`, `chat.*`, `phrases.yml` | — |
 | **Corps** dans le monde avec skin, qui regardent les joueurs proches | entité Mannequin, sans NMS | Minecraft **1.21.9+** |
 | **Mode ambiance** : arrivées et départs un par un, vers une cible | `auto.*`, `/fp auto on` | — |
 | **Planning** : cible selon l'heure, mercredi, week-end, vacances scolaires (zones A/B/C), jours fériés | `schedule.*`, `/fp schedule` | — |
@@ -48,6 +48,19 @@ Les **vacances 2026-2027** (zones A, B, C) sont préremplies d'après le calendr
 ([data.education.gouv.fr](https://data.education.gouv.fr/explore/dataset/fr-en-calendrier-scolaire/)). À compléter
 chaque année dans `schedule.school-holidays.periods` ; un avertissement s'affiche au démarrage quand il n'y a plus
 de période à venir. Les jours fériés français sont calculés automatiquement (Pâques comprise).
+
+## Chat
+
+Tout le texte est dans `plugins/VaeloriaFakePlayers/phrases.yml` (créé au premier démarrage) : `vocab` (mots
+interchangeables), `topics` (messages spontanés, avec heures), `threads` (question → réponse entre faux joueurs),
+`intents` (mots-clés des vrais joueurs → réponses), `events` (arrivée, départ, mort, message privé…).
+Modèles : `{item}` = mot du vocabulaire, `{a|b}` = variante, `{n:2-64}` = nombre, `{player}` = vrai joueur.
+Le style de chaque faux joueur est appliqué automatiquement. `/fp reload` après modification.
+
+Apprentissage : une phrase spontanée suivie d'un message d'un vrai joueur dans les 45 s gagne du poids, une phrase
+ignorée en perd un peu (poids entre 0,3 et 5, `brain.yml`). Aucun message de joueur n'est enregistré.
+Les questions sur les bots (« t'es un bot ? ») restent sans réponse. Pas d'IA générative : tout ce que disent les
+faux joueurs vient de `phrases.yml`.
 
 ## Limites, volontaires
 

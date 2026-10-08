@@ -109,6 +109,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (ticker != null) ticker.cancel();
+        if (chat != null) chat.save();
         save();
         manager.removeAll(true);
         instance = null;
@@ -124,6 +125,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         names = new NamePool(getConfig().getStringList("names"), new Random());
         loadSchedule();
         if (interactions != null) interactions.reloadRules();
+        if (chat != null) chat.load();
     }
 
     Schedule schedule() { return schedule; }
@@ -212,6 +214,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         manager.tick(seconds);
         ambient();
         chat.tick();
+        if (seconds % 600 == 0) chat.save(); // apprentissage sauvegardé toutes les 10 min
     }
 
     /**

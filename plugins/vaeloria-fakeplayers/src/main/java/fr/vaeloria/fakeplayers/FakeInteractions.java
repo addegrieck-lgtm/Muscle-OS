@@ -194,14 +194,15 @@ final class FakeInteractions implements Listener {
         lastPartner.put(key(sender), fake.name());
         ThreadLocalRandom r = ThreadLocalRandom.current();
         if (r.nextDouble() >= w.getDouble("reply-chance", 0.6)) return true;
-        List<String> answers = chat.ruleAnswers(text);
-        if (answers.isEmpty()) answers = w.getStringList("answers");
-        if (answers.isEmpty()) return true;
-        String answer = answers.get(r.nextInt(answers.size())).replace("<player>", sender.getName());
-        later(w, 4, 20, () -> {
+        String answer = chat.whisperReply(fake, text, sender.getName());
+        if (answer == null) return true;
+        // Le temps de lire le message, puis de taper la réponse.
+        long ticks = 20L * (w.getInt("delay-seconds.min", 2) + r.nextInt(Math.max(1, w.getInt("delay-seconds.max", 10)
+                - w.getInt("delay-seconds.min", 2) + 1))) + chat.typingTicks(answer);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (plugin.manager().get(fake.name()) != fake || fake.leaving() || !stillThere(sender)) return;
             send(sender, w.getString("incoming", ""), fake, answer);
-        });
+        }, ticks);
         return true;
     }
 
@@ -364,12 +365,6 @@ final class FakeInteractions implements Listener {
 
     private static String key(CommandSender sender) {
         return sender instanceof Player p ? p.getUniqueId().toString() : new UUID(0, 0).toString();
-    }
-
-    private void later(ConfigurationSection section, int defMin, int defMax, Runnable task) {
-        int min = Math.max(0, section.getInt("delay-seconds.min", defMin));
-        int max = Math.max(min, section.getInt("delay-seconds.max", defMax));
-        Bukkit.getScheduler().runTaskLater(plugin, task, 20L * (min + ThreadLocalRandom.current().nextInt(max - min + 1)) + 1);
     }
 
     private static String str(Map<?, ?> rule, String key, String def) {

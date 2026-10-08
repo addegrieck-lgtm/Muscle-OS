@@ -1,0 +1,393 @@
+# VæloriaFakePlayers — banque de phrases des faux joueurs
+#
+# Modèles : {mot} = un mot au hasard de « vocab », {a|b|c} = une des variantes, {n:2-64} = un nombre,
+# {player} = le vrai joueur concerné, {killer} = son tueur (événement death).
+# Le style (abréviations, accents, fautes, « mdr »…) est ajouté automatiquement selon chaque faux joueur :
+# écris les phrases simplement, en minuscules.
+# Apprentissage : les phrases qui font réagir les vrais joueurs reviennent plus souvent (fichier brain.yml).
+# Après modification : /fp reload.
+
+vocab:
+  item: ["diams", "des diamants", "du fer", "de la netherite", "des pommes en or", "des pommes de notch", "des perles",
+         "des ender pearls", "de l'obsi", "des bouteilles d'xp", "des potions de force", "des splash heal", "des totems",
+         "une sharp 5", "une épée en diams", "un stuff full diams", "un stuff en netherite", "un arc power 5", "de la tnt",
+         "de la redstone", "des émeraudes", "un spawner", "des blaze rods", "des livres enchantés", "des shulkers"]
+  item_short: ["diams", "fer", "netherite", "pommes", "perles", "obsi", "xp", "potions", "totems", "tnt", "spawners",
+               "émeraudes", "shulkers", "livres"]
+  qty: ["{n:2-64}", "{n:2-9} stacks de", "un stack de", "{n:2-5} shulkers de"]
+  price: ["{n:1-50}k", "{n:100-950}$", "{n:1-9}k chacun", "pas cher", "un bon prix"]
+  place: ["au spawn", "au nether", "à l'end", "en warzone", "au koth", "à ma base", "en bordure", "au marché",
+          "dans les mines", "près du spawn", "loin du spawn", "en zone pvp"]
+  when: ["ce soir", "demain", "tout à l'heure", "dans 10 min", "après manger", "ce week-end", "dans 1h", "plus tard"]
+  fac: ["Titans", "Shadows", "Empire", "Legion", "Wolves", "Spartans", "Nova", "Kraken", "Obsidian", "Dragons",
+        "Ravens", "Vipers", "Phoenix", "Vikings", "Ronin", "Zenith"]
+  mob: ["creeper", "blaze", "enderman", "wither squelette", "zombie", "warden", "ghast", "piglin"]
+  feeling: ["chaud", "trop chaud", "grave chaud", "motivé", "chaud patate"]
+  good: ["trop bien", "incroyable", "le feu", "trop stylé", "vraiment bien", "masterclass", "propre"]
+  bad: ["abusé", "trop cheat", "fumé", "pas normal", "op", "n'importe quoi"]
+  laugh: ["mdr", "ptdr", "xD", "lol", "jpp"]
+  friend: ["mon pote", "mon frère", "mon mate", "le reuf", "un pote"]
+  time_ago: ["tout à l'heure", "hier", "y a 5 min", "ce matin", "y a 2 jours"]
+
+# Sujets des messages spontanés. weight = fréquence relative ; hours = heures où le sujet existe (vide = toujours).
+# Les sujets favoris de chaque faux joueur (pvp, faction, trade, farm, server, fun, build) sortent 2,5× plus.
+topics:
+  pvp:
+    weight: 3
+    lines:
+      - "qqn pour un 1v1 ?"
+      - "qui veut se battre {place}"
+      - "1v1 {place} {when} ?"
+      - "je viens de me faire os par un mec en {item_short} {laugh}"
+      - "jsuis mort bêtement {place}"
+      - "j'ai perdu tout mon stuff {laugh}"
+      - "le pvp est {good} ici"
+      - "qui est {feeling} pour un pvp {place}"
+      - "les {fac} campent {place} faites gaffe"
+      - "j'ai kill un mec full netherite avec un stuff en fer {laugh}"
+      - "y a un mec qui spam les perles {place} c'est {bad}"
+      - "le combo est {bad} sur ce serv"
+      - "jsuis à {n:2-6} kills d'affilée"
+      - "quelqu'un a vu qui m'a tué {place} ?"
+      - "faut que je me restuff avant de retourner au pvp"
+      - "vous utilisez quelle ench sur l'épée ?"
+      - "mon kb est trop bien réglé {laugh}"
+      - "les pommes de notch c'est {bad}"
+      - "go pvp box {when}"
+      - "jsuis full stuff qui ose {laugh}"
+  faction:
+    weight: 3
+    lines:
+      - "je recrute pour ma fac, mp moi"
+      - "on recrute des joueurs actifs chez les {fac}"
+      - "je cherche une fac active"
+      - "qui veut rejoindre une fac {feeling} ?"
+      - "les {fac} se sont fait raid {time_ago}"
+      - "on prépare un raid {when}"
+      - "ma base vient de se faire raid {laugh}"
+      - "les {fac} sont {bad} en ce moment"
+      - "alliance avec les {fac} ou pas ?"
+      - "on est {n:3-12} dans ma fac"
+      - "faut qu'on claim plus loin du spawn"
+      - "qui est en guerre avec les {fac} ?"
+      - "on a perdu {n:2-10} claims cette nuit"
+      - "les {fac} ont un bunker {bad}"
+      - "vous êtes dans quelle fac vous ?"
+      - "on cherche un builder pour la base"
+      - "ma fac est top {n:2-10} au classement"
+      - "qqn sait qui a raid les {fac} ?"
+  trade:
+    weight: 2.5
+    lines:
+      - "je vends {qty} {item_short} {price}"
+      - "j'achète {item} mp"
+      - "qqn a {item} à vendre ?"
+      - "je cherche {item}"
+      - "j'échange {item} contre {item}"
+      - "qui vend {item} {price} ?"
+      - "le prix des {item_short} a explosé"
+      - "je fais des prix sur {item}, mp"
+      - "{item} à vendre, premier qui mp"
+      - "qqn me fait {item} {price} ?"
+      - "trop cher les {item_short} au shop"
+      - "jvends un spawner à {mob}, mp"
+  farm:
+    weight: 2
+    lines:
+      - "je farm {item_short} {place}"
+      - "qqn veut farm avec moi ?"
+      - "ma ferme à {mob} tourne bien"
+      - "trop long de farm l'xp"
+      - "j'ai trouvé {n:3-14} diams d'un coup"
+      - "je mine depuis 1h et rien {laugh}"
+      - "y a des bons spawners {place}"
+      - "qqn a une ferme à xp ?"
+      - "mon spawner à {mob} est {good}"
+      - "jvais miner un peu"
+      - "j'ai enfin full stuff diams"
+      - "faut que je farm l'argent pour le grade"
+  server:
+    weight: 2
+    lines:
+      - "le koth c'est à quelle heure ?"
+      - "y a un event {when} ?"
+      - "trop {good} le serv"
+      - "on est combien de fr ici"
+      - "le serv commence à avoir du monde"
+      - "jsuis nouveau vous conseillez quoi ?"
+      - "c'est quoi le meilleur grade ?"
+      - "le shop il est où ?"
+      - "le serv lag un peu non ?"
+      - "vous avez le discord ?"
+      - "qui a gagné le dernier koth ?"
+      - "le classement des facs est {bad}"
+      - "faut que je lie mon compte sur le site"
+      - "y a des récompenses pour le koth ?"
+      - "le spawn est {good}"
+      - "le site est {good}"
+      - "vous avez vu la boutique ?"
+      - "c'est quand le prochain event ?"
+      - "les règles sont où ?"
+      - "le serv est stable ce soir"
+      - "y a combien de facs ?"
+      - "le top fac c'est qui en ce moment ?"
+      - "j'ai voté pour le serv"
+  fun:
+    weight: 2.5
+    lines:
+      - "{laugh}"
+      - "gg"
+      - "re"
+      - "ah ouais"
+      - "jpp"
+      - "c'est mort"
+      - "tranquille"
+      - "quelqu'un a vu {friend} ?"
+      - "jsuis afk 5 min"
+      - "ah non c'est mon co"
+      - "j'ai failli rage quit {laugh}"
+      - "un {mob} m'a explosé ma base {laugh}"
+      - "je suis tombé dans la lave avec tout mon stuff"
+      - "trop de monde ce soir"
+      - "ça fait plaisir de voir du monde"
+      - "jsuis là depuis {n:2-6}h {laugh}"
+      - "mon pc chauffe trop"
+      - "qqn écoute quoi en jouant ?"
+      - "j'ai oublié où est ma base {laugh}"
+      - "les {mob}s me détestent"
+  build:
+    weight: 1.2
+    lines:
+      - "je construis ma base, vous faites quoi vous"
+      - "qqn a du quartz ?"
+      - "je cherche des idées pour ma base"
+      - "ma base est enfin finie"
+      - "faut que je fasse des murs en obsi"
+      - "jfais un bunker sous terre"
+      - "ma base ressemble à rien {laugh}"
+      - "qqn sait faire des portes cachées ?"
+      - "jfais une tour de guet à ma base"
+      - "j'ai besoin de {item_short} pour finir ma base"
+      - "ma base est presque finie"
+      - "qqn veut voir ma base ?"
+      - "j'ai refait tout mon stuff room"
+      - "faut que je cache mes coffres"
+      - "jfais une ferme sous ma base"
+      - "les murs en obsi c'est obligé ici"
+      - "jvais déménager ma base plus loin"
+      - "y a trop de monde près de ma base"
+      - "qui a des idées de pièges ?"
+  meal:
+    weight: 4
+    hours: [12, 13, 19, 20]
+    lines:
+      - "jvais manger je reviens"
+      - "bon app à ceux qui mangent"
+      - "afk manger"
+      - "jreviens après manger"
+      - "ma mère m'appelle pour manger {laugh}"
+      - "pause manger"
+      - "jvais grailler"
+      - "je mange et je reviens"
+      - "qui mange aussi ?"
+      - "bon je vais manger moi"
+      - "à table {laugh}"
+  evening:
+    weight: 2
+    hours: [20, 21, 22]
+    lines:
+      - "c'est l'heure du pvp"
+      - "y a du monde ce soir {laugh}"
+      - "qui est chaud pour un raid ce soir"
+      - "le koth va être {feeling}"
+      - "ça se remplit ce soir"
+      - "qui est co pour un raid ?"
+      - "grosse soirée pvp"
+      - "les {fac} sont tous co ce soir"
+      - "le spawn est blindé"
+      - "on fait quoi ce soir ?"
+      - "jsuis {feeling} pour ce soir"
+      - "qui vient au koth ?"
+      - "grosse guerre {place} ce soir"
+      - "ça va chauffer ce soir {laugh}"
+  night:
+    weight: 3
+    hours: [23, 0, 1, 2, 3]
+    lines:
+      - "qui est encore là ?"
+      - "faut que je dorme moi"
+      - "une dernière game et jvais dormir"
+      - "jsuis mort de fatigue"
+      - "y a plus personne {laugh}"
+      - "les vrais sont encore co à cette heure"
+      - "jvais me faire tuer demain matin {laugh}"
+      - "les insomniaques sont là"
+      - "j'ai cours demain {laugh}"
+      - "plus que les vrais à cette heure"
+      - "farm de nuit tranquille"
+      - "personne pour un pvp à cette heure ?"
+      - "jvais raid pendant que tout le monde dort {laugh}"
+      - "il est quelle heure là {laugh}"
+  morning:
+    weight: 2
+    hours: [7, 8, 9, 10]
+    lines:
+      - "bonjour tlm"
+      - "déjà du monde le matin"
+      - "petit farm du matin"
+      - "jsuis pas réveillé {laugh}"
+      - "slt les lève-tôt"
+      - "café et minecraft"
+      - "qui est déjà co ?"
+      - "le serv est calme le matin"
+      - "je profite qu'il y ait personne"
+
+# Petites conversations entre faux joueurs : l'un pose la question, un autre répond, parfois le premier relance.
+threads:
+  - ask: ["le koth c'est quand ?", "y a koth ce soir ?", "il est à quelle heure le koth"]
+    answers: ["{when} je crois", "regarde sur le discord", "à 21h normalement", "jsp demande au staff", "ce soir oui"]
+    follow-ups: ["merci", "ok", "ah cool", "parfait"]
+  - ask: ["qqn a {item} à vendre ?", "jcherche {item}"]
+    answers: ["moi j'en ai, mp", "combien tu payes ?", "regarde au shop", "nn dsl", "j'en ai plus"]
+    follow-ups: ["je mp", "ok je regarde", "dommage"]
+  - ask: ["qqn pour un 1v1 ?", "qui veut pvp ?", "1v1 {place} ?"]
+    answers: ["moi", "go", "jsuis pas stuff là", "après si tu veux", "tu vas perdre {laugh}", "où ?"]
+    follow-ups: ["go {place}", "viens", "ok à toute", "flemme en fait"]
+  - ask: ["vous êtes dans quelle fac ?", "c'est quoi la meilleure fac ?"]
+    answers: ["les {fac}", "chez les {fac}", "jsuis sans fac", "les {fac} évidemment", "la mienne {laugh}"]
+    follow-ups: ["ah ok", "ils recrutent ?", "jamais entendu"]
+  - ask: ["c'est quoi le meilleur grade ?", "le grade vaut le coup ?"]
+    answers: ["le plus cher {laugh}", "regarde sur le site", "le vaelorian il est bien", "ça dépend ce que tu veux"]
+    follow-ups: ["ok merci", "trop cher pour moi"]
+  - ask: ["qqn sait comment faire de l'argent vite ?", "comment vous faites de l'argent ?"]
+    answers: ["farm les spawners", "vends tes diams", "les jobs", "le koth rapporte bien", "mine et vends au shop"]
+    follow-ups: ["merci", "ok je vais essayer"]
+  - ask: ["le serv lag ou c'est moi ?", "vous laggez ?"]
+    answers: ["c'est toi", "un peu oui", "chez moi ça va", "redémarre ton jeu", "ça va pour moi"]
+    follow-ups: ["ok c'est mon co", "bizarre"]
+  - ask: ["qqn a une ferme à xp ?", "où on farm l'xp ?"]
+    answers: ["moi mais c'est privé {laugh}", "les spawners à blaze", "au nether", "fais une ferme à {mob}"]
+    follow-ups: ["merci", "ok"]
+  - ask: ["qui a raid les {fac} ?", "c'est qui qui a raid ma base ?"]
+    answers: ["jsp", "pas moi {laugh}", "sûrement les {fac}", "check les logs", "aucune idée"]
+    follow-ups: ["ils vont voir", "sérieux", "on va se venger"]
+  - ask: ["jsuis nouveau, je fais quoi ?", "vous conseillez quoi pour commencer ?"]
+    answers: ["trouve une fac", "farm un peu de stuff d'abord", "va loin du spawn", "lis les règles sur le site",
+              "rejoins le discord"]
+    follow-ups: ["merci", "ok ça marche", "trop gentil"]
+  - ask: ["vous jouez depuis quand ?", "qui est là depuis le début ?"]
+    answers: ["depuis l'ouverture", "{n:2-11} mois", "une semaine", "moi depuis le début {laugh}"]
+    follow-ups: ["ah ouais quand même", "pareil"]
+  - ask: ["qqn a vu {friend} ?", "{friend} est co ?"]
+    answers: ["nn", "il était là {time_ago}", "jsp", "il est afk je crois"]
+    follow-ups: ["ok merci", "ah"]
+
+# Réponses aux messages des VRAIS joueurs. Ordre important : la première intention reconnue gagne.
+# chance = probabilité qu'un faux joueur réponde (multipliée par chat.replies.chance dans config.yml).
+intents:
+  # Question sur les bots : les faux joueurs ne répondent pas (ni oui ni non).
+  bot:
+    chance: 0
+    keywords: ["bot", "bots", "faux joueur", "faux joueurs", "fake", "robot", "ia", "pnj"]
+    replies: []
+  insult:
+    chance: 0.3
+    keywords: ["fdp", "ntm", "tg", "ta gueule", "connard", "nul", "nullos", "bouffon", "noob", "ez", "ratio"]
+    replies: ["calme toi", "ok", "t'es vexé ?", "{laugh}", "ça va tranquille", "détends toi", "bref"]
+  greeting:
+    chance: 0.45
+    keywords: ["salut", "slt", "bonjour", "bjr", "cc", "coucou", "yo", "hello", "wesh", "hey", "bonsoir", "salut tlm"]
+    replies: ["slt", "yo", "cc", "salut {player}", "slt ça va ?", "yo {player}", "bonjour", "wesh", "hey", "cc {player}"]
+  how:
+    chance: 0.4
+    keywords: ["ca va", "cv", "sa va", "la forme", "quoi de neuf", "tu vas bien", "vous allez bien"]
+    replies: ["oui et toi ?", "tranquille", "ça va et toi", "bien bien", "tkt ça va", "ça va, un peu fatigué",
+              "nickel", "ça peut aller"]
+  thanks:
+    chance: 0.3
+    keywords: ["merci", "mrc", "thx", "merci beaucoup", "trop gentil"]
+    replies: ["de rien", "tkt", "np", "avec plaisir", "pas de souci"]
+  bye:
+    chance: 0.4
+    keywords: ["bye", "ciao", "a demain", "a plus", "bonne nuit", "bn", "je vais dormir", "jvais dormir", "je deco",
+               "jdeco", "bonne soiree"]
+    replies: ["bye", "a+", "bn", "bonne nuit {player}", "a demain", "ciao", "a+ {player}"]
+  back:
+    chance: 0.35
+    keywords: ["re", "rere", "me revoila", "je suis de retour"]
+    replies: ["wb", "re", "wb {player}", "rere"]
+  gg:
+    chance: 0.45
+    keywords: ["gg", "bien joue", "gg wp", "bravo", "trop fort"]
+    replies: ["gg", "gg wp", "ggg", "bien joué", "gg {player}", "propre"]
+  koth:
+    chance: 0.5
+    keywords: ["koth"]
+    replies: ["{when} je crois", "regarde le discord", "jsp", "ouais jsuis chaud", "ça va être {feeling}",
+              "à 21h normalement", "les {fac} vont le prendre comme d'hab"]
+  event:
+    chance: 0.4
+    keywords: ["event", "evenement", "tournoi", "concours"]
+    replies: ["{when} je crois", "jsp regarde le discord", "y en a un ce week-end non ?", "j'espère qu'il y en a un"]
+  recruit:
+    chance: 0.4
+    keywords: ["recrute", "recrutement", "cherche une fac", "cherche fac", "rejoindre", "une fac", "ma fac",
+               "notre fac", "team"]
+    replies: ["moi jsuis déjà dans une fac", "vous êtes combien ?", "c'est quoi ta fac ?", "les {fac} recrutent je crois",
+              "mp moi", "vous êtes actifs ?", "jsuis chaud mp"]
+  which-fac:
+    chance: 0.45
+    keywords: ["quelle fac", "quelle faction", "dans quelle fac", "t'es dans quelle fac", "ta fac", "ta faction"]
+    replies: ["les {fac}", "chez les {fac}", "jsuis sans fac pour l'instant", "les {fac} et toi ?",
+              "jsuis chez les {fac} depuis {n:2-8} semaines", "une petite fac, les {fac}"]
+  trade:
+    chance: 0.35
+    keywords: ["vend", "vends", "achete", "achat", "acheter", "vendre", "prix", "combien", "echange", "echanger"]
+    replies: ["combien ?", "trop cher", "mp", "moi j'en ai", "c'est quoi ton prix ?", "je prends", "nn merci",
+              "regarde au shop"]
+  duel:
+    chance: 0.4
+    keywords: ["1v1", "duel", "fight", "combat", "pvp", "qui veut se battre"]
+    replies: ["moi", "go", "jsuis pas stuff dsl", "après si tu veux", "tu vas perdre {laugh}", "où ?", "go {place}",
+              "jsuis occupé là"]
+  help:
+    chance: 0.35
+    keywords: ["comment", "aide", "help", "tuto", "commande", "c quoi la commande", "je fais comment"]
+    replies: ["demande au staff", "regarde sur le site", "fais /help", "le discord y a tout", "jsp dsl",
+              "regarde dans le menu"]
+  staff:
+    chance: 0.2
+    keywords: ["staff", "modo", "admin", "cheat", "cheater", "hack", "hacker", "xray"]
+    replies: ["report le sur le discord", "le staff est pas co je crois", "screen et envoie au staff", "sérieux ?"]
+  lag:
+    chance: 0.35
+    keywords: ["lag", "lagg", "laggy", "tps", "freeze", "ping"]
+    replies: ["chez moi ça va", "un peu ouais", "c'est ton co", "ça lag un peu oui", "redémarre ton jeu"]
+  laugh:
+    chance: 0.12
+    keywords: ["mdr", "ptdr", "xd", "lol", "jpp", "mdrr", "ahah"]
+    replies: ["{laugh}", "ptdr", "mdr"]
+  question:
+    chance: 0.15
+    keywords: ["?"]
+    replies: ["jsp", "aucune idée", "demande au staff", "bonne question", "jsais pas dsl", "je crois pas",
+              "peut-être", "ouais je pense"]
+
+# Événements et situations.
+events:
+  join: ["slt", "salut", "yo", "cc", "re", "bonjour", "slt tlm", "re tlm", "wesh", "hello", "rere", "slt ça va ?"]
+  leave: ["a+", "bon j'y vais", "a demain", "bye", "jdois y aller", "allez a+ tlm", "ciao", "jdeco", "a toute"]
+  leave-night: ["bn", "bonne nuit", "bonne nuit tlm", "bon dodo", "a demain bn", "jvais dormir", "allez bn"]
+  leave-meal: ["jvais manger", "a+ jvais manger", "afk manger", "jreviens après manger"]
+  greet-real: ["slt {player}", "yo {player}", "cc {player}", "re {player}", "wb {player}", "slt", "yo"]
+  welcome-new: ["bienvenue {player}", "bienvenue !", "wlc {player}", "bienvenue sur le serv", "slt {player} bienvenue"]
+  death: ["rip {player}", "f", "rip", "{laugh}", "aïe", "gg {killer}", "rip {player} {laugh}", "il s'est fait détruire"]
+  # Un vrai joueur écrit le pseudo d'un faux joueur sans autre intention reconnue.
+  named: ["?", "oui ?", "quoi", "ouais ?", "jsuis là", "hein ?", "qu'est-ce qu'il y a ?", "moi ?"]
+  # Suite d'une conversation déjà engagée avec un vrai joueur, sans intention reconnue.
+  continue: ["ah ouais", "grave", "{laugh}", "ok", "jsp", "c'est vrai", "sérieux ?", "ah bon", "trop bien",
+             "ouais", "bof", "pas faux", "ça marche", "jsuis d'accord", "nn quand même pas"]
+  # Messages privés reçus, sans intention reconnue.
+  whisper: ["?", "oui ?", "c'est qui ?", "jsuis occupé là", "plus tard", "quoi ?", "ok", "nn dsl", "jsuis afk",
+            "{laugh}", "tkt", "jsp", "pk ?", "ouais", "attends 2 sec", "jsuis en pvp là", "on se connaît ?",
+            "jte réponds après", "ça dépend"]

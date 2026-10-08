@@ -129,106 +129,65 @@ chat:
   # Doit être IDENTIQUE au format de chat de ton serveur (plugin de chat, grades…), sinon ça se voit.
   # <name> = pseudo, <message> = texte. Par défaut : format vanilla « <Pseudo> message ».
   format: '\<<name>> <message>'
+  # Les PHRASES sont dans phrases.yml (sujets, vocabulaire, conversations, réponses). Ici : fréquences et chances.
+  # Apprentissage : les phrases qui font réagir les vrais joueurs reviennent plus souvent (brain.yml).
+  learning: true
+  # Un modèle de phrase ne revient pas avant que N autres aient servi (une phrase identique : 250).
+  no-repeat: 100
 
   # Messages spontanés. Fréquence (par minute) = per-minute-base + per-minute-per-player × nombre de faux joueurs
-  # → ~0,5 message/min à 12 faux joueurs, ~2,7/min à 120.
+  # → ~0,5 message/min à 12 faux joueurs, ~2,7/min à 120. Chaque faux joueur parle plus ou moins selon son caractère.
   auto:
     enabled: true
     per-minute-base: 0.3
     per-minute-per-player: 0.02
     min-gap-seconds: 8
-    # Un message ne revient pas avant que N autres aient été envoyés.
-    no-repeat: 25
-    messages:
-      - "qqn pour un 1v1 ?"
-      - "qui veut faire un duel"
-      - "le koth c'est a quelle heure ?"
-      - "je recrute pour ma faction mp moi"
-      - "qqn a du fer a vendre ?"
-      - "jachete des diamants"
-      - "ya un event ce soir ?"
-      - "trop bien le serveur"
-      - "gg a ceux qui ont gagné le koth"
-      - "jsuis mort betement mdr"
-      - "quelqun veut farm avec moi"
-      - "c'est quoi la commande pour le spawn"
-      - "/spawn"
-      - "jai perdu tout mon stuff ptdr"
-      - "le pvp est trop bien ici"
-      - "qui est chaud pour un raid"
-      - "ma base vient de se faire raid"
-      - "on est combien de fr ici"
-      - "jsuis nouveau vous conseillez quoi ?"
-      - "le shop il est ou"
-      - "c'est quoi le meilleur grade"
-      - "jsuis afk 5 min"
-      - "re"
-      - "mdr"
-      - "ptdr"
-      - "gg"
-      - "ah ouais"
-      - "jpp"
-      - "quelqun a vu mon pote"
-      - "qui veut rejoindre ma fac"
-      - "le serv lag un peu non"
-      - "ah non c'est mon co"
-      - "jvais manger je reviens"
-      - "le nether est blindé de monde"
-      - "qqn a un enchant sharp 5"
-      - "vous etes dans quelle faction"
-      - "on se fait un pvp au spawn ?"
-      - "je cherche une fac active"
-      - "trop dur le boss"
-      - "j'ai enfin full diams"
+
+  # Petites conversations entre faux joueurs (question → réponse d'un autre → relance).
+  threads:
+    enabled: true
+    chance: 0.25
+    answer-chance: 0.75
+    follow-up-chance: 0.4
 
   # Juste après une connexion : parfois un bonjour, 3 à 12 s plus tard.
   on-join:
     enabled: true
     chance: 0.12
     delay-seconds: {min: 3, max: 12}
-    messages: ["slt", "salut", "yo", "cc", "re", "bonjour", "slt tout le monde", "re tlm", "wesh", "hello"]
 
-  # Juste avant un départ : parfois un au revoir (la déconnexion suit 3 à 8 s après).
+  # Juste avant un départ : parfois un au revoir (« bn » la nuit, « jvais manger » à midi et 19 h).
   on-leave:
     enabled: true
     chance: 0.08
-    messages: ["a+", "bon j'y vais", "a demain", "je vais manger", "bye", "jdois y aller", "allez a+ tlm", "ciao"]
-    # Entre 22 h et 6 h.
-    night-messages: ["bn", "bonne nuit", "bonne nuit tlm", "bon dodo", "a demain bn", "jvais dormir"]
 
-  # Quand un VRAI joueur se connecte : parfois un faux joueur le salue. <player> = son pseudo.
+  # Quand un VRAI joueur se connecte : parfois un faux joueur le salue (plus souvent un nouveau : « bienvenue »).
   greet-real-players:
     enabled: true
-    chance: 0.2
+    chance: 0.15
+    newcomer-multiplier: 2.5
     delay-seconds: {min: 3, max: 10}
-    messages: ["slt <player>", "yo <player>", "cc <player>", "re <player>", "wb <player>", "slt"]
 
-  # Réponses aux messages des VRAIS joueurs (mot entier, sans accents ni majuscules). <player> = son pseudo.
+  # Quand un vrai joueur meurt : parfois « rip », « gg <tueur> »…
+  death:
+    enabled: true
+    chance: 0.1
+    delay-seconds: {min: 2, max: 6}
+
+  # Réponses aux messages des VRAIS joueurs, selon l'intention reconnue (phrases.yml → intents).
   replies:
     enabled: true
-    chance: 0.35
-    cooldown-seconds: 20
-    delay-seconds: {min: 2, max: 7}
-    # Quand un vrai joueur écrit le pseudo d'un faux joueur, celui-ci répond parfois.
-    when-named-chance: 0.5
-    when-named: ["?", "oui ?", "quoi", "ouais ?", "jsuis la", "hein ?"]
-    rules:
-      - triggers: ["salut", "slt", "bonjour", "cc", "coucou", "yo", "hello", "wesh", "bjr"]
-        answers: ["slt", "yo", "cc", "salut <player>", "slt ça va ?", "yo <player>"]
-      - triggers: ["ca va", "cv", "sa va", "la forme"]
-        answers: ["oui et toi ?", "tranquille", "ça va et toi", "bien bien", "tkt ça va"]
-      - triggers: ["gg", "bien joue", "gg wp"]
-        answers: ["gg", "gg wp", "ggg", "bien joué"]
-      - triggers: ["bn", "bonne nuit", "jvais dormir"]
-        answers: ["bn", "bonne nuit", "bn <player>"]
-      - triggers: ["re"]
-        answers: ["wb", "re", "wb <player>"]
-      - triggers: ["bye", "ciao", "a plus", "a demain"]
-        answers: ["a+", "bye", "a+ <player>"]
-      - triggers: ["1v1", "duel"]
-        answers: ["moi", "go", "jsuis occupé dsl", "apres si tu veux", "tu vas perdre mdr"]
-      - triggers: ["koth"]
-        answers: ["ce soir je crois", "regarde le discord", "jsais pas", "ouais jsuis chaud"]
+    # Multiplie la chance de chaque intention pour un message général.
+    chance: 1.0
+    # Pause minimum entre deux réponses à des messages généraux.
+    cooldown-seconds: 15
+    # Un faux joueur ne reparle pas avant N secondes.
+    per-fake-cooldown-seconds: 6
+    # Quand un vrai joueur écrit le pseudo d'un faux joueur.
+    when-named-chance: 0.6
+    # Une fois qu'un faux joueur a parlé avec un vrai joueur, il poursuit la conversation pendant N secondes.
+    engage-seconds: 90
+    engaged-chance: 0.6
 
 # Commandes visant un faux joueur. Sans ce module, /msg Pseudo, /tpa Pseudo… répondent « joueur introuvable ».
 # La commande est interceptée et reçoit une réponse crédible. Formats en MiniMessage :
@@ -242,12 +201,10 @@ interactions:
     #   incoming: "<gold>[<red><target></red> <gold>-></gold> <red>moi</red>]</gold> <white><message>"
     outgoing: "<gray><i><lang:commands.message.display.outgoing:'<target>':'<message>'>"
     incoming: "<gray><i><lang:commands.message.display.incoming:'<target>':'<message>'>"
-    # Chance de réponse, après un délai « de frappe ». Les règles chat.replies (salut, ça va, 1v1…) sont
-    # utilisées d'abord, sinon une de ces réponses génériques.
+    # Chance de réponse. Délai = temps de lecture (delay-seconds) + temps de frappe selon la longueur.
+    # Réponses : intentions de phrases.yml d'abord, sinon events.whisper.
     reply-chance: 0.6
-    delay-seconds: {min: 4, max: 20}
-    answers: ["?", "oui ?", "c'est qui ?", "jsuis occupé là", "plus tard", "quoi ?", "ok", "nn dsl", "jsuis afk",
-              "mdr", "tkt", "jsp", "pk ?", "ouais", "attends 2 sec", "jsuis en pvp là"]
+    delay-seconds: {min: 2, max: 10}
   list:
     # Réponse de /list (vanilla, traduite). <count> inclut les faux joueurs, <max> = server-list.max-players.
     format: "<lang:commands.list.players:'<count>':'<max>':'<names>'>"
