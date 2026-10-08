@@ -5,6 +5,44 @@ Dépendances facultatives : **Vault** + un plugin d'économie (banque de faction
 
 L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre à la TNT), avec les outils actuels (menus, bouclier, alertes de raid, tableau latéral, chat coloré par relation, site web synchronisé).
 
+## Économie : une seule monnaie, celle de VæloriaShop
+Le plugin Faction et le marché (VæloriaShop) partagent **la même monnaie** : l'économie Vault fournie par EssentialsX. Avec le shop installé, chaque montant du plugin Faction s'affiche exactement comme dans le marché (« 25 000 $ »). Les valeurs par défaut sont calibrées sur le catalogue du shop :
+
+| Repère du shop | Prix |
+|---|---|
+| TNT | 180 $ |
+| Obsidienne (rang Négociant, 8 par jour) | 2 500 $ |
+| Générateur zombie / enderman / golem | 15 000 $ / 140 000 $ / 1 000 000 $ |
+| Rangs de marchand (total vendu) | 20 000 $ → 7 500 000 $ |
+
+**D'où vient l'argent des factions** (versé dans la banque de faction) :
+
+| Source | Montant par défaut |
+|---|---|
+| Missions quotidiennes (3 par jour) | 5 000 à 20 000 $ chacune |
+| Avant-poste tenu | 1 500 $ toutes les 10 min (9 000 $/h, le revenu d'un golem, mais à défendre) |
+| KOTH gagné | 60 000 $ |
+| Totem abattu | 75 000 $ |
+| Dépôts des membres | `/f banque deposer`, avec l'argent gagné au marché |
+
+**Où il repart** (dépenses qui détruisent la monnaie, contre l'inflation) :
+
+| Dépense | Montant par défaut |
+|---|---|
+| Fonder une faction | 10 000 $ (payés par le fondateur) |
+| Renommer la faction | 25 000 $ (banque de faction) |
+| Déclarer une guerre officielle | 50 000 $ (banque de faction) |
+| Améliorations | de 15 000 $ à 1 000 000 $ par niveau (voir plus bas) |
+| Au marché | obsidienne, TNT, générateurs, outils… (prix du shop) |
+
+**Règles communes aux deux plugins :**
+- **Pas de découvert.** EssentialsX autorise par défaut un solde jusqu'à −10 000 $. Le plugin Faction exige le solde réel avant tout prélèvement : impossible de déposer en banque de l'argent qu'on n'a pas, ou de fonder une faction à crédit.
+- **Générateurs.** C'est le shop qui les gère : on les récupère au Toucher de soie et ils vont dans l'inventaire. Le plugin Faction décide seulement *qui* a le droit de les casser (le détenteur du chunk, ou un ennemi pendant une brèche) et note les vols dans le bilan de pillage. Aucun doublon possible.
+- **Outils du shop** (houe, pioche 3×3, hache, baguette de vente). Ils respectent les claims, le totem et les zones protégées. Leurs blocs cassés « en plus » ne comptent ni dans les missions ni pour les éclats d'obsidienne, ce qui évite les abus.
+- **Obsidienne.** Le marché la vend cher et en quantité limitée (2 500 $, 8 par jour, rang Négociant). Sinon, on la reconstitue avec des éclats (9 éclats = 1 bloc). Dans les deux cas, elle reste indestructible à la TNT.
+
+Tous les montants se règlent dans `config.yml` : sections `economy`, `upgrades`, `missions`, `outposts`, `koth`, `totem`.
+
 ## Le cœur : deux façons de piller
 
 ### 1. Le surclaim (pillage historique)
@@ -134,14 +172,14 @@ Le rapport est aussi écrit dans `/f logs` (ligne « BILAN », plus une ligne «
 ## Améliorations de faction (`/f ameliorations`)
 Elles sont payées avec la banque de faction et réservées au chef par défaut (permission `UPGRADE`). Le niveau de faction est la somme des niveaux achetés.
 
-| Amélioration | Bonus par niveau | Niveaux |
+| Amélioration | Bonus par niveau | Coûts par niveau |
 |---|---|---|
-| Territoire | +10 chunks de plafond | 5 |
-| Puissance | +5 power de faction | 5 |
-| Coffre | +1 rangée (6 maximum) | 3 |
-| Bouclier | +1 h de bouclier | 2 |
-| Warps | +1 warp | 3 |
-| Effectif | +5 places de membre | 2 |
+| Territoire | +10 chunks de plafond | 25 k, 60 k, 125 k, 250 k, 500 k $ |
+| Puissance | +5 power de faction | 50 k, 120 k, 250 k, 500 k, 1 M $ |
+| Coffre | +1 rangée (6 maximum) | 20 k, 60 k, 150 k $ |
+| Bouclier | +1 h de bouclier | 150 k, 400 k $ |
+| Warps | +1 warp | 15 k, 40 k, 90 k $ |
+| Effectif | +5 places de membre | 75 k, 200 k $ |
 
 Coûts et bonus se règlent dans `config.yml → upgrades`. Pour le staff : `/f admin banque <faction> <montant>`.
 
@@ -224,6 +262,16 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (économie commune avec VæloriaShop)
+- Essai sur Paper 1.21.4 avec Vault, EssentialsX, VæloriaShop et VæloriaFactions :
+  - le shop et la faction utilisent la même économie EssentialsX, et les montants ont le format du shop (« 10 000 $ ») ;
+  - fondation refusée à 8 000 $ puis payée à 30 000 $ ;
+  - dépôt de 999 999 $ non possédés refusé ;
+  - amélioration achetée 25 000 $ ;
+  - générateur du shop arraché par l'ennemi pendant une brèche : refusé sans Toucher de soie, puis **un seul** générateur rendu avec, aucun doublon au sol, vol noté ;
+  - pioche 3×3 du shop : elle mine autour, mais un seul minerai compte pour les missions.
+- Faille corrigée pendant l'essai : avec le découvert d'EssentialsX, on pouvait déposer de l'argent qu'on n'avait pas.
 
 ## Ce qui a été vérifié (spawners, améliorations, avant-postes, KOTH, missions, confort)
 - 33 tests unitaires, dont les coûts, bonus et plafonds des améliorations, et le tirage identique des missions.

@@ -54,6 +54,7 @@ public final class ObsidianListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) {
+        if (fr.vaeloria.factions.util.Probes.isProbe(e)) return;
         Block b = e.getBlock();
         Player p = e.getPlayer();
         if (plugin.totems().isTotemBlock(b)) return;

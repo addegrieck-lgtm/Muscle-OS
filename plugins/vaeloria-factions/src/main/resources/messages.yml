@@ -385,6 +385,11 @@ totem:
     world_missing: "<red>Le monde de ce totem n'est pas chargé."
     not_enough_players: "<red>Pas assez de joueurs connectés."
 
+economy:
+  create-no-money: "<red>Fonder une faction coûte <white><cost></white> (tu as <white><balance></white>). <gray>Vends au marché : /vendre"
+  create-paid: "<gray>Frais de fondation payés : <gold><cost></gold>."
+  faction-no-money: "<red>La banque de faction n'a pas assez : <white><cost></white> requis, <white><bank></white> disponible. <gray>/f banque deposer ‹montant›"
+
 upgrade:
   bought: "<gold>▲</gold> <white><player></white> <gray>achète <gold><upgrade></gold> niveau <white><level></white> : <green>+<bonus> <unit></green> <dark_gray>(<cost>)"
   max: "<gray><white><upgrade></white> est déjà au niveau maximum."
@@ -393,6 +398,7 @@ upgrade:
 
 spawner:
   looted: "<gold>Tu arraches un <white><type></white> à l'ennemi !"
+  need-silk: "<red>Il faut une pioche Toucher de soie pour récupérer ce spawner."
 
 zone:
   contested: " <red><b>⚔ DISPUTÉ"

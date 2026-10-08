@@ -7,6 +7,19 @@
 # Fuseau horaire du bouclier quotidien.
 timezone: "Europe/Paris"
 
+# ── Économie ──────────────────────────────────────────────────────
+# UNE seule monnaie sur VÆLORIA : celle de VæloriaShop (Vault + EssentialsX). Banque de faction, améliorations,
+# coûts et récompenses l'utilisent ; les montants s'affichent exactement comme dans le shop.
+# Les valeurs par défaut sont calibrées sur le catalogue du shop (générateur zombie 15 000 $, golem 1 000 000 $,
+# obsidienne 2 500 $, rangs de marchand de 20 000 $ à 7 500 000 $). Voir « Économie » dans GUIDE-FACTIONS.md.
+economy:
+  required: true               # prévient en console si aucune économie Vault n'est installée
+  currency-symbol: "$"         # utilisé seulement si VæloriaShop est absent
+  costs:                       # dépenses qui retirent de l'argent du jeu (anti-inflation)
+    create-faction: 10000      # payé par le fondateur
+    rename-faction: 25000      # payé par la banque de faction
+    declare-war: 50000         # payé par la banque de faction
+
 factions:
   name-min: 3
   # Le site accepte jusqu'à 24 caractères.
@@ -180,7 +193,7 @@ totem:
     - "MERCREDI 20:30"
     - "SAMEDI 21:00"
   reward:
-    money: 5000                # versé en banque de faction (Vault)
+    money: 75000               # versé en banque de faction (≈ un générateur d'enderman)
     power-boost: 0             # power de faction ajouté à vie (0 = aucun)
     # Commandes console : {player} = dernier coup, {faction}, {totem}
     commands: []
@@ -193,28 +206,29 @@ spawners:
   enabled: true
   explosion-proof: true
   wilderness-drop: false       # spawners naturels (donjons) : ne tombent pas, pour garder la valeur de la boutique
+  require-silk-touch: true     # même règle que VæloriaShop (qui gère ses générateurs lui-même s'il est installé)
 
 # ── Améliorations de faction (/f ameliorations) ───────────────────
 # Achetées avec la banque de faction. per-level = bonus par niveau ; costs = prix de chaque niveau.
 upgrades:
   claims:                      # plafond de claims
     per-level: 10
-    costs: [10000, 25000, 50000, 100000, 200000]
+    costs: [25000, 60000, 125000, 250000, 500000]
   power:                       # power de faction
     per-level: 5
-    costs: [15000, 40000, 80000, 150000, 300000]
+    costs: [50000, 120000, 250000, 500000, 1000000]
   chest:                       # rangées du coffre de faction (6 maximum)
     per-level: 1
-    costs: [5000, 15000, 40000]
+    costs: [20000, 60000, 150000]
   shield:                      # heures de bouclier quotidien
     per-level: 1
-    costs: [20000, 60000]
+    costs: [150000, 400000]
   warps:
     per-level: 1
-    costs: [5000, 15000, 30000]
+    costs: [15000, 40000, 90000]
   members:                     # places de membre
     per-level: 5
-    costs: [20000, 50000]
+    costs: [75000, 200000]
 
 # ── Avant-postes (/f avantposte) ──────────────────────────────────
 # Zones permanentes : une faction seule dans la zone pendant capture-seconds la prend, puis touche un revenu en
@@ -223,7 +237,7 @@ outposts:
   enabled: true
   capture-seconds: 120
   income-minutes: 10
-  income-money: 1000
+  income-money: 1500           # 9 000 $/h : le revenu d'un générateur de golem, mais à défendre
   power-bonus: 2               # power de faction par avant-poste tenu
 
 # ── KOTH (/f koth) ────────────────────────────────────────────────
@@ -237,7 +251,7 @@ koth:
   schedule:
     - "DIMANCHE 18:00"
   reward:
-    money: 5000
+    money: 60000               # versé en banque de faction
     power-boost: 0
     commands: []               # {player}, {faction}, {koth}
 
@@ -248,13 +262,13 @@ missions:
   enabled: true
   per-day: 3
   pool:
-    - {id: chasse, type: KILL_PLAYERS, target: 20, reward: 6000, label: "Tuer 20 joueurs ennemis"}
-    - {id: monstres, type: KILL_MOBS, target: 250, reward: 2500, label: "Tuer 250 monstres"}
-    - {id: mineurs, type: MINE_ORES, target: 256, reward: 3000, label: "Miner 256 minerais"}
-    - {id: profondeurs, type: MINE_DEEPSLATE_ORES, target: 96, reward: 4000, label: "Miner 96 minerais de deepslate"}
-    - {id: pillards, type: RAID_BLOCKS, target: 300, reward: 7000, label: "Détruire 300 blocs ennemis à la TNT"}
-    - {id: presence, type: PLAYTIME_MINUTES, target: 600, reward: 2000, label: "Cumuler 10 h de jeu entre membres"}
-    - {id: conquete, type: CAPTURE_OUTPOST, target: 1, reward: 5000, label: "Capturer un avant-poste"}
+    - {id: chasse, type: KILL_PLAYERS, target: 20, reward: 15000, label: "Tuer 20 joueurs ennemis"}
+    - {id: monstres, type: KILL_MOBS, target: 250, reward: 6000, label: "Tuer 250 monstres"}
+    - {id: mineurs, type: MINE_ORES, target: 256, reward: 8000, label: "Miner 256 minerais"}
+    - {id: profondeurs, type: MINE_DEEPSLATE_ORES, target: 96, reward: 10000, label: "Miner 96 minerais de deepslate"}
+    - {id: pillards, type: RAID_BLOCKS, target: 300, reward: 20000, label: "Détruire 300 blocs ennemis à la TNT"}
+    - {id: presence, type: PLAYTIME_MINUTES, target: 600, reward: 5000, label: "Cumuler 10 h de jeu entre membres"}
+    - {id: conquete, type: CAPTURE_OUTPOST, target: 1, reward: 12000, label: "Capturer un avant-poste"}
 
 # ── Confort ───────────────────────────────────────────────────────
 nametags:

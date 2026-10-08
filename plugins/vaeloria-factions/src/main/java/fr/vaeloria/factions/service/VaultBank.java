@@ -18,7 +18,15 @@ final class VaultBank implements Bank {
 
     public boolean available() { return true; }
     public double balance(OfflinePlayer p) { return eco.getBalance(p); }
-    public boolean withdraw(OfflinePlayer p, double amount) { return eco.withdrawPlayer(p, amount).transactionSuccess(); }
+    /**
+     * Retrait seulement si le solde RÉEL couvre le montant. EssentialsX autorise par défaut un découvert
+     * (min-money: -10000) et son has() en tient compte : sans ce contrôle, on pourrait déposer en banque de faction
+     * de l'argent qu'on n'a pas, c'est-à-dire créer de la monnaie.
+     */
+    public boolean withdraw(OfflinePlayer p, double amount) {
+        if (amount <= 0 || Double.isNaN(amount) || eco.getBalance(p) + 1e-9 < amount) return false;
+        return eco.withdrawPlayer(p, amount).transactionSuccess();
+    }
     public boolean deposit(OfflinePlayer p, double amount) { return eco.depositPlayer(p, amount).transactionSuccess(); }
-    public String format(double amount) { return eco.format(amount); }
+    public String format(double amount) { return ShopHook.format(amount); }
 }

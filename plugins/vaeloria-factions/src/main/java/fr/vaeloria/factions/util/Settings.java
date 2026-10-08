@@ -80,7 +80,11 @@ public final class Settings {
     public java.util.List<fr.vaeloria.factions.rules.TotemSchedule.Entry> totemSchedule = new java.util.ArrayList<>();
     public java.util.List<String> totemScheduleErrors = new java.util.ArrayList<>();
     // Spawners
-    public boolean spawnersEnabled, spawnersExplosionProof, spawnersWildernessDrop;
+    public boolean spawnersEnabled, spawnersExplosionProof, spawnersWildernessDrop, spawnersRequireSilk;
+    // Économie
+    public String currencySymbol;
+    public boolean economyRequired;
+    public double createCost, renameCost, warDeclareCost;
     // Améliorations
     public Map<fr.vaeloria.factions.model.UpgradeType, fr.vaeloria.factions.rules.Upgrades.Def> upgrades =
             new EnumMap<>(fr.vaeloria.factions.model.UpgradeType.class);
@@ -244,6 +248,12 @@ public final class Settings {
         spawnersEnabled = c.getBoolean("spawners.enabled", true);
         spawnersExplosionProof = c.getBoolean("spawners.explosion-proof", true);
         spawnersWildernessDrop = c.getBoolean("spawners.wilderness-drop", false);
+        spawnersRequireSilk = c.getBoolean("spawners.require-silk-touch", true);
+        currencySymbol = c.getString("economy.currency-symbol", "$");
+        economyRequired = c.getBoolean("economy.required", true);
+        createCost = Math.max(0, c.getDouble("economy.costs.create-faction", 10000));
+        renameCost = Math.max(0, c.getDouble("economy.costs.rename-faction", 25000));
+        warDeclareCost = Math.max(0, c.getDouble("economy.costs.declare-war", 50000));
 
         upgrades = new EnumMap<>(fr.vaeloria.factions.model.UpgradeType.class);
         for (fr.vaeloria.factions.model.UpgradeType t : fr.vaeloria.factions.model.UpgradeType.values()) {

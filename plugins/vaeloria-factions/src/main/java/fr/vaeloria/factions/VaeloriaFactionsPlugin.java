@@ -120,6 +120,11 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         missions.roll();
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
         bank = Banks.detect();
+        fr.vaeloria.factions.service.ShopHook.detect(getLogger(), settings.currencySymbol);
+        if (!bank.available() && settings.economyRequired) {
+            getLogger().severe("Aucune économie Vault : installe Vault + EssentialsX (monnaie de VæloriaShop). "
+                    + "Banque, améliorations, coûts et récompenses en argent sont inactifs tant qu'elle manque.");
+        }
         raid = new RaidService(settings, manager, state);
         access = new AccessService(settings, manager, raid);
         claims = new ClaimService(settings, manager, raid, bridge);
@@ -153,6 +158,12 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             f.setTabCompleter(cmd);
         }
         startTasks();
+        // VæloriaShop et VæloriaFactions se déclarent l'un l'autre en « softdepend » : l'ordre de chargement n'est
+        // pas garanti, on refait la détection une fois tous les plugins activés.
+        Bukkit.getScheduler().runTask(this, () -> {
+            if (!bank.available()) bank = Banks.detect();
+            fr.vaeloria.factions.service.ShopHook.detect(getLogger(), settings.currencySymbol);
+        });
         for (Player p : Bukkit.getOnlinePlayers()) {
             manager.fplayer(p);
             scoreboard.show(p);

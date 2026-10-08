@@ -32,7 +32,7 @@ class MessagesTest {
                 "territory", "grace", "date", "type", "actor", "detail", "url", "ping", "phase", "participants",
                 "ascore", "dscore", "winner", "reason", "war", "combat", "totem", "y", "height", "holder", "broken", "rewards",
                 "world", "wars", "totems", "item", "percent", "attackers", "duration", "total", "items", "dead", "killed", "blocks", "loot", "upgrade", "level", "bonus", "unit", "cost", "type", "outpost", "previous", "capture", "state",
-                "progress", "needed", "name", "radius", "koth", "hold", "mission", "bar", "list", "koths", "outposts", "missions", "reward"};
+                "progress", "needed", "name", "radius", "koth", "hold", "mission", "bar", "list", "koths", "outposts", "missions", "reward", "balance"};
         TagResolver.Builder b = TagResolver.builder();
         for (String n : names) b.resolver(net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.unparsed(n, "X"));
         TagResolver anyPlaceholder = b.build();

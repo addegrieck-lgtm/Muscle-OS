@@ -27,6 +27,7 @@ public final class MissionListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMine(BlockBreakEvent e) {
+        if (fr.vaeloria.factions.util.Probes.isProbe(e)) return;
         Material m = e.getBlock().getType();
         if (!isOre(m)) return;
         Player p = e.getPlayer();

@@ -200,7 +200,7 @@ public final class TotemAdminMenu {
         Menu m = new Menu(4, c("<yellow>Totem · Gains"));
         m.set(10, Menu.item(Material.GOLD_INGOT, c("<yellow><b>Argent en banque : <v>", "v", plugin.bank().format(s().totemRewardMoney)), List.of(
                 c("<gray>Versé à la faction gagnante"),
-                c("<yellow>Gauche +1000 · Droit -1000"), c("<yellow>Maj + clic : montant exact"))), (pl, ct) -> {
+                c("<yellow>Gauche +5000 · Droit -5000"), c("<yellow>Maj + clic : montant exact"))), (pl, ct) -> {
             if (ct.isShiftClick()) {
                 plugin.prompts().ask(pl, "Montant versé à la faction gagnante :", txt -> {
                     try {
@@ -215,7 +215,7 @@ public final class TotemAdminMenu {
                 });
                 return;
             }
-            set("totem.reward.money", Math.max(0, s().totemRewardMoney + (ct.isRightClick() ? -1000 : 1000)));
+            set("totem.reward.money", Math.max(0, s().totemRewardMoney + (ct.isRightClick() ? -5000 : 5000)));
             openRewards(pl);
         });
         m.set(12, Menu.item(Material.BLAZE_POWDER, c("<gold><b>Power de faction : +<v>", "v", Msg.fmt(s().totemRewardPower)), List.of(

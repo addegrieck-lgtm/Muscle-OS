@@ -52,7 +52,15 @@ public final class SpawnerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) {
         Block b = e.getBlock();
+        if (fr.vaeloria.factions.util.Probes.isProbe(e)) return;
         if (b.getType() != Material.SPAWNER || !plugin.settings().spawnersEnabled) return;
+        // VæloriaShop rend lui-même ses générateurs (Toucher de soie) : on ne fait que noter le vol, plus bas.
+        if (fr.vaeloria.factions.service.ShopHook.present()) return;
+        if (plugin.settings().spawnersRequireSilk && !hasSilkPickaxe(e.getPlayer())) {
+            e.setCancelled(true);
+            Msg.send(e.getPlayer(), "spawner.need-silk");
+            return;
+        }
         Faction owner = plugin.manager().factionAt(b.getLocation());
         if (owner == null && !plugin.settings().spawnersWildernessDrop) return;
         if (owner != null && owner.system) return;
@@ -67,6 +75,28 @@ public final class SpawnerListener implements Listener {
             plugin.logs().add(owner, "VOL", p.getName() + (mine == null ? "" : " (" + mine.name + ")"), "a arraché un " + label);
             Msg.send(p, "spawner.looted", "type", label);
         }
+    }
+
+    private static boolean hasSilkPickaxe(Player p) {
+        ItemStack it = p.getInventory().getItemInMainHand();
+        return org.bukkit.Tag.ITEMS_PICKAXES.isTagged(it.getType()) && it.containsEnchantment(org.bukkit.enchantments.Enchantment.SILK_TOUCH);
+    }
+
+    /** Avec VæloriaShop : le générateur est parti chez le joueur, on note seulement le vol dans le bilan de pillage. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onShopSpawnerTaken(BlockBreakEvent e) {
+        if (!fr.vaeloria.factions.service.ShopHook.present() || fr.vaeloria.factions.util.Probes.isProbe(e)) return;
+        Block b = e.getBlock();
+        if (b.getType() != Material.SPAWNER) return;
+        Faction owner = plugin.manager().factionAt(b.getLocation());
+        Player p = e.getPlayer();
+        if (owner == null || owner.system || !plugin.access().viaBreach(p, b.getLocation(), FPerm.SPAWNER)) return;
+        EntityType type = b.getState(false) instanceof CreatureSpawner cs ? cs.getSpawnedType() : null;
+        String label = "générateur " + (type == null ? "vide" : type.name().toLowerCase(Locale.ROOT).replace('_', ' '));
+        Faction mine = plugin.manager().factionOf(p);
+        if (owner.raidReport != null && mine != null) owner.raidReport.addStolen(mine.name, Map.of(label, 1));
+        plugin.logs().add(owner, "VOL", p.getName() + (mine == null ? "" : " (" + mine.name + ")"), "a arraché un " + label);
+        Msg.send(p, "spawner.looted", "type", label);
     }
 
     /** Un spawner posé garde la créature indiquée sur l'objet. */

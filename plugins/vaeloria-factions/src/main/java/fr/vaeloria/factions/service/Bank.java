@@ -15,6 +15,6 @@ public interface Bank {
         public double balance(OfflinePlayer p) { return 0; }
         public boolean withdraw(OfflinePlayer p, double amount) { return false; }
         public boolean deposit(OfflinePlayer p, double amount) { return false; }
-        public String format(double amount) { return String.format(java.util.Locale.ROOT, "%.2f", amount); }
+        public String format(double amount) { return ShopHook.format(amount); }
     };
 }

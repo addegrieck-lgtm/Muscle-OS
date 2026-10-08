@@ -278,6 +278,14 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (m().factionOf(p) != null) { Msg.send(p, "error.already-in-faction"); return; }
         String name = a[0];
         if (!validName(p, name)) return;
+        double cost = s().createCost;
+        if (cost > 0 && plugin.bank().available()) {
+            if (!plugin.bank().withdraw(p, cost)) {
+                Msg.send(p, "economy.create-no-money", "cost", plugin.bank().format(cost), "balance", plugin.bank().format(plugin.bank().balance(p)));
+                return;
+            }
+            Msg.send(p, "economy.create-paid", "cost", plugin.bank().format(cost));
+        }
         Faction f = m().create(name, p);
         plugin.bridge().create(f, p.getUniqueId(), p.getName());
         plugin.bridge().join(f, p.getUniqueId(), p.getName(), Role.CHEF);
@@ -318,6 +326,14 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (a.length < 1) { usage(p, "renommer"); return; }
         if (plugin.wars().warOf(f) != null) { Msg.send(p, "war.locked"); return; }
         if (!validName(p, a[0])) return;
+        if (s().renameCost > 0 && plugin.bank().available()) {
+            if (f.bank < s().renameCost) {
+                Msg.send(p, "economy.faction-no-money", "cost", plugin.bank().format(s().renameCost), "bank", plugin.bank().format(f.bank));
+                return;
+            }
+            f.bank = PowerMath.round(f.bank - s().renameCost);
+            log(f, "BANQUE-", p, "renommage : " + plugin.bank().format(s().renameCost));
+        }
         String old = f.name;
         log(f, "FACTION", p, "a renommé la faction (" + old + " → " + a[0] + ")");
         // Le site identifie les factions par leur nom : on y recrée la faction sous son nouveau nom.
@@ -981,7 +997,18 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 if (a.length < 2) { usage(p, "guerre"); return; }
                 Faction o = m().byName(a[1]);
                 if (o == null || o.system) { Msg.send(p, "error.faction-not-found", "faction", a[1]); return; }
+                double cost = s().warDeclareCost;
+                boolean pay = cost > 0 && plugin.bank().available();
+                if (pay && f.bank < cost) {
+                    Msg.send(p, "economy.faction-no-money", "cost", plugin.bank().format(cost), "bank", plugin.bank().format(f.bank));
+                    return;
+                }
                 var r = ws.declare(f, o, p.getName());
+                if (r == fr.vaeloria.factions.service.WarService.DeclareResult.OK && pay) {
+                    f.bank = PowerMath.round(f.bank - cost);
+                    m().markDirty();
+                    log(f, "BANQUE-", p, "déclaration de guerre : " + plugin.bank().format(cost));
+                }
                 switch (r) {
                     case OK -> { }
                     case COOLDOWN -> Msg.send(p, "war.fail.cooldown", "time", Msg.duration(ws.cooldownRemaining(f, o)));
