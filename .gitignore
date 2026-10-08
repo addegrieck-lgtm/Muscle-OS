@@ -23,3 +23,5 @@ plugins/vaeloria-arena/build
 plugins/vaeloria-arena/.gradle
 plugins/vaeloria-crates/build
 plugins/vaeloria-crates/.gradle
+plugins/vaeloria-mines/build
+plugins/vaeloria-mines/.gradle

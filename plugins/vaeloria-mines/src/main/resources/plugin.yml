@@ -1,0 +1,23 @@
+name: VaeloriaMines
+version: '${version}'
+main: fr.vaeloria.mines.VaeloriaMinesPlugin
+api-version: '1.21'
+description: Mines de VÆLORIA — zones régénérées automatiquement à intervalle réglable, depuis une interface admin en jeu.
+authors: [VÆLORIA]
+commands:
+  mine:
+    description: Mines régénérées (liste, temps restant, administration)
+    usage: "/mine [list|info|admin|create|wand|pos1|pos2|setzone|interval|reset|tp|reload]"
+    aliases: [mines]
+permissions:
+  vaeloria.mines.admin:
+    description: Créer et configurer les mines, les réinitialiser, s'y téléporter
+    default: op
+    children:
+      vaeloria.mines.tp: true
+  vaeloria.mines.tp:
+    description: Se téléporter au point d'arrivée d'une mine (/mine tp)
+    default: op
+  vaeloria.mines.use:
+    description: Voir les mines et le temps avant leur réinitialisation
+    default: true

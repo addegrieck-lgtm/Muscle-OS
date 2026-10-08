@@ -1,0 +1,44 @@
+# VaeloriaMines — réglages généraux.
+# Les mines (zone, blocs, délai…) se configurent EN JEU avec /mine admin (enregistrées dans mines.yml).
+# Placeholders : {mine} nom de la mine, {id} identifiant, {time} « 15 minutes », {clock} « 14:59 », {percent}.
+
+prefix: "&6[VÆLORIA] &7"
+
+# Blocs régénérés par tick pendant une réinitialisation (20 ticks = 1 s).
+# 5 000 / tick : une mine de 50×50×30 (75 000 blocs) se remplit en moins d'une seconde sans geler le serveur.
+blocks-per-tick: 5000
+
+# Avertissements avant la réinitialisation, en secondes (15 min, 10 min, 5 min, 1 min, 30 s, 10 s, 5…1 s).
+warnings: [900, 600, 300, 60, 30, 10, 5, 4, 3, 2, 1]
+
+announce:
+  # server : tout le serveur · world : joueurs du monde de la mine · nearby : joueurs à moins de « radius » blocs.
+  scope: server
+  radius: 150
+
+messages:
+  warning: "{mine} &7se réinitialise dans &e{time}&7 !"
+  # Dans les messages de réinitialisation, {time} = délai jusqu'à la suivante.
+  reset: "{mine} &7s'est réinitialisée ! Prochaine réinitialisation dans &e{time}&7."
+  reset-percent: "{mine} &7a été minée à &e{percent}% &7: elle s'est réinitialisée !"
+  evacuated: "&7Tu as été mis à l'abri : {mine} &7se réinitialise."
+
+# Barre en haut de l'écran pour les joueurs dans la mine (ou à moins de « margin » blocs).
+bossbar:
+  enabled: true
+  margin: 5
+  # PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+  color: PURPLE
+  title: "{mine} &8· {state}"
+
+# Texte flottant au point choisi dans l'admin (« Hologramme »). « \n » = retour à la ligne.
+hologram:
+  format: "{mine}\n{state}"
+
+# {state} selon l'état de la mine (la barre utilise {clock}, l'hologramme {time}).
+states:
+  countdown: "&7Réinitialisation dans &e{time}"
+  countdown-short: "&7Réinitialisation dans &e{clock}"
+  resetting: "&eRéinitialisation en cours…"
+  paused: "&7En pause"
+  unready: "&cNon configurée"
