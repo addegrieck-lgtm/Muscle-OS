@@ -35,24 +35,24 @@ timezone: "Europe/Paris"        # minuit de cette zone = nouvelle journée (roue
 #   c) /votes give <joueur> <site> depuis la console (site web, autre plugin).
 sites:
   site1:
-    name: "Site 1"
-    url: "https://exemple.fr/vote/vaeloria"
+    name: "Serveur Privé"
+    url: "https://serveur-prive.net"                # À REMPLACER par la page de vote de VÆLORIA sur ce site (après inscription)
     cooldown-minutes: 1440
     check-url: ""
     api-key: ""
     success-regex: ''
     votifier-service: ""
   site2:
-    name: "Site 2"
-    url: "https://exemple.fr/vote/vaeloria"
+    name: "Serveur Minecraft"
+    url: "https://serveur-minecraft.com"                # À REMPLACER par la page de vote de VÆLORIA sur ce site (après inscription)
     cooldown-minutes: 1440
     check-url: ""
     api-key: ""
     success-regex: ''
     votifier-service: ""
   site3:
-    name: "Site 3"
-    url: "https://exemple.fr/vote/vaeloria"
+    name: "Liste Serveurs Minecraft"
+    url: "https://www.liste-serveurs-minecraft.org"                # À REMPLACER par la page de vote de VÆLORIA sur ce site (après inscription)
     cooldown-minutes: 1440
     check-url: ""
     api-key: ""

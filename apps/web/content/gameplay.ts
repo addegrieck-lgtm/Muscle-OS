@@ -16,9 +16,10 @@ export interface VoteSite {
 
 /** Les 3 sites de vote. Remplacer nom + lien en même temps que `sites:` dans VaeloriaVote/config.yml. */
 export const VOTE_SITES: VoteSite[] = [
-  { id: "site1", name: "Site 1", url: "", cooldownMinutes: 1440 },
-  { id: "site2", name: "Site 2", url: "", cooldownMinutes: 1440 },
-  { id: "site3", name: "Site 3", url: "", cooldownMinutes: 1440 },
+  // url : page de vote de VÆLORIA sur chaque site, à renseigner après l'inscription du serveur.
+  { id: "site1", name: "Serveur Privé", url: "", cooldownMinutes: 1440 },
+  { id: "site2", name: "Serveur Minecraft", url: "", cooldownMinutes: 1440 },
+  { id: "site3", name: "Liste Serveurs Minecraft", url: "", cooldownMinutes: 1440 },
 ];
 
 export const VOTE = {
