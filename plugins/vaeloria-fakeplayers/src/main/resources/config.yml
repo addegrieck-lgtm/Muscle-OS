@@ -1,0 +1,77 @@
+# VæloriaFakePlayers — configuration
+# Formats en MiniMessage (https://docs.advntr.dev/minimessage/format.html). <name> = pseudo du faux joueur.
+
+# Restaurer au redémarrage les faux joueurs créés par commande (fichier fakes.yml).
+persist: true
+
+# Pseudos utilisés en priorité par /fp add et le mode ambiance (3 à 16 caractères : lettres, chiffres, _).
+# Une fois la liste épuisée, des pseudos sont générés aléatoirement.
+names:
+  - Kaelith
+  - Drakonis_
+  - SkyWarden
+  - NoxFury
+  - LeoMineur
+  - Arkhane
+  - Vortyx
+  - Elyndra
+  - TheoPvP
+  - Maxou_77
+
+messages:
+  # Laisser vide ("") pour ne rien afficher.
+  join: "<yellow><name> a rejoint la partie</yellow>"
+  quit: "<yellow><name> a quitté la partie</yellow>"
+
+tab:
+  # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
+  enabled: true
+  # Nom affiché dans le TAB ("" = pseudo brut).
+  display-name: "<gray><name>"
+  ping:
+    min: 15
+    max: 90
+
+skins:
+  # Récupère le skin Mojang du pseudo (requête asynchrone).
+  fetch: true
+  # Si le pseudo n'a pas de compte Mojang, emprunte le skin d'un de ces comptes (sinon Steve/Alex).
+  fallback-names: []
+
+server-list:
+  # ATTENTION : gonfler le nombre de joueurs affiché dans la liste des serveurs est interdit par la plupart
+  # des sites de classement (top-serveurs, serveurs-minecraft…) et trompe les joueurs. Désactivé par défaut.
+  include-fakes: false
+  # Nombre max de pseudos affichés au survol du compteur.
+  sample-size: 12
+
+bodies:
+  # Corps « mannequin » (Minecraft 1.21.9+) placés avec /fp spawn <pseudo> body ou /fp tphere.
+  invulnerable: true
+  # Les corps tournent la tête vers le joueur le plus proche (8 blocs).
+  look-at-players: true
+
+# Mode ambiance : des faux joueurs arrivent et partent tout seuls.
+auto:
+  enabled: false
+  min: 3
+  max: 10
+  # Toutes les N secondes : une arrivée (join-chance) ou, à défaut, un départ (leave-chance).
+  interval-seconds: 60
+  join-chance: 0.5
+  leave-chance: 0.3
+
+chat:
+  format: "<gray><name></gray> <dark_gray>»</dark_gray> <white><message>"
+  auto:
+    # Messages automatiques des faux joueurs.
+    enabled: false
+    interval-seconds: 90
+    chance: 0.5
+    messages:
+      - "salut tout le monde"
+      - "qqn pour un 1v1 ?"
+      - "gg"
+      - "le KOTH c'est quand ?"
+      - "je cherche une faction"
+      - "lag un peu non ?"

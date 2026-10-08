@@ -25,6 +25,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm typecheck` | Vérification TypeScript de tout le workspace |
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
+| `cd plugins/vaeloria-fakeplayers && gradle build` | Jar du plugin de faux joueurs ([doc](plugins/vaeloria-fakeplayers/README.md)) |
 
 ## Documentation
 

@@ -15,3 +15,5 @@ next-env.d.ts
 # Plugin Minecraft
 plugins/vaeloria-bridge/build
 plugins/vaeloria-bridge/.gradle
+plugins/vaeloria-fakeplayers/build
+plugins/vaeloria-fakeplayers/.gradle
