@@ -25,11 +25,12 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm typecheck` | Vérification TypeScript de tout le workspace |
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
+| `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 |
 
 ## Documentation
 
 - [Architecture du site](docs/SITE_ARCHITECTURE.md) · [API](docs/API_ARCHITECTURE.md) · [Base de données](docs/DATABASE.md)
-- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
+- [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Arène de bots P4 U3](docs/ARENA_BOTS.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
 

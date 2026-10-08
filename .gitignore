@@ -13,5 +13,5 @@ coverage
 next-env.d.ts
 .claude
 # Plugin Minecraft
-plugins/vaeloria-bridge/build
-plugins/vaeloria-bridge/.gradle
+plugins/*/build
+plugins/*/.gradle
