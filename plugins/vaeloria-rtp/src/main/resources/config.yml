@@ -1,0 +1,94 @@
+# VæloriaRTP — réglages généraux. Les mondes se configurent dans worlds.yml ou en jeu avec /rtpadmin.
+# Textes au format MiniMessage : https://docs.advntr.dev/minimessage/format.html
+
+menu:
+  rows: 3                       # hauteur du menu /rtp (1 à 6)
+  filler: BLACK_STAINED_GLASS_PANE
+  hide-locked-worlds: false     # true = cacher les mondes dont le joueur n'a pas la permission
+
+teleport:
+  cooldown-per-world: true      # false = un seul délai partagé entre tous les mondes
+  cancel-on-move: true          # bouger pendant le compte à rebours annule le RTP
+  cancel-on-damage: true        # subir des dégâts pendant le compte à rebours annule le RTP
+  fall-protection-seconds: 5    # pas de dégâts de chute juste après l'arrivée
+  title: true                   # titre à l'écran à l'arrivée
+
+search:
+  max-attempts: 25              # positions testées avant d'abandonner
+  unsafe-blocks:                # sol ou blocs interdits à l'arrivée
+    - LAVA
+    - WATER
+    - MAGMA_BLOCK
+    - CACTUS
+    - FIRE
+    - SOUL_FIRE
+    - CAMPFIRE
+    - SOUL_CAMPFIRE
+    - POWDER_SNOW
+    - SWEET_BERRY_BUSH
+    - POINTED_DRIPSTONE
+    - WITHER_ROSE
+    - COBWEB
+    - BEDROCK
+  blocked-biomes:               # biomes où l'on n'atterrit jamais
+    - ocean
+    - deep_ocean
+    - cold_ocean
+    - deep_cold_ocean
+    - frozen_ocean
+    - deep_frozen_ocean
+    - lukewarm_ocean
+    - deep_lukewarm_ocean
+    - warm_ocean
+    - river
+    - frozen_river
+
+messages:
+  prefix: "<gradient:#D21F2F:#5E0710><bold>VÆLORIA</bold></gradient> <dark_gray>»</dark_gray> "
+  menu-title: "<dark_gray>Téléportation aléatoire"
+  menu-click: "<green>▶ Clic pour partir à l'aventure"
+  menu-cooldown: "<red>⌛ Disponible dans <time>"
+  menu-locked: "<red>🔒 Accès réservé"
+  menu-empty: "<red>Aucun monde disponible pour le moment"
+  players-only: "<prefix><red>Commande réservée aux joueurs."
+  no-permission: "<prefix><red>Tu n'as pas la permission."
+  usage: "<prefix><gray>Utilisation : <white><usage>"
+  unknown-world: "<prefix><red>Monde inconnu : <white><world>"
+  unknown-player: "<prefix><red>Joueur introuvable : <white><player>"
+  world-unavailable: "<prefix><red>Le monde <world> <red>n'est pas disponible."
+  world-disabled: "<prefix><red>Le RTP est désactivé dans <world><red>."
+  world-no-permission: "<prefix><red>Tu n'as pas accès au RTP de <world><red>."
+  already-pending: "<prefix><red>Une téléportation est déjà en cours."
+  cooldown: "<prefix><red>Patiente encore <white><time></white> avant un nouveau RTP dans <world><red>."
+  warmup-start: "<prefix><gray>Téléportation vers <world> <gray>dans <white><seconds>s</white>… ne bouge pas !"
+  warmup-actionbar: "<gold>Téléportation dans <white><seconds></white>…"
+  cancelled-move: "<prefix><red>Téléportation annulée : tu as bougé."
+  cancelled-damage: "<prefix><red>Téléportation annulée : tu as subi des dégâts."
+  searching: "<prefix><gray>Recherche d'un endroit sûr dans <world><gray>…"
+  not-found: "<prefix><red>Aucun endroit sûr trouvé dans <world><red>, réessaie."
+  success: "<prefix><green>Téléporté dans <world> <green>en <white><x> <y> <z></white>."
+  title: "<gradient:#D21F2F:#FFFFFF><bold>EN TERRE INCONNUE</bold></gradient>"
+  subtitle: "<world>"
+  forced: "<prefix><green><player> part vers <world><green>."
+  forced-failed: "<prefix><red>Impossible d'envoyer <player> dans <world> <red>(monde indisponible ou téléportation déjà en cours)."
+  reloaded: "<prefix><green>Configuration rechargée."
+  prompt: "<prefix><yellow><question><newline><gray>Écris la valeur dans le chat, ou <white>annuler</white>."
+  prompt-timeout: "<prefix><red>Saisie expirée."
+  admin-saved: "<prefix><green>Enregistré."
+  admin-invalid: "<prefix><red><error>"
+  admin-added: "<prefix><green>Monde <white><world></white> ajouté au RTP."
+  admin-removed: "<prefix><green>Monde <white><world></white> retiré du RTP."
+  admin-hand-empty: "<prefix><red>Prends un objet en main pour l'utiliser comme icône."
+  admin-wrong-world: "<prefix><red>Tu dois être dans le monde <white><world></white> pour utiliser ta position."
+  admin-cooldown-reset: "<prefix><green>Délais RTP de <white><player></white> réinitialisés."
+  admin-list-empty: "<prefix><gray>Aucun monde configuré. <white>/rtpadmin add <monde>"
+  admin-list-entry: "<prefix><white><world></white> <dark_gray>(</dark_gray><name><dark_gray>)</dark_gray> <gray><state> · <min> → <max> blocs"
+  admin-help:
+    - "<gradient:#D21F2F:#5E0710><bold>VæloriaRTP</bold></gradient> <gray>— administration"
+    - "<white>/rtpadmin</white> <gray>ouvre l'interface"
+    - "<white>/rtpadmin list</white> <gray>liste les mondes"
+    - "<white>/rtpadmin add|remove|edit <monde>"
+    - "<white>/rtpadmin set <monde> <réglage> <valeur>"
+    - "<white>/rtpadmin resetcooldown <joueur>"
+    - "<white>/rtpadmin reload"
+    - "<white>/rtp <monde> <joueur></white> <gray>téléportation forcée (console, PNJ)"

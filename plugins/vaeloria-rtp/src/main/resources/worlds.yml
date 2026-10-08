@@ -1,0 +1,52 @@
+# Mondes du RTP VÆLORIA. Modifiable en jeu avec /rtpadmin (recommandé) ou à la main puis /rtpadmin reload.
+# Les mondes listés mais non chargés sur le serveur sont ignorés (et signalés en rouge dans /rtpadmin).
+worlds:
+  world:
+    enabled: true
+    display-name: "<green><bold>Monde Faction"
+    icon: GRASS_BLOCK
+    description:
+      - "<gray>Le monde principal : bâtis ta base,"
+      - "<gray>loin des regards ennemis."
+    slot: -1                 # -1 = placement automatique
+    shape: SQUARE            # SQUARE ou CIRCLE
+    center-x: 0
+    center-z: 0
+    min-radius: 500
+    max-radius: 5000
+    cooldown: 300            # secondes entre deux RTP
+    warmup: 3                # secondes d'immobilité avant le départ
+    permission: false        # true = nécessite vaeloria.rtp.world.<nom>
+    max-y: auto
+  world_nether:
+    enabled: true
+    display-name: "<red><bold>Nether"
+    icon: NETHERRACK
+    description:
+      - "<gray>Ressources rares, dangers mortels."
+    slot: -1
+    shape: SQUARE
+    center-x: 0
+    center-z: 0
+    min-radius: 100
+    max-radius: 2000
+    cooldown: 600
+    warmup: 3
+    permission: false
+    max-y: 120
+  world_the_end:
+    enabled: false
+    display-name: "<light_purple><bold>L'End"
+    icon: END_STONE
+    description:
+      - "<gray>Les îles extérieures."
+    slot: -1
+    shape: CIRCLE
+    center-x: 0
+    center-z: 0
+    min-radius: 1000
+    max-radius: 4000
+    cooldown: 900
+    warmup: 3
+    permission: false
+    max-y: auto

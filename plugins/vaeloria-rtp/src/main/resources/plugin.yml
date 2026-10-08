@@ -1,0 +1,36 @@
+name: VaeloriaRTP
+version: '${version}'
+main: fr.vaeloria.rtp.VaeloriaRtpPlugin
+api-version: '1.21'
+description: Téléportation aléatoire multi-mondes de VÆLORIA (menu de choix + interface d'administration).
+authors: [VÆLORIA]
+softdepend: [Multiverse-Core]
+commands:
+  rtp:
+    description: Ouvrir le menu de téléportation aléatoire, ou /rtp <monde>
+    usage: /rtp [monde] [joueur]
+    aliases: [wild, randomtp]
+    permission: vaeloria.rtp.use
+  rtpadmin:
+    description: Interface d'administration du RTP
+    usage: /rtpadmin [gui|list|add|remove|edit|set|reload|resetcooldown]
+    permission: vaeloria.rtp.admin
+permissions:
+  vaeloria.rtp.use:
+    description: Utiliser /rtp
+    default: true
+  vaeloria.rtp.bypass.cooldown:
+    description: Ignorer le délai entre deux RTP
+    default: op
+  vaeloria.rtp.bypass.warmup:
+    description: Ignorer le compte à rebours
+    default: op
+  vaeloria.rtp.others:
+    description: Téléporter un autre joueur (/rtp <monde> <joueur>)
+    default: op
+  vaeloria.rtp.admin:
+    description: Interface et commandes d'administration
+    default: op
+    children:
+      vaeloria.rtp.use: true
+      vaeloria.rtp.others: true

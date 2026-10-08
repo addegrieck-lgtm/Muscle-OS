@@ -39,9 +39,12 @@ jobs:
 
   plugin:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        plugin: [vaeloria-bridge, vaeloria-rtp]
     defaults:
       run:
-        working-directory: plugins/vaeloria-bridge
+        working-directory: plugins/${{ matrix.plugin }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -54,5 +57,5 @@ jobs:
       - run: gradle build --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: vaeloria-bridge
-          path: plugins/vaeloria-bridge/build/libs/*.jar
+          name: ${{ matrix.plugin }}
+          path: plugins/${{ matrix.plugin }}/build/libs/*.jar
