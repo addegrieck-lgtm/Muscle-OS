@@ -76,6 +76,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         chat = new AmbientChat(this);
         getServer().getPluginManager().registerEvents(chat, this);
+        getServer().getPluginManager().registerEvents(new FakeInteractions(this, chat), this);
         FakeCommand command = new FakeCommand(this);
         getCommand("fakeplayers").setExecutor(command);
         getCommand("fakeplayers").setTabCompleter(command);
@@ -256,6 +257,8 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         return (long) ((min + (max - min) * u * u) * 60_000);
     }
 
+    AmbientChat chat() { return chat; }
+
     /** Départ d'un faux joueur, précédé parfois d'un « a+ » quelques secondes avant. */
     void depart(FakePlayer fake) {
         if (fake.leaving()) return;
@@ -290,10 +293,15 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPing(PaperServerListPingEvent event) {
-        if (!getConfig().getBoolean("server-list.include-fakes", false) || manager.count() == 0) return;
+        if (!getConfig().getBoolean("server-list.include-fakes", false)) return;
+        int maxPlayers = getConfig().getInt("server-list.max-players", 0);
+        if (maxPlayers > 0) event.setMaxPlayers(maxPlayers);
+        if (manager.count() == 0) return;
         event.setNumPlayers(event.getNumPlayers() + manager.count());
         int sample = getConfig().getInt("server-list.sample-size", 12);
-        for (FakePlayer fake : manager.all()) {
+        List<FakePlayer> shuffled = new ArrayList<>(manager.all());
+        java.util.Collections.shuffle(shuffled); // pas toujours les mêmes pseudos au survol
+        for (FakePlayer fake : shuffled) {
             if (event.getListedPlayers().size() >= sample) break;
             event.getListedPlayers().add(new PaperServerListPingEvent.ListedPlayerInfo(fake.name(), fake.uuid()));
         }

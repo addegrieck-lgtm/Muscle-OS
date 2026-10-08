@@ -145,6 +145,17 @@ final class AmbientChat implements Listener {
         });
     }
 
+    /** Réponses prévues par chat.replies.rules pour ce texte (vide si aucune règle ne correspond). */
+    List<String> ruleAnswers(String text) {
+        ConfigurationSection replies = plugin.getConfig().getConfigurationSection("chat.replies");
+        if (replies == null) return List.of();
+        String normalized = normalize(text);
+        for (Map<?, ?> rule : replies.getMapList("rules")) {
+            if (matches(normalized, rule.get("triggers"))) return strings(rule.get("answers"));
+        }
+        return List.of();
+    }
+
     private static boolean matches(String normalized, Object triggers) {
         String padded = " " + normalized + " ";
         for (String trigger : strings(triggers)) {

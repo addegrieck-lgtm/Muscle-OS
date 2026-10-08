@@ -31,10 +31,14 @@ skins:
   fallback-names: []
 
 server-list:
-  # ATTENTION : gonfler le nombre de joueurs affiché dans la liste des serveurs est interdit par la plupart
-  # des sites de classement (top-serveurs, serveurs-minecraft…) et trompe les joueurs. Désactivé par défaut.
-  include-fakes: false
-  # Nombre max de pseudos affichés au survol du compteur.
+  # Affiche les faux joueurs dans le menu Multijoueur : compteur (ex. 87/200) et pseudos au survol.
+  # ATTENTION : la plupart des sites de classement (top-serveurs, serveurs-minecraft…) interdisent de gonfler
+  # le compteur et peuvent retirer le serveur s'ils le détectent.
+  include-fakes: true
+  # Nombre de places affiché (« 87/200 »). 0 = valeur de server.properties (max-players).
+  # À garder au-dessus de auto.hard-cap + tes vrais joueurs, sinon « 140/20 » se remarque.
+  max-players: 200
+  # Nombre max de pseudos affichés au survol du compteur (tirés au hasard à chaque rafraîchissement).
   sample-size: 12
 
 bodies:
@@ -224,3 +228,80 @@ chat:
         answers: ["moi", "go", "jsuis occupé dsl", "apres si tu veux", "tu vas perdre mdr"]
       - triggers: ["koth"]
         answers: ["ce soir je crois", "regarde le discord", "jsais pas", "ouais jsuis chaud"]
+
+# Commandes visant un faux joueur. Sans ce module, /msg Pseudo, /tpa Pseudo… répondent « joueur introuvable ».
+# La commande est interceptée et reçoit une réponse crédible. Formats en MiniMessage :
+# <target> = faux joueur visé, <player> = celui qui tape la commande, <message> = texte du message privé.
+# Mets les MÊMES formats que tes plugins (Essentials, plugin de factions…), sinon la différence se voit.
+interactions:
+  enabled: true
+  whisper:
+    # Format vanilla /msg, traduit dans la langue du joueur. Exemple Essentials :
+    #   outgoing: "<gold>[<red>moi</red> <gold>-></gold> <red><target></red>]</gold> <white><message>"
+    #   incoming: "<gold>[<red><target></red> <gold>-></gold> <red>moi</red>]</gold> <white><message>"
+    outgoing: "<gray><i><lang:commands.message.display.outgoing:'<target>':'<message>'>"
+    incoming: "<gray><i><lang:commands.message.display.incoming:'<target>':'<message>'>"
+    # Chance de réponse, après un délai « de frappe ». Les règles chat.replies (salut, ça va, 1v1…) sont
+    # utilisées d'abord, sinon une de ces réponses génériques.
+    reply-chance: 0.6
+    delay-seconds: {min: 4, max: 20}
+    answers: ["?", "oui ?", "c'est qui ?", "jsuis occupé là", "plus tard", "quoi ?", "ok", "nn dsl", "jsuis afk",
+              "mdr", "tkt", "jsp", "pk ?", "ouais", "attends 2 sec", "jsuis en pvp là"]
+  list:
+    # Réponse de /list (vanilla, traduite). <count> inclut les faux joueurs, <max> = server-list.max-players.
+    format: "<lang:commands.list.players:'<count>':'<max>':'<names>'>"
+  # action : whisper (message privé), reply (/r), list, request (demande qui expire ou est refusée),
+  #          message (réponse fixe), disconnect (kick/ban : le faux joueur se déconnecte),
+  #          teleport (vers son corps s'il en a un).
+  # arg : position du pseudo dans la commande (1 par défaut ; 2 pour « /f invite <pseudo> »).
+  # subcommands : sous-commandes concernées (ex. invite pour /f).
+  commands:
+    - {commands: [msg, tell, w, whisper, m, t, pm, message, emsg, etell, ewhisper, dm], action: whisper}
+    - {commands: [r, reply, er, ereply], action: reply}
+    - {commands: [list, online, who, playerlist, elist, ewho], action: list}
+    - commands: [tpa, call, tpask, etpa, ecall]
+      action: request
+      sent: "<gold>Demande de téléportation envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé ta demande de téléportation."
+      expired: "<red>Ta demande de téléportation à <target> a expiré."
+      already: "<red>Tu as déjà une demande en cours avec <target>."
+      refuse-chance: 0.4
+      expire-seconds: 120
+    - commands: [tpahere, etpahere]
+      action: request
+      sent: "<gold>Demande envoyée à <red><target></red> pour qu'il se téléporte à toi."
+      refused: "<red><target></red> <gold>a refusé ta demande de téléportation."
+      expired: "<red>Ta demande de téléportation à <target> a expiré."
+      refuse-chance: 0.5
+      expire-seconds: 120
+    - commands: [duel, 1v1]
+      action: request
+      sent: "<gold>Demande de duel envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé ton duel."
+      expired: "<red>Ta demande de duel à <target> a expiré."
+      refuse-chance: 0.6
+      expire-seconds: 60
+    - commands: [trade, echange]
+      action: request
+      sent: "<gold>Demande d'échange envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé l'échange."
+      expired: "<red>Ta demande d'échange à <target> a expiré."
+      refuse-chance: 0.5
+      expire-seconds: 60
+    - commands: [f, fac, faction, factions]
+      subcommands: [invite, inv]
+      arg: 2
+      action: request
+      sent: "<yellow>Tu as invité <target> dans ta faction."
+      refused: ""
+      expired: "<red>L'invitation de <target> a expiré."
+      refuse-chance: 0
+      expire-seconds: 300
+    - commands: [pay, epay]
+      action: message
+      message: "<red><target> n'accepte pas les paiements pour le moment."
+    - commands: [kick, ekick, ban, eban, tempban, etempban, ipban, banip]
+      action: disconnect
+      feedback: "<gray><target> a été déconnecté du serveur."
+    - {commands: [tp, teleport, tpo, etp, s], action: teleport}
+

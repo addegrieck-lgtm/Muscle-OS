@@ -10,7 +10,8 @@ Plugin Paper de faux joueurs, inspiré de [Fake Player Plugin](https://hangar.pa
 | **Corps** dans le monde avec skin, qui regardent les joueurs proches | entité Mannequin, sans NMS | Minecraft **1.21.9+** |
 | **Mode ambiance** : arrivées et départs un par un, vers une cible | `auto.*`, `/fp auto on` | — |
 | **Planning** : cible selon l'heure, mercredi, week-end, vacances scolaires (zones A/B/C), jours fériés | `schedule.*`, `/fp schedule` | — |
-| Compteur de la **liste des serveurs** | `server-list.include-fakes` | désactivé par défaut (voir ci-dessous) |
+| **Menu Multijoueur** : compteur (« 87/200 ») et pseudos au survol | `server-list.*` | voir l'avertissement ci-dessous |
+| **Commandes** visant un faux joueur : `/msg` (avec réponse), `/r`, `/list`, `/tpa`, `/duel`, `/trade`, `/f invite` (refus ou expiration), `/pay`, `/kick`/`/ban`, `/tp` vers son corps ; pseudos proposés en auto-complétion | `interactions.*` | — |
 | **Persistance** des faux joueurs créés par commande | `plugins/VaeloriaFakePlayers/fakes.yml` | — |
 
 Sans PacketEvents ou sur un serveur < 1.21.9, le plugin démarre quand même et désactive seulement la partie concernée.
@@ -50,9 +51,12 @@ de période à venir. Les jours fériés français sont calculés automatiquemen
 
 ## Limites, volontaires
 
-- Ce ne sont **pas** de vraies connexions : les faux joueurs n'apparaissent pas dans `Bukkit.getOnlinePlayers()`, `/list`, ni dans les plugins tiers (factions, économie). C'est ce qui rend le plugin stable sans NMS d'une version à l'autre.
+- Ce ne sont **pas** de vraies connexions : les autres plugins (factions, économie, scoreboard) ne les voient pas. Les
+  commandes courantes sont interceptées par `interactions.commands` pour répondre de façon crédible ; une commande non
+  listée répondra « joueur introuvable ». C'est ce qui rend le plugin stable sans NMS d'une version à l'autre.
 - Un vrai joueur qui se connecte avec le pseudo d'un faux le remplace.
-- **Liste des serveurs** : gonfler le compteur est interdit par la plupart des sites de classement et trompe les joueurs ; l'option existe pour les tests et reste à `false` par défaut.
+- **Menu Multijoueur** : gonfler le compteur est interdit par la plupart des sites de classement, qui peuvent retirer
+  le serveur s'ils le détectent (`server-list.include-fakes: false` pour le couper).
 
 ## Build
 
