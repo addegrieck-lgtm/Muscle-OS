@@ -18,6 +18,8 @@ public final class FakePlayer {
     private long leaveAt;
     /** Départ annoncé (message d'au revoir envoyé), déconnexion imminente. */
     private boolean leaving;
+    /** Visible dans la liste TAB (sinon seulement compté), selon les places laissées par VaeloriaTab. */
+    private volatile boolean listed = true;
     private Location bodyLocation;
 
     /** Texture signée Mojang (propriété « textures »). */
@@ -52,5 +54,7 @@ public final class FakePlayer {
     public long leaveAt() { return leaveAt; }
     public void leaveAt(long leaveAt) { this.leaveAt = leaveAt; }
     public boolean leaving() { return leaving; }
+    public boolean listed() { return listed; }
+    public void listed(boolean listed) { this.listed = listed; }
     public void leaving(boolean leaving) { this.leaving = leaving; }
 }

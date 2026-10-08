@@ -68,6 +68,7 @@ public final class FakePlayerManager {
     public FakePlayer spawn(String name, boolean auto, Location bodyAt, boolean silent) {
         if (!NamePool.isValid(name) || takenNames().contains(name.toLowerCase(Locale.ROOT))) return null;
         FakePlayer fake = new FakePlayer(name, auto, randomPing());
+        fake.listed(fakes.size() < tabSlots());
         fakes.put(name.toLowerCase(Locale.ROOT), fake);
         refreshSnapshot();
         if (bodyAt != null && bodies != null) bodies.spawn(fake, bodyAt);
@@ -97,8 +98,9 @@ public final class FakePlayerManager {
 
     public void chat(FakePlayer fake, String message) {
         String format = plugin.getConfig().getString("chat.format", "<gray><name></gray> <dark_gray>»</dark_gray> <message>");
-        Bukkit.broadcast(MM.deserialize(format, Placeholder.unparsed("name", fake.name()),
-                Placeholder.unparsed("message", message)));
+        // <name> remplacé dans le texte du format : il peut ainsi servir aussi dans <click:…> et <hover:…>
+        // (pseudo validé : lettres, chiffres et _ uniquement, aucune balise possible).
+        Bukkit.broadcast(MM.deserialize(format.replace("<name>", fake.name()), Placeholder.unparsed("message", message)));
     }
 
     /** Envoie toutes les entrées TAB à un joueur qui vient de se connecter. */
@@ -106,8 +108,33 @@ public final class FakePlayerManager {
         tab.show(all(), List.of(viewer));
     }
 
+    /** Places du TAB pour les faux joueurs (tab.max-listed, et la limite de VaeloriaTab s'il est installé). */
+    private int tabSlots() {
+        int configured = plugin.getConfig().getInt("tab.max-listed", 0);
+        int slots = VaeloriaTabHook.fakeSlots();
+        return configured > 0 ? Math.min(configured, slots) : slots;
+    }
+
+    /**
+     * Ne montre dans le TAB que les faux joueurs qui ont une place (les plus anciens d'abord) ; les autres restent
+     * connectés et comptés. Évite qu'un TAB trop rempli cache de vrais joueurs (Minecraft n'affiche que 80 noms).
+     */
+    void applyTabLimit() {
+        int slots = tabSlots(), index = 0;
+        List<FakePlayer> changed = new ArrayList<>();
+        for (FakePlayer fake : fakes.values()) {
+            boolean listed = index++ < slots;
+            if (fake.listed() != listed) {
+                fake.listed(listed);
+                changed.add(fake);
+            }
+        }
+        tab.updateListed(changed, Bukkit.getOnlinePlayers());
+    }
+
     /** Chaque seconde : corps (réapparition, regard) ; toutes les 10 s : variation du ping. */
     void tick(long seconds) {
+        if (seconds % 5 == 0) applyTabLimit();
         boolean look = plugin.getConfig().getBoolean("bodies.look-at-players", true);
         if (bodies != null) for (FakePlayer fake : fakes.values()) bodies.tick(fake, look);
         if (seconds % 10 == 0 && !fakes.isEmpty()) {
@@ -122,7 +149,7 @@ public final class FakePlayerManager {
 
     Component render(String path, FakePlayer fake) {
         String format = plugin.getConfig().getString(path, "");
-        return format.isEmpty() ? null : MM.deserialize(format, Placeholder.unparsed("name", fake.name()));
+        return format.isEmpty() ? null : MM.deserialize(format.replace("<name>", fake.name()));
     }
 
     private void broadcast(String path, FakePlayer fake) {

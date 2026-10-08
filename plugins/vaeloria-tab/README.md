@@ -1,6 +1,6 @@
 # VaeloriaTab
 
-TAB et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Java 21). Aucune dépendance externe.
+TAB, chat, annonces de connexion et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Java 21). Aucune dépendance externe.
 
 ![Aperçu du TAB](apercu.png)
 
@@ -9,7 +9,18 @@ TAB et écran Multijoueur aux couleurs du logo VÆLORIA, pour Paper 1.21.4+ (Jav
 - **En-tête** : wordmark `V Æ L O R I A` argent balayé par un reflet blanc animé, l'**Æ en rubis** comme sur le logo, filets rubis et devise « LE RETOUR DE LA **VRAIE GUERRE**. »
 - **Pied de page** : joueurs visibles / max, ping et TPS colorés selon des seuils, serveur, grade du joueur, `vaeloria.fr` et `/link`.
 - **Noms** : préfixe de grade (Fondateur, Admin, Modo, VÆLORIAN…) et **tri** de la liste par grade.
+- **Plafond** de `max-shown` vrais joueurs dans le TAB de chacun (75 par défaut) : lui-même, puis les grades les plus hauts, puis l'ordre alphabétique ; les autres restent connectés et comptés dans `<online>`. `VaeloriaTabPlugin.fakeSlots()` donne les places restantes pour les faux joueurs.
+- **Mode compact** au-delà de `compact.above` joueurs (40 par défaut, faux joueurs compris) : grades réduits à une lettre ou un losange (`F Pseudo`, `◆ Pseudo`), en-tête et pied de page raccourcis. Minecraft affiche 20 joueurs par colonne, toutes de la largeur du nom le plus long : sans ce mode, le TAB devient très large au-delà de 60 joueurs. Retour au format complet 5 joueurs sous le seuil.
 - Charte du logo (`brand/build.py`) disponible comme balises MiniMessage : `<ruby>`, `<ruby_hi>`, `<ruby_lo>`, `<snow>`, `<silver>`, `<steel>`, `<ash>`, `<graphite>`.
+
+## Chat et connexions
+
+- **Chat** : chaque message est précédé du nom au format du grade, le même que dans le TAB (`FONDATEUR │ Pseudo » message`). Survol du nom : grade et serveur ; clic : `/msg Pseudo`. Un grade peut avoir son propre format (`ranks.<grade>.chat`, ex. message blanc pour le staff). Le texte tapé par les joueurs n'interprète aucune balise.
+- **Connexion / déconnexion** : `[+] Pseudo` / `[-] Pseudo` avec le grade, annonce dédiée par grade possible (`ranks.<grade>.join` / `quit`, ex. « ⚔ Le Fondateur … entre dans la bataille. »), annonce de **toute première connexion** avec le numéro du joueur, et message privé de bienvenue avec liens cliquables vers vaeloria.fr et `/link`.
+- **Faction** : avec VæloriaFactions, le tag de faction s'affiche devant (`[**Ordre-Noir] FONDATEUR │ Pseudo » message`), coloré pour chaque lecteur selon sa relation (membre, allié, trêve, ennemi). VaeloriaTab formate le message en premier (priorité LOW) et VæloriaFactions l'enveloppe (priorité HIGH) : l'ordre ne dépend pas du chargement des plugins. Le style du tag se règle dans `plugins/VaeloriaFactions/messages.yml` (`chat.public-tag`), son affichage dans `config.yml` (`chat.tags`). Les chats de faction et d'alliance (`/f c`) gardent leur propre format.
+- **Discrétion** : aucune annonce pour les joueurs en vanish ni pour la permission `vaeloria.join.silent`.
+
+Avec EssentialsX : rien à changer pour les connexions. EssentialsX réécrit le message en priorité HIGHEST ; VaeloriaTab passe après (MONITOR) et a donc le dernier mot, quelle que soit sa config `custom-join-message`. Vider seulement `motd.txt` (sinon deux messages de bienvenue) et retirer **EssentialsChat** (ou tout autre plugin de format de chat). La première connexion est détectée par la statistique « déconnexions = 0 » (`hasPlayedBefore()` n'est pas fiable sur Paper récent).
 
 ## Écran Multijoueur
 
@@ -37,6 +48,7 @@ Chaque grade de `config.yml` a une permission ; le joueur reçoit le grade d'`or
 
 ```
 /lp group vaelorian permission set vaeloria.rank.vaelorian
+/lp user TonPseudo permission set vaeloria.rank.fondateur
 ```
 
 Ces permissions sont déclarées à `false` par défaut : un op n'apparaît pas « Fondateur » sans qu'on le lui donne. Les grades sont relus toutes les `names-refresh-ticks` (2 s par défaut), un changement LuckPerms apparaît donc sans reconnexion.

@@ -2,10 +2,11 @@ name: VaeloriaTab
 version: '${version}'
 main: fr.vaeloria.tab.VaeloriaTabPlugin
 api-version: '1.21'
-description: TAB et écran Multijoueur aux couleurs du logo VÆLORIA — en-tête animé, grades, MOTD, icône, maintenance.
+description: TAB, chat, annonces et écran Multijoueur aux couleurs du logo VÆLORIA.
 authors: [VÆLORIA]
-# Optionnel : les faux joueurs de VaeloriaFakePlayers sont comptés dans <online>.
-softdepend: [VaeloriaFakePlayers]
+# Chargé après VæloriaFactions (tag de faction devant le format de chat) et VaeloriaFakePlayers
+# (faux joueurs comptés dans <online>) quand ils sont présents.
+softdepend: [VaeloriaFactions, VaeloriaFakePlayers]
 commands:
   vtab:
     description: Recharger la configuration du TAB VÆLORIA
@@ -14,6 +15,9 @@ commands:
 permissions:
   vaeloria.tab.admin:
     default: op
+  vaeloria.join.silent:
+    description: Connexion et déconnexion sans annonce
+    default: false
   vaeloria.maintenance.bypass:
     description: Se connecter pendant la maintenance
     default: op

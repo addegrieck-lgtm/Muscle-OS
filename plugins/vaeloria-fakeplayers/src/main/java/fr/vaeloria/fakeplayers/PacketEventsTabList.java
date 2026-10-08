@@ -49,6 +49,12 @@ final class PacketEventsTabList implements TabList {
         send(viewers, () -> new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(Action.UPDATE_LATENCY), entries(fakes)));
     }
 
+    @Override
+    public void updateListed(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {
+        if (fakes.isEmpty()) return;
+        send(viewers, () -> new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(Action.UPDATE_LISTED), entries(fakes)));
+    }
+
     private List<PlayerInfo> entries(Collection<FakePlayer> fakes) {
         List<PlayerInfo> entries = new ArrayList<>(fakes.size());
         for (FakePlayer fake : fakes) {
@@ -56,7 +62,7 @@ final class PacketEventsTabList implements TabList {
             FakePlayer.Skin skin = fake.skin();
             if (skin != null) textures.add(new TextureProperty("textures", skin.value(), skin.signature()));
             UserProfile profile = new UserProfile(fake.uuid(), fake.name(), textures);
-            entries.add(new PlayerInfo(profile, true, fake.ping(), GameMode.SURVIVAL, displayName.apply(fake), null));
+            entries.add(new PlayerInfo(profile, fake.listed(), fake.ping(), GameMode.SURVIVAL, displayName.apply(fake), null));
         }
         return entries;
     }

@@ -12,9 +12,13 @@ public interface TabList {
 
     void updateLatency(Collection<FakePlayer> fakes, Collection<? extends Player> viewers);
 
+    /** Applique {@link FakePlayer#listed()} : affiché dans la liste ou seulement connu du client. */
+    void updateListed(Collection<FakePlayer> fakes, Collection<? extends Player> viewers);
+
     TabList NONE = new TabList() {
         public void show(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {}
         public void hide(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {}
         public void updateLatency(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {}
+        public void updateListed(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {}
     };
 }

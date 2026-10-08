@@ -10,10 +10,14 @@ persist: true
 names: []
 
 messages:
-  # Laisser vide ("") pour ne rien afficher. Par défaut : le message vanilla, traduit dans la langue de chaque
-  # joueur, exactement comme pour un vrai joueur. Si ton serveur a des messages perso, mets le même format ici.
-  join: "<yellow><lang:multiplayer.player.joined:'<name>'>"
-  quit: "<yellow><lang:multiplayer.player.left:'<name>'>"
+  # Doivent être IDENTIQUES aux messages des vrais joueurs. Par défaut : ceux de VaeloriaTab pour un joueur sans grade
+  # (join-quit.join / quit avec <tab_name> = <steel><player>), couleurs de la charte écrites en hexadécimal.
+  # Sans VaeloriaTab (message vanilla traduit) :
+  #   join: "<yellow><lang:multiplayer.player.joined:'<name>'>"
+  #   quit: "<yellow><lang:multiplayer.player.left:'<name>'>"
+  # Laisser vide ("") pour ne rien afficher.
+  join: "<#2A2C33>[<#D21F2F>+</#D21F2F>]</#2A2C33> <#A9AEB8><name>"
+  quit: "<#2A2C33>[<#5E0710>-</#5E0710>]</#2A2C33> <#A9AEB8><name>"
 
 tab:
   # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
@@ -24,6 +28,10 @@ tab:
   ping:
     min: 15
     max: 90
+  # Faux joueurs affichés au plus dans la liste TAB (les autres sont connectés et comptés, mais pas listés).
+  # 0 = pas de limite propre. Avec VaeloriaTab, la limite est aussi « max-shown » moins les vrais joueurs :
+  # les vrais joueurs restent toujours visibles (Minecraft n'affiche que 80 noms).
+  max-listed: 0
 
 skins:
   # Récupère le skin Mojang du pseudo (requête asynchrone).
@@ -126,9 +134,11 @@ schedule:
       - {name: "vacances d'été",           zones: "A,B,C", from: "2027-07-03", to: "2027-08-31"}
 
 chat:
-  # Doit être IDENTIQUE au format de chat de ton serveur (plugin de chat, grades…), sinon ça se voit.
-  # <name> = pseudo, <message> = texte. Par défaut : format vanilla « <Pseudo> message ».
-  format: '\<<name>> <message>'
+  # Doit être IDENTIQUE au format de chat de ton serveur, sinon ça se voit. <name> = pseudo, <message> = texte.
+  # Par défaut : le chat de VaeloriaTab pour un joueur sans grade (nom gris acier, survol « Joueur / Serveur »,
+  # clic → /msg). Si tu changes server-name ou le grade default dans VaeloriaTab, reporte-le ici.
+  # Sans VaeloriaTab (format vanilla) : format: '\<<name>> <message>'
+  format: "<hover:show_text:'<#A9AEB8>Joueur</#A9AEB8><newline><#6E737E>Serveur <#D9DCE2>Factions</#D9DCE2><newline><newline><#6E737E>Clique pour lui écrire'><click:suggest_command:'/msg <name> '><#A9AEB8><name></click></hover> <#2A2C33>»</#2A2C33> <#A9AEB8><message>"
   # Les PHRASES sont dans phrases.yml (sujets, vocabulaire, conversations, réponses). Ici : fréquences et chances.
   # Apprentissage : les phrases qui font réagir les vrais joueurs reviennent plus souvent (brain.yml).
   learning: true
