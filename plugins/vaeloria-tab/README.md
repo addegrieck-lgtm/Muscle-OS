@@ -18,7 +18,7 @@ TAB, chat, annonces de connexion et écran Multijoueur aux couleurs du logo VÆL
 - **Faction** : avec VæloriaFactions, le tag de faction s'affiche devant (`[**Ordre-Noir] FONDATEUR │ Pseudo » message`), coloré pour chaque lecteur selon sa relation (membre, allié, trêve, ennemi). VaeloriaTab formate le message en premier (priorité LOW) et VæloriaFactions l'enveloppe (priorité HIGH) : l'ordre ne dépend pas du chargement des plugins. Le style du tag se règle dans `plugins/VaeloriaFactions/messages.yml` (`chat.public-tag`), son affichage dans `config.yml` (`chat.tags`). Les chats de faction et d'alliance (`/f c`) gardent leur propre format.
 - **Discrétion** : aucune annonce pour les joueurs en vanish ni pour la permission `vaeloria.join.silent`.
 
-Avec EssentialsX : mettre `custom-join-message: ""` et `custom-quit-message: ""` dans `plugins/Essentials/config.yml`, vider `motd.txt`, et retirer **EssentialsChat** (ou tout autre plugin de format de chat), sinon les deux formats se superposent.
+Avec EssentialsX : rien à changer pour les connexions. EssentialsX réécrit le message en priorité HIGHEST ; VaeloriaTab passe après (MONITOR) et a donc le dernier mot, quelle que soit sa config `custom-join-message`. Vider seulement `motd.txt` (sinon deux messages de bienvenue) et retirer **EssentialsChat** (ou tout autre plugin de format de chat). La première connexion est détectée par la statistique « déconnexions = 0 » (`hasPlayedBefore()` n'est pas fiable sur Paper récent).
 
 ## Écran Multijoueur
 

@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -53,7 +54,11 @@ final class ChatListener implements Listener {
         }));
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    /**
+     * MONITOR : EssentialsX réécrit le message en HIGHEST (custom-join-message, ou null s'il est vide).
+     * Passer après lui est le seul moyen d'afficher l'annonce de VaeloriaTab quelle que soit sa config.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         Rank rank = plugin.updateName(p);
@@ -64,7 +69,7 @@ final class ChatListener implements Listener {
                 Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size())));
         if (silent(p, m)) {
             e.joinMessage(null);
-        } else if (!p.hasPlayedBefore() && !m.firstJoin().isBlank()) {
+        } else if (firstJoin(p) && !m.firstJoin().isBlank()) {
             int unique = Bukkit.getOfflinePlayers().length; // nouveau joueur seulement : rare
             e.joinMessage(mm.deserialize(m.firstJoin(), TagResolver.resolver(tags, Placeholder.unparsed("unique", Integer.toString(unique)))));
         } else {
@@ -73,7 +78,8 @@ final class ChatListener implements Listener {
         for (String line : m.welcome()) p.sendMessage(mm.deserialize(line, tags));
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    /** MONITOR, comme {@link #onJoin} : EssentialsX remplace aussi le message de départ en HIGHEST. */
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         MessagesSettings m = plugin.messages();
@@ -87,6 +93,14 @@ final class ChatListener implements Listener {
         TagResolver tags = TagResolver.resolver(plugin.paletteTags(), plugin.playerTags(p, rank, plugin.tabName(p, rank)),
                 Placeholder.unparsed("online", Integer.toString(Bukkit.getOnlinePlayers().size() - 1)));
         e.quitMessage(announce(Rank.or(rank == null ? null : rank.quit(), m.quit()), tags));
+    }
+
+    /**
+     * Première connexion : le joueur n'a encore jamais quitté le serveur. {@code hasPlayedBefore()} n'est pas
+     * fiable sur Paper récent, qui enregistre les données du joueur avant l'événement de connexion.
+     */
+    private static boolean firstJoin(Player p) {
+        return p.getStatistic(Statistic.LEAVE_GAME) == 0;
     }
 
     /** Format vide = pas d'annonce. */
