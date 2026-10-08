@@ -1,0 +1,14 @@
+name: VaeloriaTab
+version: '${version}'
+main: fr.vaeloria.tab.VaeloriaTabPlugin
+api-version: '1.21'
+description: Liste des joueurs (TAB) aux couleurs du logo VÆLORIA — en-tête animé, pied de page, grades et tri.
+authors: [VÆLORIA]
+commands:
+  vtab:
+    description: Recharger la configuration du TAB VÆLORIA
+    usage: /vtab reload
+    permission: vaeloria.tab.admin
+permissions:
+  vaeloria.tab.admin:
+    default: op

@@ -25,6 +25,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm typecheck` | Vérification TypeScript de tout le workspace |
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
+| `cd plugins/vaeloria-tab && gradle build` | Jar du TAB aux couleurs du logo ([VaeloriaTab](plugins/vaeloria-tab/README.md)) |
 
 ## Documentation
 
