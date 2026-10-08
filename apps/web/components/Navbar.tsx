@@ -67,7 +67,7 @@ export function Navbar() {
           <CartButton />
           {/* Masqués sur mobile : le menu et la barre fixe du bas les portent déjà. */}
           <div className="hidden items-center gap-2 sm:flex">
-            <Link href="/compte" className={buttonClass("ghost", "sm")}>
+            <Link href="/login" className={buttonClass("ghost", "sm")}>
               Connexion
             </Link>
             <Link href="/rejoindre" data-track="cta_click" data-track-id="nav-rejoindre" className={buttonClass("primary", "sm")}>
@@ -93,7 +93,7 @@ export function Navbar() {
         <div id="menu-mobile" className="fixed inset-x-0 top-16 z-40 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
           <div className="grid grid-cols-2 gap-2">
             <Link href="/rejoindre" data-track="cta_click" data-track-id="menu-rejoindre" className={buttonClass("primary", "lg")}>Rejoindre</Link>
-            <Link href="/compte" className={buttonClass("secondary", "lg")}>Connexion</Link>
+            <Link href="/login" className={buttonClass("secondary", "lg")}>Connexion</Link>
           </div>
           <ul className="mt-4 flex flex-col">
             {NAV.map((item) => (

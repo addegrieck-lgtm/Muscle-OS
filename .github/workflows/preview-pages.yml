@@ -59,6 +59,9 @@ jobs:
           path: apps/web/out
   deploy:
     needs: build
+    # Seule la branche main peut publier (règle de l'environnement github-pages) ;
+    # sur les autres branches, le build sert de vérification.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

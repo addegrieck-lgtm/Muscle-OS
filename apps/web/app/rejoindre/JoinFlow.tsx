@@ -35,7 +35,10 @@ export function JoinFlow() {
       <Card className="space-y-3">
         <p className="font-display text-lg font-bold uppercase tracking-[0.05em]">Les inscriptions ouvriront ici</p>
         <p className="text-sm text-muted">Cet aperçu n&apos;est pas relié au serveur. Rejoins le Discord pour être prévenu de l&apos;ouverture des places de fondateur.</p>
-        <ButtonLink href="/discord" variant="secondary">Rejoindre le Discord</ButtonLink>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <ButtonLink href={loginHref("/rejoindre", true)}>Créer mon compte</ButtonLink>
+          <ButtonLink href="/discord" variant="secondary">Rejoindre le Discord</ButtonLink>
+        </div>
       </Card>
     );
 
