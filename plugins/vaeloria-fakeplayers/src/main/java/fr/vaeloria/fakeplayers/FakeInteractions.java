@@ -48,6 +48,7 @@ final class FakeInteractions implements Listener {
     FakeInteractions(FakePlayersPlugin plugin, AmbientChat chat) {
         this.plugin = plugin;
         this.chat = chat;
+        reloadRules();
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -65,24 +66,86 @@ final class FakeInteractions implements Listener {
         lastPartner.remove(event.getPlayer().getUniqueId().toString());
     }
 
-    /** Ajoute les faux joueurs aux suggestions des commandes de plugins qui proposent des pseudos. */
+    /** Commande / sous-commandes / position du pseudo, lues depuis interactions.commands (copie thread-safe). */
+    private record TabRule(List<String> commands, List<String> subcommands, int arg) {}
+
+    private volatile List<TabRule> tabRules = List.of();
+
+    /** À appeler au démarrage et après /fp reload. */
+    void reloadRules() {
+        List<TabRule> rules = new ArrayList<>();
+        for (Map<?, ?> rule : plugin.getConfig().getMapList("interactions.commands")) {
+            int index = rule.get("arg") instanceof Number n ? n.intValue() : 1;
+            rules.add(new TabRule(strings(rule.get("commands")), strings(rule.get("subcommands")), index));
+        }
+        tabRules = List.copyOf(rules);
+    }
+
+    /** Suggestions synchrones (commandes Bukkit classiques). */
     @EventHandler(priority = EventPriority.HIGH)
     public void onTabComplete(TabCompleteEvent event) {
-        if (!enabled() || event.getCompletions().isEmpty()) return;
-        Set<String> online = new HashSet<>();
-        for (Player p : Bukkit.getOnlinePlayers()) online.add(p.getName().toLowerCase(Locale.ROOT));
-        boolean suggestsPlayers = event.getCompletions().stream().anyMatch(c -> online.contains(c.toLowerCase(Locale.ROOT)));
-        if (!suggestsPlayers) return;
-        String buffer = event.getBuffer();
-        String token = buffer.endsWith(" ") ? "" : buffer.substring(buffer.lastIndexOf(' ') + 1).toLowerCase(Locale.ROOT);
-        List<String> completions = new ArrayList<>(event.getCompletions());
-        for (FakePlayer fake : plugin.manager().all()) {
-            if (fake.name().toLowerCase(Locale.ROOT).startsWith(token) && !completions.contains(fake.name())) {
-                completions.add(fake.name());
+        List<String> merged = suggest(event.getBuffer(), event.getCompletions());
+        if (merged != null) event.setCompletions(merged);
+    }
+
+    /**
+     * Suggestions asynchrones de Paper : certains plugins (Essentials…) répondent ici et l'événement synchrone
+     * n'a alors jamais lieu. On complète leur réponse sans la remplacer.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onAsyncTabComplete(com.destroystokyo.paper.event.server.AsyncTabCompleteEvent event) {
+        if (!event.isCommand() || !event.isHandled()) return; // non traité : l'événement synchrone suivra
+        List<String> existing = new ArrayList<>();
+        for (var c : event.completions()) existing.add(c.suggestion());
+        List<String> merged = suggest(event.getBuffer(), existing);
+        if (merged == null) return;
+        List<com.destroystokyo.paper.event.server.AsyncTabCompleteEvent.Completion> out = new ArrayList<>(event.completions());
+        for (String name : merged) {
+            if (!existing.contains(name)) out.add(com.destroystokyo.paper.event.server.AsyncTabCompleteEvent.Completion.completion(name));
+        }
+        event.completions(out);
+    }
+
+    /**
+     * Ajoute les pseudos des faux joueurs qui commencent par le mot en cours. Pour les commandes de
+     * interactions.commands, à la position du pseudo, même si le plugin ne propose personne (quand on est seul) ;
+     * pour les autres commandes, seulement si elles proposent déjà des pseudos de vrais joueurs.
+     * Thread-safe (appelée aussi hors du thread principal). Retourne null s'il n'y a rien à changer.
+     */
+    private List<String> suggest(String buffer, List<String> existing) {
+        if (!enabled() || buffer == null || !buffer.startsWith("/")) return null;
+        List<String> fakes = plugin.manager().namesSnapshot();
+        if (fakes.isEmpty()) return null;
+        String[] tokens = buffer.substring(1).split(" ", -1); // -1 : garde le mot vide après une espace finale
+        if (tokens.length < 2) return null;
+        String label = tokens[0].toLowerCase(Locale.ROOT);
+        if (label.contains(":")) label = label.substring(label.indexOf(':') + 1);
+        int position = tokens.length - 1;
+        String token = tokens[position].toLowerCase(Locale.ROOT);
+
+        boolean ruleMatches = false;
+        for (TabRule rule : tabRules) {
+            if (!rule.commands().contains(label) || rule.arg() != position) continue;
+            if (!rule.subcommands().isEmpty() && !rule.subcommands().contains(tokens[1].toLowerCase(Locale.ROOT))) continue;
+            ruleMatches = true;
+            break;
+        }
+        if (!ruleMatches) {
+            Set<String> online = new HashSet<>();
+            for (Player p : Bukkit.getOnlinePlayers()) online.add(p.getName().toLowerCase(Locale.ROOT));
+            if (existing.stream().noneMatch(c -> online.contains(c.toLowerCase(Locale.ROOT)))) return null;
+        }
+        List<String> merged = new ArrayList<>(existing);
+        boolean changed = false;
+        for (String name : fakes) {
+            if (name.toLowerCase(Locale.ROOT).startsWith(token) && !merged.contains(name)) {
+                merged.add(name);
+                changed = true;
             }
         }
-        completions.sort(String.CASE_INSENSITIVE_ORDER);
-        event.setCompletions(completions);
+        if (!changed) return null;
+        merged.sort(String.CASE_INSENSITIVE_ORDER);
+        return merged;
     }
 
     private boolean enabled() {
@@ -162,7 +225,11 @@ final class FakeInteractions implements Listener {
         return true;
     }
 
-    /** /tpa, /duel, /f invite… : « demande envoyée », puis refus ou expiration. Jamais acceptée. */
+    /**
+     * /tpa, /tpahere, /duel, /f invite… : « demande envoyée », puis acceptation, refus ou expiration.
+     * Acceptée (si la règle a teleport: to-target ou to-sender et que les corps sont disponibles) :
+     * le faux joueur prend un corps dans le monde et la téléportation a lieu après le délai habituel.
+     */
     private boolean request(CommandSender sender, FakePlayer fake, String label, Map<?, ?> rule) {
         String id = key(sender) + "|" + label + "|" + fake.name();
         if (!pending.add(id)) {
@@ -171,17 +238,91 @@ final class FakeInteractions implements Listener {
         }
         send(sender, str(rule, "sent", "<gold>Demande envoyée à <red><target></red>."), fake, "");
         ThreadLocalRandom r = ThreadLocalRandom.current();
-        double refuseChance = rule.get("refuse-chance") instanceof Number n ? n.doubleValue() : 0.4;
-        long expire = rule.get("expire-seconds") instanceof Number n ? n.longValue() : 120;
-        boolean refuse = r.nextDouble() < refuseChance;
-        long delay = refuse ? 5 + r.nextLong(Math.max(1, Math.min(expire - 5, 40))) : expire;
+        String teleport = str(rule, "teleport", "none");
+        boolean canAccept = !teleport.equals("none") && sender instanceof Player && plugin.manager().bodies() != null;
+        double accept = canAccept ? num(rule, "accept-chance", 0.5) : 0;
+        double refuse = num(rule, "refuse-chance", 0.4);
+        long expire = (long) num(rule, "expire-seconds", 120);
+        double roll = r.nextDouble();
+        String outcome = roll < accept ? "accepted" : roll < accept + refuse ? "refused" : "expired";
+        long delay = outcome.equals("expired") ? expire : 3 + r.nextLong(Math.max(1, Math.min(expire - 3, 30)));
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pending.remove(id);
             if (!stillThere(sender)) return;
-            send(sender, str(rule, refuse ? "refused" : "expired", refuse ? "<red><target> a refusé ta demande."
-                    : "<red>Ta demande à <target> a expiré."), fake, "");
+            if (plugin.manager().get(fake.name()) != fake || fake.leaving()) { // parti entre-temps
+                send(sender, str(rule, "expired", "<red>Ta demande à <target> a expiré."), fake, "");
+                return;
+            }
+            switch (outcome) {
+                case "accepted" -> accepted((Player) sender, fake, rule, teleport);
+                case "refused" -> send(sender, str(rule, "refused", "<red><target> a refusé ta demande."), fake, "");
+                default -> send(sender, str(rule, "expired", "<red>Ta demande à <target> a expiré."), fake, "");
+            }
         }, delay * 20L);
         return true;
+    }
+
+    private void accepted(Player player, FakePlayer fake, Map<?, ?> rule, String teleport) {
+        send(player, str(rule, "accepted", "<red><target></red> <gold>a accepté ta demande."), fake, "");
+        long warmup = (long) num(rule, "warmup-seconds", 3);
+        if (warmup > 0) send(player, str(rule, "teleporting", "<gold>Téléportation dans <red>" + warmup + "</red> secondes…"), fake, "");
+        Location start = player.getLocation();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline() || plugin.manager().get(fake.name()) != fake || fake.leaving()) return;
+            if (warmup > 0 && rule.get("cancel-on-move") != Boolean.FALSE
+                    && (player.getWorld() != start.getWorld() || player.getLocation().distanceSquared(start) > 1)) {
+                send(player, str(rule, "cancelled", "<red>Téléportation annulée : tu as bougé."), fake, "");
+                return;
+            }
+            if (teleport.equals("to-sender")) {
+                Location near = beside(player.getLocation());
+                plugin.manager().moveBody(fake, near);
+            } else {
+                if (!fake.hasBody()) {
+                    Location spot = randomSpot(player);
+                    if (spot == null) {
+                        send(player, str(rule, "expired", "<red>Ta demande à <target> a expiré."), fake, "");
+                        return;
+                    }
+                    plugin.manager().moveBody(fake, spot);
+                }
+                player.teleport(beside(fake.bodyLocation()));
+            }
+        }, Math.max(1, warmup * 20L));
+    }
+
+    /** Emplacement de surface au hasard pour un faux joueur sans corps (interactions.teleport). */
+    private Location randomSpot(Player player) {
+        ConfigurationSection t = plugin.getConfig().getConfigurationSection("interactions.teleport");
+        String worldName = t == null ? "" : t.getString("world", "");
+        org.bukkit.World world = worldName.isEmpty() ? Bukkit.getWorlds().get(0) : Bukkit.getWorld(worldName);
+        if (world == null) world = player.getWorld();
+        int min = t == null ? 300 : t.getInt("min-radius", 300), max = t == null ? 3000 : Math.max(min + 1, t.getInt("max-radius", 3000));
+        Location center = world.getSpawnLocation();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        for (int attempt = 0; attempt < 15; attempt++) {
+            double angle = r.nextDouble(Math.PI * 2), dist = min + r.nextDouble(max - min);
+            int x = center.getBlockX() + (int) (Math.cos(angle) * dist), z = center.getBlockZ() + (int) (Math.sin(angle) * dist);
+            if (!world.getWorldBorder().isInside(new Location(world, x, 0, z))) continue;
+            org.bukkit.block.Block ground = world.getHighestBlockAt(x, z);
+            if (ground.isLiquid() || !ground.getType().isSolid() || ground.getY() <= world.getMinHeight()) continue;
+            return new Location(world, x + 0.5, ground.getY() + 1, z + 0.5, r.nextFloat() * 360, 0);
+        }
+        return null;
+    }
+
+    /** Position à côté d'un point, posée sur le sol (pour ne pas se retrouver dans le corps ou dans un mur). */
+    private static Location beside(Location at) {
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        double angle = r.nextDouble(Math.PI * 2);
+        Location l = at.clone().add(Math.cos(angle) * 1.5, 0, Math.sin(angle) * 1.5);
+        if (l.getBlock().getType().isSolid() || !l.clone().subtract(0, 1, 0).getBlock().getType().isSolid()) return at.clone();
+        l.setDirection(at.toVector().subtract(l.toVector())); // face au faux joueur
+        return l;
+    }
+
+    private static double num(Map<?, ?> rule, String key, double def) {
+        return rule.get(key) instanceof Number n ? n.doubleValue() : def;
     }
 
     private boolean disconnect(CommandSender sender, FakePlayer fake, Map<?, ?> rule) {

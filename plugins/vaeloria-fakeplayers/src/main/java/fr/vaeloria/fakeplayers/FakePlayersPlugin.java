@@ -48,6 +48,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     private long nextJoinAt;
     private long nextLeaveAt;
     private AmbientChat chat;
+    private FakeInteractions interactions;
     /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
     private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
 
@@ -76,7 +77,8 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         chat = new AmbientChat(this);
         getServer().getPluginManager().registerEvents(chat, this);
-        getServer().getPluginManager().registerEvents(new FakeInteractions(this, chat), this);
+        interactions = new FakeInteractions(this, chat);
+        getServer().getPluginManager().registerEvents(interactions, this);
         FakeCommand command = new FakeCommand(this);
         getCommand("fakeplayers").setExecutor(command);
         getCommand("fakeplayers").setTabCompleter(command);
@@ -102,6 +104,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         reloadConfig();
         names = new NamePool(getConfig().getStringList("names"), new Random());
         loadSchedule();
+        if (interactions != null) interactions.reloadRules();
     }
 
     Schedule schedule() { return schedule; }
@@ -263,6 +266,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     void depart(FakePlayer fake) {
         if (fake.leaving()) return;
         fake.leaving(true);
+        manager.refreshSnapshot();
         long ticks = chat.onFakeLeaving(fake);
         if (ticks <= 0) {
             manager.remove(fake.name(), false);

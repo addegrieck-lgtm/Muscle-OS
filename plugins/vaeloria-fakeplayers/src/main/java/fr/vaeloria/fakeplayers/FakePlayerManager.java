@@ -23,6 +23,8 @@ public final class FakePlayerManager {
 
     private final FakePlayersPlugin plugin;
     private final Map<String, FakePlayer> fakes = new LinkedHashMap<>();
+    /** Pseudos des faux joueurs présents (hors départs annoncés), lisible depuis n'importe quel thread. */
+    private volatile List<String> namesSnapshot = List.of();
     private TabList tab = TabList.NONE;
     private Bodies bodies;
     private final SkinFetcher skins;
@@ -43,6 +45,13 @@ public final class FakePlayerManager {
 
     public int count() { return fakes.size(); }
 
+    /** Copie immuable des pseudos, utilisable hors du thread principal (auto-complétion asynchrone). */
+    public List<String> namesSnapshot() { return namesSnapshot; }
+
+    void refreshSnapshot() {
+        namesSnapshot = fakes.values().stream().filter(f -> !f.leaving()).map(FakePlayer::name).toList();
+    }
+
     public FakePlayer get(String name) { return name == null ? null : fakes.get(name.toLowerCase(Locale.ROOT)); }
 
     /** Pseudos (minuscules) déjà pris par un vrai joueur connecté ou un faux joueur. */
@@ -60,6 +69,7 @@ public final class FakePlayerManager {
         if (!NamePool.isValid(name) || takenNames().contains(name.toLowerCase(Locale.ROOT))) return null;
         FakePlayer fake = new FakePlayer(name, auto, randomPing());
         fakes.put(name.toLowerCase(Locale.ROOT), fake);
+        refreshSnapshot();
         if (bodyAt != null && bodies != null) bodies.spawn(fake, bodyAt);
         tab.show(List.of(fake), Bukkit.getOnlinePlayers());
         if (!silent) broadcast("messages.join", fake);
@@ -70,6 +80,7 @@ public final class FakePlayerManager {
     public boolean remove(String name, boolean silent) {
         FakePlayer fake = fakes.remove(name.toLowerCase(Locale.ROOT));
         if (fake == null) return false;
+        refreshSnapshot();
         if (bodies != null) bodies.despawn(fake);
         tab.hide(List.of(fake), Bukkit.getOnlinePlayers());
         if (!silent) broadcast("messages.quit", fake);

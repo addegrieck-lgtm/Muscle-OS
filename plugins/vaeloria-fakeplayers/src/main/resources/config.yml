@@ -250,6 +250,11 @@ interactions:
   list:
     # Réponse de /list (vanilla, traduite). <count> inclut les faux joueurs, <max> = server-list.max-players.
     format: "<lang:commands.list.players:'<count>':'<max>':'<names>'>"
+  # Zone où apparaissent les faux joueurs sans corps quand une demande teleport: to-target est acceptée.
+  teleport:
+    world: ""          # "" = monde principal
+    min-radius: 300    # distance au spawn du monde, en blocs
+    max-radius: 3000
   # action : whisper (message privé), reply (/r), list, request (demande qui expire ou est refusée),
   #          message (réponse fixe), disconnect (kick/ban : le faux joueur se déconnecte),
   #          teleport (vers son corps s'il en a un).
@@ -267,6 +272,12 @@ interactions:
       already: "<red>Tu as déjà une demande en cours avec <target>."
       refuse-chance: 0.4
       expire-seconds: 120
+      # Acceptation (optionnelle, Minecraft 1.21.9+) : teleport: to-target fait apparaître le faux joueur avec un
+      # corps quelque part dans le monde (interactions.teleport) et y téléporte le joueur. none = jamais acceptée.
+      teleport: none
+      accept-chance: 0.5
+      accepted: "<red><target></red> <gold>a accepté ta demande de téléportation."
+      warmup-seconds: 3
     - commands: [tpahere, etpahere]
       action: request
       sent: "<gold>Demande envoyée à <red><target></red> pour qu'il se téléporte à toi."
