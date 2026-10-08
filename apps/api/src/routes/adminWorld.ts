@@ -35,16 +35,34 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
   };
 
   // ───── Réglages ─────
-  const Settings = z.object({ foundersCap: z.number().int().min(1).max(1_000_000), foundersOpen: z.boolean(), empiresMaxMembers: z.number().int().min(2).max(500), worldRadius: z.number().int().min(500).max(100_000) });
+  const Settings = z.object({ foundersCap: z.number().int().min(1).max(1_000_000), foundersOpen: z.boolean(), empiresMaxMembers: z.number().int().min(2).max(500), worldRadius: z.number().int().min(500).max(100_000),
+    // Une ligne par monde : « clé = Nom affiché » (clé = nom du dossier du monde en jeu).
+    mapWorlds: z.string().max(2000).default("world = Monde principal") });
+  const WORLD_KEY = /^[A-Za-z0-9_.-]{1,64}$/;
+  const parseWorlds = (text: string) => {
+    const out: { key: string; name: string }[] = [];
+    for (const line of text.split(/\r?\n/)) {
+      const [rawKey, ...rest] = line.split("=");
+      const key = rawKey?.trim() ?? "";
+      if (!key) continue;
+      if (!WORLD_KEY.test(key)) throw new HttpError(400, "invalid_world", `Nom de monde invalide : « ${key} »`);
+      if (!out.some((w) => w.key === key)) out.push({ key, name: rest.join("=").trim().slice(0, 40) || key });
+    }
+    if (out.length === 0) throw new HttpError(400, "invalid_world", "Au moins un monde est nécessaire.");
+    return out.slice(0, 12);
+  };
   app.get("/settings", async () => {
-    const rows = await sql<{ key: string; value: unknown }[]>`SELECT key, value FROM site_settings WHERE key IN ('founders.cap','founders.open','empires.max_members','map.world_radius')`;
+    const rows = await sql<{ key: string; value: unknown }[]>`SELECT key, value FROM site_settings WHERE key IN ('founders.cap','founders.open','empires.max_members','map.world_radius','map.worlds')`;
     const v = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     const [{ count }] = (await sql`SELECT last AS count FROM founder_counter`) as unknown as [{ count: number }];
-    return { foundersCap: Number(v["founders.cap"] ?? 3000), foundersOpen: v["founders.open"] !== false, empiresMaxMembers: Number(v["empires.max_members"] ?? 50), worldRadius: Number(v["map.world_radius"] ?? 5000), foundersCount: count };
+    return { foundersCap: Number(v["founders.cap"] ?? 3000), foundersOpen: v["founders.open"] !== false, empiresMaxMembers: Number(v["empires.max_members"] ?? 50), worldRadius: Number(v["map.world_radius"] ?? 5000),
+      mapWorlds: (Array.isArray(v["map.worlds"]) ? (v["map.worlds"] as { key: string; name: string }[]) : [{ key: "world", name: "Monde principal" }]).map((w) => `${w.key} = ${w.name}`).join("\n"),
+      foundersCount: count };
   });
   app.put("/settings", async (req) => {
     const b = parse(Settings, req.body);
-    for (const [key, value] of [["founders.cap", b.foundersCap], ["founders.open", b.foundersOpen], ["empires.max_members", b.empiresMaxMembers], ["map.world_radius", b.worldRadius]] as const) {
+    const worlds = parseWorlds(b.mapWorlds);
+    for (const [key, value] of [["founders.cap", b.foundersCap], ["founders.open", b.foundersOpen], ["empires.max_members", b.empiresMaxMembers], ["map.world_radius", b.worldRadius], ["map.worlds", worlds]] as const) {
       await sql`INSERT INTO site_settings (key, value) VALUES (${key}, ${sql.json(value)}) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`;
     }
     await audit("world.settings", "settings", "world", b);
@@ -94,6 +112,7 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
 
   crud("zones", "map_zones", "id",
     z.object({ key: z.string().regex(/^[a-z0-9-]{2,40}$/), name: z.string().min(2).max(60), kind: z.enum(["spawn", "neutral", "koth", "warzone", "event", "outpost"]),
+      world: z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/).default("world"),
       x1: z.number().int(), z1: z.number().int(), x2: z.number().int(), z2: z.number().int(), description: z.string().max(400).default(""), active: z.boolean().default(true) })
       .refine((z_) => z_.x2 > z_.x1 && z_.z2 > z_.z1, { message: "x2 > x1 et z2 > z1" }),
     (v) => v, "key");

@@ -21,7 +21,14 @@ const ZONE: Record<ZoneKind, { fill: string; stroke: string; dash?: string; labe
  * Carte géopolitique stylisée. Coordonnées = blocs Minecraft (X vers l'est, Z vers le sud).
  * Zones : configurées dans l'admin. Territoires : claims des empires, synchronisés par VæloriaBridge.
  */
-export function WorldMap({ data, compact = false, initialFilter = "tout" }: { data: MapData; compact?: boolean; initialFilter?: Filter }) {
+export function WorldMap({ data: all, compact = false, initialFilter = "tout" }: { data: MapData; compact?: boolean; initialFilter?: Filter }) {
+  const worlds = all.worlds?.length ? all.worlds : [{ key: "world", name: "Monde principal", chunks: 0 }];
+  // Plusieurs mondes Minecraft : un onglet par monde ; zones et territoires filtrés sur le monde affiché.
+  const [world, setWorld] = useState(worlds[0]!.key);
+  const data = useMemo(
+    () => ({ ...all, zones: all.zones.filter((z) => (z.world ?? "world") === world), territories: all.territories.filter((t) => (t.world ?? "world") === world) }),
+    [all, world],
+  );
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState({ x: 0, z: 0 });
@@ -55,6 +62,18 @@ export function WorldMap({ data, compact = false, initialFilter = "tout" }: { da
   return (
     <div className={cn("grid gap-4", !compact && "lg:grid-cols-[1fr_300px]")}>
       <div>
+        {!compact && worlds.length > 1 && (
+          <div className="mb-3 flex flex-wrap gap-1.5 border-b border-line/60 pb-3" role="tablist" aria-label="Mondes">
+            {worlds.map((w) => (
+              <button key={w.key} type="button" role="tab" aria-selected={world === w.key}
+                onClick={() => { setWorld(w.key); setSelected(null); setZoom(1); setCenter({ x: 0, z: 0 }); }}
+                className={cn("rounded-md px-3 py-1.5 font-display text-sm font-semibold uppercase tracking-[0.06em] transition-colors", world === w.key ? "bg-surface-2 text-fg" : "text-muted hover:text-fg")}>
+                {w.name}
+                {w.chunks > 0 && <span className="ml-2 text-xs text-subtle tabular-nums">{w.chunks}</span>}
+              </button>
+            ))}
+          </div>
+        )}
         {!compact && (
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtres de la carte">
@@ -75,7 +94,7 @@ export function WorldMap({ data, compact = false, initialFilter = "tout" }: { da
             viewBox={view}
             className={cn("block aspect-square w-full touch-none select-none bg-[radial-gradient(ellipse_at_50%_45%,#1a1014_0%,#0d0d10_60%,#07070a_100%)]", !compact && "cursor-grab active:cursor-grabbing")}
             role="img"
-            aria-label="Carte du monde de VÆLORIA"
+            aria-label={`Carte de VÆLORIA — ${worlds.find((w) => w.key === world)?.name ?? world}`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={() => (drag.current = null)}
@@ -121,7 +140,7 @@ export function WorldMap({ data, compact = false, initialFilter = "tout" }: { da
           </svg>
           {data.territories.length === 0 && (
             <p className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/95 to-transparent px-4 pb-3 pt-8 text-center text-xs text-muted">
-              Les territoires des empires apparaîtront dès les premiers claims de la Saison I.
+              {all.territories.length === 0 ? "Les territoires des empires apparaîtront dès les premiers claims de la Saison I." : "Aucun territoire d'empire dans ce monde pour l'instant."}
             </p>
           )}
         </div>

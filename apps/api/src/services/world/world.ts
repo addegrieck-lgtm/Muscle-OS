@@ -1,25 +1,37 @@
 import type { Sql } from "../../db";
 import { setting } from "./common";
 
-/** Données de la carte : zones configurées + territoires des empires (claims synchronisés depuis le jeu). */
+/**
+ * Données de la carte : zones configurées + territoires des empires (claims synchronisés depuis le jeu), pour chaque monde.
+ * Mondes affichés = ceux de map.worlds (ordre et noms) puis tout monde ayant des claims ou des zones.
+ */
 export async function getMap(sql: Sql) {
-  const [radius, zones, territories, liveEvents, activeWars] = await Promise.all([
+  const [radius, configured, zones, territories, liveEvents, activeWars] = await Promise.all([
     setting(sql, "map.world_radius", 5000),
-    sql<{ key: string; name: string; kind: string; x1: number; z1: number; x2: number; z2: number; description: string }[]>`
-      SELECT key, name, kind, x1, z1, x2, z2, description FROM map_zones WHERE active
+    setting<{ key: string; name: string }[]>(sql, "map.worlds", [{ key: "world", name: "Monde principal" }]),
+    sql<{ key: string; name: string; kind: string; world: string; x1: number; z1: number; x2: number; z2: number; description: string }[]>`
+      SELECT key, name, kind, world, x1, z1, x2, z2, description FROM map_zones WHERE active
       ORDER BY array_position(ARRAY['neutral','warzone','event','koth','outpost','spawn'], kind)`,
     // Claims regroupés par carré de 8×8 chunks (128 blocs) : carte lisible et légère.
-    sql<{ slug: string; name: string; color: string; cx: number; cz: number; chunks: number }[]>`
-      SELECT e.slug, e.name, e.color, floor(c.chunk_x / 8.0)::int AS cx, floor(c.chunk_z / 8.0)::int AS cz, count(*)::int AS chunks
+    sql<{ slug: string; name: string; color: string; world: string; cx: number; cz: number; chunks: number }[]>`
+      SELECT e.slug, e.name, e.color, c.world, floor(c.chunk_x / 8.0)::int AS cx, floor(c.chunk_z / 8.0)::int AS cz, count(*)::int AS chunks
       FROM claims c JOIN factions f ON f.id = c.faction_id JOIN seasons s ON s.id = c.season_id AND s.status = 'active'
       JOIN empires e ON lower(e.faction_name) = lower(f.name) AND e.status = 'active'
-      WHERE c.world = 'world' GROUP BY e.slug, e.name, e.color, cx, cz LIMIT 20000`,
+      GROUP BY e.slug, e.name, e.color, c.world, cx, cz LIMIT 20000`,
     sql<{ slug: string; title: string; type: string; zoneKey: string | null }[]>`
       SELECT slug, title, type, zone_key AS "zoneKey" FROM events
       WHERE published AND starts_at <= now() AND coalesce(ends_at, starts_at + interval '2 hours') > now()`,
     sql<{ slug: string; title: string }[]>`SELECT slug, title FROM wars WHERE status = 'active'`,
   ]);
-  return { radius: Number(radius), cellBlocks: 128, zones, territories, liveEvents, activeWars };
+  const worlds = new Map<string, { key: string; name: string; chunks: number }>();
+  for (const w of Array.isArray(configured) ? configured : []) if (w?.key) worlds.set(w.key, { key: w.key, name: w.name || w.key, chunks: 0 });
+  for (const z of zones) if (!worlds.has(z.world)) worlds.set(z.world, { key: z.world, name: z.world, chunks: 0 });
+  for (const t of territories) {
+    const w = worlds.get(t.world) ?? { key: t.world, name: t.world, chunks: 0 };
+    w.chunks += t.chunks;
+    worlds.set(t.world, w);
+  }
+  return { radius: Number(radius), cellBlocks: 128, worlds: [...worlds.values()], zones, territories, liveEvents, activeWars };
 }
 
 export async function listJournal(sql: Sql) {

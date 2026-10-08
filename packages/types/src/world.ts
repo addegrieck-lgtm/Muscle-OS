@@ -72,8 +72,10 @@ export type ZoneKind = "spawn" | "neutral" | "koth" | "warzone" | "event" | "out
 export interface MapData {
   radius: number;
   cellBlocks: number;
-  zones: { key: string; name: string; kind: ZoneKind; x1: number; z1: number; x2: number; z2: number; description: string }[];
-  territories: { slug: string; name: string; color: string; cx: number; cz: number; chunks: number }[];
+  /** Mondes Minecraft affichables (clé = nom du monde en jeu), dans l'ordre des onglets. */
+  worlds: { key: string; name: string; chunks: number }[];
+  zones: { key: string; name: string; kind: ZoneKind; world: string; x1: number; z1: number; x2: number; z2: number; description: string }[];
+  territories: { slug: string; name: string; color: string; world: string; cx: number; cz: number; chunks: number }[];
   liveEvents: { slug: string; title: string; type: string; zoneKey: string | null }[];
   activeWars: { slug: string; title: string }[];
 }

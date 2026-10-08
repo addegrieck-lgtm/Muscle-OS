@@ -5,6 +5,7 @@ export const SETTINGS: Field[] = [
   { name: "foundersCap", label: "Nombre de places de fondateur", kind: "number", required: true },
   { name: "empiresMaxMembers", label: "Membres max. par empire", kind: "number", required: true },
   { name: "worldRadius", label: "Rayon du monde (blocs, carte)", kind: "number", required: true },
+  { name: "mapWorlds", label: "Mondes de la carte — une ligne par monde : nom du monde en jeu = nom affiché (ex. « world_nether = Nether »)", kind: "textarea" },
   { name: "foundersOpen", label: "Attribution des numéros de fondateur ouverte", kind: "checkbox" },
 ];
 
@@ -43,6 +44,7 @@ export const ZONE: Field[] = [
   { name: "key", label: "Clé", kind: "text", required: true },
   { name: "name", label: "Nom", kind: "text", required: true },
   { name: "kind", label: "Type", kind: "select", options: [["neutral", "Neutre"], ["spawn", "Spawn"], ["koth", "KOTH"], ["warzone", "Zone de guerre"], ["event", "Événement"], ["outpost", "Avant-poste"]] },
+  { name: "world", label: "Monde (nom en jeu, ex. world)", kind: "text", required: true },
   { name: "active", label: "Affichée sur la carte", kind: "checkbox" },
   { name: "x1", label: "x1", kind: "number", required: true },
   { name: "z1", label: "z1", kind: "number", required: true },

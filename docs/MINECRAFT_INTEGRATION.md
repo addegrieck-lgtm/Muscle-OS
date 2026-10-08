@@ -96,6 +96,10 @@ Format vérifié en lisant le bytecode des jars : les champs correspondent à `p
 4. `VaeloriaVote/config.yml` et `VaeloriaShop/config.yml` → `bridge: enabled: true`, puis `/votes reload` et `/shop admin reload`.
 5. Sites de vote : renseigner `sites:` dans `VaeloriaVote/config.yml` **et** `VOTE_SITES` dans `apps/web/content/gameplay.ts` (même nom, même lien), sinon le site affiche « Lien bientôt disponible ».
 
+### Carte et plusieurs mondes
+
+Chaque claim est enregistré avec son monde (`world` du `FACTION_CLAIM`). La carte `/monde` affiche un onglet par monde : ceux listés dans **Admin → Monde → Réglages → « Mondes de la carte »** (une ligne par monde : `nom du dossier en jeu = nom affiché`, ex. `world_nether = Nether`), puis tout autre monde où il existe des claims ou des zones. Chaque zone (Admin → Monde → Zones) a son champ **Monde**. Le classement « Territoire » et le compteur des empires additionnent tous les mondes.
+
 Les valeurs de jeu affichées sur le site (prix, power, récompenses, roue…) sont recopiées des configs dans `apps/web/content/gameplay.ts` : à modifier au même endroit quand une config change.
 
 ## File d'événements et pannes
