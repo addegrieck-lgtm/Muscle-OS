@@ -1,0 +1,23 @@
+name: VaeloriaCrates
+version: '${version}'
+main: fr.vaeloria.crates.VaeloriaCratesPlugin
+api-version: '1.21'
+description: Coffres à clés de VÆLORIA — clés personnalisées et lots configurables depuis une interface admin en jeu.
+authors: [VÆLORIA]
+commands:
+  crate:
+    description: Coffres à clés (admin, don de clés, aperçu)
+    usage: "/crate <admin|give|giveall|preview|list|reload>"
+    aliases: [crates, coffre]
+permissions:
+  vaeloria.crates.admin:
+    description: Ouvrir l'interface admin, créer/modifier les coffres, clés et lots
+    default: op
+    children:
+      vaeloria.crates.give: true
+  vaeloria.crates.give:
+    description: Donner des clés (console, boutique via VæloriaBridge)
+    default: op
+  vaeloria.crates.use:
+    description: Ouvrir un coffre avec sa clé et voir les lots
+    default: true
