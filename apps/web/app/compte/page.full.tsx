@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Badge, Card, Container, EmptyState, Section, formatDate, formatPrice } from "@vaeloria/ui";
+import { Badge, Card, Container, EmptyState, Section, buttonClass, formatDate, formatPrice } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { RankProgressCard } from "@/components/shop/RankProgress";
 import { pageMeta } from "@/lib/seo";
 import { authedApi, getMe } from "@/lib/session";
+import { ClaimAdminForm } from "./AdminAccess";
 import { LinkForm } from "./LinkForm";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +17,12 @@ const STATUS: Record<string, { label: string; tone: "neutral" | "success" | "war
   cancelled: { label: "Annulée", tone: "neutral" }, expired: { label: "Expirée", tone: "neutral" },
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ admin?: string }> }) {
+  const justClaimed = (await searchParams).admin === "1";
   const me = await getMe();
   if (!me) redirect("/login?next=%2Fcompte");
+  const staff = me.user.role === "admin" || me.user.role === "owner";
+  const adminUrl = process.env.ADMIN_URL ?? "/admin";
   const [orders, catalogRanks] = await Promise.all([
     authedApi<{ items: { publicId: string; status: string; totalCents: number; pointsTotal: number; recipient: string; createdAt: string; items: string }[] }>("/api/v1/me/orders"),
     authedApi<{ ranks: { key: string; name: string; minPoints: number; color: string | null; perks: string[] }[] }>("/api/v1/shop/catalog").then((c) => c.ranks),
@@ -30,6 +34,15 @@ export default async function AccountPage() {
       </PageHeader>
       <Section className="py-8 sm:py-12">
         <Container className="space-y-10">
+          {staff && (
+            <Card className="flex flex-col gap-3 border-ruby/40 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-display text-lg font-bold uppercase tracking-[0.05em]">Back-office</p>
+                <p className="text-sm text-muted">{justClaimed ? "Accès activé. " : ""}Rôle : {me.user.role === "owner" ? "propriétaire" : "administrateur"}.</p>
+              </div>
+              <a href={adminUrl} className={buttonClass("primary", "md")}>Ouvrir le back-office</a>
+            </Card>
+          )}
           {me.minecraft.length === 0 ? (
             <Card className="max-w-xl">
               <h2 className="mb-3 font-display text-lg font-bold uppercase tracking-[0.05em]">Lier mon compte Minecraft</h2>
@@ -79,6 +92,13 @@ export default async function AccountPage() {
             <details className="max-w-xl rounded-[var(--radius-card)] border border-line p-4">
               <summary className="cursor-pointer text-sm font-semibold">Lier un autre compte Minecraft</summary>
               <div className="mt-4"><LinkForm /></div>
+            </details>
+          )}
+          {!staff && (
+            <details className="max-w-xl text-sm text-muted">
+              <summary className="cursor-pointer">Accès équipe</summary>
+              <p className="my-3">Propriétaire du serveur ? Saisis le code d&apos;administration défini à l&apos;installation. Les autres membres de l&apos;équipe sont ajoutés depuis le back-office.</p>
+              <ClaimAdminForm />
             </details>
           )}
         </Container>

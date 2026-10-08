@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppContext } from "../context";
 import { requireUser, sessionToken } from "../lib/auth";
 import { HttpError, notFound } from "../lib/errors";
+import { safeEqualString } from "../lib/hmac";
 import { parse } from "../lib/validate";
 import { consumeLinkCode, deleteSession, getMe, userOwnsPlayer } from "../services/identity";
 import { getProgress, pointsHistory } from "../services/shop/ledger";
@@ -30,6 +31,20 @@ export async function meRoutes(app: FastifyInstance, ctx: AppContext) {
     const token = sessionToken(req);
     if (token) await deleteSession(sql, token);
     reply.code(204);
+  });
+
+  /** Devenir propriétaire avec le code secret défini au déploiement (ADMIN_SETUP_CODE). */
+  app.post("/claim-admin", { config: { rateLimit: { max: 5, timeWindow: "1 hour", keyGenerator: (r: { headers: Record<string, unknown>; ip: string }) => String(r.headers.authorization ?? r.ip) } } }, async (req) => {
+    const user = await requireUser(sql, req);
+    const { code } = parse(z.object({ code: z.string().min(1).max(200) }), req.body);
+    const expected = ctx.env.ADMIN_SETUP_CODE;
+    if (!expected || !safeEqualString(code.trim(), expected)) {
+      await sql`INSERT INTO audit_logs (actor_type, actor_id, action, target_type, target_id) VALUES ('user', ${user.id}, 'admin.claim_refused', 'user', ${user.id})`;
+      throw new HttpError(403, "invalid_code", "Code invalide.");
+    }
+    await sql`UPDATE users SET role = 'owner', updated_at = now() WHERE id = ${user.id}`;
+    await sql`INSERT INTO audit_logs (actor_type, actor_id, action, target_type, target_id) VALUES ('user', ${user.id}, 'admin.claimed', 'user', ${user.id})`;
+    return { role: "owner" };
   });
 
   app.post("/link", { config: { rateLimit: { max: 10, timeWindow: "10 minutes" } } }, async (req) => {

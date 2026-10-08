@@ -3,8 +3,9 @@
  */
 import { randomBytes, randomInt } from "node:crypto";
 import type { LinkedMinecraft, Me } from "@vaeloria/types";
-import type { Sql } from "../db";
+import type { Sql, Tx } from "../db";
 import { sha256 } from "../lib/hmac";
+import { DUMMY_HASH, hashPassword, verifyPassword } from "../lib/password";
 import { getProgress } from "./shop/ledger";
 import { assignFounder } from "./world/founders";
 import { grantInfluence } from "./world/influence";
@@ -57,11 +58,67 @@ export async function upsertDiscordUser(
     }
     const [user] = await tx<{ id: string }[]>`INSERT INTO users (display_name) VALUES (${d.displayName}) RETURNING id`;
     await tx`INSERT INTO discord_accounts (discord_id, user_id, username, avatar) VALUES (${d.discordId}, ${user!.id}, ${d.username}, ${d.avatar})`;
-    await tx`INSERT INTO analytics_events (name) VALUES ('account_created'), ('register'), ('discord_connect')`;
-    await attributeReferral(tx, user!.id, onboarding.referralCode);
-    await assignFounder(tx, user!.id);
+    await tx`INSERT INTO analytics_events (name) VALUES ('discord_connect')`;
+    await onboard(tx, user!.id, onboarding.referralCode);
     return user!.id;
   });
+}
+
+/** Inscription (quelle que soit la méthode) : analytics, parrainage, numéro de fondateur. */
+async function onboard(tx: Tx, userId: string, referralCode?: string | null) {
+  await tx`INSERT INTO analytics_events (name) VALUES ('account_created'), ('register')`;
+  await attributeReferral(tx, userId, referralCode);
+  await assignFounder(tx, userId);
+}
+
+// ───────────── Comptes e-mail + mot de passe ─────────────
+
+export class AccountError extends Error {
+  constructor(public readonly code: string, message: string) {
+    super(message);
+  }
+}
+
+export const normalizeEmail = (e: string) => e.trim().toLowerCase();
+
+export async function registerWithPassword(sql: Sql, i: { email: string; password: string; displayName: string; referralCode?: string | null }): Promise<string> {
+  const email = normalizeEmail(i.email);
+  const hash = await hashPassword(i.password);
+  return sql.begin(async (tx) => {
+    if ((await tx`SELECT 1 FROM users WHERE lower(email) = ${email}`).length) throw new AccountError("email_taken", "Un compte existe déjà avec cette adresse. Connecte-toi.");
+    const [user] = await tx<{ id: string }[]>`INSERT INTO users (display_name, email, password_hash) VALUES (${i.displayName}, ${email}, ${hash}) RETURNING id`;
+    await onboard(tx, user!.id, i.referralCode);
+    return user!.id;
+  });
+}
+
+const LOCK_FAILURES = 10, LOCK_MINUTES = 15;
+
+/** Connexion : même réponse et même durée pour « e-mail inconnu » et « mauvais mot de passe ». Verrou après 10 échecs en 15 min. */
+export async function loginWithPassword(sql: Sql, rawEmail: string, password: string): Promise<string> {
+  const email = normalizeEmail(rawEmail);
+  const [{ n }] = (await sql`SELECT count(*)::int AS n FROM login_failures WHERE email_lower = ${email} AND at > now() - make_interval(mins => ${LOCK_MINUTES})`) as unknown as [{ n: number }];
+  if (n >= LOCK_FAILURES) throw new AccountError("locked", `Trop de tentatives. Réessaie dans ${LOCK_MINUTES} minutes.`);
+  const [u] = await sql<{ id: string; hash: string | null }[]>`SELECT id, password_hash AS hash FROM users WHERE lower(email) = ${email}`;
+  const ok = await verifyPassword(password, u?.hash ?? DUMMY_HASH);
+  if (!u?.hash || !ok) {
+    await sql`INSERT INTO login_failures (email_lower) VALUES (${email})`;
+    throw new AccountError("invalid_credentials", "E-mail ou mot de passe incorrect.");
+  }
+  await sql`DELETE FROM login_failures WHERE email_lower = ${email} OR at < now() - interval '1 day'`;
+  return u.id;
+}
+
+// ───────────── Rôles (accès au back-office) ─────────────
+
+export const STAFF_ROLES = ["moderator", "admin", "owner"] as const;
+export const isStaff = (role: string) => role === "admin" || role === "owner";
+
+export async function setRole(sql: Sql, email: string, role: "player" | "moderator" | "admin" | "owner", actor: string): Promise<{ id: string; displayName: string } | null> {
+  const [u] = await sql<{ id: string; displayName: string }[]>`
+    UPDATE users SET role = ${role}, updated_at = now() WHERE lower(email) = ${normalizeEmail(email)} RETURNING id, display_name AS "displayName"`;
+  if (u) await sql`INSERT INTO audit_logs (actor_type, actor_id, action, target_type, target_id, metadata) VALUES ('admin', ${actor}, 'user.role', 'user', ${u.id}, ${sql.json({ role })})`;
+  return u ?? null;
 }
 
 /** Échange du code OAuth Discord côté serveur. Le secret client ne quitte jamais l'API. */

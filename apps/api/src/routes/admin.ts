@@ -5,6 +5,7 @@ import { HttpError, notFound, unauthorized } from "../lib/errors";
 import { safeEqualString } from "../lib/hmac";
 import { parse } from "../lib/validate";
 import { enqueueCommand } from "../services/commands";
+import { normalizeEmail, setRole } from "../services/identity";
 import { randomUUID } from "node:crypto";
 
 const Slug = z.string().regex(/^[a-z0-9-]{1,120}$/, "slug : minuscules, chiffres et tirets");
@@ -217,6 +218,24 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppContext) {
       projections: { players100: projected(100), players1000: projected(1000) },
       latestMetrics: metrics[0] ?? null,
     };
+  });
+
+  // ───── Équipe : accès au back-office par rôle ─────
+  app.get("/team", async () => ({
+    items: await sql`
+      SELECT u.display_name AS "displayName", u.email, u.role, u.created_at AS "createdAt",
+             (SELECT max(s.created_at) FROM sessions s WHERE s.user_id = u.id) AS "lastLoginAt"
+      FROM users u WHERE u.role <> 'player' ORDER BY u.role DESC, u.created_at`,
+  }));
+  app.put("/team", async (req) => {
+    const b = parse(z.object({ email: z.string().trim().email(), role: z.enum(["player", "moderator", "admin", "owner"]), actor: z.string().max(120).default("admin") }), req.body);
+    if (b.role !== "owner") {
+      const [{ owners }] = (await sql`SELECT count(*)::int AS owners FROM users WHERE role = 'owner' AND lower(email) <> ${normalizeEmail(b.email)}`) as unknown as [{ owners: number }];
+      if (owners === 0) throw new HttpError(409, "last_owner", "Impossible : il doit toujours rester au moins un propriétaire.");
+    }
+    const u = await setRole(sql, b.email, b.role, b.actor);
+    if (!u) throw new HttpError(404, "not_found", "Aucun compte avec cette adresse. La personne doit d'abord créer son compte sur le site.");
+    return { ok: true, displayName: u.displayName, role: b.role };
   });
 
   // ───── Acquisition : funnel & marketing ─────

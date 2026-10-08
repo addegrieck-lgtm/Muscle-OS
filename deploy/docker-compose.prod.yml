@@ -23,6 +23,12 @@ services:
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
       MC_PING_HOST: ${MC_PING_HOST:-play.vaeloria.fr}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+      SITE_URL: https://vaeloria.fr
+      WEB_INTERNAL_TOKEN: ${WEB_INTERNAL_TOKEN:?}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      # Code à usage unique pour devenir propriétaire (Mon compte → Accès équipe). Le retirer ensuite.
+      ADMIN_SETUP_CODE: ${ADMIN_SETUP_CODE:-}
 
   web:
     build: { context: .., dockerfile: deploy/Dockerfile, target: web }
@@ -31,6 +37,8 @@ services:
     environment:
       API_URL: http://api:4000
       NEXT_PUBLIC_SITE_URL: https://vaeloria.fr
+      WEB_INTERNAL_TOKEN: ${WEB_INTERNAL_TOKEN:?}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
 
   admin:
     build: { context: .., dockerfile: deploy/Dockerfile, target: admin }
@@ -39,8 +47,10 @@ services:
     environment:
       API_URL: http://api:4000
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
-      ADMIN_USER: ${ADMIN_USER:?}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?}
+      SITE_URL: https://vaeloria.fr
+      # Accès normal : compte du site avec le rôle admin/owner. Basic Auth facultatif (secours).
+      ADMIN_USER: ${ADMIN_USER:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
 
   caddy:
     image: caddy:2-alpine

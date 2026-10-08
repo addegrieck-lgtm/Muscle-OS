@@ -8,7 +8,7 @@ export default function AccountPreview() {
   return (
     <>
       <PageHeader title="Mon compte" crumbs={[{ name: "Mon compte", path: "/compte" }]} />
-      <Section><Container className="max-w-xl"><EmptyState title="Les comptes ouvriront avec le serveur">Connexion Discord, liaison Minecraft, points et historique des commandes.<div className="mt-4"><ButtonLink href="/boutique" variant="secondary">Voir la boutique</ButtonLink></div></EmptyState></Container></Section>
+      <Section><Container className="max-w-xl"><EmptyState title="Les comptes ouvriront avec le serveur">Création de compte, liaison Minecraft, points et historique des commandes.<div className="mt-4"><ButtonLink href="/boutique" variant="secondary">Voir la boutique</ButtonLink></div></EmptyState></Container></Section>
     </>
   );
 }

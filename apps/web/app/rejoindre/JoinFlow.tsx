@@ -19,7 +19,7 @@ function Step({ n, done, title, children }: { n: number; done: boolean; title: s
   );
 }
 
-/** Parcours fondateur : Discord → numéro de fondateur → Minecraft → empire → invitations. */
+/** Parcours fondateur : compte → numéro de fondateur → Minecraft → empire → invitations. */
 export function JoinFlow() {
   const [state] = useMyWorld();
   const [invitation, setInvitation] = useState<string | null>(null);
@@ -44,11 +44,12 @@ export function JoinFlow() {
       <Card className="space-y-4">
         {invitation && <p className="rounded-md border border-ruby/40 bg-ruby/10 px-3 py-2 text-sm">Tu as été invité avec le code <strong className="font-mono">{invitation}</strong>. Il sera pris en compte à ton inscription.</p>}
         <ol className="space-y-3">
-          <Step n={1} done={false} title="Connecte-toi avec Discord">Un clic, sans mot de passe. Ton numéro de fondateur est attribué immédiatement.</Step>
+          <Step n={1} done={false} title="Crée ton compte VÆLORIA">Une adresse e-mail et un mot de passe. Ton numéro de fondateur est attribué immédiatement.</Step>
           <Step n={2} done={false} title="Lie ton compte Minecraft" />
           <Step n={3} done={false} title="Fonde ou rejoins un empire" />
         </ol>
-        <ButtonLink href={loginHref("/rejoindre")} size="lg" className="w-full" data-track="cta_click" data-track-id="rejoindre-discord">Se connecter avec Discord</ButtonLink>
+        <ButtonLink href={loginHref("/rejoindre", true)} size="lg" className="w-full" data-track="cta_click" data-track-id="rejoindre-compte">Créer mon compte</ButtonLink>
+        <p className="text-center text-sm text-muted">Déjà inscrit ? <a href={loginHref("/rejoindre")} className="font-semibold text-accent">Se connecter</a></p>
       </Card>
     );
 
@@ -71,7 +72,7 @@ export function JoinFlow() {
         )}
       </Card>
       <ol className="space-y-3">
-        <Step n={1} done title="Compte Discord connecté">{d.displayName ?? undefined}</Step>
+        <Step n={1} done title="Compte VÆLORIA créé">{d.displayName ?? undefined}</Step>
         <Step n={2} done={d.linked} title={d.linked ? `Minecraft lié${d.minecraft ? ` : ${d.minecraft}` : ""}` : "Lie ton compte Minecraft"}>
           {!d.linked && (
             <>

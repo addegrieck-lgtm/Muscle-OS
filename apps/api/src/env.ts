@@ -17,6 +17,11 @@ const Env = z.object({
   WEB_INTERNAL_TOKEN: z.string().min(24).optional(),
   DISCORD_CLIENT_ID: z.string().optional(),
   DISCORD_CLIENT_SECRET: z.string().optional(),
+  /**
+   * Code secret permettant à un compte connecté de devenir propriétaire (accès au back-office).
+   * À définir au déploiement, utiliser une fois, puis retirer. Vide = désactivé.
+   */
+  ADMIN_SETUP_CODE: z.string().min(16, "ADMIN_SETUP_CODE : 16 caractères minimum").optional().or(z.literal("")),
   /** Connexion sans Discord pour le développement uniquement (refusée en production). */
   DEV_LOGIN: z.enum(["0", "1"]).default("0"),
 

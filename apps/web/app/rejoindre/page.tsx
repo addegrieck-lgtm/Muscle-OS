@@ -9,7 +9,7 @@ import { JoinFlow } from "./JoinFlow";
 export const revalidate = 15;
 export const metadata = pageMeta({
   title: "Rejoindre VÆLORIA — Deviens fondateur",
-  description: `Rejoins ${BRAND.name} : connecte-toi avec Discord, obtiens ton numéro de fondateur, fonde ton empire et invite tes alliés.`,
+  description: `Rejoins ${BRAND.name} : crée ton compte, obtiens ton numéro de fondateur, fonde ton empire et invite tes alliés.`,
   path: "/rejoindre",
 });
 

@@ -39,4 +39,4 @@ export async function worldAction(path: string, body: object, method: "POST" | "
   }
 }
 
-export const loginHref = (next: string) => `/login?next=${encodeURIComponent(next)}`;
+export const loginHref = (next: string, signup = false) => `/login?next=${encodeURIComponent(next)}${signup ? "&mode=inscription" : ""}`;

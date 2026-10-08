@@ -12,7 +12,7 @@ Dernière mise à jour : 7 octobre 2026. « Testé » = vérifié par un test au
 | 4 | Pages serveur | ✅ Terminée (contenus légaux à renseigner) | 90 |
 | 5 | API | 🟡 Avancée | 85 |
 | 6 | Database | ✅ Terminée | 90 |
-| 7 | Authentication | 🟡 Implémentée et testée ; connexion Discord réelle à activer (identifiants) | 80 |
+| 7 | Authentication | ✅ Comptes e-mail + mot de passe, rôles, accès admin ; Discord optionnel ; e-mails (vérification, oubli) à faire | 90 |
 | 8 | Minecraft Bridge | 🟡 Avancée, pas encore testée sur un vrai serveur Paper | 75 |
 | 9 | Profils joueur / faction | ✅ Terminée | 85 |
 | 10 | Classements | ✅ Terminée | 85 |
@@ -130,6 +130,19 @@ Identité visuelle inchangée : toutes les nouvelles pages sont construites avec
 Tests de cette étape : API 90 / 90 ✅, site 4 / 4 ✅, typecheck du workspace ✅, build production du site ✅ (toutes les routes V2), build admin ✅, export statique de l'aperçu sur une base neuve (sans `--demo`) ✅ : 16 pages et 34 liens internes vérifiés, 0 erreur JS, 0 débordement horizontal à 390 px, aucun nom d'empire de démonstration présent. E2E navigateur du parcours joueur complet : 0 erreur console.
 
 Limites connues : le compteur et les listes publiques sont mis en cache 10 à 60 s (une action apparaît sur les pages publiques avec ce délai ; l'îlot personnel est immédiat). Les parrainages et votes d'un même foyer ne sont pas distingués au-delà de « un compte Discord = une personne » et du plafond quotidien.
+
+## Comptes et accès au back-office (8 octobre 2026)
+
+| Fonctionnalité | État | Vérification |
+|---|---|---|
+| Inscription / connexion e-mail + mot de passe (scrypt, verrou, limites) | ✅ | 6 tests API ; E2E navigateur |
+| Formulaire conservé après une erreur (pseudo, e-mail, case) | ✅ | E2E |
+| Back-office protégé par le compte du site (rôle admin/owner) | ✅ | E2E : sans session → connexion ; joueur → 403 ; propriétaire → 200 |
+| Premier propriétaire par `ADMIN_SETUP_CODE` (Mon compte → Accès équipe) | ✅ | Tests API + E2E (mauvais code refusé et journalisé) |
+| Admin → Équipe : donner / retirer l'accès par e-mail, dernier propriétaire protégé | ✅ | Tests API + E2E (second compte devient admin et entre) |
+| Vérification d'e-mail, mot de passe oublié | ⬜ | Nécessite un service d'envoi d'e-mails |
+
+Tests : API 96 / 96.
 
 ## Décisions attendues du propriétaire
 
