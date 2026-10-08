@@ -224,7 +224,7 @@ describe("guerres, événements et carte via VæloriaBridge", () => {
     expect((await me("Bravo")).influence - before).toBe(15);
   });
 
-  it("carte : zones configurées et territoires des empires liés", async () => {
+  it("carte : zones publiques et surface des empires, sans aucune coordonnée de claim", async () => {
     const [season] = await sql`SELECT id FROM seasons WHERE status = 'active'`;
     const [f] = await sql`INSERT INTO factions (season_id, name) VALUES (${season!.id}, 'Nightmare') RETURNING id`;
     for (let x = 0; x < 3; x++) await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'vaeloria', ${x}, 0)`;
@@ -234,9 +234,11 @@ describe("guerres, événements et carte via VæloriaBridge", () => {
     expect(map.zones.map((z: { key: string }) => z.key)).toContain("citadelle");
     expect(map.zones.every((z: { world: string }) => z.world === "vaeloria")).toBe(true);
     expect(map.territories).toEqual([
-      expect.objectContaining({ slug: "nightmare", world: "vaeloria", cx: 0, cz: 0, chunks: 3 }),
-      expect.objectContaining({ slug: "nightmare", world: "vaeloria_nether", cx: 2, cz: 2, chunks: 1 }),
+      { slug: "nightmare", name: "Nightmare", color: expect.any(String), world: "vaeloria", chunks: 3 },
+      { slug: "nightmare", name: "Nightmare", color: expect.any(String), world: "vaeloria_nether", chunks: 1 },
     ]);
+    // Aucune position de claim n'est publiée : elle révélerait les bases.
+    expect(JSON.stringify(map)).not.toMatch(/"(cx|cz|chunkX|chunkZ|chunk_x|chunk_z)"/);
     expect(map.worlds).toEqual([{ key: "vaeloria", name: "VÆLORIA", chunks: 3 }, { key: "vaeloria_nether", name: "vaeloria_nether", chunks: 1 }]);
   });
 

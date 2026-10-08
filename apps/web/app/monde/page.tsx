@@ -8,7 +8,7 @@ import { pageMeta } from "@/lib/seo";
 export const revalidate = 60;
 export const metadata = pageMeta({
   title: "Carte du monde de VÆLORIA",
-  description: "La carte géopolitique de VÆLORIA : territoires des empires, guerres, zones KOTH et événements en direct.",
+  description: "La carte de VÆLORIA : zones KOTH, zones de guerre, événements en direct et surface de chaque empire. Les bases restent secrètes.",
   path: "/monde",
 });
 
@@ -17,7 +17,7 @@ export default async function WorldPage() {
   return (
     <>
       <TrackView name="map_view" />
-      <PageHeader eyebrow="Le monde" title="La carte de VÆLORIA" description="Un monde où chaque territoire compte. Les frontières bougent au rythme des guerres." crumbs={[{ name: "Monde", path: "/monde" }]} />
+      <PageHeader eyebrow="Le monde" title="La carte de VÆLORIA" description="Zones publiques, événements en direct et surface de chaque empire. Les bases, elles, se trouvent en jeu." crumbs={[{ name: "Monde", path: "/monde" }]} />
       <Section className="py-8 sm:py-12">
         <Container>{map ? <WorldMap data={map} /> : <EmptyState title="Carte momentanément indisponible" />}</Container>
       </Section>

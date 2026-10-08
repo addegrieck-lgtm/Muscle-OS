@@ -2,7 +2,8 @@ import type { Sql } from "../../db";
 import { setting } from "./common";
 
 /**
- * Données de la carte : zones configurées + territoires des empires (claims synchronisés depuis le jeu), pour chaque monde.
+ * Données de la carte : zones publiques configurées + surface des empires (nombre de chunks claimés), pour chaque monde.
+ * Aucune coordonnée de claim n'est publiée.
  * Mondes affichés = ceux de map.worlds (ordre et noms) puis tout monde ayant des claims ou des zones.
  */
 export async function getMap(sql: Sql) {
@@ -12,12 +13,12 @@ export async function getMap(sql: Sql) {
     sql<{ key: string; name: string; kind: string; world: string; x1: number; z1: number; x2: number; z2: number; description: string }[]>`
       SELECT key, name, kind, world, x1, z1, x2, z2, description FROM map_zones WHERE active
       ORDER BY array_position(ARRAY['neutral','warzone','event','koth','outpost','spawn'], kind)`,
-    // Claims regroupés par carré de 8×8 chunks (128 blocs) : carte lisible et légère.
-    sql<{ slug: string; name: string; color: string; world: string; cx: number; cz: number; chunks: number }[]>`
-      SELECT e.slug, e.name, e.color, c.world, floor(c.chunk_x / 8.0)::int AS cx, floor(c.chunk_z / 8.0)::int AS cz, count(*)::int AS chunks
+    // Surface par empire et par monde, SANS position : publier l'emplacement des claims révélerait les bases aux raideurs.
+    sql<{ slug: string; name: string; color: string; world: string; chunks: number }[]>`
+      SELECT e.slug, e.name, e.color, c.world, count(*)::int AS chunks
       FROM claims c JOIN factions f ON f.id = c.faction_id JOIN seasons s ON s.id = c.season_id AND s.status = 'active'
       JOIN empires e ON lower(e.faction_name) = lower(f.name) AND e.status = 'active'
-      GROUP BY e.slug, e.name, e.color, c.world, cx, cz LIMIT 20000`,
+      GROUP BY e.slug, e.name, e.color, c.world ORDER BY chunks DESC, e.name`,
     sql<{ slug: string; title: string; type: string; zoneKey: string | null }[]>`
       SELECT slug, title, type, zone_key AS "zoneKey" FROM events
       WHERE published AND starts_at <= now() AND coalesce(ends_at, starts_at + interval '2 hours') > now()`,
@@ -31,7 +32,7 @@ export async function getMap(sql: Sql) {
     w.chunks += t.chunks;
     worlds.set(t.world, w);
   }
-  return { radius: Number(radius), cellBlocks: 128, worlds: [...worlds.values()], zones, territories, liveEvents, activeWars };
+  return { radius: Number(radius), worlds: [...worlds.values()], zones, territories, liveEvents, activeWars };
 }
 
 export async function listJournal(sql: Sql) {

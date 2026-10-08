@@ -19,7 +19,8 @@ const ZONE: Record<ZoneKind, { fill: string; stroke: string; dash?: string; labe
 
 /**
  * Carte géopolitique stylisée. Coordonnées = blocs Minecraft (X vers l'est, Z vers le sud).
- * Zones : configurées dans l'admin. Territoires : claims des empires, synchronisés par VæloriaBridge.
+ * Seules les zones publiques (configurées dans l'admin) sont dessinées. Les claims ne sont JAMAIS positionnés :
+ * l'emplacement des bases reste secret, seule la surface de chaque empire est listée.
  */
 export function WorldMap({ data: all, compact = false, initialFilter = "tout" }: { data: MapData; compact?: boolean; initialFilter?: Filter }) {
   const worlds = all.worlds?.length ? all.worlds : [{ key: "vaeloria", name: "VÆLORIA", chunks: 0 }];
@@ -45,7 +46,6 @@ export function WorldMap({ data: all, compact = false, initialFilter = "tout" }:
     for (const t of data.territories) m.set(t.slug, { name: t.name, color: t.color, chunks: (m.get(t.slug)?.chunks ?? 0) + t.chunks });
     return [...m.entries()].sort((a, b) => b[1].chunks - a[1].chunks);
   }, [data.territories]);
-  const showTerritories = filter === "tout" || filter === "empires" || filter === "guerres";
 
   function onPointerDown(e: React.PointerEvent) {
     if (compact) return;
@@ -124,12 +124,6 @@ export function WorldMap({ data: all, compact = false, initialFilter = "tout" }:
                 </g>
               );
             })}
-
-            {showTerritories && data.territories.map((t) => (
-              <rect key={`${t.slug}-${t.cx}-${t.cz}`} x={t.cx * data.cellBlocks} y={t.cz * data.cellBlocks} width={data.cellBlocks} height={data.cellBlocks}
-                fill={t.color} fillOpacity={Math.min(0.85, 0.25 + t.chunks / 64)} stroke={t.color} strokeOpacity={0.9} strokeWidth={6} />
-            ))}
-
             {data.zones.filter((z) => ZONE[z.kind].layer.includes(filter) && z.kind !== "neutral").map((z) => (
               <text key={`l-${z.key}`} x={(z.x1 + z.x2) / 2} y={z.z1 - 60} textAnchor="middle" fill="#d9dce2" fontSize={compact ? 220 : 150 / Math.sqrt(zoom)} fontWeight={700} letterSpacing={20}
                 style={{ fontFamily: "var(--font-chakra), sans-serif", textTransform: "uppercase", paintOrder: "stroke" }} stroke="#07070a" strokeWidth={30}>
@@ -138,11 +132,9 @@ export function WorldMap({ data: all, compact = false, initialFilter = "tout" }:
             ))}
             <text x={0} y={-R + 260} textAnchor="middle" fill="#8b909b" fontSize={200} fontWeight={700} style={{ fontFamily: "var(--font-chakra), sans-serif" }}>N</text>
           </svg>
-          {data.territories.length === 0 && (
-            <p className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/95 to-transparent px-4 pb-3 pt-8 text-center text-xs text-muted">
-              {all.territories.length === 0 ? "Les territoires des empires apparaîtront dès les premiers claims de la Saison I." : "Aucun territoire d'empire dans ce monde pour l'instant."}
-            </p>
-          )}
+          <p className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/95 to-transparent px-4 pb-3 pt-8 text-center text-xs text-muted">
+            Les bases restent secrètes : la carte montre les zones publiques, jamais l&apos;emplacement des claims.
+          </p>
         </div>
       </div>
 
@@ -175,7 +167,7 @@ export function WorldMap({ data: all, compact = false, initialFilter = "tout" }:
             </ul>
           </div>
           <div className="rounded-[var(--radius-card)] border border-line p-4">
-            <p className="mb-2 font-display text-xs font-semibold uppercase tracking-[0.2em] text-subtle">Empires sur la carte</p>
+            <p className="mb-2 font-display text-xs font-semibold uppercase tracking-[0.2em] text-subtle">Surface des empires</p>
             {empires.length === 0 ? (
               <p className="text-sm text-muted">Aucun territoire revendiqué pour l&apos;instant.</p>
             ) : (
