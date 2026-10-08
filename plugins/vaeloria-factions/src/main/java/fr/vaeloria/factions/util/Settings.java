@@ -68,6 +68,14 @@ public final class Settings {
     public boolean discordEnabled;
     public String discordUrlPattern, discordGlobalWebhook;
     public Set<String> discordEvents = new HashSet<>();
+    // Totem
+    public boolean totemEnabled, totemInstantBreak, totemHologram;
+    public int totemHeight, totemDurationMinutes, totemMinOnline;
+    public Material totemMaterial = Material.OBSIDIAN;
+    public double totemRewardMoney, totemRewardPower;
+    public java.util.List<String> totemRewardCommands = new java.util.ArrayList<>();
+    public java.util.List<fr.vaeloria.factions.rules.TotemSchedule.Entry> totemSchedule = new java.util.ArrayList<>();
+    public java.util.List<String> totemScheduleErrors = new java.util.ArrayList<>();
     // Guerres
     public boolean warEnabled;
     public int warPreparationMinutes, warDurationHours, warCooldownHours, warMinMembers, warPointsKill, warPointsRaid, warPointsOverclaim;
@@ -183,6 +191,25 @@ public final class Settings {
         discordGlobalWebhook = c.getString("discord.global-webhook", "");
         discordEvents = new HashSet<>();
         for (String e : c.getStringList("discord.events")) discordEvents.add(e.toUpperCase(Locale.ROOT));
+
+        totemEnabled = c.getBoolean("totem.enabled", true);
+        totemHeight = Math.max(1, Math.min(20, c.getInt("totem.height", 5)));
+        Material tm = Material.matchMaterial(c.getString("totem.material", "OBSIDIAN"));
+        totemMaterial = tm == null || !tm.isBlock() ? Material.OBSIDIAN : tm;
+        totemInstantBreak = c.getBoolean("totem.instant-break", true);
+        totemHologram = c.getBoolean("totem.hologram", true);
+        totemDurationMinutes = Math.max(1, c.getInt("totem.duration-minutes", 30));
+        totemMinOnline = Math.max(0, c.getInt("totem.min-online", 0));
+        totemRewardMoney = Math.max(0, c.getDouble("totem.reward.money", 0));
+        totemRewardPower = c.getDouble("totem.reward.power-boost", 0);
+        totemRewardCommands = new java.util.ArrayList<>(c.getStringList("totem.reward.commands"));
+        totemSchedule = new java.util.ArrayList<>();
+        totemScheduleErrors = new java.util.ArrayList<>();
+        for (String e : c.getStringList("totem.schedule")) {
+            var entry = fr.vaeloria.factions.rules.TotemSchedule.parse(e);
+            if (entry == null) totemScheduleErrors.add(e);
+            else totemSchedule.add(entry);
+        }
 
         warEnabled = c.getBoolean("war.enabled", true);
         warPreparationMinutes = Math.max(0, c.getInt("war.preparation-minutes", 15));

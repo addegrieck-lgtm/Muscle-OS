@@ -56,6 +56,7 @@ public final class ObsidianListener implements Listener {
     public void onBreak(BlockBreakEvent e) {
         Block b = e.getBlock();
         Player p = e.getPlayer();
+        if (plugin.totems().isTotemBlock(b)) return;
         obsidian.forget(b);
         if (p.getGameMode() == org.bukkit.GameMode.CREATIVE) return;
         if (isObsidian(b.getType())) {

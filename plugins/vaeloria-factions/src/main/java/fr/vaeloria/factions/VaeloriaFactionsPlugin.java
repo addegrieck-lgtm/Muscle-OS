@@ -71,6 +71,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private DiscordService discord;
     private CombatService combat;
     private WarService wars;
+    private fr.vaeloria.factions.service.TotemService totems;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -101,6 +102,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         discord = new DiscordService(settings, getLogger());
         combat = new CombatService(settings);
         wars = new WarService(settings, manager, state, bridge, discord, logs);
+        totems = new fr.vaeloria.factions.service.TotemService(this, settings, state);
+        totems.purgeOrphans();
+        for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
         bank = Banks.detect();
         raid = new RaidService(settings, manager, state);
         access = new AccessService(settings, manager, raid);
@@ -122,6 +126,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         pm.registerEvents(new PlayerListener(this), this);
         pm.registerEvents(new ChatListener(this), this);
         pm.registerEvents(new MenuListener(this), this);
+        pm.registerEvents(new fr.vaeloria.factions.listener.TotemListener(this), this);
 
         FactionCommand cmd = new FactionCommand(this);
         PluginCommand f = getCommand("f");
@@ -148,6 +153,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             territory.tickFly();
             combat.tick();
             wars.tick();
+            totems.tick();
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
@@ -230,6 +236,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         settings.load(getConfig());
         Msg.load(this);
         obsidian.registerRecipe();
+        for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
         scoreboard.clear();
         for (Player p : Bukkit.getOnlinePlayers()) scoreboard.show(p);
         startTasks();
@@ -263,6 +270,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             if (holder instanceof ChestService.Holder || holder instanceof fr.vaeloria.factions.gui.Menu) p.closeInventory();
         }
         raid.hideAll();
+        totems.shutdown();
         scoreboard.clear();
         obsidian.unregisterRecipe();
         save(false);
@@ -286,5 +294,6 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public DiscordService discord() { return discord; }
     public CombatService combat() { return combat; }
     public WarService wars() { return wars; }
+    public fr.vaeloria.factions.service.TotemService totems() { return totems; }
     public fr.vaeloria.factions.rules.FarmGuard farmGuard() { return farmGuard; }
 }

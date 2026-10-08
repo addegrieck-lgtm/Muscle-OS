@@ -74,6 +74,7 @@ public final class ProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) {
+        if (plugin.totems().isTotemBlock(e.getBlock())) return; // géré par TotemListener
         if (!access.check(e.getPlayer(), e.getBlock().getLocation(), FPerm.BUILD)) e.setCancelled(true);
     }
 

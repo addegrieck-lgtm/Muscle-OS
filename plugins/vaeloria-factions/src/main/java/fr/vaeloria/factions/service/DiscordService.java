@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Envoi asynchrone, jamais bloquant pour le serveur ; limité à un message par seconde et par webhook.
  */
 public final class DiscordService {
-    public enum Event { RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG }
+    public enum Event { RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG, TOTEM }
 
     private static final int RED = 0xD21F2F, GOLD = 0xFACC15, GREEN = 0x4ADE80, GREY = 0xA9AEB8;
 
@@ -87,6 +87,12 @@ public final class DiscordService {
         if (a != null) send(a, e, false);
         if (b != null) send(b, e, false);
         if (global) sendGlobal(e);
+    }
+
+    /** Totem : annonce publique sur le webhook global. */
+    public void totem(String title, String text) {
+        if (!wants(Event.TOTEM)) return;
+        sendGlobal(embed(title, text, 0x9B59B6));
     }
 
     public void sendGlobal(JsonObject embed) {

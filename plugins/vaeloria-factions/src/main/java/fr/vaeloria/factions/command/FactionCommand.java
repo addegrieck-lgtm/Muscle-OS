@@ -68,8 +68,8 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("ouvrir", "", "Ouvrir / fermer la faction à tous", true, use, this::open, null, "open");
         reg("info", "[faction|joueur]", "Fiche d'une faction", false, use, this::info, (s, a) -> factionOrPlayerNames(), "show", "who", "f");
         reg("liste", "[page]", "Toutes les factions", false, use, this::list, null, "list", "ls");
-        reg("top", "[power|claims|kills|pillages|surclaims|banque]", "Classements", false, use, this::top,
-                (s, a) -> List.of("power", "claims", "kills", "pillages", "surclaims", "banque"));
+        reg("top", "[power|claims|kills|pillages|surclaims|totems|banque]", "Classements", false, use, this::top,
+                (s, a) -> List.of("power", "claims", "kills", "pillages", "surclaims", "totems", "banque"));
         reg("power", "[joueur]", "Power d'un joueur", false, use, this::power, (s, a) -> onlineNames(), "pow");
         reg("menu", "", "Menu de faction", true, use, (s, p, a) -> plugin.menus().openMain(p), null, "gui");
         // Membres
@@ -108,6 +108,9 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("bouclier", "[heure 0-23|off]", "Bouclier anti-pillage quotidien", true, use, this::shield, (s, a) -> List.of("0", "2", "4", "20", "22", "off"), "shield");
         reg("guerre", "[declarer <faction>|abandonner]", "Guerres officielles", true, use, this::war,
                 (s, a) -> a.length <= 1 ? List.of("declarer", "abandonner") : factionNames(), "war");
+        reg("totem", "[liste|creer|supprimer|lancer|arreter]", "Événement Totem", false, use, this::totem,
+                (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin") ? List.of("liste", "creer", "supprimer", "lancer", "arreter") : List.of("liste"))
+                        : plugin.totems().definitions().stream().map(d -> d.name).toList());
         reg("logs", "[page]", "Journal de la faction", true, use, this::logs, null, "journal", "log");
         reg("discord", "[lien|off|test|ping]", "Alertes Discord de la faction", true, use, this::discord,
                 (s, a) -> List.of("off", "test", "ping"), "webhook");
@@ -386,7 +389,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         sendRelationLine(s, f, Relation.TREVE, "info.truces");
         sendRelationLine(s, f, Relation.ENNEMI, "info.enemies");
         s.sendMessage(Msg.get("info.stats", "kills", f.kills, "deaths", f.deaths, "raids", f.raidsDone, "raided", f.raidsSuffered,
-                "oc", f.overclaimsDone, "ocs", f.overclaimsSuffered));
+                "oc", f.overclaimsDone, "ocs", f.overclaimsSuffered, "totems", f.totemsWon, "wars", f.warsWon));
     }
 
     private void sendRelationLine(CommandSender s, Faction f, Relation rel, String key) {
@@ -429,6 +432,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
             case "claims", "terres" -> { key = f -> f.claims.size(); show = f -> f.claims.size() + " claims"; crit = "claims"; }
             case "kills" -> { key = f -> f.kills; show = f -> f.kills + " kills"; }
             case "pillages", "raids" -> { key = f -> f.raidsDone; show = f -> f.raidsDone + " pillages"; crit = "pillages"; }
+            case "totems", "totem" -> { key = f -> f.totemsWon; show = f -> f.totemsWon + " totems"; crit = "totems"; }
             case "surclaims", "overclaims" -> { key = f -> f.overclaimsDone; show = f -> f.overclaimsDone + " surclaims"; crit = "surclaims"; }
             case "banque", "argent", "money" -> { key = f -> f.bank; show = f -> plugin.bank().format(f.bank); crit = "banque"; }
             default -> { key = f -> m().power(f); show = f -> Msg.fmt(m().power(f)) + " power"; crit = "power"; }
@@ -977,6 +981,48 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 ws.surrender(f);
             }
             default -> usage(p, "guerre");
+        }
+    }
+
+    private void totem(CommandSender s, Player p, String[] a) {
+        var ts = plugin.totems();
+        if (a.length == 0) {
+            s.sendMessage(ts.status());
+            return;
+        }
+        String sub = a[0].toLowerCase(Locale.ROOT);
+        if (sub.equals("liste") || sub.equals("list")) {
+            var defs = ts.definitions();
+            if (defs.isEmpty()) { Msg.send(s, "totem.none-defined"); return; }
+            for (var d : defs) Msg.send(s, "totem.list-line", "totem", d.name, "world", d.world, "x", d.x, "y", d.y, "z", d.z);
+            return;
+        }
+        if (!s.hasPermission("vaeloria.factions.admin")) { Msg.send(s, "error.no-permission"); return; }
+        switch (sub) {
+            case "creer", "créer", "create" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                if (a.length < 2 || !a[1].matches("[A-Za-z0-9_-]{2,24}")) { Msg.send(s, "error.usage", "usage", "/f totem creer <nom>"); return; }
+                var base = p.getLocation().getBlock();
+                if (ts.create(a[1], base)) Msg.send(s, "totem.created", "totem", a[1], "x", base.getX(), "y", base.getY(), "z", base.getZ());
+                else Msg.send(s, "totem.exists", "totem", a[1]);
+            }
+            case "supprimer", "delete" -> {
+                if (a.length < 2) { Msg.send(s, "error.usage", "usage", "/f totem supprimer <nom>"); return; }
+                Msg.send(s, ts.delete(a[1]) ? "totem.deleted" : "totem.unknown", "totem", a[1]);
+            }
+            case "lancer", "start" -> {
+                String name = a.length > 1 ? a[1] : null;
+                int minutes = a.length > 2 ? parseInt(a[2], 0) : 0;
+                var r = ts.start(name, minutes, false);
+                if (r != fr.vaeloria.factions.service.TotemService.StartResult.OK) {
+                    Msg.send(s, "totem.start-fail." + r.name().toLowerCase(Locale.ROOT), "totem", name == null ? "" : name);
+                }
+            }
+            case "arreter", "arrêter", "stop" -> {
+                if (!ts.isActive()) { Msg.send(s, "totem.not-running"); return; }
+                ts.stop(false);
+            }
+            default -> Msg.send(s, "error.usage", "usage", "/f totem [liste|creer|supprimer|lancer|arreter]");
         }
     }
 

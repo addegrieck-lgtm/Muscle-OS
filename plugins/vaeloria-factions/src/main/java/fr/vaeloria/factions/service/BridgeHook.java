@@ -140,4 +140,23 @@ public final class BridgeHook {
         o.addProperty("participants", w.participants.size());
         send(o);
     }
+
+    public void kothStart(String koth, int durationSeconds) {
+        if (!active()) return;
+        JsonObject o = base("KOTH_START");
+        o.addProperty("koth", koth.length() > 64 ? koth.substring(0, 64) : koth);
+        o.addProperty("durationSeconds", Math.max(60, Math.min(86_400, durationSeconds)));
+        send(o);
+    }
+
+    public void kothCapture(String koth, Faction f, UUID uuid, String username) {
+        if (!active()) return;
+        JsonObject o = base("KOTH_CAPTURE");
+        o.addProperty("koth", koth.length() > 64 ? koth.substring(0, 64) : koth);
+        if (f == null || f.system) o.add("faction", com.google.gson.JsonNull.INSTANCE);
+        else o.addProperty("faction", f.name);
+        o.addProperty("uuid", uuid.toString());
+        o.addProperty("username", username);
+        send(o);
+    }
 }

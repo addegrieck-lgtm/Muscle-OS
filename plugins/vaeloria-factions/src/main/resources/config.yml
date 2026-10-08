@@ -155,11 +155,33 @@ logs:
 # Chaque chef relie le salon Discord de sa faction : /f discord <lien du webhook>.
 discord:
   enabled: true
-  events: [RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG]
+  events: [RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG, TOTEM]
   # Webhook du staff pour les annonces publiques (guerres) ; vide = aucun.
   global-webhook: ""
   # Liens acceptés (expression régulière). Vide = webhooks Discord officiels uniquement.
   url-pattern: ""
+
+# ── Totem ─────────────────────────────────────────────────────────
+# Une colonne de blocs à abattre : la faction qui casse TOUS les blocs d'affilée gagne. Si une autre faction
+# casse un bloc, le totem se reconstruit et elle prend la main.
+# Création : place-toi sur la case de base et tape /f totem creer <nom> (mets la zone en warzone).
+totem:
+  enabled: true
+  height: 5
+  material: OBSIDIAN
+  instant-break: true          # un coup = un bloc (sinon il faut miner l'obsidienne normalement)
+  hologram: true
+  duration-minutes: 30         # sans vainqueur à la fin : le totem s'effondre
+  min-online: 10               # joueurs connectés minimum pour un lancement programmé
+  # Lancements automatiques (heure de « timezone ») : JOUR HH:MM [nom] — JOUR = LUNDI…DIMANCHE ou TOUS.
+  schedule:
+    - "MERCREDI 20:30"
+    - "SAMEDI 21:00"
+  reward:
+    money: 5000                # versé en banque de faction (Vault)
+    power-boost: 0             # power de faction ajouté à vie (0 = aucun)
+    # Commandes console : {player} = dernier coup, {faction}, {totem}
+    commands: []
 
 # ── Guerres officielles ───────────────────────────────────────────
 # /f guerre declarer <faction> : préparation, puis combat chronométré. Points : kills, pillages, surclaims.

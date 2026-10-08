@@ -78,6 +78,31 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
   - **publication sur le site** (`WAR_START` / `WAR_END` : scores, chunks surclaim, nombre de combattants).
 - Statistiques : guerres gagnées et perdues par faction.
 
+## Événement Totem
+- Une colonne de **5 blocs d'obsidienne** (hauteur et matériau réglables) apparaît, idéalement en warzone.
+- **La faction qui casse tous les blocs d'affilée gagne.** Si une autre faction casse un bloc, le totem se **reconstruit** et c'est elle qui prend la main, avec ce premier bloc déjà compté.
+- Un coup = un bloc (`totem.instant-break`). Il faut être dans une faction pour frapper. En dehors de l'événement, la colonne est intouchable : ni casse, ni pose, ni explosion, ni piston.
+- Affichage :
+  - hologramme au-dessus du totem (faction en tête, progression, temps restant) ;
+  - barre de boss pour tout le serveur ;
+  - titres et sons ;
+  - annonces à chaque reprise ;
+  - annonce sur le webhook Discord global ;
+  - **publication sur le site** comme un KOTH (`KOTH_START` / `KOTH_CAPTURE`).
+- Récompenses :
+  - argent en banque de faction (5000 par défaut) ;
+  - bonus de power de faction ;
+  - commandes console (`{player}`, `{faction}`, `{totem}`), par exemple une clé de caisse ;
+  - le compteur « Totems » dans `/f info` et le classement `/f top totems`.
+- Programmation automatique : `totem.schedule` (ex. `"SAMEDI 21:00"`, `"TOUS 20:30 citadelle"`). Le lancement automatique ne se fait qu'avec au moins `min-online` joueurs connectés.
+- Sans vainqueur au bout de `duration-minutes` (30), le totem s'effondre.
+- Staff :
+  - `/f totem creer <nom>` : à faire debout sur la case de base ;
+  - `/f totem supprimer <nom>` ;
+  - `/f totem lancer [nom] [minutes]` ;
+  - `/f totem arreter`.
+- Joueurs : `/f totem` (état ou prochains horaires) et `/f totem liste`.
+
 ## Obsidienne rare
 - Le générateur eau + lave produit de la **pierre**, plus d'obsidienne.
 - L'obsidienne de la nature (portails en ruine, End) ne donne que **1 à 3 éclats** quand on la mine.
@@ -99,6 +124,7 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
 | Diplomatie | `allie`, `treve`, `neutre`, `ennemi`, `relations` (l'alliance et la trêve se signent à deux, la guerre se déclare seul) |
 | Faction | `chat [f\|a\|p]`, `banque [deposer\|retirer]`, `coffre`, `perm`, `bouclier`, `scoreboard`, `logs`, `discord` |
 | Guerre | `guerre`, `guerre declarer <faction>`, `guerre abandonner` |
+| Totem | `totem`, `totem liste` ; staff : `totem creer\|supprimer\|lancer\|arreter` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.
@@ -113,6 +139,15 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
+
+## Ce qui a été vérifié (Totem)
+- 28 tests unitaires, dont la règle « tous d'affilée » avec reprise et la lecture des horaires.
+- Essai sur Paper 1.21.4 avec deux bots :
+  - création du totem, colonne construite, hologramme présent ;
+  - Lions à 3/5, puis Loups reprend la main et le totem est reconstruit ;
+  - Loups à 5/5 : victoire, colonne et hologramme retirés, 5000 en banque ;
+  - `/f top totems`, journal, deux annonces Discord ;
+  - arrêt par le staff, qui retire le totem.
 
 ## Ce qui a été vérifié (lot anti-abus, Discord, guerres)
 - 25 tests unitaires, dont l'anti-farm, la différence de coffre, les règles de guerre et la validation des webhooks.

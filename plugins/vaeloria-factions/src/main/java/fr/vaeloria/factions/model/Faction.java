@@ -51,6 +51,7 @@ public final class Faction {
     public long blocksDestroyed;
     public int warsWon;
     public int warsLost;
+    public int totemsWon;
 
     /** Webhook Discord de la faction (alertes de pillage, guerres). Jamais affiché en entier. */
     public String discordWebhook;
