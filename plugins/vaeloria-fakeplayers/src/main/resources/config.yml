@@ -51,15 +51,73 @@ bodies:
   # Les corps tournent la tête vers le joueur le plus proche (8 blocs).
   look-at-players: true
 
-# Mode ambiance : des faux joueurs arrivent et partent tout seuls.
+# Mode ambiance : des faux joueurs arrivent et partent tout seuls, UN PAR UN, pour viser une cible.
+# Seuls les faux joueurs créés par ce mode comptent dans la cible (ceux de /fp spawn ou /fp add s'ajoutent).
 auto:
   enabled: false
+  # Plancher et pic. Avec le planning, la cible = pic × % de la courbe, jamais sous min.
   min: 3
   max: 10
-  # Toutes les N secondes : une arrivée (join-chance) ou, à défaut, un départ (leave-chance).
+  # Délai aléatoire entre deux arrivées/départs (raccourci automatiquement si l'écart à la cible est grand).
+  step-seconds:
+    min: 15
+    max: 90
+  # Une fois la cible atteinte : chance, à chaque pas, qu'un faux joueur parte (un autre le remplacera).
+  churn-chance: 0.15
+  # Sans planning uniquement : toutes les N secondes la cible monte (join-chance) ou descend (leave-chance) de 1.
   interval-seconds: 60
   join-chance: 0.5
   leave-chance: 0.3
+
+# Planning : plus de monde le soir, les week-ends et pendant les vacances, presque personne la nuit et en
+# journée les jours d'école. Vérifie la prévision avec /fp schedule.
+schedule:
+  enabled: true
+  timezone: "Europe/Paris"
+  # Jours fériés français calculés automatiquement (1er janvier, lundi de Pâques, 1er et 8 mai, Ascension,
+  # lundi de Pentecôte, 14 juillet, 15 août, 1er et 11 novembre, Noël) : traités comme un dimanche.
+  french-public-holidays: true
+  # Jours de congé supplémentaires (événement, pont…) : "AAAA-MM-JJ".
+  extra-days-off: []
+  # Variation aléatoire d'un jour à l'autre (0.15 = ±15 %) et bruit doux par quart d'heure (±10 %).
+  # Reproductible : la même heure donne la même cible même après un redémarrage.
+  daily-variation: 0.15
+  noise: 0.10
+  seed: "vaeloria"
+
+  # Courbes : 24 valeurs en % du pic, de 0 h à 23 h. Une journée va de 6 h à 6 h : les valeurs de 0 h à 5 h
+  # décrivent la nuit QUI SUIT la journée (la nuit de vendredi à samedi = courbe school-eve).
+  # Les courbes sont mélangées selon la part de zones en vacances (ex. 1 zone sur 3 en vacances d'hiver).
+  # Supprimer une courbe ici = courbe par défaut.
+  curves:
+    #            0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+    # Jour d'école suivi d'un jour d'école (lundi, mardi, jeudi)
+    school:     [10,  4,  2,  1,  1,  1,  1,  2,  3,  3,  4,  6, 12, 12,  6,  6, 12, 30, 45, 50, 60, 65, 45, 22]
+    # Mercredi : après-midi libre
+    wednesday:  [10,  4,  2,  1,  1,  1,  1,  2,  3,  4,  6,  8, 15, 30, 45, 55, 60, 60, 55, 55, 60, 65, 45, 22]
+    # Jour d'école suivi d'un jour de congé (vendredi, veille de vacances) : grosse soirée
+    school-eve: [50, 35, 20, 10,  5,  3,  1,  2,  3,  3,  4,  6, 12, 12,  6,  6, 15, 40, 55, 65, 80, 90, 85, 65]
+    # Jour de congé suivi d'un jour de congé (samedi, vacances) : la journée la plus remplie
+    day-off:    [55, 40, 25, 12,  6,  3,  2,  2,  4,  8, 15, 25, 35, 40, 55, 65, 70, 70, 70, 75, 90,100, 95, 75]
+    # Jour de congé suivi d'un jour d'école (dimanche, dernier jour de vacances) : on se couche tôt
+    day-off-eve: [12,  5,  2,  1,  1,  1,  2,  2,  4,  8, 15, 25, 35, 40, 55, 65, 70, 70, 65, 65, 70, 65, 40, 18]
+
+  # Vacances scolaires. Calendrier officiel : https://data.education.gouv.fr (fr-en-calendrier-scolaire).
+  # Dates INCLUSES (du premier au dernier jour sans cours). À compléter chaque année.
+  school-holidays:
+    # Zones prises en compte. Un jour compte comme « vacances » au prorata des zones en congé.
+    zones: [A, B, C]
+    periods:
+      - {name: "vacances de la Toussaint", zones: "A,B,C", from: "2026-10-17", to: "2026-11-01"}
+      - {name: "vacances de Noël",         zones: "A,B,C", from: "2026-12-19", to: "2027-01-03"}
+      - {name: "vacances d'hiver",         zones: "C",     from: "2027-02-06", to: "2027-02-21"}
+      - {name: "vacances d'hiver",         zones: "A",     from: "2027-02-13", to: "2027-02-28"}
+      - {name: "vacances d'hiver",         zones: "B",     from: "2027-02-20", to: "2027-03-07"}
+      - {name: "vacances de printemps",    zones: "C",     from: "2027-04-03", to: "2027-04-18"}
+      - {name: "vacances de printemps",    zones: "A",     from: "2027-04-10", to: "2027-04-25"}
+      - {name: "vacances de printemps",    zones: "B",     from: "2027-04-17", to: "2027-05-02"}
+      - {name: "pont de l'Ascension",      zones: "A,B,C", from: "2027-05-07", to: "2027-05-07"}
+      - {name: "vacances d'été",           zones: "A,B,C", from: "2027-07-03", to: "2027-08-31"}
 
 chat:
   format: "<gray><name></gray> <dark_gray>»</dark_gray> <white><message>"

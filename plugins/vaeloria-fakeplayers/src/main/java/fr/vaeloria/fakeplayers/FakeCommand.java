@@ -7,6 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +17,7 @@ import java.util.Locale;
 
 /** /fakeplayers (alias /fp) — gestion des faux joueurs. Permission : vaeloria.fakeplayers.admin. */
 final class FakeCommand implements TabExecutor {
-    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "reload");
+    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "schedule", "reload");
     private static final int MAX_BULK = 100;
 
     private final FakePlayersPlugin plugin;
@@ -42,9 +45,15 @@ final class FakeCommand implements TabExecutor {
                 return ok(sender, "Faux joueur « " + fake.name() + " » connecté" + (body ? " avec un corps." : "."));
             }
             case "add" -> {
-                // /fp add <nombre>
+                // /fp add <nombre> [durée] — sans durée : tous d'un coup ; avec : arrivées étalées (ex. 10m)
                 int n = args.length >= 2 ? parse(args[1]) : -1;
-                if (n < 1 || n > MAX_BULK) return error(sender, "Usage : /" + label + " add <1-" + MAX_BULK + ">");
+                if (n < 1 || n > MAX_BULK) return error(sender, "Usage : /" + label + " add <1-" + MAX_BULK + "> [durée, ex. 30s, 10m, 1h]");
+                if (args.length >= 3) {
+                    long duration = Durations.parseSeconds(args[2]);
+                    if (duration < 1 || duration > 86_400) return error(sender, "Durée invalide (ex. 30s, 10m, 2h ; 24h max).");
+                    plugin.scheduleArrivals(n, duration);
+                    return ok(sender, n + " faux joueur(s) vont arriver petit à petit sur " + args[2] + ".");
+                }
                 int created = 0;
                 for (int i = 0; i < n && plugin.spawnRandom(false, false) != null; i++) created++;
                 return ok(sender, created + " faux joueur(s) ajouté(s). Total : " + manager.count());
@@ -53,6 +62,7 @@ final class FakeCommand implements TabExecutor {
                 if (args.length < 2) return error(sender, "Usage : /" + label + " remove <pseudo|all>");
                 if (args[1].equalsIgnoreCase("all")) {
                     int n = manager.count();
+                    plugin.clearPendingArrivals();
                     manager.removeAll(false);
                     return ok(sender, n + " faux joueur(s) retiré(s).");
                 }
@@ -60,12 +70,13 @@ final class FakeCommand implements TabExecutor {
                         : error(sender, "Faux joueur inconnu : " + args[1]);
             }
             case "list" -> {
-                if (manager.count() == 0) return ok(sender, "Aucun faux joueur.");
+                String pending = plugin.pendingArrivals() > 0 ? " (" + plugin.pendingArrivals() + " arrivée(s) en attente)" : "";
+                if (manager.count() == 0) return ok(sender, "Aucun faux joueur." + pending);
                 List<String> parts = new ArrayList<>();
                 for (FakePlayer f : manager.all()) {
                     parts.add(f.name() + (f.hasBody() ? " [corps]" : "") + (f.auto() ? " [auto]" : "") + " " + f.ping() + "ms");
                 }
-                return ok(sender, manager.count() + " faux joueur(s) : " + String.join(", ", parts));
+                return ok(sender, manager.count() + " faux joueur(s)" + pending + " : " + String.join(", ", parts));
             }
             case "chat" -> {
                 // /fp chat <pseudo> <message…>
@@ -94,6 +105,9 @@ final class FakeCommand implements TabExecutor {
                 if (!on) manager.all().stream().filter(FakePlayer::auto).forEach(f -> manager.remove(f.name(), false));
                 return ok(sender, "Mode ambiance " + (on ? "activé." : "désactivé."));
             }
+            case "schedule" -> {
+                return schedule(sender);
+            }
             case "reload" -> {
                 plugin.reload();
                 return ok(sender, "Configuration rechargée.");
@@ -119,12 +133,44 @@ final class FakeCommand implements TabExecutor {
                 case "chat", "tphere" -> filter(names, args[1]);
                 case "auto" -> filter(List.of("on", "off"), args[1]);
                 case "add" -> filter(List.of("1", "5", "10", "20"), args[1]);
+                case "schedule" -> List.of();
                 case "spawn" -> filter(List.of("body"), args[1]);
                 default -> List.of();
             };
         }
         if (args.length == 3 && sub.equals("spawn")) return filter(List.of("body"), args[2]);
+        if (args.length == 3 && sub.equals("add")) return filter(List.of("30s", "5m", "10m", "30m", "1h"), args[2]);
         return List.of();
+    }
+
+    /** Résumé du planning : type de journée, cible actuelle et prévision des 12 prochaines heures. */
+    private boolean schedule(CommandSender sender) {
+        boolean autoOn = plugin.getConfig().getBoolean("auto.enabled", false);
+        long autos = plugin.manager().all().stream().filter(FakePlayer::auto).count();
+        Schedule schedule = plugin.schedule();
+        if (schedule == null) {
+            return ok(sender, "Planning désactivé (schedule.enabled). Mode ambiance " + (autoOn ? "actif" : "inactif")
+                    + " : cible " + plugin.ambientTarget() + ", " + autos + " connecté(s).");
+        }
+        LocalDateTime now = plugin.now();
+        LocalDate today = Schedule.logicalDate(now);
+        int min = Math.max(0, plugin.getConfig().getInt("auto.min", 3));
+        int max = Math.max(min, plugin.getConfig().getInt("auto.max", 10));
+        sender.sendMessage(Component.text("Planning — " + now.format(DateTimeFormatter.ofPattern("EEEE d MMMM HH:mm", Locale.FRANCE)),
+                NamedTextColor.GOLD));
+        sender.sendMessage(Component.text("Aujourd'hui : " + schedule.describe(today) + " · demain : "
+                + schedule.describe(today.plusDays(1)), NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Cible : " + plugin.ambientTarget() + " (" + Math.round(schedule.percent(now))
+                + " % du pic de " + max + ") · connectés (auto) : " + autos
+                + (autoOn ? "" : " · mode ambiance INACTIF (/fp auto on)"), NamedTextColor.GRAY));
+        StringBuilder forecast = new StringBuilder("Prévision :");
+        LocalDateTime hour = now.withMinute(0).withSecond(0).withNano(0);
+        for (int i = 1; i <= 12; i++) {
+            LocalDateTime t = hour.plusHours(i);
+            forecast.append(' ').append(t.getHour()).append("h=").append(schedule.target(t, min, max));
+        }
+        sender.sendMessage(Component.text(forecast.toString(), NamedTextColor.GRAY));
+        return true;
     }
 
     private static List<String> filter(List<String> options, String prefix) {
@@ -144,12 +190,13 @@ final class FakeCommand implements TabExecutor {
         sender.sendMessage(Component.text("VæloriaFakePlayers", NamedTextColor.GOLD));
         for (String line : List.of(
                 "spawn [pseudo] [body] — connecte un faux joueur (body : corps à ta position)",
-                "add <nombre> — connecte plusieurs faux joueurs aux pseudos aléatoires",
+                "add <nombre> [durée] — connecte plusieurs faux joueurs (durée : arrivées étalées, ex. 10m)",
                 "remove <pseudo|all> — déconnecte",
                 "list — liste les faux joueurs",
                 "chat <pseudo> <message> — fait parler un faux joueur",
                 "tphere <pseudo> — place son corps à ta position",
                 "auto <on|off> — mode ambiance (arrivées/départs automatiques)",
+                "schedule — planning : cible actuelle et prévision des prochaines heures",
                 "reload — recharge config.yml")) {
             sender.sendMessage(Component.text("/" + label + " " + line, NamedTextColor.GRAY));
         }

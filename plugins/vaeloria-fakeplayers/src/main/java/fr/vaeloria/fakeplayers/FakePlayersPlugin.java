@@ -15,8 +15,19 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
@@ -29,11 +40,20 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     private NamePool names;
     private BukkitTask ticker;
     private long seconds;
+    /** Planning horaire du mode ambiance, null s'il est désactivé ou invalide. */
+    private Schedule schedule;
+    private ZoneId zone = ZoneId.systemDefault();
+    /** Sans planning : cible qui dérive lentement entre auto.min et auto.max. */
+    private int driftTarget = -1;
+    private long nextStepAt;
+    /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
+    private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         names = new NamePool(getConfig().getStringList("names"), new Random());
+        loadSchedule();
 
         TabList tab = TabList.NONE;
         if (getConfig().getBoolean("tab.enabled", true)) {
@@ -76,6 +96,80 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     public void reload() {
         reloadConfig();
         names = new NamePool(getConfig().getStringList("names"), new Random());
+        loadSchedule();
+    }
+
+    Schedule schedule() { return schedule; }
+
+    LocalDateTime now() { return LocalDateTime.now(zone); }
+
+    /** Cible actuelle du mode ambiance (faux joueurs « auto » uniquement). */
+    int ambientTarget() {
+        ConfigurationSection auto = getConfig().getConfigurationSection("auto");
+        int min = auto == null ? 0 : Math.max(0, auto.getInt("min", 3));
+        int max = auto == null ? 0 : Math.max(min, auto.getInt("max", 10));
+        if (schedule != null) return schedule.target(now(), min, max);
+        if (driftTarget < 0) driftTarget = min;
+        return Math.max(min, Math.min(max, driftTarget));
+    }
+
+    /** Programme n arrivées réparties au hasard sur la durée donnée. */
+    void scheduleArrivals(int n, long durationSeconds) {
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        for (int i = 0; i < n; i++) pendingArrivals.add(seconds + 1 + r.nextLong(Math.max(1, durationSeconds)));
+    }
+
+    int pendingArrivals() { return pendingArrivals.size(); }
+
+    void clearPendingArrivals() { pendingArrivals.clear(); }
+
+    private void loadSchedule() {
+        schedule = null;
+        ConfigurationSection cfg = getConfig().getConfigurationSection("schedule");
+        if (cfg == null || !cfg.getBoolean("enabled", false)) return;
+        try {
+            zone = ZoneId.of(cfg.getString("timezone", "Europe/Paris"));
+            Map<String, double[]> curves = new HashMap<>();
+            ConfigurationSection cs = cfg.getConfigurationSection("curves");
+            if (cs != null) for (String key : cs.getKeys(false)) {
+                List<Double> values = cs.getDoubleList(key);
+                if (values.size() != 24) {
+                    getLogger().warning("schedule.curves." + key + " doit avoir 24 valeurs : courbe par défaut utilisée.");
+                    continue;
+                }
+                curves.put(key, values.stream().mapToDouble(Double::doubleValue).toArray());
+            }
+            List<Schedule.Period> periods = new ArrayList<>();
+            for (Map<?, ?> m : cfg.getMapList("school-holidays.periods")) {
+                Set<String> zones = new HashSet<>();
+                for (String z : String.valueOf(m.get("zones")).split(",")) zones.add(z.trim().toUpperCase(Locale.ROOT));
+                Object name = m.get("name");
+                periods.add(new Schedule.Period(date(m.get("from")), date(m.get("to")), zones,
+                        name == null ? "vacances" : name.toString()));
+            }
+            Set<String> zones = new HashSet<>();
+            for (String z : cfg.getStringList("school-holidays.zones")) zones.add(z.trim().toUpperCase(Locale.ROOT));
+            Set<LocalDate> extra = new HashSet<>();
+            for (Object d : cfg.getList("extra-days-off", List.of())) extra.add(date(d));
+            schedule = new Schedule(Schedule.Curves.from(curves, Schedule.DEFAULT_CURVES), periods, zones,
+                    cfg.getBoolean("french-public-holidays", true), extra, cfg.getDouble("daily-variation", 0.15),
+                    cfg.getDouble("noise", 0.10), cfg.getString("seed", "vaeloria").hashCode());
+            LocalDate last = periods.stream().map(Schedule.Period::to).max(LocalDate::compareTo).orElse(null);
+            if (last == null || last.isBefore(LocalDate.now(zone))) {
+                getLogger().warning("Aucune période de vacances scolaires à venir dans schedule.school-holidays : "
+                        + "mets à jour le calendrier (voir le README).");
+            }
+        } catch (RuntimeException e) {
+            getLogger().log(Level.WARNING, "Section schedule invalide : planning désactivé.", e);
+            schedule = null;
+        }
+    }
+
+    /** Accepte "2026-10-17" (texte) ou une date YAML non entre guillemets. */
+    private static LocalDate date(Object value) {
+        if (value instanceof java.util.Date d) return d.toInstant().atZone(ZoneOffset.UTC).toLocalDate();
+        if (value == null) throw new IllegalArgumentException("date manquante");
+        return LocalDate.parse(value.toString().trim());
     }
 
     // --- Boucle : ambiance (arrivées/départs), chat automatique, corps, ping ---
@@ -88,22 +182,37 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     }
 
     private void ambient() {
+        while (!pendingArrivals.isEmpty() && pendingArrivals.peek() <= seconds) {
+            pendingArrivals.poll();
+            spawnRandom(false, false);
+        }
         ConfigurationSection auto = getConfig().getConfigurationSection("auto");
         if (auto == null || !auto.getBoolean("enabled", false)) return;
-        int min = auto.getInt("min", 3), max = Math.max(min, auto.getInt("max", 10));
-        List<FakePlayer> autos = manager.all().stream().filter(FakePlayer::auto).toList();
-        if (autos.size() < min) { // remplissage progressif : un par seconde
-            spawnRandom(true, false);
-            return;
-        }
-        long interval = Math.max(5, auto.getLong("interval-seconds", 60));
-        if (seconds % interval != 0) return;
         ThreadLocalRandom r = ThreadLocalRandom.current();
-        if (autos.size() < max && r.nextDouble() < auto.getDouble("join-chance", 0.5)) {
+        if (schedule == null && seconds % Math.max(5, auto.getLong("interval-seconds", 60)) == 0) {
+            int min = auto.getInt("min", 3), max = Math.max(min, auto.getInt("max", 10));
+            if (driftTarget < 0) driftTarget = min;
+            if (r.nextDouble() < auto.getDouble("join-chance", 0.5)) driftTarget = Math.min(max, driftTarget + 1);
+            else if (r.nextDouble() < auto.getDouble("leave-chance", 0.3)) driftTarget = Math.max(min, driftTarget - 1);
+        }
+        if (seconds < nextStepAt) return;
+
+        // Un pas à la fois : une arrivée ou un départ, séparés d'un délai aléatoire.
+        int target = ambientTarget();
+        List<FakePlayer> autos = manager.all().stream().filter(FakePlayer::auto).toList();
+        int gap = Math.abs(target - autos.size());
+        if (autos.size() < target) {
             spawnRandom(true, false);
-        } else if (autos.size() > min && r.nextDouble() < auto.getDouble("leave-chance", 0.3)) {
+        } else if (autos.size() > target) {
+            manager.remove(autos.get(r.nextInt(autos.size())).name(), false);
+        } else if (!autos.isEmpty() && r.nextDouble() < auto.getDouble("churn-chance", 0.15)) {
+            // Rotation : quelqu'un part, un autre arrivera au pas suivant.
             manager.remove(autos.get(r.nextInt(autos.size())).name(), false);
         }
+        long stepMin = Math.max(1, auto.getLong("step-seconds.min", 15));
+        long stepMax = Math.max(stepMin, auto.getLong("step-seconds.max", 90));
+        long delay = stepMin + r.nextLong(stepMax - stepMin + 1);
+        nextStepAt = seconds + Math.max(1, delay / Math.max(1, gap / 5)); // rattrape plus vite un gros écart
     }
 
     private void autoChat() {
