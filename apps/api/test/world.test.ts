@@ -227,26 +227,26 @@ describe("guerres, événements et carte via VæloriaBridge", () => {
   it("carte : zones configurées et territoires des empires liés", async () => {
     const [season] = await sql`SELECT id FROM seasons WHERE status = 'active'`;
     const [f] = await sql`INSERT INTO factions (season_id, name) VALUES (${season!.id}, 'Nightmare') RETURNING id`;
-    for (let x = 0; x < 3; x++) await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'world', ${x}, 0)`;
+    for (let x = 0; x < 3; x++) await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'vaeloria', ${x}, 0)`;
     // Un second monde (ex. le Nether) : ses claims ont leur propre onglet sur la carte.
-    await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'world_nether', 20, 20)`;
+    await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'vaeloria_nether', 20, 20)`;
     const map = (await app.inject({ url: "/api/v1/world/map" })).json();
     expect(map.zones.map((z: { key: string }) => z.key)).toContain("citadelle");
-    expect(map.zones.every((z: { world: string }) => z.world === "world")).toBe(true);
+    expect(map.zones.every((z: { world: string }) => z.world === "vaeloria")).toBe(true);
     expect(map.territories).toEqual([
-      expect.objectContaining({ slug: "nightmare", world: "world", cx: 0, cz: 0, chunks: 3 }),
-      expect.objectContaining({ slug: "nightmare", world: "world_nether", cx: 2, cz: 2, chunks: 1 }),
+      expect.objectContaining({ slug: "nightmare", world: "vaeloria", cx: 0, cz: 0, chunks: 3 }),
+      expect.objectContaining({ slug: "nightmare", world: "vaeloria_nether", cx: 2, cz: 2, chunks: 1 }),
     ]);
-    expect(map.worlds).toEqual([{ key: "world", name: "Monde principal", chunks: 3 }, { key: "world_nether", name: "world_nether", chunks: 1 }]);
+    expect(map.worlds).toEqual([{ key: "vaeloria", name: "VÆLORIA", chunks: 3 }, { key: "vaeloria_nether", name: "vaeloria_nether", chunks: 1 }]);
   });
 
   it("admin : liste des mondes de la carte (« clé = nom »), nom de monde invalide refusé", async () => {
     const base = (await app.inject({ url: "/admin/v1/world/settings", headers: admin })).json();
-    expect(base.mapWorlds).toBe("world = Monde principal");
+    expect(base.mapWorlds).toBe("vaeloria = VÆLORIA");
     const { foundersCount: _c, ...settings } = base;
-    const ok = await app.inject({ method: "PUT", url: "/admin/v1/world/settings", headers: admin, payload: { ...settings, mapWorlds: "world = Royaume\nworld_nether = Nether\n\nworld = doublon" } });
+    const ok = await app.inject({ method: "PUT", url: "/admin/v1/world/settings", headers: admin, payload: { ...settings, mapWorlds: "vaeloria = Royaume\nvaeloria_nether = Nether\n\nvaeloria = doublon" } });
     expect(ok.statusCode, ok.body).toBe(200);
-    expect((await app.inject({ url: "/admin/v1/world/settings", headers: admin })).json().mapWorlds).toBe("world = Royaume\nworld_nether = Nether");
+    expect((await app.inject({ url: "/admin/v1/world/settings", headers: admin })).json().mapWorlds).toBe("vaeloria = Royaume\nvaeloria_nether = Nether");
     const bad = await app.inject({ method: "PUT", url: "/admin/v1/world/settings", headers: admin, payload: { ...settings, mapWorlds: "monde avec espaces" } });
     expect(bad.statusCode).toBe(400);
   });

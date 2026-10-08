@@ -37,7 +37,7 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
   // ───── Réglages ─────
   const Settings = z.object({ foundersCap: z.number().int().min(1).max(1_000_000), foundersOpen: z.boolean(), empiresMaxMembers: z.number().int().min(2).max(500), worldRadius: z.number().int().min(500).max(100_000),
     // Une ligne par monde : « clé = Nom affiché » (clé = nom du dossier du monde en jeu).
-    mapWorlds: z.string().max(2000).default("world = Monde principal") });
+    mapWorlds: z.string().max(2000).default("vaeloria = VÆLORIA") });
   const WORLD_KEY = /^[A-Za-z0-9_.-]{1,64}$/;
   const parseWorlds = (text: string) => {
     const out: { key: string; name: string }[] = [];
@@ -56,7 +56,7 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
     const v = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     const [{ count }] = (await sql`SELECT last AS count FROM founder_counter`) as unknown as [{ count: number }];
     return { foundersCap: Number(v["founders.cap"] ?? 3000), foundersOpen: v["founders.open"] !== false, empiresMaxMembers: Number(v["empires.max_members"] ?? 50), worldRadius: Number(v["map.world_radius"] ?? 5000),
-      mapWorlds: (Array.isArray(v["map.worlds"]) ? (v["map.worlds"] as { key: string; name: string }[]) : [{ key: "world", name: "Monde principal" }]).map((w) => `${w.key} = ${w.name}`).join("\n"),
+      mapWorlds: (Array.isArray(v["map.worlds"]) ? (v["map.worlds"] as { key: string; name: string }[]) : [{ key: "vaeloria", name: "VÆLORIA" }]).map((w) => `${w.key} = ${w.name}`).join("\n"),
       foundersCount: count };
   });
   app.put("/settings", async (req) => {
@@ -112,7 +112,7 @@ export async function adminWorldRoutes(app: FastifyInstance, ctx: AppContext) {
 
   crud("zones", "map_zones", "id",
     z.object({ key: z.string().regex(/^[a-z0-9-]{2,40}$/), name: z.string().min(2).max(60), kind: z.enum(["spawn", "neutral", "koth", "warzone", "event", "outpost"]),
-      world: z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/).default("world"),
+      world: z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/).default("vaeloria"),
       x1: z.number().int(), z1: z.number().int(), x2: z.number().int(), z2: z.number().int(), description: z.string().max(400).default(""), active: z.boolean().default(true) })
       .refine((z_) => z_.x2 > z_.x1 && z_.z2 > z_.z1, { message: "x2 > x1 et z2 > z1" }),
     (v) => v, "key");

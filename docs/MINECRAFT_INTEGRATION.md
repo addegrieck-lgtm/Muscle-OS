@@ -98,7 +98,7 @@ Format vérifié en lisant le bytecode des jars : les champs correspondent à `p
 
 ### Carte et plusieurs mondes
 
-Chaque claim est enregistré avec son monde (`world` du `FACTION_CLAIM`). La carte `/monde` affiche un onglet par monde : ceux listés dans **Admin → Monde → Réglages → « Mondes de la carte »** (une ligne par monde : `nom du dossier en jeu = nom affiché`, ex. `world_nether = Nether`), puis tout autre monde où il existe des claims ou des zones. Chaque zone (Admin → Monde → Zones) a son champ **Monde**. Le classement « Territoire » et le compteur des empires additionnent tous les mondes.
+Chaque claim est enregistré avec son monde (`world` du `FACTION_CLAIM`). La carte `/monde` affiche un onglet par monde : ceux listés dans **Admin → Monde → Réglages → « Mondes de la carte »** (une ligne par monde : `nom du dossier en jeu = nom affiché`, ex. `vaeloria_nether = Nether` ; le monde principal est `vaeloria`), puis tout autre monde où il existe des claims ou des zones. Chaque zone (Admin → Monde → Zones) a son champ **Monde**. Le classement « Territoire » et le compteur des empires additionnent tous les mondes.
 
 Les valeurs de jeu affichées sur le site (prix, power, récompenses, roue…) sont recopiées des configs dans `apps/web/content/gameplay.ts` : à modifier au même endroit quand une config change.
 

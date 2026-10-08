@@ -22,11 +22,11 @@ const ZONE: Record<ZoneKind, { fill: string; stroke: string; dash?: string; labe
  * Zones : configurées dans l'admin. Territoires : claims des empires, synchronisés par VæloriaBridge.
  */
 export function WorldMap({ data: all, compact = false, initialFilter = "tout" }: { data: MapData; compact?: boolean; initialFilter?: Filter }) {
-  const worlds = all.worlds?.length ? all.worlds : [{ key: "world", name: "Monde principal", chunks: 0 }];
+  const worlds = all.worlds?.length ? all.worlds : [{ key: "vaeloria", name: "VÆLORIA", chunks: 0 }];
   // Plusieurs mondes Minecraft : un onglet par monde ; zones et territoires filtrés sur le monde affiché.
   const [world, setWorld] = useState(worlds[0]!.key);
   const data = useMemo(
-    () => ({ ...all, zones: all.zones.filter((z) => (z.world ?? "world") === world), territories: all.territories.filter((t) => (t.world ?? "world") === world) }),
+    () => ({ ...all, zones: all.zones.filter((z) => (z.world ?? "vaeloria") === world), territories: all.territories.filter((t) => (t.world ?? "vaeloria") === world) }),
     [all, world],
   );
   const [filter, setFilter] = useState<Filter>(initialFilter);

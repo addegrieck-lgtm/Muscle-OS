@@ -8,7 +8,7 @@ import { setting } from "./common";
 export async function getMap(sql: Sql) {
   const [radius, configured, zones, territories, liveEvents, activeWars] = await Promise.all([
     setting(sql, "map.world_radius", 5000),
-    setting<{ key: string; name: string }[]>(sql, "map.worlds", [{ key: "world", name: "Monde principal" }]),
+    setting<{ key: string; name: string }[]>(sql, "map.worlds", [{ key: "vaeloria", name: "VÆLORIA" }]),
     sql<{ key: string; name: string; kind: string; world: string; x1: number; z1: number; x2: number; z2: number; description: string }[]>`
       SELECT key, name, kind, world, x1, z1, x2, z2, description FROM map_zones WHERE active
       ORDER BY array_position(ARRAY['neutral','warzone','event','koth','outpost','spawn'], kind)`,
