@@ -19,6 +19,10 @@ import fr.vaeloria.factions.service.Banks;
 import fr.vaeloria.factions.service.BridgeHook;
 import fr.vaeloria.factions.service.ChestService;
 import fr.vaeloria.factions.service.ClaimService;
+import fr.vaeloria.factions.service.CombatService;
+import fr.vaeloria.factions.service.DiscordService;
+import fr.vaeloria.factions.service.LogService;
+import fr.vaeloria.factions.service.WarService;
 import fr.vaeloria.factions.service.FactionManager;
 import fr.vaeloria.factions.service.ObsidianService;
 import fr.vaeloria.factions.service.RaidService;
@@ -63,6 +67,11 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private ScoreboardService scoreboard;
     private ChestService chests;
     private Menus menus;
+    private LogService logs;
+    private DiscordService discord;
+    private CombatService combat;
+    private WarService wars;
+    private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
 
@@ -88,6 +97,10 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             return;
         }
         bridge = new BridgeHook(getLogger());
+        logs = new LogService(settings, manager);
+        discord = new DiscordService(settings, getLogger());
+        combat = new CombatService(settings);
+        wars = new WarService(settings, manager, state, bridge, discord, logs);
         bank = Banks.detect();
         raid = new RaidService(settings, manager, state);
         access = new AccessService(settings, manager, raid);
@@ -133,6 +146,8 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         tasks.add(sch.runTaskTimer(this, () -> {
             raid.tick();
             territory.tickFly();
+            combat.tick();
+            wars.tick();
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
@@ -162,6 +177,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
 
     private void purgeInvites() {
         long now = System.currentTimeMillis();
+        farmGuard.purge(now, settings.farmCooldownMinutes * 60_000L);
         for (Faction f : manager.playerFactions()) f.invites.values().removeIf(t -> t < now);
     }
 
@@ -196,6 +212,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
 
     /** Dissolution complète : claims, coffre, barres de raid, site. */
     public void disband(Faction f) {
+        wars.onDisband(f);
         chests.closeAll(f);
         raid.hideBar(f.id);
         for (Player p : manager.online(f)) {
@@ -265,4 +282,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public ScoreboardService scoreboard() { return scoreboard; }
     public ChestService chests() { return chests; }
     public Menus menus() { return menus; }
+    public LogService logs() { return logs; }
+    public DiscordService discord() { return discord; }
+    public CombatService combat() { return combat; }
+    public WarService wars() { return wars; }
+    public fr.vaeloria.factions.rules.FarmGuard farmGuard() { return farmGuard; }
 }

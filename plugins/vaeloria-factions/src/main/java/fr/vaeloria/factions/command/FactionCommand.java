@@ -106,6 +106,11 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("coffre", "", "Coffre de faction", true, use, this::chest, null, "chest", "vault");
         reg("perm", "[permission] [rang]", "Permissions par rang", true, use, this::perm, this::permComplete, "perms");
         reg("bouclier", "[heure 0-23|off]", "Bouclier anti-pillage quotidien", true, use, this::shield, (s, a) -> List.of("0", "2", "4", "20", "22", "off"), "shield");
+        reg("guerre", "[declarer <faction>|abandonner]", "Guerres officielles", true, use, this::war,
+                (s, a) -> a.length <= 1 ? List.of("declarer", "abandonner") : factionNames(), "war");
+        reg("logs", "[page]", "Journal de la faction", true, use, this::logs, null, "journal", "log");
+        reg("discord", "[lien|off|test|ping]", "Alertes Discord de la faction", true, use, this::discord,
+                (s, a) -> List.of("off", "test", "ping"), "webhook");
         reg("scoreboard", "", "Afficher / masquer le tableau", true, use, (s, p, a) -> plugin.scoreboard().toggle(p), null, "sb");
         reg("aide", "[page]", "Cette aide", false, use, this::help, null, "help", "?");
         reg("admin", "<…>", "Administration", false, "vaeloria.factions.admin", admin::run, admin::complete);
@@ -239,6 +244,16 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    private void log(Faction f, String type, Player actor, String detail) {
+        plugin.logs().add(f, type, actor == null ? "—" : actor.getName(), detail);
+    }
+
+    private boolean blockedByCombat(Player p) {
+        if (!plugin.combat().inCombat(p)) return false;
+        Msg.send(p, "combat.teleport-blocked", "seconds", (plugin.combat().remaining(p) + 999) / 1000);
+        return true;
+    }
+
     private void broadcastFaction(Faction f, String key, Object... kv) {
         for (Player p : m().online(f)) Msg.send(p, key, kv);
     }
@@ -288,8 +303,10 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         Faction f = need(p);
         if (f == null || !isLeader(p, f)) return;
         if (a.length < 1) { usage(p, "renommer"); return; }
+        if (plugin.wars().warOf(f) != null) { Msg.send(p, "war.locked"); return; }
         if (!validName(p, a[0])) return;
         String old = f.name;
+        log(f, "FACTION", p, "a renommé la faction (" + old + " → " + a[0] + ")");
         // Le site identifie les factions par leur nom : on y recrée la faction sous son nouveau nom.
         plugin.bridge().disband(f);
         m().rename(f, a[0]);
@@ -308,6 +325,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (d.length() > s().descMax) { Msg.send(p, "faction.desc-too-long", "max", s().descMax); return; }
         f.description = d;
         m().markDirty();
+        log(f, "FACTION", p, "description : " + (d.isEmpty() ? "—" : d));
         broadcastFaction(f, "faction.desc-changed", "player", p.getName(), "desc", d.isEmpty() ? "—" : d);
     }
 
@@ -317,6 +335,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (!f.role(p.getUniqueId()).atLeast(Role.OFFICIER)) { Msg.send(p, "error.officer-only"); return; }
         f.open = !f.open;
         m().markDirty();
+        log(f, "FACTION", p, f.open ? "a ouvert la faction" : "a fermé la faction");
         broadcastFaction(f, f.open ? "faction.now-open" : "faction.now-closed", "player", p.getName());
     }
 
@@ -458,6 +477,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (m().factionOf(t) == f) { Msg.send(p, "invite.already-member", "player", t.getName()); return; }
         if (f.members.size() >= s().maxMembers) { Msg.send(p, "invite.full", "max", s().maxMembers); return; }
         f.invites.put(t.getUniqueId(), System.currentTimeMillis() + s().inviteMinutes * 60_000L);
+        log(f, "MEMBRES", p, "a invité " + t.getName());
         broadcastFaction(f, "invite.sent", "player", p.getName(), "target", t.getName());
         t.sendMessage(Msg.prefixed("invite.received", "faction", f.name, "player", p.getName(), "minutes", s().inviteMinutes)
                 .clickEvent(ClickEvent.runCommand("/f rejoindre " + f.name))
@@ -484,6 +504,8 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (f.members.size() >= s().maxMembers) { Msg.send(p, "invite.full", "max", s().maxMembers); return; }
         m().addMember(f, p.getUniqueId(), Role.RECRUE);
         plugin.bridge().join(f, p.getUniqueId(), p.getName(), Role.RECRUE);
+        log(f, "MEMBRES", p, "a rejoint la faction");
+        plugin.discord().member(f, p.getName() + " a rejoint la faction.");
         broadcastFaction(f, "member.joined", "player", p.getName(), "faction", f.name);
     }
 
@@ -496,6 +518,8 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
             return;
         }
         removeFromFaction(f, p.getUniqueId(), p.getName());
+        log(f, "MEMBRES", p, "a quitté la faction");
+        plugin.discord().member(f, p.getName() + " a quitté la faction.");
         Msg.send(p, "member.you-left", "faction", f.name);
         broadcastFaction(f, "member.left", "player", p.getName());
     }
@@ -528,6 +552,8 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         }
         String name = m().nameOf(t);
         removeFromFaction(f, t, name);
+        log(f, "MEMBRES", p, "a expulsé " + name);
+        plugin.discord().member(f, name + " a été expulsé par " + p.getName() + ".");
         broadcastFaction(f, "member.kicked", "player", name, "by", p.getName());
         Player tp = Bukkit.getPlayer(t);
         if (tp != null) Msg.send(tp, "member.you-were-kicked", "faction", f.name, "by", p.getName());
@@ -555,6 +581,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         }
         m().setRole(f, t, next);
         plugin.bridge().join(f, t, m().nameOf(t), next);
+        log(f, "RANGS", p, (up ? "a promu " : "a rétrogradé ") + m().nameOf(t) + " → " + next.label());
         broadcastFaction(f, up ? "member.promoted" : "member.demoted", "player", m().nameOf(t), "role", next.label(), "by", p.getName());
     }
 
@@ -571,6 +598,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         }
         m().setRole(f, t, Role.CHEF);
         plugin.bridge().join(f, t, m().nameOf(t), Role.CHEF);
+        log(f, "RANGS", p, "a transmis la direction à " + m().nameOf(t));
         broadcastFaction(f, "member.new-leader", "player", m().nameOf(t));
     }
 
@@ -598,13 +626,17 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
             if (f.inRaid()) { Msg.send(p, "raid.locked", "time", Msg.duration(f.raidUntil - System.currentTimeMillis())); return; }
             if (a.length < 2 || !a[1].equalsIgnoreCase("confirmer")) { p.sendMessage(Msg.get("claim.unclaimall-confirm")); return; }
             int n = plugin.claims().unclaimAll(f);
+            log(f, "UNCLAIM", p, "a libéré tout le territoire (" + n + " chunks)");
             broadcastFaction(f, "claim.unclaimall-done", "count", n, "player", p.getName());
             return;
         }
         ChunkPos here = ChunkPos.of(p.getLocation());
         ClaimService.UnclaimResult r = plugin.claims().unclaim(f, here);
         switch (r) {
-            case OK -> Msg.send(p, "claim.unclaimed", "x", here.x(), "z", here.z());
+            case OK -> {
+                Msg.send(p, "claim.unclaimed", "x", here.x(), "z", here.z());
+                log(f, "UNCLAIM", p, "chunk " + here.x() + ", " + here.z());
+            }
             case NOT_OWNED -> Msg.send(p, "claim.not-yours");
             case IN_RAID -> Msg.send(p, "raid.locked", "time", Msg.duration(f.raidUntil - System.currentTimeMillis()));
         }
@@ -643,7 +675,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (f == null || !can(p, f, FPerm.HOME)) return;
         Location l = f.home == null ? null : f.home.toLocation();
         if (l == null) { Msg.send(p, "home.none"); return; }
-        if (enemyBlocksTeleport(p)) return;
+        if (blockedByCombat(p) || enemyBlocksTeleport(p)) return;
         plugin.teleports().teleport(p, l, "home");
     }
 
@@ -653,6 +685,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (s().homeInOwnClaim && m().factionAt(p.getLocation()) != f) { Msg.send(p, "home.must-be-in-claim"); return; }
         f.home = Pos.of(p.getLocation());
         m().markDirty();
+        log(f, "HOME", p, "a défini le home en " + p.getLocation().getBlockX() + ", " + p.getLocation().getBlockZ());
         broadcastFaction(f, "home.set", "player", p.getName());
     }
 
@@ -671,7 +704,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         Pos w = f.warps.get(a[0].toLowerCase(Locale.ROOT));
         Location l = w == null ? null : w.toLocation();
         if (l == null) { Msg.send(p, "warp.unknown", "warp", a[0]); return; }
-        if (enemyBlocksTeleport(p)) return;
+        if (blockedByCombat(p) || enemyBlocksTeleport(p)) return;
         plugin.teleports().teleport(p, l, "warp " + a[0].toLowerCase(Locale.ROOT));
     }
 
@@ -684,6 +717,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (m().factionAt(p.getLocation()) != f) { Msg.send(p, "home.must-be-in-claim"); return; }
         f.warps.put(name, Pos.of(p.getLocation()));
         m().markDirty();
+        log(f, "WARP", p, "a créé le warp " + name);
         broadcastFaction(f, "warp.set", "warp", name, "player", p.getName());
     }
 
@@ -693,6 +727,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (a.length < 1) { usage(p, "delwarp"); return; }
         if (f.warps.remove(a[0].toLowerCase(Locale.ROOT)) == null) { Msg.send(p, "warp.unknown", "warp", a[0]); return; }
         m().markDirty();
+        log(f, "WARP", p, "a supprimé le warp " + a[0].toLowerCase(Locale.ROOT));
         Msg.send(p, "warp.deleted", "warp", a[0]);
     }
 
@@ -708,6 +743,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         Faction f = need(p);
         if (f == null || !can(p, f, FPerm.FLY)) return;
         if (!plugin.territory().canFlyHere(p)) { Msg.send(p, "fly.not-here"); return; }
+        if (blockedByCombat(p)) return;
         if (!p.hasPermission("vaeloria.factions.bypass.fly") && plugin.territory().enemyNearby(p, s().flyEnemyRadius) != null) {
             Msg.send(p, "fly.enemy-nearby"); return;
         }
@@ -725,6 +761,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (o == null || o.system) { Msg.send(p, "error.faction-not-found", "faction", a[0]); return; }
         if (o == f) { Msg.send(p, "relation.self"); return; }
         if (f.wishToward(o.id) == wish) { Msg.send(p, "relation.already", "faction", o.name, "relation", wish.label()); return; }
+        if (wish != Relation.ENNEMI && plugin.wars().warBetween(f, o) != null) { Msg.send(p, "war.relation-locked", "faction", o.name); return; }
         Relation before = m().relation(f, o);
         if (wish == Relation.ALLIE && o.wishToward(f.id) == Relation.ALLIE && m().countRelations(f, Relation.ALLIE) >= s().maxAllies) {
             Msg.send(p, "relation.max-allies", "max", s().maxAllies); return;
@@ -738,6 +775,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (wish == Relation.NEUTRE) f.wishes.remove(o.id);
         else f.wishes.put(o.id, wish);
         m().markDirty();
+        log(f, "RELATION", p, wish.label() + " → " + o.name);
         Relation now = m().relation(f, o);
         if (now != before) {
             String key = "relation.now." + now.name().toLowerCase(Locale.ROOT);
@@ -825,6 +863,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 if (!plugin.bank().withdraw(p, amount)) { Msg.send(p, "bank.not-enough"); return; }
                 f.bank = PowerMath.round(f.bank + amount);
                 m().markDirty();
+                log(f, "BANQUE+", p, "a déposé " + plugin.bank().format(amount));
                 broadcastFaction(f, "bank.deposited", "player", p.getName(), "amount", plugin.bank().format(amount), "balance", plugin.bank().format(f.bank));
             }
             case "retirer", "withdraw", "r" -> {
@@ -837,6 +876,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 m().markDirty();
+                log(f, "BANQUE-", p, "a retiré " + plugin.bank().format(amount));
                 broadcastFaction(f, "bank.withdrew", "player", p.getName(), "amount", plugin.bank().format(amount), "balance", plugin.bank().format(f.bank));
             }
             default -> usage(p, "banque");
@@ -846,7 +886,9 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
     private void chest(CommandSender s, Player p, String[] a) {
         Faction f = need(p);
         if (f == null || !can(p, f, FPerm.CHEST)) return;
-        p.openInventory(plugin.chests().open(f));
+        var inv = plugin.chests().open(f);
+        plugin.logs().chestOpened(p, inv);
+        p.openInventory(inv);
     }
 
     private void perm(CommandSender s, Player p, String[] a) {
@@ -862,6 +904,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         if (perm == null || role == null) { usage(p, "perm"); return; }
         f.perms.put(perm, role);
         m().markDirty();
+        log(f, "PERMS", p, perm.label() + " → " + role.label());
         Msg.send(p, "perm.set", "perm", perm.label(), "role", role.label());
     }
 
@@ -892,7 +935,105 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         f.shieldStart = start;
         f.shieldChangedAt = System.currentTimeMillis();
         m().markDirty();
+        log(f, "BOUCLIER", p, "bouclier : " + ShieldWindow.describe(start, s().shieldHours));
         broadcastFaction(f, "shield.set", "player", p.getName(), "window", ShieldWindow.describe(start, s().shieldHours));
+    }
+
+    // ── Guerres, journal, Discord ──
+
+    private void war(CommandSender s, Player p, String[] a) {
+        if (!s().warEnabled) { Msg.send(p, "error.disabled"); return; }
+        Faction f = need(p);
+        if (f == null) return;
+        var ws = plugin.wars();
+        if (a.length == 0) {
+            var w = ws.warOf(f);
+            if (w == null) { Msg.send(p, "war.none"); return; }
+            long now = System.currentTimeMillis();
+            Msg.send(p, "war.status", "attacker", w.attackerName, "defender", w.defenderName,
+                    "ascore", w.attackerScore, "dscore", w.defenderScore,
+                    "time", w.started ? Msg.duration(w.endAt - now) : Msg.duration(w.startAt - now),
+                    "phase", Msg.raw(w.started ? "war.phase-active" : "war.phase-prep"),
+                    "participants", w.participants.size());
+            return;
+        }
+        switch (a[0].toLowerCase(Locale.ROOT)) {
+            case "declarer", "déclarer", "declare" -> {
+                if (!isLeader(p, f)) return;
+                if (a.length < 2) { usage(p, "guerre"); return; }
+                Faction o = m().byName(a[1]);
+                if (o == null || o.system) { Msg.send(p, "error.faction-not-found", "faction", a[1]); return; }
+                var r = ws.declare(f, o, p.getName());
+                switch (r) {
+                    case OK -> { }
+                    case COOLDOWN -> Msg.send(p, "war.fail.cooldown", "time", Msg.duration(ws.cooldownRemaining(f, o)));
+                    default -> Msg.send(p, "war.fail." + r.name().toLowerCase(Locale.ROOT), "faction", o.name, "min", s().warMinMembers);
+                }
+            }
+            case "abandonner", "surrender" -> {
+                if (!isLeader(p, f)) return;
+                if (ws.warOf(f) == null) { Msg.send(p, "war.none"); return; }
+                if (a.length < 2 || !a[1].equalsIgnoreCase("confirmer")) { p.sendMessage(Msg.get("war.surrender-confirm")); return; }
+                ws.surrender(f);
+            }
+            default -> usage(p, "guerre");
+        }
+    }
+
+    private void logs(CommandSender s, Player p, String[] a) {
+        Faction f = need(p);
+        if (f == null || !can(p, f, FPerm.LOGS)) return;
+        if (f.logs.isEmpty()) { Msg.send(p, "logs.empty"); return; }
+        int perPage = 10;
+        int pages = Math.max(1, (f.logs.size() + perPage - 1) / perPage);
+        int page = a.length > 0 ? Math.max(1, Math.min(pages, parseInt(a[0], 1))) : 1;
+        p.sendMessage(Msg.get("logs.header", "page", page, "pages", pages));
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM HH:mm");
+        // Du plus récent au plus ancien.
+        for (int i = 0; i < perPage; i++) {
+            int idx = f.logs.size() - 1 - ((page - 1) * perPage + i);
+            if (idx < 0) break;
+            var e = f.logs.get(idx);
+            p.sendMessage(Msg.get("logs.line", "date", fmt.format(new Date(e.time)), "type", e.type, "actor", e.actor, "detail", e.detail));
+        }
+        if (page < pages) p.sendMessage(Msg.get("list.next", "next", page + 1).clickEvent(ClickEvent.runCommand("/f logs " + (page + 1))));
+    }
+
+    private void discord(CommandSender s, Player p, String[] a) {
+        if (!s().discordEnabled) { Msg.send(p, "error.disabled"); return; }
+        Faction f = need(p);
+        if (f == null) return;
+        if (a.length == 0) {
+            Msg.send(p, "discord.status", "url", fr.vaeloria.factions.rules.WebhookRules.masked(f.discordWebhook),
+                    "ping", Msg.raw(f.discordPing ? "discord.ping-on" : "discord.ping-off"));
+            return;
+        }
+        if (!isLeader(p, f)) return;
+        switch (a[0].toLowerCase(Locale.ROOT)) {
+            case "off" -> {
+                f.discordWebhook = null;
+                m().markDirty();
+                log(f, "DISCORD", p, "a retiré le webhook");
+                Msg.send(p, "discord.removed");
+            }
+            case "ping" -> {
+                f.discordPing = !f.discordPing;
+                m().markDirty();
+                Msg.send(p, f.discordPing ? "discord.ping-enabled" : "discord.ping-disabled");
+            }
+            case "test" -> plugin.discord().test(f, ok -> Bukkit.getScheduler().runTask(plugin, () ->
+                    Msg.send(p, ok ? "discord.test-ok" : "discord.test-fail")));
+            default -> {
+                String url = a[0];
+                if (!plugin.discord().validUrl(url)) { Msg.send(p, "discord.invalid"); return; }
+                f.discordWebhook = url;
+                m().markDirty();
+                log(f, "DISCORD", p, "a relié un salon Discord");
+                Msg.send(p, "discord.saved");
+                plugin.discord().test(f, ok -> Bukkit.getScheduler().runTask(plugin, () ->
+                        Msg.send(p, ok ? "discord.test-ok" : "discord.test-fail")));
+            }
+        }
     }
 
     private void help(CommandSender s, Player p, String[] a) {

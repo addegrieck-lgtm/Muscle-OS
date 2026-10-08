@@ -60,6 +60,17 @@ public final class Settings {
     public String territoryDisplay;
     public boolean chatTags, scoreboardEnabled, bankEnabled;
     public int scoreboardRefreshTicks, inactivityDays, snapshotMinutes, autosaveMinutes;
+    // Anti-abus
+    public int combatTagSeconds, farmCooldownMinutes, logsMax;
+    public boolean combatKillOnLogout, sameIpNoLoss;
+    public java.util.List<String> combatBlockedCommands = new java.util.ArrayList<>();
+    // Discord
+    public boolean discordEnabled;
+    public String discordUrlPattern, discordGlobalWebhook;
+    public Set<String> discordEvents = new HashSet<>();
+    // Guerres
+    public boolean warEnabled;
+    public int warPreparationMinutes, warDurationHours, warCooldownHours, warMinMembers, warPointsKill, warPointsRaid, warPointsOverclaim;
 
     public void load(FileConfiguration c) {
         nameMin = c.getInt("factions.name-min", 3);
@@ -156,6 +167,31 @@ public final class Settings {
         inactivityDays = c.getInt("inactivity.days", 0);
         snapshotMinutes = Math.max(1, c.getInt("bridge.snapshot-minutes", 5));
         autosaveMinutes = Math.max(1, c.getInt("autosave-minutes", 5));
+
+        combatTagSeconds = Math.max(0, c.getInt("combat.tag-seconds", 15));
+        combatKillOnLogout = c.getBoolean("combat.kill-on-logout", true);
+        combatBlockedCommands = new java.util.ArrayList<>();
+        for (String cmd : c.getStringList("combat.blocked-commands")) {
+            combatBlockedCommands.add(cmd.toLowerCase(Locale.ROOT).replaceFirst("^/", "").trim());
+        }
+        farmCooldownMinutes = Math.max(0, c.getInt("power.farm-cooldown-minutes", 15));
+        sameIpNoLoss = c.getBoolean("power.same-ip-no-loss", true);
+        logsMax = Math.max(20, c.getInt("logs.max", 300));
+
+        discordEnabled = c.getBoolean("discord.enabled", true);
+        discordUrlPattern = c.getString("discord.url-pattern", "");
+        discordGlobalWebhook = c.getString("discord.global-webhook", "");
+        discordEvents = new HashSet<>();
+        for (String e : c.getStringList("discord.events")) discordEvents.add(e.toUpperCase(Locale.ROOT));
+
+        warEnabled = c.getBoolean("war.enabled", true);
+        warPreparationMinutes = Math.max(0, c.getInt("war.preparation-minutes", 15));
+        warDurationHours = Math.max(1, c.getInt("war.duration-hours", 48));
+        warCooldownHours = Math.max(0, c.getInt("war.cooldown-hours", 72));
+        warMinMembers = Math.max(1, c.getInt("war.min-members", 2));
+        warPointsKill = c.getInt("war.points.kill", 1);
+        warPointsRaid = c.getInt("war.points.raid", 5);
+        warPointsOverclaim = c.getInt("war.points.overclaim", 10);
     }
 
     private static Set<FPerm> perms(java.util.List<String> names) {

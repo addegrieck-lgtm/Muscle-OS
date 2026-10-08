@@ -71,8 +71,19 @@ public final class ClaimService {
             f.overclaimsDone++;
             bridge.claim(previous, pos, false);
             notifyOverclaim(p, f, previous, pos);
+            var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+            if (plugin != null) {
+                int bx = pos.x() * 16 + 8, bz = pos.z() * 16 + 8;
+                plugin.wars().onOverclaim(f, previous, p.getUniqueId());
+                plugin.discord().overclaimLost(previous, f.name, bx, bz);
+                plugin.discord().overclaimWon(f, previous.name, bx, bz);
+                plugin.logs().add(previous, "SURCLAIM", p.getName() + " (" + f.name + ")", "a pris le chunk " + bx + ", " + bz);
+                plugin.logs().add(f, "SURCLAIM", p.getName(), "a pris le chunk " + bx + ", " + bz + " à " + previous.name);
+            }
         } else {
             Msg.send(p, "claim.success", "x", pos.x(), "z", pos.z(), "claims", f.claims.size(), "limit", manager.landLimit(f));
+            var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+            if (plugin != null) plugin.logs().add(f, "CLAIM", p.getName(), "chunk " + pos.x() + ", " + pos.z());
             for (Player m : manager.online(f)) {
                 if (m != p) Msg.send(m, "claim.member-notice", "player", p.getName(), "x", pos.x(), "z", pos.z());
             }

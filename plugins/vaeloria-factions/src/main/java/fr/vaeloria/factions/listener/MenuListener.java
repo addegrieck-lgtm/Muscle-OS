@@ -30,6 +30,13 @@ public final class MenuListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onClose(org.bukkit.event.inventory.InventoryCloseEvent e) {
+        if (!(e.getInventory().getHolder(false) instanceof ChestService.Holder h) || !(e.getPlayer() instanceof Player p)) return;
+        var f = plugin.manager().byId(h.factionId);
+        if (f != null) plugin.logs().chestClosed(p, f, e.getInventory());
+    }
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onDrag(InventoryDragEvent e) {
         var holder = e.getView().getTopInventory().getHolder(false);

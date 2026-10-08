@@ -72,6 +72,7 @@ power:
   show: "<gray>Power de <white><player></white> : <gold><power></gold>/<gold><max></gold> <dark_gray>·</dark_gray> plein dans <white><full></white> <dark_gray>·</dark_gray> <white><kills></white> kills, <white><deaths></white> morts"
   full: "maintenant"
   lost: "<red>-<loss> power <gray>(<white><power></white>/<white><max></white>)."
+  farm-protected: "<gray>Pas de perte de power : ce joueur t'a déjà tué récemment (anti-farm)."
   faction-vulnerable: "<red><b>⚠</b> Ta faction n'a plus assez de power pour ses terres : ses ennemis peuvent la <b>SURCLAIM</b> !"
 
 invite:
@@ -279,6 +280,8 @@ scoreboard:
     - "<state>"
     - "  "
     - "<gray>Zone <territory>"
+    - "<gold>Guerre <white><war>"
+    - "<red>Combat <white><combat>s"
     - "<yellow>Grâce <white><grace>"
     - "<dark_gray><st>                    </st> "
     - "<#a9aeb8>vaeloria.fr"
@@ -291,6 +294,7 @@ scoreboard:
     - "<gray>Kills <white><kills></white> · Morts <white><deaths>"
     - "  "
     - "<gray>Zone <territory>"
+    - "<red>Combat <white><combat>s"
     - "<yellow>Grâce <white><grace>"
     - "<dark_gray><st>                    </st> "
     - "<#a9aeb8>vaeloria.fr"
@@ -298,6 +302,58 @@ scoreboard:
   state-shield: "<aqua>⛨ Bouclier actif"
   state-vulnerable: "<gold>⚠ Surclaimable"
   state-safe: "<green>✔ Territoire tenu"
+
+combat:
+  tagged: "<red>⚔ En combat pendant <white><seconds></white> s : te déconnecter maintenant, c'est mourir."
+  ended: "<green>Tu n'es plus en combat."
+  actionbar: "<red>⚔ Combat <white><seconds></white> s"
+  command-blocked: "<red>Commande interdite en combat (encore <white><seconds></white> s)."
+  teleport-blocked: "<red>Impossible de se téléporter en combat (encore <white><seconds></white> s)."
+  logout-broadcast: "<red>☠</red> <white><player></white> <gray>s'est déconnecté en plein combat… et en est mort."
+
+war:
+  declared-broadcast: "<gold>⚔</gold> <white><attacker></white> <gray>déclare officiellement la guerre à</gray> <white><defender></white><gray> ! Début dans <white><time></white>."
+  start-title: "<gradient:#a3121e:#ef4450><b>GUERRE</b></gradient>"
+  start-subtitle: "<white><attacker></white> <gray>contre</gray> <white><defender></white>"
+  started-broadcast: "<gold>⚔</gold> <gray>La guerre</gray> <white><attacker></white> <gray>contre</gray> <white><defender></white> <gray>commence : <white><hours></white> h de combat. Kills, pillages et surclaims rapportent des points."
+  ended-broadcast: "<gold>⚑</gold> <gray>Fin de la guerre</gray> <white><attacker></white> <gold><ascore></gold>-<gold><dscore></gold> <white><defender></white><gray> : victoire de</gray> <gold><b><winner></b></gold><gray>. <reason>"
+  ended-draw: "<gold>⚑</gold> <gray>Fin de la guerre</gray> <white><attacker></white> <gold><ascore></gold>-<gold><dscore></gold> <white><defender></white><gray> : match nul."
+  draw: "match nul"
+  reason-disband: "(dissolution)"
+  reason-surrender: "(reddition)"
+  score-actionbar: "<gold>⚔ <white><attacker></white> <ascore> - <dscore> <white><defender>"
+  none: "<gray>Ta faction n'est pas en guerre. <white>/f guerre declarer ‹faction›"
+  status: "<gold>⚔ Guerre</gold> <white><attacker></white> <gold><ascore></gold>-<gold><dscore></gold> <white><defender></white> <dark_gray>·</dark_gray> <gray><phase> <white><time></white> <dark_gray>·</dark_gray> <gray><participants> combattants"
+  phase-prep: "début dans"
+  phase-active: "fin dans"
+  locked: "<red>Impossible pendant une guerre officielle."
+  relation-locked: "<red>Vous êtes en guerre officielle contre <white><faction></white> : pas de paix avant la fin (ou /f guerre abandonner)."
+  surrender-confirm: "<prefix><red>Abandonner la guerre ? L'adversaire gagne. <click:run_command:'/f guerre abandonner confirmer'><dark_red><b>[CONFIRMER]</b></dark_red></click>"
+  fail:
+    disabled: "<red>Les guerres officielles sont désactivées."
+    self: "<red>Tu ne peux pas te déclarer la guerre."
+    attacker_busy: "<red>Ta faction est déjà en guerre."
+    defender_busy: "<red><white><faction></white> est déjà en guerre."
+    cooldown: "<red>Nouvelle guerre contre cette faction possible dans <white><time></white>."
+    too_few_members: "<red>Il faut au moins <min> membres pour déclarer une guerre."
+    target_too_few_members: "<red><white><faction></white> a moins de <min> membres."
+
+logs:
+  empty: "<gray>Le journal est vide."
+  header: "<dark_gray><st>      </st></dark_gray> <gold><b>Journal</b></gold> <gray>— page <page>/<pages></gray> <dark_gray><st>      </st>"
+  line: "<dark_gray><date></dark_gray> <gold><type></gold> <white><actor></white> <gray><detail>"
+
+discord:
+  status: "<gray>Discord : <white><url></white> <dark_gray>·</dark_gray> mention @everyone : <white><ping></white> <dark_gray>· /f discord ‹lien›|off|test|ping"
+  ping-on: "oui"
+  ping-off: "non"
+  saved: "<green>Salon Discord relié. Envoi d'un message de test…"
+  removed: "<gray>Salon Discord retiré."
+  invalid: "<red>Lien invalide : Discord → Paramètres du salon → Intégrations → Webhooks → Copier l'URL."
+  test-ok: "<green>Message de test reçu par Discord ✔"
+  test-fail: "<red>Discord a refusé le message : vérifie le lien du webhook."
+  ping-enabled: "<green>Les alertes de pillage mentionneront @everyone."
+  ping-disabled: "<gray>Les alertes de pillage ne mentionneront plus personne."
 
 menu:
   title: "<dark_gray>Faction · <gold><faction>"

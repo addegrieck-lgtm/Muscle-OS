@@ -49,6 +49,16 @@ public final class Faction {
     public int overclaimsDone;
     public int overclaimsSuffered;
     public long blocksDestroyed;
+    public int warsWon;
+    public int warsLost;
+
+    /** Webhook Discord de la faction (alertes de pillage, guerres). Jamais affiché en entier. */
+    public String discordWebhook;
+    /** Mentionner @everyone sur les alertes de pillage. */
+    public boolean discordPing;
+
+    /** Journal (/f logs), du plus ancien au plus récent, borné par logs.max. */
+    public java.util.List<LogEntry> logs = new java.util.ArrayList<>();
 
     // ── État d'exécution (non sauvegardé) ──
     public transient Set<ChunkPos> claims;
@@ -75,6 +85,7 @@ public final class Faction {
         if (perms == null) perms = new EnumMap<>(FPerm.class);
         if (warps == null) warps = new LinkedHashMap<>();
         if (description == null) description = "";
+        if (logs == null) logs = new java.util.ArrayList<>();
         claims = ConcurrentHashMap.newKeySet();
         invites = new ConcurrentHashMap<>();
         raidAttackers = new HashSet<>();

@@ -29,7 +29,8 @@ class MessagesTest {
                 "criterion", "value", "full", "loss", "target", "minutes", "by", "x", "z", "bx", "bz", "defender",
                 "attacker", "seconds", "radius", "warp", "first", "second", "message", "balance", "amount", "window",
                 "hours", "command", "description", "left", "n", "zone", "boost", "maxpower", "fpower", "fmaxpower",
-                "territory", "grace"};
+                "territory", "grace", "date", "type", "actor", "detail", "url", "ping", "phase", "participants",
+                "ascore", "dscore", "winner", "reason", "war", "combat"};
         TagResolver.Builder b = TagResolver.builder();
         for (String n : names) b.resolver(net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.unparsed(n, "X"));
         TagResolver anyPlaceholder = b.build();

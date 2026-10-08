@@ -90,6 +90,12 @@ public final class RaidService {
             if (defender.raidAttackers.add(attacker.id)) {
                 attacker.raidsDone++;
                 defender.raidsSuffered++;
+                var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+                if (plugin != null) {
+                    plugin.wars().onRaid(attacker, defender);
+                    plugin.logs().add(defender, "PILLAGE", attacker.name, "pillage en " + (chunk.x() * 16 + 8) + ", " + (chunk.z() * 16 + 8));
+                    plugin.logs().add(attacker, "PILLAGE", attacker.name, "pillage de " + defender.name);
+                }
                 if (settings.raidBroadcast) {
                     Bukkit.broadcast(Msg.prefixed("raid.broadcast", "attacker", attacker.name, "defender", defender.name));
                 }
@@ -101,6 +107,8 @@ public final class RaidService {
         }
         if (now - defender.lastRaidAlert >= settings.raidAlertCooldown * 1000L) {
             defender.lastRaidAlert = now;
+            var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+            if (plugin != null) plugin.discord().raid(defender, attacker == null ? "Inconnu" : attacker.name, chunk.x() * 16 + 8, chunk.z() * 16 + 8);
             Title title = Title.title(Msg.get("raid.alert-title"),
                     Msg.get("raid.alert-subtitle", "x", chunk.x() * 16 + 8, "z", chunk.z() * 16 + 8,
                             "attacker", attacker == null ? "inconnu" : attacker.name),

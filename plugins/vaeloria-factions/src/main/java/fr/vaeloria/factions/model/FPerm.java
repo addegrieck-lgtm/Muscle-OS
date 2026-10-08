@@ -17,7 +17,8 @@ public enum FPerm {
     BANK_WITHDRAW("Retirer de la banque", Role.OFFICIER),
     RELATION("Gérer les relations", Role.OFFICIER),
     FLY("Voler dans le territoire", Role.MEMBRE),
-    SHIELD("Régler le bouclier", Role.CHEF);
+    SHIELD("Régler le bouclier", Role.CHEF),
+    LOGS("Lire le journal", Role.OFFICIER);
 
     private final String label;
     private final Role defaultRole;

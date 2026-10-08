@@ -27,6 +27,10 @@ power:
   offline-regen: false
   loss-on-death: 4.0
   warzone-loss-multiplier: 1.5
+  # Anti-farm : un même tueur ne fait perdre du power à une même victime qu'une fois par période.
+  farm-cooldown-minutes: 15
+  # Aucune perte de power (ni kill compté) entre deux joueurs de même adresse IP : doubles comptes.
+  same-ip-no-loss: true
 
 claims:
   per-power: 1.0               # chunks autorisés par point de power
@@ -135,5 +139,39 @@ inactivity:
 
 bridge:
   snapshot-minutes: 5          # FACTION_SNAPSHOT vers le site (si VæloriaBridge est installé)
+
+# ── Combat ────────────────────────────────────────────────────────
+combat:
+  tag-seconds: 15              # durée du « en combat » après un coup PvP (0 = désactivé)
+  kill-on-logout: true         # combat-log : se déconnecter en combat = mourir
+  # Commandes interdites en combat (début de la commande, sans le /).
+  blocked-commands: [spawn, home, homes, sethome, tpa, tpahere, tpaccept, tpyes, back, warp, warps, rtp, wild, ec, enderchest, "f home", "f warp", "f fly", "f h"]
+
+# ── Journal de faction (/f logs) ──────────────────────────────────
+logs:
+  max: 300                     # lignes gardées par faction
+
+# ── Alertes Discord ───────────────────────────────────────────────
+# Chaque chef relie le salon Discord de sa faction : /f discord <lien du webhook>.
+discord:
+  enabled: true
+  events: [RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG]
+  # Webhook du staff pour les annonces publiques (guerres) ; vide = aucun.
+  global-webhook: ""
+  # Liens acceptés (expression régulière). Vide = webhooks Discord officiels uniquement.
+  url-pattern: ""
+
+# ── Guerres officielles ───────────────────────────────────────────
+# /f guerre declarer <faction> : préparation, puis combat chronométré. Points : kills, pillages, surclaims.
+war:
+  enabled: true
+  preparation-minutes: 15
+  duration-hours: 48
+  cooldown-hours: 72           # délai avant une nouvelle guerre entre les deux mêmes factions
+  min-members: 2               # membres minimum de chaque côté
+  points:
+    kill: 1
+    raid: 5
+    overclaim: 10
 
 autosave-minutes: 5

@@ -115,4 +115,29 @@ public final class BridgeHook {
         o.addProperty("claims", claims);
         send(o);
     }
+
+    public void warStart(fr.vaeloria.factions.model.War w) {
+        if (!active()) return;
+        JsonObject o = base("WAR_START");
+        o.addProperty("warId", w.id);
+        String title = "Guerre : " + w.attackerName + " contre " + w.defenderName;
+        o.addProperty("title", title.length() > 120 ? title.substring(0, 120) : title);
+        o.addProperty("attacker", w.attackerName);
+        o.addProperty("defender", w.defenderName);
+        send(o);
+    }
+
+    public void warEnd(fr.vaeloria.factions.model.War w, String winnerName) {
+        if (!active()) return;
+        JsonObject o = base("WAR_END");
+        o.addProperty("warId", w.id);
+        if (winnerName == null) o.add("winner", com.google.gson.JsonNull.INSTANCE);
+        else o.addProperty("winner", winnerName);
+        o.addProperty("attackerScore", Math.max(0, w.attackerScore));
+        o.addProperty("defenderScore", Math.max(0, w.defenderScore));
+        o.addProperty("attackerTerritories", w.attackerOverclaims);
+        o.addProperty("defenderTerritories", w.defenderOverclaims);
+        o.addProperty("participants", w.participants.size());
+        send(o);
+    }
 }

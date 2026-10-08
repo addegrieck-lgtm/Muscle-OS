@@ -8,6 +8,7 @@ import fr.vaeloria.factions.rules.PowerMath;
 import fr.vaeloria.factions.service.FactionManager;
 import fr.vaeloria.factions.util.Msg;
 import fr.vaeloria.factions.util.Settings;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -32,6 +33,13 @@ public final class CombatListener implements Listener {
     }
 
     private Settings s() { return plugin.settings(); }
+
+    private static boolean sameAddress(Player a, Player b) {
+        var x = a.getAddress();
+        var y = b.getAddress();
+        return x != null && y != null && x.getAddress() != null && x.getAddress().equals(y.getAddress())
+                && !x.getAddress().isLoopbackAddress();
+    }
 
     private static Player attacker(Entity damager) {
         if (damager instanceof Player p) return p;
@@ -81,6 +89,55 @@ public final class CombatListener implements Listener {
         plugin.teleports().cancel(victim, true);
     }
 
+    /** Le coup est définitivement porté (aucun plugin ne l'a annulé) : les deux joueurs passent en combat. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDamageDone(EntityDamageByEntityEvent e) {
+        if (!(e.getEntity() instanceof Player victim)) return;
+        Player a = attacker(e.getDamager());
+        if (a == null || a.equals(victim)) return;
+        plugin.combat().tag(a, victim);
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onCommand(org.bukkit.event.player.PlayerCommandPreprocessEvent e) {
+        Player p = e.getPlayer();
+        if (!plugin.combat().inCombat(p) || !plugin.combat().blocked(e.getMessage())) return;
+        e.setCancelled(true);
+        Msg.send(p, "combat.command-blocked", "seconds", (plugin.combat().remaining(p) + 999) / 1000);
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onTeleport(org.bukkit.event.player.PlayerTeleportEvent e) {
+        var cause = e.getCause();
+        if (cause != org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.COMMAND) return;
+        Player p = e.getPlayer();
+        if (plugin.combat().inCombat(p) && !p.hasPermission("vaeloria.factions.bypass.combat")) {
+            e.setCancelled(true);
+            Msg.send(p, "combat.teleport-blocked", "seconds", (plugin.combat().remaining(p) + 999) / 1000);
+        }
+    }
+
+    /** Combat-log : se déconnecter en combat, c'est mourir (inventaire au sol, power perdu, kill pour l'agresseur). */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onQuit(org.bukkit.event.player.PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        // Arrêt du serveur : tout le monde est « déconnecté », personne ne doit mourir pour autant.
+        if (Bukkit.isStopping() || !s().combatKillOnLogout || !plugin.combat().inCombat(p) || p.isDead()) {
+            plugin.combat().untag(p.getUniqueId());
+            return;
+        }
+        Player killer = plugin.combat().lastAttacker(p);
+        if (killer != null) p.setKiller(killer);
+        Bukkit.broadcast(Msg.prefixed("combat.logout-broadcast", "player", p.getName()));
+        Faction f = manager.factionOf(p);
+        if (f != null) {
+            plugin.discord().combatLog(f, p.getName());
+            plugin.logs().add(f, "COMBAT", p.getName(), "s'est déconnecté en combat");
+        }
+        p.setHealth(0);
+        plugin.combat().untag(p.getUniqueId());
+    }
+
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onSplash(PotionSplashEvent e) {
         if (!(e.getPotion().getShooter() instanceof Player a)) return;
@@ -97,20 +154,37 @@ public final class CombatListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onDeath(PlayerDeathEvent e) {
         Player victim = e.getEntity();
+        plugin.combat().untag(victim.getUniqueId());
         FPlayer fv = manager.fplayer(victim);
         Faction zone = manager.factionAt(victim.getLocation());
         Faction fac = manager.factionOf(victim);
+        Player killer = victim.getKiller();
+        if (killer != null && killer.equals(victim)) killer = null;
+
+        // Anti-farm : même tueur, même victime dans la période, ou même adresse IP (double compte) → mort « gratuite ».
+        boolean farmed = false;
+        if (killer != null) {
+            if (s().sameIpNoLoss && sameAddress(killer, victim)) farmed = true;
+            else farmed = !plugin.farmGuard().shouldPenalize(killer.getUniqueId(), victim.getUniqueId(),
+                    System.currentTimeMillis(), s().farmCooldownMinutes * 60_000L);
+        }
         fv.deaths++;
         if (fac != null) fac.deaths++;
-        Player killer = victim.getKiller();
-        if (killer != null && !killer.equals(victim)) {
+        if (killer != null && !farmed) {
             manager.fplayer(killer).kills++;
             Faction fk = manager.factionOf(killer);
-            if (fk != null) fk.kills++;
+            if (fk != null) {
+                fk.kills++;
+                plugin.wars().onKill(fk, fac, killer.getUniqueId(), victim.getUniqueId());
+            }
         }
         manager.markDirty();
         if (zone != null && zone.isSafezone()) return;
         if (victim.hasPermission("vaeloria.factions.bypass.powerloss")) return;
+        if (farmed) {
+            Msg.send(victim, "power.farm-protected");
+            return;
+        }
         double loss = s().lossOnDeath * (zone != null && zone.isWarzone() ? s().warzoneLossMultiplier : 1);
         fv.power = PowerMath.round(PowerMath.clamp(fv.power - loss, s().powerMin, s().powerMax));
         Msg.send(victim, "power.lost", "loss", Msg.fmt(loss), "power", Msg.fmt(fv.power), "max", Msg.fmt(s().powerMax));

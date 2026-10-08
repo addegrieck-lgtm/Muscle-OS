@@ -62,6 +62,7 @@ public final class PlayerListener implements Listener {
         plugin.territory().stopSeeChunk(p.getUniqueId());
         plugin.scoreboard().hide(p);
         plugin.access().forget(p.getUniqueId());
+        plugin.logs().forget(p.getUniqueId());
         manager.markDirty();
     }
 

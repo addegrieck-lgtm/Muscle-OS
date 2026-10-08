@@ -38,6 +38,10 @@ public final class Store {
     public static final class State {
         public long graceUntil;
         public Map<String, Integer> blockDamage = new HashMap<>();
+        /** Guerres officielles en cours (préparation ou combat). */
+        public List<fr.vaeloria.factions.model.War> wars = new ArrayList<>();
+        /** Fin de la dernière guerre entre deux factions (WarRules.pairKey → epoch ms). */
+        public Map<String, Long> warCooldowns = new HashMap<>();
     }
 
     public List<Faction> loadFactions() throws IOException {
@@ -59,6 +63,9 @@ public final class Store {
         State s = read("state.json", State.class);
         if (s == null) s = new State();
         if (s.blockDamage == null) s.blockDamage = new HashMap<>();
+        if (s.wars == null) s.wars = new ArrayList<>();
+        if (s.warCooldowns == null) s.warCooldowns = new HashMap<>();
+        for (fr.vaeloria.factions.model.War w : s.wars) if (w.participants == null) w.participants = new java.util.HashSet<>();
         return s;
     }
 

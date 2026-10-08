@@ -92,6 +92,12 @@ public final class Menus {
                 t("<gray>Blocs détruits : <white><v1>", "v1", f.blocksDestroyed))), null);
         menu.set(34, Menu.item(Material.OAK_SIGN, t("<yellow><b>Chat"), List.of(
                 t("<gray>Mode : <white><m>", "m", fp.chatMode.name().toLowerCase()), t("<yellow>Clic : changer"))), (pl, c) -> run(pl, "f chat"));
+        var war = plugin.wars().warOf(f);
+        menu.set(39, Menu.item(Material.WRITABLE_BOOK, t("<gold><b>Journal"), List.of(
+                t("<gray>Coffre, banque, membres, pillages"), t("<yellow>Clic : lire"))), (pl, c) -> run(pl, "f logs"));
+        menu.set(41, Menu.item(Material.NETHERITE_SWORD, t("<red><b>Guerre officielle"), List.of(
+                t(war == null ? "<gray>Aucune guerre en cours" : "<white><l>", "l", war == null ? "" : war.attackerName + " " + war.attackerScore + "-" + war.defenderScore + " " + war.defenderName),
+                t("<gray>/f guerre declarer ‹faction›"), t("<yellow>Clic : état"))), (pl, c) -> run(pl, "f guerre"));
         menu.fill(Material.BLACK_STAINED_GLASS_PANE).open(p);
     }
 
@@ -148,6 +154,7 @@ public final class Menus {
         if (f == null) return;
         boolean leader = f.role(p.getUniqueId()) == Role.CHEF;
         Menu menu = new Menu(3, Msg.get("menu.perms-title"));
+        // 17 permissions + retour : tient sur 3 lignes.
         int slot = 0;
         for (FPerm perm : FPerm.values()) {
             Role r = f.permRole(perm);
@@ -188,6 +195,7 @@ public final class Menus {
             case RELATION -> Material.IRON_SWORD;
             case FLY -> Material.FEATHER;
             case SHIELD -> Material.SHIELD;
+            case LOGS -> Material.WRITABLE_BOOK;
         };
     }
 }

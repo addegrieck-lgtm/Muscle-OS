@@ -36,6 +36,9 @@ permissions:
   vaeloria.factions.bypass.fly:
     description: Garder le vol de faction près des ennemis
     default: op
+  vaeloria.factions.bypass.combat:
+    description: Pas de tag de combat ni de blocage des téléportations
+    default: false
   vaeloria.factions.bypass.powerloss:
     description: Ne pas perdre de power à la mort
     default: false

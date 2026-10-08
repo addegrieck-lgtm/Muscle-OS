@@ -97,9 +97,14 @@ public final class ScoreboardService {
         else if (manager.isVulnerable(f)) state = Msg.raw("scoreboard.state-vulnerable");
         else state = Msg.raw("scoreboard.state-safe");
         String grace = raid.graceActive() ? Msg.duration(raid.graceRemaining()) : "";
+        var plugin = fr.vaeloria.factions.VaeloriaFactionsPlugin.get();
+        String war = f == null || plugin == null ? "" : plugin.wars().scoreboardLine(f);
+        String combat = plugin != null && plugin.combat().inCombat(p) ? String.valueOf((plugin.combat().remaining(p) + 999) / 1000) : "";
         List<String> template = f == null ? listOf("scoreboard.lines-no-faction") : listOf("scoreboard.lines");
         for (String line : template) {
             if (line.contains("<grace>") && grace.isEmpty()) continue;
+            if (line.contains("<war>") && war.isEmpty()) continue;
+            if (line.contains("<combat>") && combat.isEmpty()) continue;
             out.add(Msg.parse(line,
                     "faction", f == null ? "" : f.name,
                     "role", f == null ? "" : f.role(p.getUniqueId()).label(),
@@ -111,7 +116,7 @@ public final class ScoreboardService {
                     "members", f == null ? 0 : f.members.size(),
                     "territory", Msg.parse("<" + color + "><t>", "t", territory),
                     "state", Msg.parse(state),
-                    "grace", grace,
+                    "grace", grace, "war", war, "combat", combat,
                     "kills", fp.kills, "deaths", fp.deaths));
         }
         return out;

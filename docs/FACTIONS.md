@@ -28,6 +28,56 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
 - **Bouclier quotidien** (`/f bouclier 3` → 03h-09h, heure de Paris) : une plage de 6 h sans explosions ni surclaim. Il se change au plus tous les 3 jours, jamais pendant un raid ni pendant qu'il est actif.
 - **Protection hors-ligne** : désactivée par défaut (`explosions.offline-protection`).
 
+## Anti-abus
+- **Tag de combat** (15 s après un coup PvP). Pendant ce temps :
+  - pas de `/f home`, de warp, de vol, ni des commandes de `combat.blocked-commands` (`/spawn`, `/tpa`, `/home`…) ;
+  - **se déconnecter tue le joueur** : inventaire au sol, power perdu, kill attribué à son dernier agresseur, annonce publique.
+- **Anti-farm de power** :
+  - un même tueur ne fait perdre du power à une même victime qu'une fois toutes les 15 minutes ;
+  - aucune perte entre deux joueurs de même IP (doubles comptes) ;
+  - les kills farmés ne comptent ni dans les statistiques ni dans les points de guerre.
+- **Journal `/f logs`** (Officier+ par défaut, permission `LOGS`) :
+  - dépôts et retraits du coffre, objet par objet, et de la banque ;
+  - arrivées, départs, expulsions et rangs ;
+  - claims, unclaims et surclaims ;
+  - home, warps, relations, bouclier et permissions ;
+  - pillages, guerres et déconnexions en combat.
+  - Les 300 dernières lignes sont gardées.
+
+## Alertes Discord
+- Le chef relie le salon de sa faction : `/f discord <lien du webhook>`, avec un message de test automatique. Les autres réglages :
+  - `/f discord ping` : mentionner @everyone sur les pillages ;
+  - `/f discord test` : renvoyer un message de test ;
+  - `/f discord off` : délier le salon.
+- Événements envoyés :
+  - pillage en cours, avec coordonnées ;
+  - chunk perdu ou gagné par surclaim ;
+  - guerre ;
+  - arrivées et départs ;
+  - déconnexion en combat.
+- `discord.global-webhook` : salon d'annonces du staff, qui reçoit les guerres.
+- Sécurité :
+  - seuls les liens de webhook Discord officiels sont acceptés ;
+  - le lien n'est jamais affiché en entier ;
+  - les noms des joueurs ne peuvent mentionner personne.
+- Envoi : une file par webhook, sans perte et sans bloquer le serveur, qui respecte les limites de débit de Discord.
+
+## Guerres officielles
+- `/f guerre declarer <faction>` (chef) : 15 min de préparation, puis 48 h de combat.
+- Points : **kill = 1**, **pillage = 5**, **surclaim = 10**.
+- Pendant la guerre, pas de paix (`/f neutre`, `allie`, `treve`) ni de renommage.
+- Fin de la guerre :
+  - à l'échéance, la faction qui a le plus de points gagne (ou match nul) ;
+  - `/f guerre abandonner` donne la victoire à l'adversaire ;
+  - la dissolution d'une faction aussi.
+- Ensuite, 72 h d'attente avant une nouvelle guerre entre les deux mêmes factions.
+- Affichage :
+  - score dans le tableau latéral et le menu ;
+  - titres et cor de guerre ;
+  - annonces en jeu et sur Discord ;
+  - **publication sur le site** (`WAR_START` / `WAR_END` : scores, chunks surclaim, nombre de combattants).
+- Statistiques : guerres gagnées et perdues par faction.
+
 ## Obsidienne rare
 - Le générateur eau + lave produit de la **pierre**, plus d'obsidienne.
 - L'obsidienne de la nature (portails en ruine, End) ne donne que **1 à 3 éclats** quand on la mine.
@@ -47,7 +97,8 @@ L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre �
 | Territoire | `claim [rayon]`, `unclaim [tout]`, `autoclaim`, `carte [on\|off]`, `voir` (bordures en particules) |
 | Déplacement | `home`, `sethome`, `warp`, `setwarp`, `delwarp`, `fly` (préparation de 5 s, bloqué si un ennemi est à moins de 16 blocs) |
 | Diplomatie | `allie`, `treve`, `neutre`, `ennemi`, `relations` (l'alliance et la trêve se signent à deux, la guerre se déclare seul) |
-| Faction | `chat [f\|a\|p]`, `banque [deposer\|retirer]`, `coffre`, `perm`, `bouclier`, `scoreboard` |
+| Faction | `chat [f\|a\|p]`, `banque [deposer\|retirer]`, `coffre`, `perm`, `bouclier`, `scoreboard`, `logs`, `discord` |
+| Guerre | `guerre`, `guerre declarer <faction>`, `guerre abandonner` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.
@@ -63,7 +114,18 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
 
-## Ce qui a été vérifié
+## Ce qui a été vérifié (lot anti-abus, Discord, guerres)
+- 25 tests unitaires, dont l'anti-farm, la différence de coffre, les règles de guerre et la validation des webhooks.
+- Essai sur Paper 1.21.4 avec deux bots et un faux webhook Discord local :
+  - tag de combat ;
+  - `/spawn` et `/f home` bloqués en combat ;
+  - mort en cas de déconnexion en combat ;
+  - second kill rapproché sans perte de power ;
+  - journal du coffre (« a déposé 20× diamond », « a retiré 5× diamond ») ;
+  - guerre déclarée, score 1-5 (kill + pillage), reddition ;
+  - tous les messages Discord reçus dans l'ordre, dont @everyone sur le pillage.
+
+## Ce qui a été vérifié (première version)
 - 21 tests unitaires : règles de claim et surclaim, power, noms, bouclier qui passe minuit, relations, permissions, sauvegarde aller-retour, rendu de tous les messages.
 - Essai sur un vrai **Paper 1.21.4** avec deux joueurs (bots) :
   - création, claim et claim en rayon, guerre ;
