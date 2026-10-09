@@ -57,6 +57,9 @@ Lieux par défaut : place d'arrivée et point d'apparition (sud), marché (est),
 porte de guerre (nord), îlot de l'arbre par les pontons. Les bots suivent le terrain réel (marches, dalles, tapis),
 contournent les obstacles et ne s'approchent jamais du vide (sol vérifié jusqu'à 3 blocs sous eux).
 
+Zones AFK : `/fp spawnzone afk add <nom> [rayon]` à l'endroit voulu (bancs, coin de la place…) ; les bots qui
+partent en AFK vont s'y installer. Sans zone, ils passent AFK là où ils s'arrêtent.
+
 Mise en place : debout sur le point d'apparition (la lodestone), `/fp spawnzone here` ; `/fp spawnzone info` donne
 la part praticable de chaque lieu et la position de chaque bot. `spawn-bots.rotation` si le spawn a été collé tourné.
 Comportements : arrivée au point d'apparition juste après le message de connexion (`login-at-spawn-chance`), petits

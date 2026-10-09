@@ -80,6 +80,8 @@ public final class SpawnBots {
         /** AFK : immobile, ne regarde personne, ne répond pas ; pseudos de ceux qui l'ont sollicité entre-temps. */
         long afkUntil;
         final Set<String> pingedWhileAfk = new HashSet<>();
+        /** En route vers une zone AFK : il passera AFK en y arrivant. */
+        boolean goingAfk;
         /** Bot avec qui il discute (groupe face à face), ou null. */
         Bot buddy;
         /** Ticks restants de l'animation « manger » ; objet tenu en main actuellement. */
@@ -183,7 +185,13 @@ public final class SpawnBots {
                 c.getDouble("spawn-point.radius", 1.5), 0);
         SpawnZone.Point exit = new SpawnZone.Point("sortie", c.getDouble("exit.x", 0), c.getDouble("exit.z", -58),
                 c.getDouble("exit.radius", 2), 0);
-        zone = new SpawnZone(ax, ay, az, rotation, points, arrival, exit);
+        List<SpawnZone.Point> afkPoints = new ArrayList<>();
+        ConfigurationSection as = c.getConfigurationSection("afk.points");
+        if (as != null) for (String k : as.getKeys(false)) {
+            afkPoints.add(new SpawnZone.Point(k, as.getDouble(k + ".x"), as.getDouble(k + ".z"), as.getDouble(k + ".radius", 3),
+                    as.getDouble(k + ".weight", 1)));
+        }
+        zone = new SpawnZone(ax, ay, az, rotation, points, arrival, exit, afkPoints);
         terrain = new BukkitTerrain(world);
     }
 
@@ -203,10 +211,16 @@ public final class SpawnBots {
             for (int i = 0; i < 20; i++) if (!Double.isNaN(ground(zone.randomIn(p, r)))) ok++;
             out.add("  " + p.name() + " : " + ok * 5 + " % praticable" + (ok < 6 ? "  ← à vérifier (chunk non chargé ou repère faux)" : ""));
         }
+        for (SpawnZone.Point p : zone.afkPoints()) {
+            int ok = 0;
+            for (int i = 0; i < 20; i++) if (!Double.isNaN(ground(zone.randomIn(p, r)))) ok++;
+            out.add("  zone AFK " + p.name() + " : " + ok * 5 + " % praticable");
+        }
+        if (zone.afkPoints().isEmpty()) out.add("  pas de zone AFK : les bots passent AFK là où ils s'arrêtent (/fp spawnzone afk add <nom>)");
         for (Bot b : bots.values()) {
             String under = world.getBlockAt((int) Math.floor(b.x), (int) Math.floor(b.y - 0.01), (int) Math.floor(b.z)).getType().name();
             out.add(String.format(java.util.Locale.ROOT, "  bot %s : %s en %.1f %.1f %.1f sur %s, vu par %d", b.fake.name(),
-                    b.state.name().toLowerCase(java.util.Locale.ROOT), b.x, b.y, b.z, under.toLowerCase(java.util.Locale.ROOT), b.viewers.size()));
+                    b.afk() ? "afk" : b.state.name().toLowerCase(java.util.Locale.ROOT), b.x, b.y, b.z, under.toLowerCase(java.util.Locale.ROOT), b.viewers.size()));
         }
         return out;
     }
@@ -362,6 +376,23 @@ public final class SpawnBots {
     private void pickTarget(Bot b) {
         double[] t = zone.randomIn(zone.pick(random), random);
         b.buddy = null;
+        b.goingAfk = false;
+        SpawnZone.Point afkZone = zone.pickAfk(random);
+        if (afkZone != null && random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.afk.chance", 0.3)) {
+            // Il va s'installer dans une zone AFK (pas de groupe : on y va pour être tranquille).
+            for (int attempt = 0; attempt < 6; attempt++) {
+                double[] spot = zone.randomIn(afkZone, random);
+                if (Double.isNaN(ground(spot))) continue;
+                b.tx = spot[0];
+                b.tz = spot[1];
+                b.goingAfk = true;
+                b.stuck = 0;
+                b.side = random.nextBoolean() ? 1 : -1;
+                b.state = State.WALKING;
+                b.speed = 0.17 + random.nextDouble() * 0.06;
+                return;
+            }
+        }
         // Parfois il rejoint un autre bot pour « discuter » : il se place à 2 blocs, face à lui.
         if (random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.group-chance", 0.35)) {
             List<Bot> idle = bots.values().stream().filter(o -> o != b && o.state == State.IDLE && !o.afk()).toList();
@@ -391,7 +422,12 @@ public final class SpawnBots {
             if (b.state == State.LEAVING) { remove(b); return; } // passé la porte : il reste connecté ailleurs
             b.state = State.IDLE;
             ConfigurationSection afk = plugin.getConfig().getConfigurationSection("spawn-bots.afk");
-            if (b.buddy == null && afk != null && random.nextDouble() < afk.getDouble("chance", 0.3)) {
+            // Avec des zones AFK, seuls ceux qui y sont allés passent AFK ; sans, n'importe où, au hasard.
+            boolean goAfk = zone.afkPoints().isEmpty()
+                    ? b.buddy == null && afk != null && random.nextDouble() < afk.getDouble("chance", 0.3)
+                    : b.goingAfk;
+            b.goingAfk = false;
+            if (goAfk && afk != null) {
                 int min = afk.getInt("minutes.min", 3), max = Math.max(min, afk.getInt("minutes.max", 25));
                 b.afkUntil = tick + 20L * 60 * (min + random.nextInt(max - min + 1));
                 b.until = b.afkUntil;
@@ -670,4 +706,9 @@ public final class SpawnBots {
     }
 
     public int count() { return bots.size(); }
+
+    /** Position (repère du spawn) d'un point du monde, ou null si le spawn n'est pas placé. */
+    public double[] local(org.bukkit.Location at) {
+        return zone == null || at.getWorld() != world ? null : zone.toLocal(at.getX(), at.getZ());
+    }
 }

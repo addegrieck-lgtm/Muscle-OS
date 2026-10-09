@@ -80,5 +80,10 @@ class WalkerTest {
         double[] a = SpawnZone.anchorFromSpawnPoint(10.7, 65.0, 262.3, 0, 62);
         assertArrayEquals(new double[]{10, 64, 200}, a, 1e-9);
         assertEquals(180f, Math.abs(Walker.yaw(0, -1)), 1e-4); // regarder vers le nord
+        for (int rot : new int[]{0, 90, 180, 270}) { // toLocal est bien l'inverse de toWorld
+            SpawnZone zr = new SpawnZone(100, 64, 200, rot, List.of(), null, null);
+            double[] w = zr.toWorld(12.5, -7);
+            assertArrayEquals(new double[]{12.5, -7}, zr.toLocal(w[0], w[1]), 1e-9, "rotation " + rot);
+        }
     }
 }

@@ -232,6 +232,12 @@ spawn-bots:
   afk:
     chance: 0.3
     minutes: {min: 3, max: 25}
+    # Zones AFK (repère du spawn). Vide = AFK là où le bot s'arrête. Avec des zones, les bots qui partent en AFK
+    # vont s'y installer. Le plus simple : va dans la zone et tape /fp spawnzone afk add <nom> [rayon].
+    points: {}
+    # Exemple :
+    # points:
+    #   bancs-place: {x: 10, z: 50, radius: 4, weight: 1}
   # Coups des vrais joueurs. pvp-protected: true = comme un vrai joueur dans un spawn protégé : ni dégât, ni recul,
   # ni son ; protected-message = le message de ta protection (WorldGuard…) à reproduire, "" = aucun.
   # false = animation de dégât, son et recul (spawn sans protection).

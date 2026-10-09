@@ -16,11 +16,18 @@ public final class SpawnZone {
     private final List<Point> points;
     private final Point arrival;
     private final Point exit;
+    private final List<Point> afkPoints;
 
     /**
      * @param rotation rotation du collage, en degrés dans le sens horaire vu du dessus (0, 90, 180 ou 270)
      */
     public SpawnZone(double ax, double ay, double az, int rotation, List<Point> points, Point arrival, Point exit) {
+        this(ax, ay, az, rotation, points, arrival, exit, List.of());
+    }
+
+    /** @param afkPoints zones AFK (vide = un bot devient AFK là où il s'arrête) */
+    public SpawnZone(double ax, double ay, double az, int rotation, List<Point> points, Point arrival, Point exit,
+                     List<Point> afkPoints) {
         this.ax = ax;
         this.ay = ay;
         this.az = az;
@@ -28,6 +35,25 @@ public final class SpawnZone {
         this.points = List.copyOf(points);
         this.arrival = arrival;
         this.exit = exit;
+        this.afkPoints = List.copyOf(afkPoints);
+    }
+
+    public List<Point> afkPoints() { return afkPoints; }
+
+    /** Zone AFK au hasard selon les poids, ou null s'il n'y en a pas. */
+    public Point pickAfk(Random random) {
+        return afkPoints.isEmpty() ? null : pick(afkPoints, random);
+    }
+
+    /** Coordonnées dans le repère du spawn {x, z} d'une position du monde (inverse de {@link #toWorld}). */
+    public double[] toLocal(double wx, double wz) {
+        double dx = wx - ax, dz = wz - az;
+        return switch (rotation) {
+            case 90 -> new double[]{dz, -dx};
+            case 180 -> new double[]{-dx, -dz};
+            case 270 -> new double[]{-dz, dx};
+            default -> new double[]{dx, dz};
+        };
     }
 
     public List<Point> points() { return points; }
@@ -54,6 +80,10 @@ public final class SpawnZone {
 
     /** Lieu au hasard selon les poids. */
     public Point pick(Random random) {
+        return pick(points, random);
+    }
+
+    private static Point pick(List<Point> points, Random random) {
         double total = 0;
         for (Point p : points) total += p.weight();
         double roll = random.nextDouble() * total;

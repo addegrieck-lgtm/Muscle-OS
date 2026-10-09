@@ -112,7 +112,31 @@ final class FakeCommand implements TabExecutor {
                 // /fp spawnzone here|info
                 var bots = plugin.spawnBots();
                 if (bots == null) return error(sender, "Bots du spawn indisponibles : PacketEvents et tab.enabled requis.");
-                if (args.length >= 2 && args[1].equalsIgnoreCase("here")) {
+                if (args.length >= 3 && args[1].equalsIgnoreCase("afk")) {
+                    // /fp spawnzone afk add <nom> [rayon] | remove <nom>
+                    String action = args[2].toLowerCase(Locale.ROOT);
+                    if (action.equals("remove") && args.length >= 4) {
+                        plugin.getConfig().set("spawn-bots.afk.points." + args[3], null);
+                        plugin.saveConfig();
+                        bots.reload();
+                        ok(sender, "Zone AFK « " + args[3] + " » supprimée.");
+                    } else if (action.equals("add") && args.length >= 4) {
+                        if (!(sender instanceof Player player)) return error(sender, "Commande réservée aux joueurs.");
+                        double[] local = bots.local(player.getLocation());
+                        if (local == null) return error(sender, "Place d'abord le spawn (/fp spawnzone here), dans ce monde.");
+                        double radius = args.length >= 5 ? Math.max(1, Math.min(30, parse(args[4]))) : 3;
+                        String path = "spawn-bots.afk.points." + args[3];
+                        plugin.getConfig().set(path + ".x", Math.round(local[0] * 10) / 10.0);
+                        plugin.getConfig().set(path + ".z", Math.round(local[1] * 10) / 10.0);
+                        plugin.getConfig().set(path + ".radius", radius);
+                        plugin.getConfig().set(path + ".weight", 1);
+                        plugin.saveConfig();
+                        bots.reload();
+                        ok(sender, "Zone AFK « " + args[3] + " » ajoutée ici (rayon " + (int) radius + ").");
+                    } else {
+                        return error(sender, "Usage : /" + label + " spawnzone afk add <nom> [rayon] | remove <nom>");
+                    }
+                } else if (args.length >= 2 && args[1].equalsIgnoreCase("here")) {
                     if (!(sender instanceof Player player)) return error(sender, "Commande réservée aux joueurs.");
                     int rotation = plugin.getConfig().getInt("spawn-bots.rotation", 0);
                     var l = player.getLocation();
@@ -155,13 +179,14 @@ final class FakeCommand implements TabExecutor {
                 case "auto" -> filter(List.of("on", "off"), args[1]);
                 case "add" -> filter(List.of("1", "5", "10", "20"), args[1]);
                 case "schedule" -> List.of();
-                case "spawnzone" -> filter(List.of("here", "info"), args[1]);
+                case "spawnzone" -> filter(List.of("here", "info", "afk"), args[1]);
                 case "spawn" -> filter(List.of("body"), args[1]);
                 default -> List.of();
             };
         }
         if (args.length == 3 && sub.equals("spawn")) return filter(List.of("body"), args[2]);
         if (args.length == 3 && sub.equals("add")) return filter(List.of("30s", "5m", "10m", "30m", "1h"), args[2]);
+        if (args.length == 3 && sub.equals("spawnzone") && args[1].equalsIgnoreCase("afk")) return filter(List.of("add", "remove"), args[2]);
         return List.of();
     }
 
@@ -220,6 +245,7 @@ final class FakeCommand implements TabExecutor {
                 "auto <on|off> — mode ambiance (arrivées/départs automatiques)",
                 "schedule — planning : cible actuelle et prévision des prochaines heures",
                 "spawnzone here|info — place les bots du spawn (debout sur le point d'apparition) / vérifie",
+                "spawnzone afk add <nom> [rayon] | remove <nom> — zone où les bots vont AFK (à ta position)",
                 "reload — recharge config.yml")) {
             sender.sendMessage(Component.text("/" + label + " " + line, NamedTextColor.GRAY));
         }
