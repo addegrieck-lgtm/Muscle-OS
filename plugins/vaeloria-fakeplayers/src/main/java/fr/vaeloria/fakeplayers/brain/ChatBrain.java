@@ -13,23 +13,41 @@ public final class ChatBrain {
     /** Phrase prête à envoyer, avec l'identifiant de son modèle (pour l'apprentissage). */
     public record Line(String text, String templateId) {}
 
-    private static final int TEXT_MEMORY = 250;
+    /** Réactions courtes (« gg », « re », « slt », « ? ») : ce sont des mots, pas des phrases, elles peuvent revenir. */
+    static final int SHORT_KEY = 10;
+    private static final int SHORT_MEMORY = 40;
 
     private final Phrasebook book;
     private final Learner learner;
-    /** Dernières phrases envoyées (texte final) : une phrase identique ne ressort pas avant 250 messages. */
-    private final java.util.LinkedHashSet<String> recentTexts = new java.util.LinkedHashSet<>();
+    private final SeenTexts seen;
+    /** Les réactions courtes ne reviennent quand même pas avant 40 messages. */
+    private final java.util.LinkedHashSet<String> recentShort = new java.util.LinkedHashSet<>();
 
     public ChatBrain(Phrasebook book, Learner learner) {
+        this(book, learner, new SeenTexts(200_000));
+    }
+
+    public ChatBrain(Phrasebook book, Learner learner, SeenTexts seen) {
         this.book = book;
         this.learner = learner;
+        this.seen = seen;
     }
+
+    public SeenTexts seen() { return seen; }
 
     public Phrasebook book() { return book; }
     public Learner learner() { return learner; }
 
     /** Message spontané : sujet pondéré (×2,5 pour les sujets favoris du joueur), actif à cette heure. */
     public Line spontaneous(Personality p, int hour, Map<String, String> vars, Random random) {
+        for (int attempt = 0; attempt < 4; attempt++) { // sujet épuisé : on en essaie un autre
+            Line line = spontaneousOnce(p, hour, vars, random);
+            if (line != null) return line;
+        }
+        return null;
+    }
+
+    private Line spontaneousOnce(Personality p, int hour, Map<String, String> vars, Random random) {
         List<Phrasebook.Topic> active = new ArrayList<>();
         double total = 0;
         for (Phrasebook.Topic t : book.topics()) {
@@ -52,20 +70,45 @@ public final class ChatBrain {
     }
 
     /** Phrase tirée d'une liste de modèles (événement, réponse…), ou null si la liste est vide. */
+    /**
+     * Phrase tirée d'une liste de modèles, jamais dite auparavant (mémoire permanente) : jusqu'à 25 essais, puis
+     * null (le faux joueur se tait plutôt que de se répéter). Les réactions courtes (« gg », « re »…) sont permises
+     * à nouveau après 40 messages.
+     */
     public synchronized Line line(List<String> templates, Personality p, Map<String, String> vars, Random random) {
-        String template = null, text = null;
-        for (int attempt = 0; attempt < 6; attempt++) { // évite une phrase identique à une phrase récente
-            template = learner.pick(templates, random, 1);
+        if (templates.isEmpty()) return null;
+        for (int attempt = 0; attempt < 25; attempt++) {
+            String template = pickByVariety(templates, random);
             if (template == null) return null;
-            text = book.expand(template, vars, random);
-            if (!recentTexts.contains(Text.normalize(text))) break;
+            String[] out = book.expandWithKey(template, vars, random);
+            String key = Text.normalize(out[1]);
+            if (key.isEmpty() && Text.normalize(out[0]).isEmpty()) continue;
+            boolean isShort = key.length() <= SHORT_KEY;
+            if (isShort ? recentShort.contains(key) : seen.contains(out[1])) continue;
+            if (isShort) {
+                recentShort.add(key);
+                if (recentShort.size() > SHORT_MEMORY) recentShort.remove(recentShort.iterator().next());
+            } else {
+                seen.add(out[1]);
+            }
+            String styled = p.style(out[0], random);
+            return styled.isBlank() ? null : new Line(styled, Learner.id(template));
         }
-        String key = Text.normalize(text);
-        recentTexts.remove(key);
-        recentTexts.add(key);
-        if (recentTexts.size() > TEXT_MEMORY) recentTexts.remove(recentTexts.iterator().next());
-        String styled = p.style(text, random);
-        return styled.isBlank() ? null : new Line(styled, Learner.id(template));
+        return null;
+    }
+
+    /**
+     * Modèle choisi par l'apprentissage, puis pondéré par sa variété : un modèle qui ne donne qu'une poignée de
+     * phrases sort beaucoup plus rarement (sinon il s'épuise en quelques jours et le faux joueur se tait).
+     */
+    private String pickByVariety(List<String> templates, Random random) {
+        for (int i = 0; i < 4; i++) {
+            String t = learner.pick(templates, random, 1);
+            if (t == null) return null;
+            double variety = Math.min(1, Math.max(0.04, Math.log10(Math.max(1, book.variants(t))) / 3.5));
+            if (random.nextDouble() < variety) return t;
+        }
+        return learner.pick(templates, random, 1);
     }
 
     public Line event(String key, Personality p, Map<String, String> vars, Random random) {

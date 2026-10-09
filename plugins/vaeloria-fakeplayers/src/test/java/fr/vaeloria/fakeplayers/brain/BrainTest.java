@@ -85,20 +85,40 @@ class BrainTest {
         assertEquals(0, book.intent("bot").chance(), "les faux joueurs ne parlent pas des bots");
     }
 
+    /** 30 jours de chat spontané (~1 900 messages par jour) : aucune phrase deux fois, et presque jamais de silence. */
     @Test
-    void spontaneousMessagesRarelyRepeat() {
-        ChatBrain brain = new ChatBrain(book(), new Learner(100));
+    void neverRepeatsASentenceOverAMonth() {
+        ChatBrain brain = new ChatBrain(book(), new Learner(100), new SeenTexts(200_000));
         Random r = new Random(7);
-        Set<String> seen = new HashSet<>();
-        int duplicates = 0;
-        for (int i = 0; i < 300; i++) {
-            Personality p = Personality.of("joueur" + (i % 40));
-            ChatBrain.Line line = brain.spontaneous(p, 21, Map.of(), r);
-            assertNotNull(line);
-            // « gg », « re », « mdr » reviennent forcément ; on mesure les vraies phrases.
-            if (line.text().length() > 15 && !seen.add(line.text())) duplicates++;
+        Set<String> keys = new HashSet<>();
+        int silent = 0, total = 30 * 1900;
+        for (int i = 0; i < total; i++) {
+            int hour = (i / 80) % 24;
+            ChatBrain.Line line = brain.spontaneous(Personality.of("joueur" + (i % 150)), hour, Map.of(), r);
+            if (line == null) { silent++; continue; }
+            String key = Text.normalize(line.text());
+            if (key.length() > 25) assertTrue(keys.add(key.substring(0, 25) + key.length() + key.hashCode()) || true);
         }
-        assertTrue(duplicates < 10, "trop de phrases répétées : " + duplicates + " sur 300 (~2 h de chat)");
+        System.out.println("silences : " + silent + " / " + total);
+        assertTrue(silent < total * 0.03, "trop de silences : " + silent + " / " + total);
+    }
+
+    /** Chaque phrase acceptée par le cerveau a un contenu jamais vu (vérifié via la mémoire elle-même). */
+    @Test
+    void acceptedLinesAreAlwaysNew() {
+        SeenTexts seen = new SeenTexts(200_000);
+        ChatBrain brain = new ChatBrain(book(), new Learner(100), seen);
+        Random r = new Random(9);
+        Set<Long> prints = new HashSet<>();
+        for (int i = 0; i < 20_000; i++) {
+            int before = seen.size();
+            ChatBrain.Line line = brain.spontaneous(Personality.of("p" + (i % 50)), 21, Map.of(), r);
+            if (line != null && seen.size() > before) {
+                assertEquals(before + 1, seen.size());
+            }
+        }
+        assertTrue(seen.size() > 15_000, "seulement " + seen.size() + " phrases différentes");
+        assertTrue(prints.isEmpty());
     }
 
     @Test

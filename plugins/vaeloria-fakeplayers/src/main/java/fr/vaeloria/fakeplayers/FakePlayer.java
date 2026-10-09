@@ -13,6 +13,9 @@ public final class FakePlayer {
     private final long joinedAt = System.currentTimeMillis();
     private volatile Skin skin;
     private int ping;
+    /** Ping habituel (sa connexion) et mesures restantes d'un pic de lag en cours. */
+    private final int basePing;
+    private int spikeLeft;
     private UUID bodyId;
     /** Mode ambiance : fin de session prévue (System.currentTimeMillis), 0 = jamais. */
     private long leaveAt;
@@ -32,6 +35,7 @@ public final class FakePlayer {
         this.uuid = offlineUuid(name);
         this.auto = auto;
         this.ping = ping;
+        this.basePing = ping;
     }
 
     /** Même calcul que les serveurs hors-ligne : ne peut pas entrer en collision avec un UUID Mojang (v4). */
@@ -48,6 +52,9 @@ public final class FakePlayer {
     public void skin(Skin skin) { this.skin = skin; }
     public int ping() { return ping; }
     public void ping(int ping) { this.ping = ping; }
+    public int basePing() { return basePing; }
+    int spikeLeft() { return spikeLeft; }
+    void spikeLeft(int spikeLeft) { this.spikeLeft = spikeLeft; }
     public UUID bodyId() { return bodyId; }
     public void bodyId(UUID bodyId) { this.bodyId = bodyId; }
     public Location bodyLocation() { return bodyLocation == null ? null : bodyLocation.clone(); }

@@ -4,6 +4,7 @@ import fr.vaeloria.fakeplayers.brain.ChatBrain;
 import fr.vaeloria.fakeplayers.brain.Learner;
 import fr.vaeloria.fakeplayers.brain.Personality;
 import fr.vaeloria.fakeplayers.brain.Phrasebook;
+import fr.vaeloria.fakeplayers.brain.SeenTexts;
 import fr.vaeloria.fakeplayers.brain.Text;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -77,16 +78,31 @@ final class AmbientChat implements Listener {
         }
         if (brain != null) learner.load(brain.learner().snapshot()); // garde l'apprentissage en cours
         Phrasebook book = parse(yaml);
-        brain = new ChatBrain(book, learner);
+        SeenTexts seen = brain != null ? brain.seen() : new SeenTexts(plugin.getConfig().getInt("chat.memory", 200_000));
+        if (brain == null) {
+            try {
+                seen.load(seenFile().toPath());
+            } catch (IOException | RuntimeException e) {
+                plugin.getLogger().log(Level.WARNING, "seen.dat illisible : mémoire des phrases repartie de zéro", e);
+            }
+        }
+        brain = new ChatBrain(book, learner, seen);
         long variants = 0;
         for (Phrasebook.Topic t : book.topics()) for (String l : t.lines()) variants += book.variants(l);
         plugin.getLogger().info("Chat : " + book.topics().size() + " sujets, " + book.intents().size() + " intentions, "
-                + book.threads().size() + " conversations, ~" + variants + " phrases spontanées possibles.");
+                + book.threads().size() + " conversations, ~" + variants + " phrases spontanées possibles, "
+                + seen.size() + " déjà dites (jamais répétées).");
     }
 
     void save() {
         ChatBrain b = brain;
-        if (b == null || !plugin.getConfig().getBoolean("chat.learning", true)) return;
+        if (b == null) return;
+        try {
+            b.seen().save(seenFile().toPath());
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Impossible d'enregistrer seen.dat", e);
+        }
+        if (!plugin.getConfig().getBoolean("chat.learning", true)) return;
         YamlConfiguration yaml = new YamlConfiguration();
         b.learner().snapshot().forEach((k, v) -> {
             if (Math.abs(v - 1) > 0.01) yaml.set("weights." + k, Math.round(v * 1000) / 1000.0);
@@ -99,6 +115,8 @@ final class AmbientChat implements Listener {
     }
 
     private File brainFile() { return new File(plugin.getDataFolder(), "brain.yml"); }
+
+    private File seenFile() { return new File(plugin.getDataFolder(), "seen.dat"); }
 
     private static Phrasebook parse(YamlConfiguration y) {
         Map<String, List<String>> vocab = new HashMap<>();

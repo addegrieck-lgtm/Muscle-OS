@@ -74,7 +74,7 @@ public final class FakePlayerManager {
      */
     public FakePlayer spawn(String name, boolean auto, Location bodyAt, boolean silent) {
         if (!NamePool.isValid(name) || takenNames().contains(name.toLowerCase(Locale.ROOT))) return null;
-        FakePlayer fake = new FakePlayer(name, auto, randomPing());
+        FakePlayer fake = new FakePlayer(name, auto, PingModel.base(name));
         fake.listed(fakes.size() < tabSlots());
         fakes.put(name.toLowerCase(Locale.ROOT), fake);
         refreshSnapshot();
@@ -140,16 +140,17 @@ public final class FakePlayerManager {
         tab.updateListed(changed, Bukkit.getOnlinePlayers());
     }
 
-    /** Chaque seconde : corps (réapparition, regard) ; toutes les 10 s : variation du ping. */
+    /** Chaque seconde : corps (réapparition, regard) ; toutes les 5 s : ping (fluctuations et pics de lag). */
     void tick(long seconds) {
         if (seconds % 5 == 0) applyTabLimit();
         boolean look = plugin.getConfig().getBoolean("bodies.look-at-players", true);
         if (bodies != null) for (FakePlayer fake : fakes.values()) bodies.tick(fake, look);
-        if (seconds % 10 == 0 && !fakes.isEmpty()) {
-            int min = plugin.getConfig().getInt("tab.ping.min", 15), max = plugin.getConfig().getInt("tab.ping.max", 90);
+        if (seconds % 5 == 0 && !fakes.isEmpty()) {
+            java.util.Random random = ThreadLocalRandom.current();
             for (FakePlayer fake : fakes.values()) {
-                int drift = ThreadLocalRandom.current().nextInt(-8, 9);
-                fake.ping(Math.max(min, Math.min(max, fake.ping() + drift)));
+                int[] next = PingModel.next(fake.basePing(), fake.spikeLeft(), random);
+                fake.ping(next[0]);
+                fake.spikeLeft(next[1]);
             }
             tab.updateLatency(all(), Bukkit.getOnlinePlayers());
         }
@@ -163,11 +164,6 @@ public final class FakePlayerManager {
     private void broadcast(String path, FakePlayer fake) {
         Component message = render(path, fake);
         if (message != null) Bukkit.broadcast(message);
-    }
-
-    private int randomPing() {
-        int min = plugin.getConfig().getInt("tab.ping.min", 15), max = plugin.getConfig().getInt("tab.ping.max", 90);
-        return ThreadLocalRandom.current().nextInt(min, Math.max(min, max) + 1);
     }
 
     private void fetchSkin(FakePlayer fake) {

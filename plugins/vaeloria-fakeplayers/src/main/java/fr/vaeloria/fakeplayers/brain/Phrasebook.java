@@ -74,34 +74,63 @@ public final class Phrasebook {
 
     /** Remplit les emplacements d'un modèle. */
     public String expand(String template, Map<String, String> vars, Random random) {
-        return expand(template, vars, random, 0).replaceAll("\\s{2,}", " ").trim();
+        return expandWithKey(template, vars, random)[0];
     }
 
-    private String expand(String template, Map<String, String> vars, Random random, int depth) {
-        if (depth > 4) return template;
+    /**
+     * Remplit les emplacements et renvoie {texte, clé}. La clé est le texte sans les emplacements de remplissage
+     * ({@code {~o}}, {@code {~c}}…) : deux phrases qui ne diffèrent que par « bon » ou « mdr » ont la même clé.
+     */
+    public String[] expandWithKey(String template, Map<String, String> vars, Random random) {
+        StringBuilder text = new StringBuilder(), key = new StringBuilder();
+        expand(template, vars, random, 0, text, key);
+        return new String[]{clean(text.toString()), clean(key.toString())};
+    }
+
+    private static String clean(String s) {
+        return s.replaceAll("\\s{2,}", " ").replaceAll(" ([?!,])", "$1").trim();
+    }
+
+    private void expand(String template, Map<String, String> vars, Random random, int depth, StringBuilder text, StringBuilder key) {
+        if (depth > 4) { text.append(template); key.append(template); return; }
         Matcher m = SLOT.matcher(template);
-        StringBuilder out = new StringBuilder();
+        int last = 0;
         while (m.find()) {
-            m.appendReplacement(out, Matcher.quoteReplacement(fill(m.group(1), vars, random, depth)));
+            String literal = template.substring(last, m.start());
+            text.append(literal);
+            key.append(literal);
+            String slot = m.group(1);
+            if (slot.startsWith("~")) fill(slot.substring(1), vars, random, depth, text, new StringBuilder());
+            else fill(slot, vars, random, depth, text, key);
+            last = m.end();
         }
-        m.appendTail(out);
-        return out.toString();
+        String tail = template.substring(last);
+        text.append(tail);
+        key.append(tail);
     }
 
-    private String fill(String slot, Map<String, String> vars, Random random, int depth) {
+    private void fill(String slot, Map<String, String> vars, Random random, int depth, StringBuilder text, StringBuilder key) {
         if (slot.contains("|")) {
             String[] options = slot.split("\\|", -1);
-            return expand(options[random.nextInt(options.length)], vars, random, depth + 1);
+            expand(options[random.nextInt(options.length)], vars, random, depth + 1, text, key);
+            return;
         }
         Matcher range = RANGE.matcher(slot);
+        String value = null;
         if (range.matches()) {
             int a = Integer.parseInt(range.group(1)), b = Integer.parseInt(range.group(2));
-            return String.valueOf(a + random.nextInt(Math.max(1, b - a + 1)));
+            value = String.valueOf(a + random.nextInt(Math.max(1, b - a + 1)));
+        } else if (vars.containsKey(slot)) {
+            value = vars.get(slot);
         }
-        if (vars.containsKey(slot)) return vars.get(slot);
+        if (value != null) {
+            text.append(value);
+            key.append(value);
+            return;
+        }
         List<String> words = vocab.get(slot);
-        if (words == null || words.isEmpty()) return "";
-        return expand(words.get(random.nextInt(words.size())), vars, random, depth + 1);
+        if (words == null || words.isEmpty()) return;
+        expand(words.get(random.nextInt(words.size())), vars, random, depth + 1, text, key);
     }
 
     /** Nombre approximatif de phrases différentes qu'un modèle peut produire (pour les statistiques). */
@@ -110,6 +139,7 @@ public final class Phrasebook {
         Matcher m = SLOT.matcher(template);
         while (m.find()) {
             String slot = m.group(1);
+            if (slot.startsWith("~")) continue; // le remplissage ne crée pas de phrase nouvelle
             long n = slot.contains("|") ? slot.split("\\|", -1).length
                     : RANGE.matcher(slot).matches() ? 10 : vocab.getOrDefault(slot, List.of("")).size();
             total = Math.min(Long.MAX_VALUE / 100, total * Math.max(1, n));

@@ -25,9 +25,8 @@ tab:
   # Nom affiché dans le TAB ("" = pseudo brut). Doit ressembler aux vrais joueurs sans grade :
   # avec VaeloriaTab, c'est le format du grade « default » (<steel><player> = gris acier #A9AEB8).
   display-name: "<#A9AEB8><name>"
-  ping:
-    min: 15
-    max: 90
+  # Ping : chaque faux joueur a sa connexion (la plupart 5 barres, certains 4, rares 3), qui fluctue,
+  # avec de petits pics de lag passagers. Calculé automatiquement, rien à régler.
   # Faux joueurs affichés au plus dans la liste TAB (les autres sont connectés et comptés, mais pas listés).
   # 0 = pas de limite propre. Avec VaeloriaTab, la limite est aussi « max-shown » moins les vrais joueurs :
   # les vrais joueurs restent toujours visibles (Minecraft n'affiche que 80 noms).
@@ -142,8 +141,12 @@ chat:
   # Les PHRASES sont dans phrases.yml (sujets, vocabulaire, conversations, réponses). Ici : fréquences et chances.
   # Apprentissage : les phrases qui font réagir les vrais joueurs reviennent plus souvent (brain.yml).
   learning: true
-  # Un modèle de phrase ne revient pas avant que N autres aient servi (une phrase identique : 250).
+  # Un modèle de phrase ne revient pas avant que N autres aient servi.
   no-repeat: 100
+  # Une phrase n'est JAMAIS dite deux fois : toutes les phrases dites sont mémorisées (seen.dat, gardé entre les
+  # redémarrages), jusqu'à N phrases (~ plusieurs semaines). S'il n'a rien de neuf, le faux joueur se tait.
+  # Seules les réactions très courtes (« gg », « re », « slt », « ? ») peuvent revenir, après 40 messages.
+  memory: 200000
 
   # Messages spontanés. Fréquence (par minute) = per-minute-base + per-minute-per-player × nombre de faux joueurs
   # → ~0,5 message/min à 12 faux joueurs, ~2,7/min à 120. Chaque faux joueur parle plus ou moins selon son caractère.
