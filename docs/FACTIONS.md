@@ -391,6 +391,28 @@ Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions o
 ## Site
 Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEAVE/CLAIM/UNCLAIM`, et `FACTION_SNAPSHOT` toutes les 5 minutes (power, power max, banque, claims). Un renommage recrée la faction sous son nouveau nom côté site.
 
+## Ce qui a été vérifié (Forteresse)
+- 43 tests unitaires, dont :
+  - le tirage des points d'apparition ;
+  - la règle de la dernière faction en vie et la victoire au temps ;
+  - la cohérence du plan avec le schéma : herses aux portes, passage libre, sol du sommet, 260 points d'apparition au sol dans la forêt.
+- Le générateur vérifie à chaque construction qu'on monte à pied de la porte sud jusqu'au sommet.
+- Essai sur Paper 1.21.4 avec deux bots :
+  - **construction** sans WorldEdit : 241 × 241 × 110 blocs collés et configurés en 8 secondes ;
+  - **montée** : un bot marche des marches sud jusqu'au sommet de la tour (82 blocs) en 68 s, portes ouvertes ;
+  - **bataille** :
+    - inscriptions puis apparition au hasard dans la forêt (187 blocs d'écart entre les deux joueurs) ;
+    - titres « Seul dans la forêt » et compte à rebours ;
+    - herses levées à l'heure ;
+    - `/tp` de la console refusé pendant la bataille ;
+    - carte indestructible ;
+    - élimination à la mort, victoire et 150 000 $ versés ;
+    - le joueur éliminé réapparaît chez lui, le gagnant rentre 15 s après ;
+  - **fermeture des portes** : les joueurs restés dehors sont éliminés, et faute de survivant il n'y a pas de vainqueur ;
+  - `/f war admin` s'ouvre.
+- Le schéma livré est mis à jour avec le plugin, sauf s'il a été modifié à la main.
+- Une vidéo de présentation de 30 s, en motion design, se génère depuis la vraie carte avec `tools/forteresse/video/`. C'est un rendu isométrique des blocs ; les combattants sont mis en scène.
+
 ## Ce qui a été vérifié (convoi et primes)
 - 37 tests unitaires, dont les paliers et montants des primes, les annonces et la condition de victoire du convoi.
 - Essai sur Paper 1.21.4 avec Vault, EssentialsX, VæloriaShop et deux bots :
