@@ -22,6 +22,9 @@ import java.util.function.Supplier;
 
 /** Ajoute de vraies entrées joueur (pseudo, skin, ping) dans la liste TAB via le plugin PacketEvents. */
 final class PacketEventsTabList implements TabList {
+    private static final boolean LIST_ORDER = PacketEvents.getAPI().getServerManager().getVersion()
+            .isNewerThanOrEquals(com.github.retrooper.packetevents.manager.server.ServerVersion.V_1_21_2);
+
     private final Function<FakePlayer, Component> displayName;
 
     PacketEventsTabList(Function<FakePlayer, Component> displayName) {
@@ -33,6 +36,7 @@ final class PacketEventsTabList implements TabList {
         if (fakes.isEmpty()) return;
         EnumSet<Action> actions = EnumSet.of(Action.ADD_PLAYER, Action.UPDATE_LISTED, Action.UPDATE_LATENCY,
                 Action.UPDATE_GAME_MODE, Action.UPDATE_DISPLAY_NAME);
+        if (LIST_ORDER) actions.add(Action.UPDATE_LIST_ORDER); // tri par grade, comme VaeloriaTab (1.21.2+)
         send(viewers, () -> new WrapperPlayServerPlayerInfoUpdate(actions, entries(fakes)));
     }
 
@@ -55,6 +59,12 @@ final class PacketEventsTabList implements TabList {
         send(viewers, () -> new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(Action.UPDATE_LISTED), entries(fakes)));
     }
 
+    @Override
+    public void updateDisplayName(Collection<FakePlayer> fakes, Collection<? extends Player> viewers) {
+        if (fakes.isEmpty()) return;
+        send(viewers, () -> new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(Action.UPDATE_DISPLAY_NAME), entries(fakes)));
+    }
+
     private List<PlayerInfo> entries(Collection<FakePlayer> fakes) {
         List<PlayerInfo> entries = new ArrayList<>(fakes.size());
         for (FakePlayer fake : fakes) {
@@ -62,7 +72,8 @@ final class PacketEventsTabList implements TabList {
             FakePlayer.Skin skin = fake.skin();
             if (skin != null) textures.add(new TextureProperty("textures", skin.value(), skin.signature()));
             UserProfile profile = new UserProfile(fake.uuid(), fake.name(), textures);
-            entries.add(new PlayerInfo(profile, fake.listed(), fake.ping(), GameMode.SURVIVAL, displayName.apply(fake), null));
+            entries.add(new PlayerInfo(profile, fake.listed(), fake.ping(), GameMode.SURVIVAL, displayName.apply(fake), null,
+                    fake.listOrder()));
         }
         return entries;
     }

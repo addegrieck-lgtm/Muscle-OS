@@ -74,7 +74,8 @@ final class FakeCommand implements TabExecutor {
                 if (manager.count() == 0) return ok(sender, "Aucun faux joueur." + pending);
                 List<String> parts = new ArrayList<>();
                 for (FakePlayer f : manager.all()) {
-                    parts.add(f.name() + (f.hasBody() ? " [corps]" : "") + (f.auto() ? " [auto]" : "") + " " + f.ping() + "ms");
+                    parts.add(f.name() + (f.rank() != null ? " [" + f.rank() + "]" : "") + (f.hasBody() ? " [corps]" : "")
+                            + (f.auto() ? " [auto]" : "") + (f.afk() ? " [afk]" : "") + " " + f.ping() + "ms");
                 }
                 return ok(sender, manager.count() + " faux joueur(s)" + pending + " : " + String.join(", ", parts));
             }

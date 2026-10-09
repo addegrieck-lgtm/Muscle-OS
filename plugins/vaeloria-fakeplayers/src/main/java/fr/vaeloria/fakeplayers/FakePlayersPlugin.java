@@ -80,7 +80,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         TabList tab = TabList.NONE;
         if (getConfig().getBoolean("tab.enabled", true)) {
             if (getServer().getPluginManager().isPluginEnabled("packetevents")) {
-                tab = new PacketEventsTabList(f -> manager.render("tab.display-name", f));
+                tab = new PacketEventsTabList(manager::tabName);
             } else {
                 getLogger().warning("PacketEvents absent : les faux joueurs n'apparaîtront pas dans la liste TAB.");
             }
@@ -118,6 +118,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (ticker != null) ticker.cancel();
+        manager.stopSkinPool();
         if (spawnBots != null) spawnBots.stop();
         if (chat != null) chat.save();
         save();

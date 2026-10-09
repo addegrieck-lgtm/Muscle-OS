@@ -45,7 +45,7 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
     private volatile CachedServerIcon icon;
     private volatile int frame;
     /** Mode compact du TAB (beaucoup de joueurs) : grades courts, en-tête et pied de page réduits. */
-    private boolean compact;
+    private volatile boolean compact;
     private BukkitTask task;
     private long ticks;
 
@@ -129,6 +129,15 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
     /**
      * Places libres dans le TAB pour les faux joueurs : max-shown moins les vrais joueurs connectés
      * (Integer.MAX_VALUE sans plafond). API pour VaeloriaFakePlayers, par réflexion. Thread-safe.
+     */
+    public static boolean compactMode() {
+        VaeloriaTabPlugin plugin = getPlugin(VaeloriaTabPlugin.class);
+        return plugin.compact;
+    }
+
+    /**
+     * Places libres dans le TAB pour les faux joueurs (voir plus haut). {@link #compactMode()} : le TAB est-il en mode
+     * compact (grades courts) ? Les faux joueurs gradés de VaeloriaFakePlayers suivent ce mode.
      */
     public static int fakeSlots() {
         VaeloriaTabPlugin plugin = getPlugin(VaeloriaTabPlugin.class);

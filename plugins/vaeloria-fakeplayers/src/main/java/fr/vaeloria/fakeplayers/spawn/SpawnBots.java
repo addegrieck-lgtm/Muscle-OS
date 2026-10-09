@@ -256,14 +256,14 @@ public final class SpawnBots {
             return gone;
         });
         List<FakePlayer> autos = plugin.manager().all().stream().filter(f -> f.auto() && !f.leaving()).toList();
-        int target = (int) Math.round(autos.size() * c.getDouble("share", 0.08));
-        target = Math.max(c.getInt("min", 2), Math.min(c.getInt("max", 10), target));
+        int target = (int) Math.round(autos.size() * c.getDouble("share", 0.18));
+        target = Math.max(c.getInt("min", 4), Math.min(c.getInt("max", 20), target));
         target = Math.min(target, autos.size());
         long active = bots.values().stream().filter(b -> b.state != State.LEAVING).count();
         if (active < target && tick >= nextArrival) {
             List<FakePlayer> free = autos.stream().filter(f -> !bots.containsKey(f.name())).toList();
             if (!free.isEmpty()) add(free.get(random.nextInt(free.size())));
-            int min = c.getInt("arrival-delay-seconds.min", 8), max = Math.max(min, c.getInt("arrival-delay-seconds.max", 48));
+            int min = c.getInt("arrival-delay-seconds.min", 4), max = Math.max(min, c.getInt("arrival-delay-seconds.max", 20));
             nextArrival = tick + 20L * (min + random.nextInt(max - min + 1));
         } else if (active > target && tick >= nextExit) {
             List<Bot> staying = bots.values().stream().filter(b -> b.state != State.LEAVING).toList();
@@ -285,7 +285,7 @@ public final class SpawnBots {
         ConfigurationSection c = plugin.getConfig().getConfigurationSection("spawn-bots");
         if (c == null || random.nextDouble() >= c.getDouble("login-at-spawn-chance", 0.6)) return;
         long active = bots.values().stream().filter(b -> b.state != State.LEAVING).count();
-        if (active >= c.getInt("max", 10)) return;
+        if (active >= c.getInt("max", 20)) return;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (zone != null && plugin.manager().get(fake.name()) == fake && !fake.leaving()) add(fake, false);
         }, 10 + random.nextInt(30));

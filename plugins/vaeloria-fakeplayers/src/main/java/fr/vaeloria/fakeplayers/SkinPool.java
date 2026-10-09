@@ -37,7 +37,10 @@ final class SkinPool {
             .connectTimeout(TIMEOUT).build();
     private final List<FakePlayer.Skin> skins = new ArrayList<>();
     private final Set<String> ids = new java.util.LinkedHashSet<>(); // même ordre que skins
-    private volatile boolean filling;
+    private volatile boolean filling, stopped;
+
+    /** Arrêt du serveur : la constitution en cours s'interrompt au prochain skin. */
+    void stop() { stopped = true; }
 
     SkinPool(File file, Logger logger) {
         this.file = file;
@@ -71,13 +74,13 @@ final class SkinPool {
         int added = 0;
         try {
             String after = null;
-            for (int page = 0; page < 60 && size() < target; page++) {
+            for (int page = 0; page < 60 && size() < target && !stopped; page++) {
                 JsonObject list = get(API + "?size=48" + (after == null ? "" : "&after=" + after), apiKey);
                 if (list == null || !list.has("skins")) break;
                 JsonArray entries = list.getAsJsonArray("skins");
                 if (entries.isEmpty()) break;
                 for (JsonElement e : entries) {
-                    if (size() >= target) break;
+                    if (size() >= target || stopped) break;
                     String uuid = e.getAsJsonObject().get("uuid").getAsString();
                     if (ids.contains(uuid)) continue;
                     Thread.sleep(400);

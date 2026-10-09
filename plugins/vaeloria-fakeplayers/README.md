@@ -50,6 +50,12 @@ Les **vacances 2026-2027** (zones A, B, C) sont préremplies d'après le calendr
 chaque année dans `schedule.school-holidays.periods` ; un avertissement s'affiche au démarrage quand il n'y a plus
 de période à venir. Les jours fériés français sont calculés automatiquement (Pâques comprise).
 
+## Grades
+
+`ranks.<grade>` donne un grade de joueur à une part des faux joueurs (`chance`, fixe par pseudo) : nom dans le TAB
+(et en mode compact de VaeloriaTab), chat, connexion/déconnexion, tri dans la liste (`list-order`, 1.21.2+).
+Les clés qui ressemblent à un grade de staff (fondateur, admin, modo, helper…) sont ignorées.
+
 ## Bots du spawn
 
 Repère du schematic du spawn (`minecraft/spawn/generate.py`) : x/z = 0 au centre de l'arbre, sol à y = 0, nord = -Z.

@@ -19,6 +19,21 @@ messages:
   join: "<#2A2C33>[<#D21F2F>+</#D21F2F>]</#2A2C33> <#A9AEB8><name>"
   quit: "<#2A2C33>[<#5E0710>-</#5E0710>]</#2A2C33> <#A9AEB8><name>"
 
+# Grades de JOUEURS donnés à une partie des faux joueurs (fixe pour un pseudo), affichés comme les vrais : TAB, chat,
+# connexion/déconnexion, tri dans la liste (list-order = « order » du grade dans VaeloriaTab). Copie les formats de
+# ton plugin de grades (ici ceux de VaeloriaTab, couleurs de la charte en hexadécimal) ; <name> = pseudo,
+# <message> = texte. tab-compact : nom en mode compact de VaeloriaTab (au-delà de 40 joueurs).
+# Jamais de grade de staff (fondateur, admin, modo…) : ces clés sont ignorées.
+ranks:
+  vaelorian:
+    chance: 0.12
+    list-order: 50
+    tab: "<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <#D21F2F>◆</#D21F2F> <#D9DCE2><name>"
+    tab-compact: "<#D21F2F>◆</#D21F2F> <#D9DCE2><name>"
+    chat: "<hover:show_text:'<gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient><newline><#6E737E>Serveur <#D9DCE2>Factions</#D9DCE2><newline><newline><#6E737E>Clique pour lui écrire'><click:suggest_command:'/msg <name> '><gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <#D21F2F>◆</#D21F2F> <#D9DCE2><name></click></hover> <#2A2C33>»</#2A2C33> <#D9DCE2><message>"
+    join: "<#D21F2F>◆</#D21F2F> <gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <#D21F2F>◆</#D21F2F> <#D9DCE2><name> <#6E737E>rejoint le front."
+    quit: "<#2A2C33>[<#5E0710>-</#5E0710>]</#2A2C33> <gradient:#FFFFFF:#A9AEB8>VÆLORIAN</gradient> <#D21F2F>◆</#D21F2F> <#D9DCE2><name>"
+
 tab:
   # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
   enabled: true
@@ -229,12 +244,13 @@ spawn-bots:
   rotation: 0
   # Ancre (bloc de sol au centre de l'arbre). Absente = déduite du point d'apparition du monde (lodestone).
   # anchor: {x: 0, y: 64, z: 0}
-  # Part des faux joueurs « auto » présents au spawn, entre min et max (≈ 2 la nuit, 10 le soir).
-  share: 0.08
-  min: 2
-  max: 10
+  # Part des faux joueurs « auto » présents au spawn, entre min et max (≈ 4 la nuit, 20 le soir).
+  # Plus de monde au spawn : monte share (0.25) et max (25-30). Au-delà de 30, le serveur travaille pour rien.
+  share: 0.18
+  min: 4
+  max: 20
   # Délai entre deux arrivées au spawn.
-  arrival-delay-seconds: {min: 8, max: 48}
+  arrival-delay-seconds: {min: 4, max: 20}
   # À la connexion d'un faux joueur, chance qu'il apparaisse au point d'apparition juste après son message [+].
   login-at-spawn-chance: 0.6
   # Chance, en changeant de lieu, d'aller rejoindre un autre bot pour « discuter » face à face.

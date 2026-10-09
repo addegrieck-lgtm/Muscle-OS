@@ -25,6 +25,9 @@ public final class FakePlayer {
     private volatile boolean afk;
     /** Visible dans la liste TAB (sinon seulement compté), selon les places laissées par VaeloriaTab. */
     private volatile boolean listed = true;
+    /** Grade de joueur (clé de la section ranks de config.yml), ou null ; ordre de tri dans le TAB. */
+    private String rank;
+    private int listOrder;
     private Location bodyLocation;
 
     /** Texture signée Mojang (propriété « textures »). */
@@ -66,6 +69,9 @@ public final class FakePlayer {
     public boolean afk() { return afk; }
     public void afk(boolean afk) { this.afk = afk; }
     public boolean listed() { return listed; }
+    public String rank() { return rank; }
+    public int listOrder() { return listOrder; }
+    void rank(String rank, int listOrder) { this.rank = rank; this.listOrder = listOrder; }
     public void listed(boolean listed) { this.listed = listed; }
     public void leaving(boolean leaving) { this.leaving = leaving; }
 }

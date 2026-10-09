@@ -78,6 +78,7 @@ public final class FakePlayerManager {
         if (!NamePool.isValid(name) || takenNames().contains(name.toLowerCase(Locale.ROOT))) return null;
         FakePlayer fake = new FakePlayer(name, auto, PingModel.base(name));
         fake.listed(fakes.size() < tabSlots());
+        assignRank(fake);
         // Skin de la réserve tout de suite : l'entrée TAB (et le corps au spawn) apparaît directement avec.
         if (!skinSource().equals("mojang")) {
             Set<String> worn = new HashSet<>();
@@ -89,7 +90,7 @@ public final class FakePlayerManager {
         refreshSnapshot();
         if (bodyAt != null && bodies != null) bodies.spawn(fake, bodyAt);
         tab.show(List.of(fake), Bukkit.getOnlinePlayers());
-        if (!silent) broadcast("messages.join", fake);
+        if (!silent) broadcast("join", fake);
         fetchSkin(fake);
         return fake;
     }
@@ -101,7 +102,7 @@ public final class FakePlayerManager {
         if (bodies != null) bodies.despawn(fake);
         onRemove.accept(fake); // l'entité visible au spawn disparaît avant l'entrée TAB
         tab.hide(List.of(fake), Bukkit.getOnlinePlayers());
-        if (!silent) broadcast("messages.quit", fake);
+        if (!silent) broadcast("quit", fake);
         return true;
     }
 
@@ -114,7 +115,7 @@ public final class FakePlayerManager {
     }
 
     public void chat(FakePlayer fake, String message) {
-        String format = plugin.getConfig().getString("chat.format", "<gray><name></gray> <dark_gray>»</dark_gray> <message>");
+        String format = format(fake, "chat");
         // <name> remplacé dans le texte du format : il peut ainsi servir aussi dans <click:…> et <hover:…>
         // (pseudo validé : lettres, chiffres et _ uniquement, aucune balise possible).
         Bukkit.broadcast(MM.deserialize(format.replace("<name>", fake.name()), Placeholder.unparsed("message", message)));
@@ -136,7 +137,14 @@ public final class FakePlayerManager {
      * Ne montre dans le TAB que les faux joueurs qui ont une place (les plus anciens d'abord) ; les autres restent
      * connectés et comptés. Évite qu'un TAB trop rempli cache de vrais joueurs (Minecraft n'affiche que 80 noms).
      */
+    private boolean compact;
+
     void applyTabLimit() {
+        boolean nowCompact = VaeloriaTabHook.compact();
+        if (nowCompact != compact) {
+            compact = nowCompact;
+            tab.updateDisplayName(all().stream().filter(f -> f.rank() != null).toList(), Bukkit.getOnlinePlayers());
+        }
         int slots = tabSlots(), index = 0;
         List<FakePlayer> changed = new ArrayList<>();
         for (FakePlayer fake : fakes.values()) {
@@ -165,14 +173,59 @@ public final class FakePlayerManager {
         }
     }
 
-    Component render(String path, FakePlayer fake) {
-        String format = plugin.getConfig().getString(path, "");
-        return format.isEmpty() ? null : MM.deserialize(format.replace("<name>", fake.name()));
+    /** Grades de staff : jamais pour un faux joueur (on lui demanderait de l'aide, on lui signalerait un tricheur…). */
+    private static final java.util.regex.Pattern STAFF = java.util.regex.Pattern.compile(
+            "(?i).*(fondateur|founder|owner|admin|modo|moder|staff|helper|guide|dev|respo|gerant|gérant|builder).*");
+
+    /** Grade de joueur tiré une fois pour toutes d'après le pseudo (section ranks), ou aucun. */
+    private void assignRank(FakePlayer fake) {
+        org.bukkit.configuration.ConfigurationSection ranks = plugin.getConfig().getConfigurationSection("ranks");
+        if (ranks == null) return;
+        double roll = new java.util.Random(fake.name().toLowerCase(Locale.ROOT).hashCode() * 2654435761L + 11).nextDouble();
+        for (String key : ranks.getKeys(false)) {
+            if (STAFF.matcher(key).matches()) {
+                plugin.getLogger().warning("ranks." + key + " ressemble à un grade de staff : ignoré pour les faux joueurs.");
+                continue;
+            }
+            roll -= ranks.getDouble(key + ".chance", 0);
+            if (roll < 0) {
+                fake.rank(key, ranks.getInt(key + ".list-order", 0));
+                return;
+            }
+        }
     }
 
-    private void broadcast(String path, FakePlayer fake) {
-        Component message = render(path, fake);
-        if (message != null) Bukkit.broadcast(message);
+    /**
+     * Format d'affichage selon le grade : ranks.&lt;grade&gt;.&lt;kind&gt; s'il existe, sinon le format commun
+     * (tab.display-name, chat.format, messages.join / messages.quit).
+     */
+    String format(FakePlayer fake, String kind) {
+        if (fake.rank() != null) {
+            if (kind.equals("tab") && compact) { // mode compact de VaeloriaTab : grade court, comme les vrais
+                String c = plugin.getConfig().getString("ranks." + fake.rank() + ".tab-compact");
+                if (c != null) return c;
+            }
+            String ranked = plugin.getConfig().getString("ranks." + fake.rank() + "." + kind);
+            if (ranked != null) return ranked;
+        }
+        return switch (kind) {
+            case "tab" -> plugin.getConfig().getString("tab.display-name", "");
+            case "chat" -> plugin.getConfig().getString("chat.format", "\\<<name>> <message>");
+            case "join" -> plugin.getConfig().getString("messages.join", "");
+            case "quit" -> plugin.getConfig().getString("messages.quit", "");
+            default -> "";
+        };
+    }
+
+    /** Nom affiché dans le TAB (grade compris), ou null pour le pseudo brut. */
+    Component tabName(FakePlayer fake) {
+        String f = format(fake, "tab");
+        return f.isEmpty() ? null : MM.deserialize(f.replace("<name>", fake.name()));
+    }
+
+    private void broadcast(String kind, FakePlayer fake) {
+        String f = format(fake, kind);
+        if (!f.isEmpty()) Bukkit.broadcast(MM.deserialize(f.replace("<name>", fake.name())));
     }
 
     /** pool (réserve MineSkin, par défaut), mojang (compte qui porte le pseudo), both (compte s'il existe, sinon réserve). */
@@ -187,7 +240,7 @@ public final class FakePlayerManager {
         String key = plugin.getConfig().getString("skins.mineskin-api-key", "");
         if (pool.size() < target) Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             pool.fill(target, key);
-            Bukkit.getScheduler().runTask(plugin, this::assignMissingSkins);
+            if (plugin.isEnabled()) Bukkit.getScheduler().runTask(plugin, this::assignMissingSkins);
         });
     }
 
@@ -208,6 +261,8 @@ public final class FakePlayerManager {
     }
 
     int skinPoolSize() { return pool.size(); }
+
+    void stopSkinPool() { pool.stop(); }
 
     private void fetchSkin(FakePlayer fake) {
         if (!plugin.getConfig().getBoolean("skins.fetch", true)) return;
