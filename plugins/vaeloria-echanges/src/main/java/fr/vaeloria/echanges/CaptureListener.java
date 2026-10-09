@@ -22,12 +22,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -117,6 +119,10 @@ public final class CaptureListener implements Listener {
             plugin.msg(p, "&cPas assez de place pour relâcher le villageois ici.");
             return;
         }
+        if (plugin.settings().respectProtections() && !canBuild(p, target, e.getClickedBlock(), item, e.getHand())) {
+            plugin.msg(p, "&cTu ne peux relâcher un villageois que là où tu peux construire (tes claims, la zone libre).");
+            return;
+        }
         PersistentDataContainer data = item.getItemMeta().getPersistentDataContainer();
         NamespacedKey professionKey = key(data.get(plugin.keys().capturedProfession, PersistentDataType.STRING));
         NamespacedKey typeKey = key(data.get(plugin.keys().capturedType, PersistentDataType.STRING));
@@ -127,10 +133,11 @@ public final class CaptureListener implements Listener {
         Component name = rawName == null ? null : GsonComponentSerializer.gson().deserialize(rawName);
 
         // Retirer l'objet AVANT de faire apparaître le villageois : aucune duplication possible.
+        ItemStack refund = item.asOne();
         if (p.getGameMode() != GameMode.CREATIVE) item.setAmount(item.getAmount() - 1);
         Location loc = target.getLocation().add(0.5, 0, 0.5);
         loc.setYaw(p.getLocation().getYaw() + 180);
-        target.getWorld().spawn(loc, Villager.class, v -> {
+        Villager released = target.getWorld().spawn(loc, Villager.class, v -> {
             // Marquer AVANT le métier : le livre que le métier génère est alors refusé (voir TradeListener).
             PersistentDataContainer pdc = v.getPersistentDataContainer();
             pdc.set(plugin.keys().needsBoost, PersistentDataType.BYTE, (byte) 1);
@@ -141,6 +148,12 @@ public final class CaptureListener implements Listener {
             v.setVillagerExperience(0);
             if (name != null) v.customName(name);
         });
+        if (!released.isValid()) {
+            // Apparition annulée par un autre plugin (anti-mobs d'un claim, région…) : l'objet est rendu.
+            if (p.getGameMode() != GameMode.CREATIVE) give(p, refund, p.getLocation());
+            plugin.msg(p, "&cLes villageois ne peuvent pas apparaître ici. Ton villageois capturé t'a été rendu.");
+            return;
+        }
         target.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc.clone().add(0, 1, 0), 15, 0.3, 0.6, 0.3);
         plugin.msg(p, "&aVillageois relâché. &7Accroupi + clic droit avec des émeraudes pour lui faire proposer un livre.");
     }
@@ -154,6 +167,16 @@ public final class CaptureListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onDispense(BlockDispenseEvent e) {
         if (plugin.items().isCaptured(e.getItem()) || plugin.items().isCaptureEgg(e.getItem())) e.setCancelled(true);
+    }
+
+    /**
+     * Droit de construire sur ce bloc : un faux placement de bloc est soumis aux plugins de protection
+     * (claims de faction, régions), qui l'annulent hors des zones où le joueur peut bâtir.
+     */
+    private static boolean canBuild(Player p, Block target, Block against, ItemStack item, EquipmentSlot hand) {
+        BlockPlaceEvent probe = new BlockPlaceEvent(target, target.getState(), against, item, p, true, hand);
+        Bukkit.getPluginManager().callEvent(probe);
+        return !probe.isCancelled() && probe.canBuild();
     }
 
     private static NamespacedKey key(String raw) {

@@ -14,7 +14,7 @@ Le jar se copie dans `plugins/` du serveur. Les réglages et la table des livres
 |---|---|
 | **Livres à la chance** | Les bibliothécaires tirent leurs livres dans une table pondérée (commun, rare, épique, légendaire) au lieu de la table vanilla. Protection IV, Tranchant V, Raccommodage… sont rares, payés en émeraudes, sans les remises vanilla (réputation, Héros du village). |
 | **Boost à l'émeraude** | **Accroupi + clic droit** sur un bibliothécaire, émeraudes en main : le joueur paie, la **chance** du villageois monte de 1 et son livre est relancé. Plus il est boosté, plus les bons livres sortent. Le coût augmente à chaque boost, jusqu'à un plafond. |
-| **Capture à l'œuf** | Un **Œuf de capture** lancé sur un villageois le transforme en objet. Clic droit sur un bloc pour le relâcher ailleurs. |
+| **Capture à l'œuf** | Un **Œuf de capture** lancé sur un villageois le transforme en objet. Clic droit sur un bloc pour le relâcher **dans ses claims** (ou en zone libre) : partout où le joueur peut construire, jamais dans le claim d'une autre faction. |
 | **Pas de livre recyclé** | Un villageois relâché repart au **niveau 1, sans livre**, et ne proposera **plus jamais** les livres qu'il avait : il faut le booster pour qu'il en propose un nouveau. |
 | **Pupitre verrouillé** | Un bibliothécaire qui propose un livre garde son métier : casser son pupitre ne relance plus le livre gratuitement. Pour changer de livre, il faut payer un boost. |
 
@@ -32,12 +32,12 @@ Alias : `/echange`, `/villageois`, `/pnj`. `use` est accordée à tous, `admin` 
 
 ## Calcul de la chance
 
-Poids effectif d'un livre = poids × (1 + chance × facteur de sa rareté). Facteurs par défaut : commun 0, rare 0,15, épique 1, légendaire 1. La chance va de 0 à 15. Elle retombe à 0 quand un livre légendaire sort.
+Poids effectif d'un livre = poids × (1 + chance × facteur de sa rareté). Facteurs par défaut : commun 0, rare 0,1, épique 0,6, légendaire 0,5. La chance va de 0 à 15. Elle retombe à 0 quand un livre légendaire sort.
 
 | Chance | Commun | Rare | Épique | Légendaire | Protection IV |
 |---|---|---|---|---|---|
-| 0 (villageois neuf) | 71,6 % | 23 % | 4,9 % | 0,5 % | 1,4 % |
-| 15 (maximum) | 30,8 % | 32,1 % | 33,7 % | 3,4 % | 9,6 % |
+| 0 (villageois neuf) | 73,6 % | 23,6 % | 2,5 % | 0,3 % | 0,7 % |
+| 15 (maximum) | 46 % | 36,9 % | 15,4 % | 1,6 % | 4,5 % |
 
 Coût d'un boost : 2 émeraudes, puis +1 par boost, plafonné à 6.
 
@@ -65,13 +65,13 @@ On boost un villageois neuf jusqu'à obtenir le livre voulu, puis on l'achète :
 
 | Objectif | Boosts en moyenne | Émeraudes de boost (moyenne / médiane / 9 joueurs sur 10) | + prix du livre | Total ≈ en $ |
 |---|---|---|---|---|
-| Un livre rare ou mieux | 2,5 | 8 / 5 / 20 | 14–26 | ~7 000 $ |
-| Un livre épique ou mieux | 5 | 23 / 20 / 50 | 30–52 | ~16 000 $ |
-| **Protection IV** | 15 | 77 / 61 / 166 | 36–44 | **~29 000 $** |
-| Tranchant V | 27 | 146 / 106 / 322 | 40–48 | ~47 000 $ |
-| Raccommodage | 55 | 314 / 224 / 700 | 56–64 | ~94 000 $ |
+| Un livre rare ou mieux | 3 | 11 / 5 / 26 | 14–26 | ~8 000 $ |
+| Un livre épique ou mieux | 10 | 48 / 38 / 98 | 30–52 | ~22 000 $ |
+| **Protection IV** | 28 | 156 / 116 / 337 | 36–44 | **~49 000 $** |
+| Tranchant V | 47 | 265 / 194 / 586 | 40–48 | ~77 000 $ |
+| Raccommodage | 99 | 579 / 404 / 1 292 | 56–64 | ~160 000 $ |
 
-Avec les revenus indiqués sur le site (6 000 à 12 000 $/h en milieu de partie), **un Protection IV représente 3 à 5 h de jeu**. Une armure complète en Protection IV demande 4 livres, soit l'équivalent d'un générateur de blaze (180 000 $) en comptant large. Une fois un bibliothécaire Protection IV obtenu, il revend son livre (3 par réapprovisionnement, comme en vanilla) au seul prix du livre. Ce villageois devient donc un bien précieux à protéger des raids, et la capture à l'œuf ne permet pas de le déplacer sans perdre son livre.
+Avec les revenus indiqués sur le site (6 000 à 12 000 $/h en milieu de partie), **un Protection IV représente 4 à 8 h de jeu**. Une armure complète en Protection IV demande 4 livres, soit l'équivalent d'un générateur de vache ou de blaze (180 000 à 200 000 $). Une fois un bibliothécaire Protection IV obtenu, il revend son livre (3 par réapprovisionnement, comme en vanilla) au seul prix du livre. Ce villageois devient donc un bien précieux à protéger des raids, et la capture à l'œuf ne permet pas de le déplacer sans perdre son livre.
 
 Pour rendre les livres plus ou moins accessibles, il suffit de modifier `config.yml` : `weight` (rareté), `price` (prix d'achat), `luck-factor` (effet du boost), `boost.cost-*` (prix du boost).
 
@@ -80,6 +80,7 @@ Pour rendre les livres plus ou moins accessibles, il suffit de modifier `config.
 - Œufs de capture et villageois capturés sont reconnus par un marqueur invisible (`PersistentDataContainer`), jamais par leur nom. Renommer un œuf à l'enclume ne crée rien.
 - Seules les émeraudes **ordinaires** sont prises en paiement : une émeraude renommée ou marquée par un autre plugin (clé de coffre…) ne l'est jamais. Si le joueur n'a pas assez d'émeraudes, rien n'est retiré.
 - Capture refusée sur un bébé, sur un villageois en plein échange, et (par défaut) là où un plugin de protection interdit de frapper ce villageois (claims de faction, régions WorldGuard). Le plugin envoie un coup « fictif » de 0 dégât et regarde s'il est annulé. Après un refus, l'œuf de capture est rendu.
+- Relâche permise seulement là où le joueur peut construire : le plugin soumet un placement de bloc « fictif » aux plugins de protection. Dans ses propres claims ça passe ; dans le claim d'une autre faction c'est refusé. Si un plugin bloque l'apparition des mobs à cet endroit, le villageois capturé est rendu au joueur.
 - Le villageois capturé est retiré **avant** que l'objet ne soit donné, et l'objet est retiré de la main **avant** que le villageois relâché n'apparaisse : pas de duplication possible. L'objet ne peut servir ni d'œuf d'apparition vanilla (bébé, spawner) ni dans un distributeur.
 - Un œuf de capture ne fait jamais éclore de poussin.
 - Captures, boosts et dons d'œufs sont journalisés dans la console.
