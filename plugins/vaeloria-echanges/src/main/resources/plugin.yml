@@ -1,0 +1,18 @@
+name: VaeloriaEchanges
+version: '${version}'
+main: fr.vaeloria.echanges.VaeloriaEchangesPlugin
+api-version: '1.21'
+description: Échanges PNJ de VÆLORIA — livres enchantés à la chance, boost à l'émeraude, capture des villageois à l'œuf.
+authors: [VÆLORIA]
+commands:
+  echanges:
+    description: Échanges avec les villageois (œuf de capture, chances des livres)
+    usage: "/echanges <oeuf|chances|give|reload>"
+    aliases: [echange, villageois, pnj]
+permissions:
+  vaeloria.echanges.use:
+    description: Booster un bibliothécaire, capturer et relâcher un villageois, acheter un œuf de capture
+    default: true
+  vaeloria.echanges.admin:
+    description: Donner des œufs de capture, recharger la configuration
+    default: op
