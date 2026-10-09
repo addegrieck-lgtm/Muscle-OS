@@ -19,7 +19,7 @@ public final class Freeze {
 
     public Freeze(VaeloriaStaffPlugin plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().runTaskTimer(plugin, this::remind, 40L, 60L);
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> remindAll(), 40L, 60L);
     }
 
     public boolean is(Player p) {
@@ -47,7 +47,7 @@ public final class Freeze {
         frozen.remove(id);
     }
 
-    private void remind() {
+    private void remindAll() {
         for (UUID id : frozen) {
             Player p = Bukkit.getPlayer(id);
             if (p != null) remind(p);
