@@ -192,6 +192,7 @@ final class FakeInteractions implements Listener {
         if (w == null) return false;
         send(sender, w.getString("outgoing", ""), fake, text);
         lastPartner.put(key(sender), fake.name());
+        if (fake.afk()) send(sender, w.getString("afk-notice", ""), fake, text); // ex. « X est AFK » d'Essentials
         ThreadLocalRandom r = ThreadLocalRandom.current();
         if (r.nextDouble() >= w.getDouble("reply-chance", 0.6)) return true;
         String answer = chat.whisperReply(fake, text, sender.getName());

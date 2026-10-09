@@ -59,6 +59,12 @@ contournent les obstacles et ne s'approchent jamais du vide (sol vérifié jusqu
 
 Mise en place : debout sur le point d'apparition (la lodestone), `/fp spawnzone here` ; `/fp spawnzone info` donne
 la part praticable de chaque lieu et la position de chaque bot. `spawn-bots.rotation` si le spawn a été collé tourné.
+Comportements : arrivée au point d'apparition juste après le message de connexion (`login-at-spawn-chance`), petits
+groupes face à face (`group-chance`, le voisin répond souvent dans le chat), AFK immobiles qui ne répondent pas et
+s'excusent à leur retour (`afk`, avec `interactions.whisper.afk-notice` façon Essentials), repas (animation et sons),
+changement d'objet en main, shift, sauts. Frappés dans un spawn protégé (`hit.pvp-protected`), ils ne bougent pas,
+comme un vrai joueur, et le message de ta protection peut être reproduit (`hit.protected-message`).
+
 Ce sont des entités envoyées par paquets : aucune n'existe côté serveur, les autres plugins ne les voient pas, et
 les coups ne font pas de dégâts (animation, son et recul seulement).
 

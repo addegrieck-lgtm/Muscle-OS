@@ -18,6 +18,8 @@ public final class FakePlayer {
     private long leaveAt;
     /** Départ annoncé (message d'au revoir envoyé), déconnexion imminente. */
     private boolean leaving;
+    /** AFK au spawn : ne parle pas, ne répond pas (les messages reçus sont rattrapés à son retour). */
+    private volatile boolean afk;
     /** Visible dans la liste TAB (sinon seulement compté), selon les places laissées par VaeloriaTab. */
     private volatile boolean listed = true;
     private Location bodyLocation;
@@ -54,6 +56,8 @@ public final class FakePlayer {
     public long leaveAt() { return leaveAt; }
     public void leaveAt(long leaveAt) { this.leaveAt = leaveAt; }
     public boolean leaving() { return leaving; }
+    public boolean afk() { return afk; }
+    public void afk(boolean afk) { this.afk = afk; }
     public boolean listed() { return listed; }
     public void listed(boolean listed) { this.listed = listed; }
     public void leaving(boolean leaving) { this.leaving = leaving; }

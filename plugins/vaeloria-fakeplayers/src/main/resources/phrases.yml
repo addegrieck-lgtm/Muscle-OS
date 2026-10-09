@@ -125,7 +125,7 @@ topics:
       - "y a des récompenses pour le koth ?"
       - "le spawn est {good}"
       - "le site est {good}"
-      - "vous avez vu la boutique ?"
+      - "vous avez vu le nouveau spawn ?"
       - "c'est quand le prochain event ?"
       - "les règles sont où ?"
       - "le serv est stable ce soir"
@@ -386,6 +386,11 @@ events:
   hit: ["?", "eh", "arrête", "pk tu me tapes", "stp", "ça sert à rien c'est la safe zone {laugh}", "oh calme",
         "t'es sérieux {player}", "viens en warzone si t'es chaud", "{laugh}", "tu fais quoi là", "aïe {laugh}",
         "1v1 en warzone {player}", "lâche moi", "jsuis afk", "quoi"]
+  # Retour d'AFK au spawn, après qu'un vrai joueur lui a parlé, écrit en privé ou l'a frappé.
+  afk-back-pinged: ["dsl j'étais afk", "dsl j'étais afk {player}", "re, j'étais afk", "pardon j'étais pas là {player}",
+                    "oui ? j'étais afk", "re dsl {player}", "jsuis là, tu voulais quoi {player} ?", "dsl j'étais parti manger"]
+  # Retour d'AFK sans que personne ne l'ait sollicité (pas toujours : la plupart ne disent rien).
+  afk-back: ["re", "rere", "me revoilà", "re tlm", "bon", "j'étais afk mdr"]
   # Un vrai joueur écrit le pseudo d'un faux joueur sans autre intention reconnue.
   named: ["?", "oui ?", "quoi", "ouais ?", "jsuis là", "hein ?", "qu'est-ce qu'il y a ?", "moi ?"]
   # Suite d'une conversation déjà engagée avec un vrai joueur, sans intention reconnue.

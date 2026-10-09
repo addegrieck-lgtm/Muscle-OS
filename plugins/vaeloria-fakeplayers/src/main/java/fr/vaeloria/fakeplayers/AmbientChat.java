@@ -175,7 +175,8 @@ final class AmbientChat implements Listener {
         if (ask == null) return;
         say(asker, ask, true);
         if (random.nextDouble() >= cfg.getDouble("answer-chance", 0.75)) return;
-        FakePlayer answerer = randomSpeaker(asker.name());
+        FakePlayer buddy = plugin.buddyOf(asker); // au spawn, c'est souvent celui d'à côté qui répond
+        FakePlayer answerer = buddy != null && !buddy.afk() && random.nextDouble() < 0.7 ? buddy : randomSpeaker(asker.name());
         if (answerer == null || answerer == asker) return;
         ChatBrain.Line answer = brain.line(thread.answers(), personality(answerer), Map.of("player", asker.name()), random);
         if (answer == null) return;
@@ -206,6 +207,7 @@ final class AmbientChat implements Listener {
     /** @return délai en ticks avant la déconnexion (0 = partir tout de suite) */
     long onFakeLeaving(FakePlayer fake) {
         ConfigurationSection leave = cfg("on-leave");
+        if (fake.afk()) return 0; // un AFK qui se déconnecte ne dit pas au revoir
         if (leave == null || random.nextDouble() >= leave.getDouble("chance", 0.08)) return 0;
         int hour = plugin.now().getHour();
         String key = hour >= 22 || hour < 6 ? "leave-night" : (hour == 12 || hour == 19 ? "leave-meal" : "leave");
@@ -274,6 +276,11 @@ final class AmbientChat implements Listener {
         Engagement e = engaged.get(player);
         FakePlayer partner = e == null ? null : plugin.manager().get(e.fake());
 
+        if (named != null && named.afk()) { // il ne voit pas le message : il s'en occupera en revenant
+            plugin.pingedWhileAfk(named, player);
+            return;
+        }
+        if (partner != null && partner.afk()) partner = null;
         FakePlayer speaker;
         double chance;
         List<String> templates;
@@ -310,6 +317,7 @@ final class AmbientChat implements Listener {
     /** Un vrai joueur frappe le faux joueur au spawn : il réagit parfois (« ? », « arrête »…), et poursuit la conversation. */
     void reactToHit(FakePlayer fake, String attacker) {
         ConfigurationSection hit = cfg("hit");
+        if (fake.afk()) { plugin.pingedWhileAfk(fake, attacker); return; }
         if (hit == null || !present(fake) || random.nextDouble() >= hit.getDouble("chance", 0.5)) return;
         ChatBrain.Line line = brain.event("hit", personality(fake), Map.of("player", attacker), random);
         if (line == null) return;
@@ -319,12 +327,29 @@ final class AmbientChat implements Listener {
         }, 10 + typingTicks(line.text()));
     }
 
+    /** Retour d'AFK : « dsl j'étais afk <joueur> » si quelqu'un l'a sollicité, sinon parfois juste « re ». */
+    void afkBack(FakePlayer fake, String pinger) {
+        if (!present(fake)) return;
+        if (pinger == null && random.nextDouble() >= 0.25) return;
+        ChatBrain.Line line = brain.event(pinger != null ? "afk-back-pinged" : "afk-back", personality(fake),
+                Map.of("player", pinger == null ? "" : pinger), random);
+        if (line == null) return;
+        if (pinger != null) engage(pinger, fake);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (present(fake)) say(fake, line, false);
+        }, 20 + typingTicks(line.text()));
+    }
+
     /**
      * Réponse à un message privé (null = pas de réponse). Les intentions de phrases.yml sont utilisées d'abord,
      * puis les réponses génériques « whisper ». Le faux joueur reste engagé dans la conversation.
      */
     String whisperReply(FakePlayer fake, String text, String player) {
         rewardPending(System.currentTimeMillis());
+        if (fake.afk()) {
+            plugin.pingedWhileAfk(fake, player);
+            return null;
+        }
         Phrasebook.Intent intent = brain.book().detect(text);
         if (intent != null && intent.chance() <= 0) return null;
         List<String> templates = intent != null ? intent.replies() : brain.book().event("whisper");
@@ -374,12 +399,12 @@ final class AmbientChat implements Listener {
         List<FakePlayer> candidates = new ArrayList<>();
         double total = 0;
         for (FakePlayer f : plugin.manager().all()) {
-            if (f.leaving() || f.name().equals(exclude) || f.name().equals(lastSpeaker)) continue;
+            if (f.leaving() || f.afk() || f.name().equals(exclude) || f.name().equals(lastSpeaker)) continue;
             candidates.add(f);
             total += personality(f).chattiness();
         }
         if (candidates.isEmpty()) {
-            for (FakePlayer f : plugin.manager().all()) if (!f.leaving() && !f.name().equals(exclude)) return f;
+            for (FakePlayer f : plugin.manager().all()) if (!f.leaving() && !f.afk() && !f.name().equals(exclude)) return f;
             return null;
         }
         double roll = random.nextDouble() * total;

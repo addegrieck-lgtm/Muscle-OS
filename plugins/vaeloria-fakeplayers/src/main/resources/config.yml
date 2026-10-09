@@ -223,6 +223,21 @@ spawn-bots:
   max: 10
   # Délai entre deux arrivées au spawn.
   arrival-delay-seconds: {min: 8, max: 48}
+  # À la connexion d'un faux joueur, chance qu'il apparaisse au point d'apparition juste après son message [+].
+  login-at-spawn-chance: 0.6
+  # Chance, en changeant de lieu, d'aller rejoindre un autre bot pour « discuter » face à face.
+  group-chance: 0.35
+  # AFK : immobile (ne regarde personne), ne parle pas, ne répond ni aux messages ni aux coups ; à son retour,
+  # « dsl j'étais afk » à ceux qui l'ont sollicité (phrases.yml → events.afk-back-pinged).
+  afk:
+    chance: 0.3
+    minutes: {min: 3, max: 25}
+  # Coups des vrais joueurs. pvp-protected: true = comme un vrai joueur dans un spawn protégé : ni dégât, ni recul,
+  # ni son ; protected-message = le message de ta protection (WorldGuard…) à reproduire, "" = aucun.
+  # false = animation de dégât, son et recul (spawn sans protection).
+  hit:
+    pvp-protected: true
+    protected-message: ""
   # Chance d'arriver par la porte (retour de warzone) plutôt qu'au point d'apparition.
   arrive-by-exit-chance: 0.3
   spawn-point: {x: 0, z: 62, radius: 1.5}
@@ -260,6 +275,9 @@ interactions:
     # Réponses : intentions de phrases.yml d'abord, sinon events.whisper.
     reply-chance: 0.6
     delay-seconds: {min: 2, max: 10}
+    # Message montré à l'expéditeur quand le faux joueur est AFK au spawn, comme Essentials (« X est AFK »).
+    # Exemple Essentials : "<gray><target> est actuellement absent." ; "" = rien.
+    afk-notice: ""
   list:
     # Réponse de /list (vanilla, traduite). <count> inclut les faux joueurs, <max> = server-list.max-players.
     format: "<lang:commands.list.players:'<count>':'<max>':'<names>'>"

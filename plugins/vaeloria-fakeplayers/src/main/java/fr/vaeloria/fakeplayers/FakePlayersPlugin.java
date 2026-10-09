@@ -267,6 +267,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
             if (fake != null) {
                 fake.leaveAt(now + sessionMillis(auto));
                 chat.onFakeJoined(fake);
+                if (spawnBots != null) spawnBots.onLogin(fake); // apparaît souvent au spawn, comme un vrai joueur
             }
             nextJoinAt = seconds + delay(auto, "join-delay-seconds", target - count);
         } else if (count > target && seconds >= nextLeaveAt) {
@@ -300,6 +301,20 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     /** Un vrai joueur a frappé le corps d'un faux joueur au spawn : réaction dans le chat (parfois). */
     public void reactToHit(FakePlayer fake, String attacker) {
         if (chat != null) chat.reactToHit(fake, attacker);
+    }
+
+    /** Un faux joueur sort de son AFK au spawn : « re », ou « dsl j'étais afk » à celui qui l'a sollicité. */
+    public void afkBack(FakePlayer fake, String pinger) {
+        if (chat != null) chat.afkBack(fake, pinger);
+    }
+
+    /** Un vrai joueur a sollicité un faux joueur AFK : rattrapé à son retour. */
+    void pingedWhileAfk(FakePlayer fake, String player) {
+        if (spawnBots != null) spawnBots.pinged(fake, player);
+    }
+
+    FakePlayer buddyOf(FakePlayer fake) {
+        return spawnBots == null ? null : spawnBots.buddyOf(fake);
     }
 
     /** Départ d'un faux joueur, précédé parfois d'un « a+ » quelques secondes avant. */

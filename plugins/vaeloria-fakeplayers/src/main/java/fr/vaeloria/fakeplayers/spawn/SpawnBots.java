@@ -77,13 +77,24 @@ public final class SpawnBots {
         double knockX, knockZ;
         boolean sneaking;
         long nextGlance, lastHitReact;
+        /** AFK : immobile, ne regarde personne, ne répond pas ; pseudos de ceux qui l'ont sollicité entre-temps. */
+        long afkUntil;
+        final Set<String> pingedWhileAfk = new HashSet<>();
+        /** Bot avec qui il discute (groupe face à face), ou null. */
+        Bot buddy;
+        /** Ticks restants de l'animation « manger » ; objet tenu en main actuellement. */
+        int eating;
+        ItemStack held;
         final Set<UUID> viewers = new HashSet<>();
 
         Bot(FakePlayer fake, int id) {
             this.fake = fake;
             this.id = id;
             this.loadout = Loadout.of(fake.name());
+            this.held = loadout.mainHand();
         }
+
+        boolean afk() { return afkUntil > 0; }
     }
 
     private final FakePlayersPlugin plugin;
@@ -239,7 +250,25 @@ public final class SpawnBots {
     }
 
     private void add(FakePlayer fake) {
-        boolean byGate = random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.arrive-by-exit-chance", 0.3);
+        add(fake, random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.arrive-by-exit-chance", 0.3));
+    }
+
+    /**
+     * Un faux joueur « auto » vient de se connecter : comme un vrai joueur, il apparaît souvent au point
+     * d'apparition juste après son message de connexion, s'il reste de la place au spawn.
+     */
+    public void onLogin(FakePlayer fake) {
+        if (zone == null || bots.containsKey(fake.name())) return;
+        ConfigurationSection c = plugin.getConfig().getConfigurationSection("spawn-bots");
+        if (c == null || random.nextDouble() >= c.getDouble("login-at-spawn-chance", 0.6)) return;
+        long active = bots.values().stream().filter(b -> b.state != State.LEAVING).count();
+        if (active >= c.getInt("max", 10)) return;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (zone != null && plugin.manager().get(fake.name()) == fake && !fake.leaving()) add(fake, false);
+        }, 10 + random.nextInt(30));
+    }
+
+    private void add(FakePlayer fake, boolean byGate) {
         SpawnZone.Point from = byGate ? zone.exit() : zone.arrival();
         for (int attempt = 0; attempt < 10; attempt++) {
             double[] at = zone.randomIn(from, random);
@@ -266,10 +295,13 @@ public final class SpawnBots {
         b.tz = out[1];
         b.state = State.LEAVING;
         b.stuck = 0;
+        endAfk(b, false);
         setSneak(b, false);
     }
 
     private void remove(Bot b) {
+        b.fake.afk(false);
+        for (Bot other : bots.values()) if (other.buddy == b) other.buddy = null;
         despawnAll(b);
         bots.remove(b.fake.name());
         byId.remove(b.id);
@@ -329,6 +361,22 @@ public final class SpawnBots {
 
     private void pickTarget(Bot b) {
         double[] t = zone.randomIn(zone.pick(random), random);
+        b.buddy = null;
+        // Parfois il rejoint un autre bot pour « discuter » : il se place à 2 blocs, face à lui.
+        if (random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.group-chance", 0.35)) {
+            List<Bot> idle = bots.values().stream().filter(o -> o != b && o.state == State.IDLE && !o.afk()).toList();
+            if (!idle.isEmpty()) {
+                Bot mate = idle.get(random.nextInt(idle.size()));
+                double a = random.nextDouble() * Math.PI * 2, r = 1.6 + random.nextDouble() * 0.9;
+                double[] spot = {mate.x + Math.cos(a) * r, mate.z + Math.sin(a) * r};
+                if (!Double.isNaN(terrain.feet((int) Math.floor(spot[0]), mate.y, (int) Math.floor(spot[1])))) {
+                    t = spot;
+                    b.buddy = mate;
+                    mate.buddy = mate.buddy == null ? b : mate.buddy;
+                    mate.until = Math.max(mate.until, tick + 20L * (30 + random.nextInt(60)));
+                }
+            }
+        }
         b.tx = t[0];
         b.tz = t[1];
         b.stuck = 0;
@@ -342,8 +390,17 @@ public final class SpawnBots {
         if (dist < 0.6) {
             if (b.state == State.LEAVING) { remove(b); return; } // passé la porte : il reste connecté ailleurs
             b.state = State.IDLE;
-            boolean afk = random.nextDouble() < 0.15;
-            b.until = tick + 20L * (afk ? 60 + random.nextInt(180) : 4 + random.nextInt(35));
+            ConfigurationSection afk = plugin.getConfig().getConfigurationSection("spawn-bots.afk");
+            if (b.buddy == null && afk != null && random.nextDouble() < afk.getDouble("chance", 0.3)) {
+                int min = afk.getInt("minutes.min", 3), max = Math.max(min, afk.getInt("minutes.max", 25));
+                b.afkUntil = tick + 20L * 60 * (min + random.nextInt(max - min + 1));
+                b.until = b.afkUntil;
+                b.fake.afk(true);
+                b.pitch = (random.nextFloat() - 0.3f) * 25; // regard figé, souvent un peu vers le bas
+                b.headYaw = b.yaw;
+            } else {
+                b.until = tick + 20L * (b.buddy != null ? 25 + random.nextInt(60) : 4 + random.nextInt(35));
+            }
             return;
         }
         Walker.Step step = Walker.step(terrain, b.x, b.y, b.z, b.tx, b.tz, b.speed, b.side);
@@ -364,24 +421,94 @@ public final class SpawnBots {
     }
 
     private void idle(Bot b) {
+        if (b.afk()) { // un vrai AFK ne bouge pas du tout
+            if (tick >= b.afkUntil) {
+                endAfk(b, true);
+                pickTarget(b);
+            }
+            return;
+        }
         Player near = nearestPlayer(b, 7);
-        if (near != null) { // regarde le joueur proche
-            double dx = near.getX() - b.x, dz = near.getZ() - b.z;
-            double dy = near.getEyeLocation().getY() - (b.y + 1.62);
-            b.headYaw = turn(b.headYaw, Walker.yaw(dx, dz), 20);
-            b.pitch = turn(b.pitch, (float) -Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))), 12);
-            if (Math.abs(wrap(b.headYaw - b.yaw)) > 50) b.yaw = turn(b.yaw, b.headYaw, 15); // le corps suit la tête
+        Bot mate = b.buddy != null && bots.containsValue(b.buddy) && dist(b, b.buddy) < 4 ? b.buddy : null;
+        if (near != null && (mate == null || random.nextDouble() < 0.6)) { // regarde le joueur proche
+            lookAt(b, near.getX(), near.getEyeLocation().getY(), near.getZ());
             if (near.getLocation().distanceSquared(new org.bukkit.Location(world, b.x, b.y, b.z)) < 16
                     && b.sneakToggles == 0 && random.nextDouble() < 0.004) b.sneakToggles = 4 + 2 * random.nextInt(3);
+        } else if (mate != null) { // face à celui avec qui il « discute »
+            lookAt(b, mate.x, mate.y + 1.62, mate.z);
+            if (random.nextDouble() < 0.003) b.sneakToggles = 2 + 2 * random.nextInt(2);
         } else if (tick >= b.nextGlance) { // jette un œil ailleurs de temps en temps
             b.headYaw = wrap(b.yaw + (random.nextFloat() - 0.5f) * 120);
             b.pitch = (random.nextFloat() - 0.4f) * 30;
             b.nextGlance = tick + 30 + random.nextInt(90);
         }
+        if (b.eating > 0) eat(b);
+        else if (random.nextDouble() < 0.0012) startEating(b);
+        else if (random.nextDouble() < 0.0015) hold(b, b.held == b.loadout.mainHand() ? b.loadout.alt() : b.loadout.mainHand());
         if (b.jump < 0 && random.nextDouble() < 0.0015) b.jump = 0;
         if (random.nextDouble() < 0.002) broadcast(b, () -> new WrapperPlayServerEntityAnimation(b.id,
                 WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_MAIN_ARM));
-        if (tick >= b.until) pickTarget(b);
+        if (tick >= b.until && b.eating == 0) pickTarget(b);
+    }
+
+    private void lookAt(Bot b, double x, double eyeY, double z) {
+        double dx = x - b.x, dz = z - b.z, dy = eyeY - (b.y + 1.62);
+        b.headYaw = turn(b.headYaw, Walker.yaw(dx, dz), 20);
+        b.pitch = turn(b.pitch, (float) -Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))), 12);
+        if (Math.abs(wrap(b.headYaw - b.yaw)) > 50) b.yaw = turn(b.yaw, b.headYaw, 15); // le corps suit la tête
+    }
+
+    private static double dist(Bot a, Bot b) {
+        return Math.hypot(a.x - b.x, a.z - b.z);
+    }
+
+    /** Fin de l'AFK : s'il a été sollicité entre-temps, il s'excuse souvent (« dsl j'étais afk »). */
+    private void endAfk(Bot b, boolean speak) {
+        if (!b.afk()) return;
+        b.afkUntil = 0;
+        b.fake.afk(false);
+        List<String> pinged = new ArrayList<>(b.pingedWhileAfk);
+        b.pingedWhileAfk.clear();
+        if (speak) plugin.afkBack(b.fake, pinged.isEmpty() ? null : pinged.get(random.nextInt(pinged.size())));
+    }
+
+    /** Un vrai joueur a sollicité un faux joueur AFK (message, mention, coup) : il le rattrapera à son retour. */
+    public void pinged(FakePlayer fake, String player) {
+        Bot b = bots.get(fake.name());
+        if (b != null && b.afk()) b.pingedWhileAfk.add(player);
+    }
+
+    /** Bot avec qui ce faux joueur discute au spawn (pour que ce soit lui qui réponde), ou null. */
+    public FakePlayer buddyOf(FakePlayer fake) {
+        Bot b = bots.get(fake.name());
+        return b != null && b.buddy != null && bots.containsValue(b.buddy) && dist(b, b.buddy) < 5 ? b.buddy.fake : null;
+    }
+
+    // Manger : nourriture en main, bras levé (main active) 1,6 s, bruits de mastication, rot à la fin.
+    private void startEating(Bot b) {
+        hold(b, b.loadout.food());
+        b.eating = 32;
+        broadcast(b, () -> new WrapperPlayServerEntityMetadata(b.id, List.of(new EntityData<>(8, EntityDataTypes.BYTE, (byte) 0x01))));
+    }
+
+    private void eat(Bot b) {
+        b.eating--;
+        org.bukkit.Location at = new org.bukkit.Location(world, b.x, b.y + 1.5, b.z);
+        if (b.eating % 4 == 0 && b.eating > 0) world.playSound(at, Sound.ENTITY_GENERIC_EAT, 0.5f, 0.8f + random.nextFloat() * 0.4f);
+        if (b.eating == 0) {
+            broadcast(b, () -> new WrapperPlayServerEntityMetadata(b.id, List.of(new EntityData<>(8, EntityDataTypes.BYTE, (byte) 0))));
+            world.playSound(at, Sound.ENTITY_PLAYER_BURP, 0.5f, 0.9f + random.nextFloat() * 0.2f);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> { if (bots.containsValue(b)) hold(b, b.loadout.mainHand()); },
+                    20 + random.nextInt(60));
+        }
+    }
+
+    /** Change l'objet en main (comme un changement d'emplacement dans la barre d'objets). */
+    private void hold(Bot b, ItemStack item) {
+        b.held = item;
+        ItemStack shown = item == null ? new ItemStack(org.bukkit.Material.AIR) : item;
+        broadcast(b, () -> new WrapperPlayServerEntityEquipment(b.id,
+                List.of(new Equipment(EquipmentSlot.MAIN_HAND, SpigotConversionUtil.fromBukkitItemStack(shown)))));
     }
 
     /** Un vrai joueur frappe le bot : animation et son de dégât, petit recul, il se tourne, parfois il parle. */
@@ -389,11 +516,22 @@ public final class SpawnBots {
         if (!bots.containsValue(b) || attacker == null || !attacker.isOnline() || attacker.getWorld() != world) return;
         double dx = b.x - attacker.getX(), dz = b.z - attacker.getZ(), len = Math.max(0.01, Math.hypot(dx, dz));
         if (len > 6) return; // hors de portée d'un vrai coup (client modifié)
-        broadcast(b, () -> new WrapperPlayServerHurtAnimation(b.id, Walker.yaw(-dx, -dz)));
-        world.playSound(new org.bukkit.Location(world, b.x, b.y, b.z), Sound.ENTITY_PLAYER_HURT, 1f, 0.9f + random.nextFloat() * 0.2f);
-        b.knockX = dx / len * 0.18;
-        b.knockZ = dz / len * 0.18;
-        b.knock = 4;
+        ConfigurationSection h = plugin.getConfig().getConfigurationSection("spawn-bots.hit");
+        if (h == null || h.getBoolean("pvp-protected", true)) {
+            // Spawn protégé : un vrai joueur frappé ne subit rien ; on envoie le même message que la protection.
+            String msg = h == null ? "" : h.getString("protected-message", "");
+            if (!msg.isEmpty()) attacker.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(msg));
+        } else {
+            broadcast(b, () -> new WrapperPlayServerHurtAnimation(b.id, Walker.yaw(-dx, -dz)));
+            world.playSound(new org.bukkit.Location(world, b.x, b.y, b.z), Sound.ENTITY_PLAYER_HURT, 1f, 0.9f + random.nextFloat() * 0.2f);
+            b.knockX = dx / len * 0.18;
+            b.knockZ = dz / len * 0.18;
+            b.knock = 4;
+        }
+        if (b.afk()) { // AFK : ne réagit pas, mais s'en souviendra
+            b.pingedWhileAfk.add(attacker.getName());
+            return;
+        }
         b.headYaw = b.yaw = Walker.yaw(-dx, -dz);
         if (b.state == State.WALKING && random.nextDouble() < 0.5) b.state = State.IDLE; // s'arrête pour voir
         b.until = Math.max(b.until, tick + 60);
@@ -455,18 +593,18 @@ public final class SpawnBots {
             data.add(new EntityData<>(6, EntityDataTypes.ENTITY_POSE, EntityPose.CROUCHING));
         }
         send(p, new WrapperPlayServerEntityMetadata(b.id, data));
-        List<Equipment> eq = equipment(b.loadout);
+        List<Equipment> eq = equipment(b.loadout, b.held);
         if (!eq.isEmpty()) send(p, new WrapperPlayServerEntityEquipment(b.id, eq));
         send(p, new WrapperPlayServerEntityHeadLook(b.id, b.headYaw));
     }
 
-    private static List<Equipment> equipment(Loadout l) {
+    private static List<Equipment> equipment(Loadout l, ItemStack held) {
         List<Equipment> out = new ArrayList<>();
         add(out, EquipmentSlot.HELMET, l.helmet());
         add(out, EquipmentSlot.CHEST_PLATE, l.chest());
         add(out, EquipmentSlot.LEGGINGS, l.legs());
         add(out, EquipmentSlot.BOOTS, l.boots());
-        add(out, EquipmentSlot.MAIN_HAND, l.mainHand());
+        add(out, EquipmentSlot.MAIN_HAND, held);
         add(out, EquipmentSlot.OFF_HAND, l.offHand());
         return out;
     }
