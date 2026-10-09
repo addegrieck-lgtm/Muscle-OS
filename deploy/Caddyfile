@@ -1,5 +1,5 @@
-# HTTPS automatique (Let's Encrypt). Mettre Cloudflare (gratuit) devant pour le CDN.
-vaeloria.fr, www.vaeloria.fr {
+# HTTPS automatique (Let's Encrypt). DOMAIN vient de deploy/.env (ex. vaeloria.fr). Mettre Cloudflare (gratuit) devant pour le CDN.
+{$DOMAIN}, www.{$DOMAIN} {
 	encode zstd gzip
 	@admin path /admin /admin/*
 	handle @admin {
@@ -10,7 +10,7 @@ vaeloria.fr, www.vaeloria.fr {
 	}
 }
 
-api.vaeloria.fr {
+api.{$DOMAIN} {
 	encode zstd gzip
 	reverse_proxy api:4000
 }

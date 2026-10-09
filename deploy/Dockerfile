@@ -18,7 +18,7 @@ COPY . .
 ARG API_URL=http://api:4000
 ARG NEXT_PUBLIC_SITE_URL=https://vaeloria.fr
 RUN pnpm --filter @vaeloria/api build \
- && API_URL=$API_URL pnpm --filter @vaeloria/web build \
+ && API_URL=$API_URL NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL pnpm --filter @vaeloria/web build \
  && pnpm --filter @vaeloria/admin build \
  && pnpm --filter @vaeloria/api deploy --prod --legacy /out/api
 
@@ -47,6 +47,7 @@ WORKDIR /app
 ENV NODE_ENV=production PORT=3001 HOSTNAME=0.0.0.0
 COPY --from=build /repo/apps/admin/.next/standalone ./
 COPY --from=build /repo/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=build /repo/apps/admin/public ./apps/admin/public
 USER node
 EXPOSE 3001
 CMD ["node", "apps/admin/server.js"]

@@ -1,0 +1,12 @@
+# Contexte de build Docker : uniquement les sources (les dépendances et builds sont refaits dans l'image).
+**/node_modules
+**/.next
+**/dist
+**/out
+**/build
+**/.gradle
+.git
+deploy/.env
+**/.env
+**/.env.local
+plugins/*/build

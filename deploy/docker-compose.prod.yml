@@ -1,5 +1,5 @@
 # Phase 1 : un VPS (2 vCPU / 4 Go suffisent), tout sur la même machine.
-# Secrets dans deploy/.env (jamais commité). Voir docs/SCALABILITY.md.
+# Secrets et domaine dans deploy/.env (jamais commité), créé par deploy/install.sh. Voir docs/DEPLOIEMENT_VPS.md.
 services:
   postgres:
     image: postgres:16-alpine
@@ -18,15 +18,17 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://vaeloria:${POSTGRES_PASSWORD}@postgres:5432/vaeloria
-      CORS_ORIGINS: https://vaeloria.fr
+      CORS_ORIGINS: https://${DOMAIN:-vaeloria.fr}
       BRIDGE_KEYS: ${BRIDGE_KEYS:?}
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
       MC_PING_HOST: ${MC_PING_HOST:-play.vaeloria.fr}
+      MC_PING_PORT: ${MC_PING_PORT:-25565}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
       DISCORD_ALERTS_WEBHOOK_URL: ${DISCORD_ALERTS_WEBHOOK_URL:-}
       LAG_ALERT_MSPT: ${LAG_ALERT_MSPT:-40}
       LAG_ALERT_MINUTES: ${LAG_ALERT_MINUTES:-3}
-      SITE_URL: https://vaeloria.fr
+      SITE_URL: https://${DOMAIN:-vaeloria.fr}
+      PUBLIC_API_URL: https://api.${DOMAIN:-vaeloria.fr}
       WEB_INTERNAL_TOKEN: ${WEB_INTERNAL_TOKEN:?}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
@@ -34,12 +36,16 @@ services:
       ADMIN_SETUP_CODE: ${ADMIN_SETUP_CODE:-}
 
   web:
-    build: { context: .., dockerfile: deploy/Dockerfile, target: web }
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: web
+      args: { NEXT_PUBLIC_SITE_URL: "https://${DOMAIN:-vaeloria.fr}" }
     restart: unless-stopped
     depends_on: [api]
     environment:
       API_URL: http://api:4000
-      NEXT_PUBLIC_SITE_URL: https://vaeloria.fr
+      NEXT_PUBLIC_SITE_URL: https://${DOMAIN:-vaeloria.fr}
       WEB_INTERNAL_TOKEN: ${WEB_INTERNAL_TOKEN:?}
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
 
@@ -50,7 +56,7 @@ services:
     environment:
       API_URL: http://api:4000
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?}
-      SITE_URL: https://vaeloria.fr
+      SITE_URL: https://${DOMAIN:-vaeloria.fr}
       # Accès normal : compte du site avec le rôle admin/owner. Basic Auth facultatif (secours).
       ADMIN_USER: ${ADMIN_USER:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
@@ -59,6 +65,8 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:-vaeloria.fr}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
