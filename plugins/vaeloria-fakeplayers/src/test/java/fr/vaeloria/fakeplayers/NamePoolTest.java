@@ -38,6 +38,7 @@ class NamePoolTest {
             assertNotNull(name);
             assertTrue(NamePool.isValid(name), name);
             assertTrue(taken.add(name.toLowerCase()), "doublon : " + name);
+            assertFalse(NamePool.repeats(name), "mot répété : " + name);
         }
     }
 
@@ -46,5 +47,13 @@ class NamePoolTest {
         assertEquals(FakePlayer.offlineUuid("Steve"), FakePlayer.offlineUuid("Steve"));
         assertNotEquals(FakePlayer.offlineUuid("Steve"), FakePlayer.offlineUuid("Alex"));
         assertEquals(3, FakePlayer.offlineUuid("Steve").version());
+    }
+
+    @Test
+    void detectsRepeatedWords() {
+        assertTrue(NamePool.repeats("StormStorm"));
+        assertTrue(NamePool.repeats("patate_patate"));
+        assertFalse(NamePool.repeats("ShadowKnight"));
+        assertFalse(NamePool.repeats("Lucas59"));
     }
 }

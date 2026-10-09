@@ -30,10 +30,12 @@ public final class FakePlayerManager {
     private TabList tab = TabList.NONE;
     private Bodies bodies;
     private final SkinFetcher skins;
+    private final SkinPool pool;
 
     FakePlayerManager(FakePlayersPlugin plugin) {
         this.plugin = plugin;
         this.skins = new SkinFetcher(plugin.getLogger());
+        this.pool = new SkinPool(new java.io.File(plugin.getDataFolder(), "skin-pool.yml"), plugin.getLogger());
     }
 
     void services(TabList tab, Bodies bodies) {
@@ -76,6 +78,13 @@ public final class FakePlayerManager {
         if (!NamePool.isValid(name) || takenNames().contains(name.toLowerCase(Locale.ROOT))) return null;
         FakePlayer fake = new FakePlayer(name, auto, PingModel.base(name));
         fake.listed(fakes.size() < tabSlots());
+        // Skin de la réserve tout de suite : l'entrée TAB (et le corps au spawn) apparaît directement avec.
+        if (!skinSource().equals("mojang")) {
+            Set<String> worn = new HashSet<>();
+            for (FakePlayer f : fakes.values()) if (f.skin() != null) worn.add(f.skin().signature());
+            FakePlayer.Skin s = pool.pick(name, worn);
+            if (s != null) fake.skin(s);
+        }
         fakes.put(name.toLowerCase(Locale.ROOT), fake);
         refreshSnapshot();
         if (bodyAt != null && bodies != null) bodies.spawn(fake, bodyAt);
@@ -166,11 +175,50 @@ public final class FakePlayerManager {
         if (message != null) Bukkit.broadcast(message);
     }
 
+    /** pool (réserve MineSkin, par défaut), mojang (compte qui porte le pseudo), both (compte s'il existe, sinon réserve). */
+    private String skinSource() {
+        return plugin.getConfig().getString("skins.source", "pool").toLowerCase(Locale.ROOT);
+    }
+
+    /** Complète la réserve de skins en arrière-plan (appelé au démarrage puis toutes les heures). */
+    void fillSkinPool() {
+        if (skinSource().equals("mojang")) return;
+        int target = plugin.getConfig().getInt("skins.pool-size", 400);
+        String key = plugin.getConfig().getString("skins.mineskin-api-key", "");
+        if (pool.size() < target) Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            pool.fill(target, key);
+            Bukkit.getScheduler().runTask(plugin, this::assignMissingSkins);
+        });
+    }
+
+    /** Faux joueurs connectés avant que la réserve soit prête : ils reçoivent leur skin maintenant. */
+    private void assignMissingSkins() {
+        Set<String> worn = new HashSet<>();
+        for (FakePlayer f : fakes.values()) if (f.skin() != null) worn.add(f.skin().signature());
+        for (FakePlayer fake : all()) {
+            if (fake.skin() != null) continue;
+            FakePlayer.Skin s = pool.pick(fake.name(), worn);
+            if (s == null) return;
+            worn.add(s.signature());
+            fake.skin(s);
+            tab.hide(List.of(fake), Bukkit.getOnlinePlayers());
+            tab.show(List.of(fake), Bukkit.getOnlinePlayers());
+            onSkin.accept(fake);
+        }
+    }
+
+    int skinPoolSize() { return pool.size(); }
+
     private void fetchSkin(FakePlayer fake) {
         if (!plugin.getConfig().getBoolean("skins.fetch", true)) return;
+        String source = skinSource();
+        if (source.equals("pool") && fake.skin() != null) return; // skin de la réserve déjà donné
+        if (source.equals("pool") && plugin.getConfig().getStringList("skins.fallback-names").isEmpty()) return;
         List<String> donors = new ArrayList<>(plugin.getConfig().getStringList("skins.fallback-names"));
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            FakePlayer.Skin skin = skins.fetch(fake.name());
+            // Le compte qui porte ce pseudo appartient à une vraie personne : seulement si on l'a demandé (mojang/both).
+            FakePlayer.Skin skin = source.equals("pool") ? null : skins.fetch(fake.name());
+            if (skin == null && source.equals("both") && fake.skin() != null) return; // garde celui de la réserve
             while (skin == null && !donors.isEmpty()) {
                 skin = skins.fetch(donors.remove(ThreadLocalRandom.current().nextInt(donors.size())));
             }

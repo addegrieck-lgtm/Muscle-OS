@@ -33,9 +33,18 @@ tab:
   max-listed: 0
 
 skins:
-  # Récupère le skin Mojang du pseudo (requête asynchrone).
   fetch: true
-  # Si le pseudo n'a pas de compte Mojang, emprunte le skin d'un de ces comptes (sinon Steve/Alex).
+  # pool  : skins variés de la galerie publique MineSkin (envoyés par des joueurs, liés à aucun vrai compte),
+  #         toujours le même pour un pseudo, jamais deux fois le même parmi les connectés. Par défaut.
+  # mojang: skin du compte Minecraft qui porte le même pseudo (c'est celui d'une vraie personne !).
+  # both  : compte Mojang s'il existe, sinon réserve.
+  source: pool
+  # Taille de la réserve (skin-pool.yml), constituée petit à petit en arrière-plan au premier démarrage
+  # (~400 ms par skin, soit quelques minutes). Prévois au moins 2 fois ton nombre max de faux joueurs.
+  pool-size: 400
+  # Clé d'API MineSkin facultative (mineskin.org) si la galerie publique limite les requêtes.
+  mineskin-api-key: ""
+  # Comptes dont emprunter le skin si la réserve est vide (facultatif).
   fallback-names: []
 
 server-list:

@@ -109,6 +109,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
             manager.listeners(spawnBots::forget, spawnBots::respawn);
         }
 
+        manager.fillSkinPool();
         restore();
         ticker = Bukkit.getScheduler().runTaskTimer(this, this::tick, 20L, 20L);
         getLogger().info("VæloriaFakePlayers actif — " + manager.count() + " faux joueur(s) restauré(s).");
@@ -225,6 +226,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         ambient();
         chat.tick();
         if (seconds % 600 == 0) chat.save(); // apprentissage sauvegardé toutes les 10 min
+        if (seconds % 3600 == 0) manager.fillSkinPool();
     }
 
     /**

@@ -73,7 +73,19 @@ public final class NamePool {
             case 8 -> random.nextInt(4) == 0 ? "xX" + pick(WORDS) + "Xx" : "The" + pick(WORDS) + digits();
             default -> pick(WORDS) + digits();                                          // Creeper77
         };
+        if (repeats(name)) return generate(); // « StormStorm », « Wolf_Wolf » : personne ne s'appelle comme ça
         return name.length() > 16 ? name.substring(0, 16) : name;
+    }
+
+    /** Même mot répété (StormStorm, patate_patate, LoupLoup). */
+    static boolean repeats(String name) {
+        String n = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
+        for (int len = 3; len * 2 <= n.length(); len++) {
+            for (int i = 0; i + 2 * len <= n.length(); i++) {
+                if (n.regionMatches(i, n, i + len, len)) return true;
+            }
+        }
+        return false;
     }
 
     private String pick(String[] values) {
