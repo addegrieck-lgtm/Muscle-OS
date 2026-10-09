@@ -16,6 +16,7 @@ Le jar se copie dans `plugins/` du serveur. Les réglages et la table des livres
 | **Boost à l'émeraude** | **Accroupi + clic droit** sur un bibliothécaire, émeraudes en main : le joueur paie, la **chance** du villageois monte de 1 et son livre est relancé. Plus il est boosté, plus les bons livres sortent. Le coût augmente à chaque boost, jusqu'à un plafond. |
 | **Capture à l'œuf** | Un **Œuf de capture** lancé sur un villageois le transforme en objet. Clic droit sur un bloc pour le relâcher **dans ses claims** (ou en zone libre) : partout où le joueur peut construire, jamais dans le claim d'une autre faction. |
 | **Pas de livre recyclé** | Un villageois relâché repart au **niveau 1, sans livre**, et ne proposera **plus jamais** les livres qu'il avait : il faut le booster pour qu'il en propose un nouveau. |
+| **Livre à durée limitée** | Un livre **disparaît** après ses ventes (Protection IV : 3, légendaire : 1, commun : 12) ou au bout de **48 h** réelles, selon ce qui arrive en premier. Il n'y a pas de réapprovisionnement. Le villageois est alors **épuisé** : plus de livre ni de boost. Le joueur doit le **capturer à l'œuf, le relâcher, puis le booster**. Le livre disparu lui est interdit à vie. Dès qu'un livre a été acheté une fois, on ne peut plus booster le villageois : impossible de relancer son compteur. |
 | **Pupitre verrouillé** | Un bibliothécaire qui propose un livre garde son métier : casser son pupitre ne relance plus le livre gratuitement. Pour changer de livre, il faut payer un boost. |
 
 ## Commandes
@@ -71,7 +72,7 @@ On boost un villageois neuf jusqu'à obtenir le livre voulu, puis on l'achète :
 | Tranchant V | 47 | 265 / 194 / 586 | 40–48 | ~77 000 $ |
 | Raccommodage | 99 | 579 / 404 / 1 292 | 56–64 | ~160 000 $ |
 
-Avec les revenus indiqués sur le site (6 000 à 12 000 $/h en milieu de partie), **un Protection IV représente 4 à 8 h de jeu**. Une armure complète en Protection IV demande 4 livres, soit l'équivalent d'un générateur de vache ou de blaze (180 000 à 200 000 $). Une fois un bibliothécaire Protection IV obtenu, il revend son livre (3 par réapprovisionnement, comme en vanilla) au seul prix du livre. Ce villageois devient donc un bien précieux à protéger des raids, et la capture à l'œuf ne permet pas de le déplacer sans perdre son livre.
+Avec les revenus indiqués sur le site (6 000 à 12 000 $/h en milieu de partie), **un Protection IV représente 4 à 8 h de jeu**. Une armure complète en Protection IV demande 4 livres, soit l'équivalent d'un générateur de vache ou de blaze (180 000 à 200 000 $). Un bibliothécaire Protection IV ne vend que **3 exemplaires en 48 h au plus**, puis son livre disparaît. Il faut alors le capturer (œuf : 24 émeraudes), le relâcher et le booster de nouveau, et il ne reproposera plus jamais Protection IV. Pour en vendre d'autres, il faut un autre villageois. Compter environ **100 émeraudes par livre Protection IV** (~25 000 $) : boosts et œuf partagés sur 3 exemplaires, plus ~40 émeraudes d'achat. La capture à l'œuf ne permet pas non plus de déplacer un villageois sans perdre son livre.
 
 Pour rendre les livres plus ou moins accessibles, il suffit de modifier `config.yml` : `weight` (rareté), `price` (prix d'achat), `luck-factor` (effet du boost), `boost.cost-*` (prix du boost).
 
@@ -87,4 +88,4 @@ Pour rendre les livres plus ou moins accessibles, il suffit de modifier `config.
 
 ## Tests
 
-`gradle test` : tirage pondéré et effet de la chance (200 000 tirages), livres interdits, fourchettes de prix, validation de la table, coût des boosts, mémoire des livres interdits.
+`gradle test` : tirage pondéré et effet de la chance (200 000 tirages), livres interdits, fourchettes de prix, validation de la table, coût des boosts, mémoire des livres interdits, disparition des livres (délai, ventes, temps restant).

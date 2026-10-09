@@ -10,6 +10,10 @@ public final class Keys {
     public final NamespacedKey boosts;
     public final NamespacedKey forbidden;
     public final NamespacedKey needsBoost;
+    public final NamespacedKey exhausted;
+    public final NamespacedKey bookExpires;
+    public final NamespacedKey bookSales;
+    public final NamespacedKey bookLimit;
     // Sur les objets
     public final NamespacedKey captureEgg;
     public final NamespacedKey capturedProfession;
@@ -22,6 +26,10 @@ public final class Keys {
         boosts = new NamespacedKey(plugin, "boosts");
         forbidden = new NamespacedKey(plugin, "forbidden");
         needsBoost = new NamespacedKey(plugin, "needs_boost");
+        exhausted = new NamespacedKey(plugin, "exhausted");
+        bookExpires = new NamespacedKey(plugin, "book_expires");
+        bookSales = new NamespacedKey(plugin, "book_sales");
+        bookLimit = new NamespacedKey(plugin, "book_limit");
         captureEgg = new NamespacedKey(plugin, "capture_egg");
         capturedProfession = new NamespacedKey(plugin, "captured_profession");
         capturedType = new NamespacedKey(plugin, "captured_type");

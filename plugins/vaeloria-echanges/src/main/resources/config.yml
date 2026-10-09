@@ -17,8 +17,16 @@ require-book: true
 # gratuitement. Pour changer son livre : le booster (payant) ou le capturer et le relâcher.
 lock-librarians: true
 
+# ── Durée de vie d'un livre ─────────────────────────────────────────────────────────────────────────────
+# Un livre DISPARAÎT quand il a fait toutes ses ventes (« uses » dans la table, sans réapprovisionnement)
+# ou au bout de ce nombre d'heures réelles (serveur éteint compris), selon ce qui arrive en premier. 0 = pas de limite de temps.
+# Le villageois est alors ÉPUISÉ : plus de livre ni de boost. Il faut le capturer à l'œuf et le relâcher, puis le booster.
+# Le livre disparu lui est interdit à vie, comme ceux qu'il avait avant une capture.
+book-lifetime-hours: 48
+
 # ── Boost (accroupi + clic droit sur un bibliothécaire, émeraudes en main) ─────────────────────────────
 # Chaque boost relance le livre du villageois et augmente sa CHANCE de 1 (jusqu'à max-luck).
+# Plus de boost possible dès que son livre a été acheté une fois : il faudra attendre qu'il disparaisse.
 # Coût du n-ième boost : base + step × (n - 1), plafonné à max. Les boosts se cumulent par villageois.
 boost:
   cost-base: 2
@@ -62,7 +70,7 @@ capture:
 # ── Table des livres ───────────────────────────────────────────────────────────────────────────────────
 # enchant : identifiant Minecraft (protection, sharpness, efficiency, mending…), level : niveau,
 # tier : COMMUN / RARE / EPIQUE / LEGENDAIRE, weight : poids à chance 0, price : [min, max] émeraudes,
-# uses : achats possibles avant que l'offre ne s'épuise (le villageois la recharge à son poste, comme en vanilla).
+# uses : nombre total de ventes du livre avant qu'il disparaisse (pas de réapprovisionnement).
 # Poids totaux à chance 0 : commun 716, rare 230, épique 24, légendaire 3 (sur 973).
 # Simulation (docs/ECHANGES.md) : Protection IV demande en moyenne ~28 boosts ≈ 156 émeraudes, puis ~40 pour l'acheter.
 books:

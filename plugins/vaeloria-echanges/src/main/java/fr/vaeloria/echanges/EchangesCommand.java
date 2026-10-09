@@ -2,6 +2,7 @@ package fr.vaeloria.echanges;
 
 import fr.vaeloria.echanges.model.BookOffer;
 import fr.vaeloria.echanges.model.BookTable;
+import fr.vaeloria.echanges.model.Expiry;
 import fr.vaeloria.echanges.model.Tier;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -108,6 +109,15 @@ public final class EchangesCommand implements TabExecutor {
             Entity seen = p.getTargetEntity(6);
             if (seen instanceof Villager v && v.getProfession() == Villager.Profession.LIBRARIAN) {
                 Trades t = plugin.trades();
+                t.expireIfDue(v);
+                if (t.exhausted(v)) {
+                    plugin.msg(p, "&cCe bibliothécaire est épuisé : capture-le et relâche-le pour qu'il propose un nouveau livre.");
+                } else if (Trades.hasBook(v)) {
+                    int limit = t.salesLimit(v);
+                    long left = t.expiresAt(v) - System.currentTimeMillis();
+                    plugin.msg(p, "&fSon livre : &7" + (limit > 0 ? "encore &e" + Math.max(0, limit - t.sales(v)) + " vente(s)" : "ventes illimitées")
+                            + (t.expiresAt(v) > 0 ? "&7, disparaît dans &e" + Expiry.remaining(left) : "") + "&7.");
+                }
                 int luck = t.luck(v);
                 Set<String> forbidden = t.forbidden(v);
                 int next = Math.min(st.maxLuck(), luck + 1);

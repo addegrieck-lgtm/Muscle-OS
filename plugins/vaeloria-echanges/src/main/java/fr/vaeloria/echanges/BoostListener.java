@@ -1,6 +1,7 @@
 package fr.vaeloria.echanges;
 
 import fr.vaeloria.echanges.model.BookOffer;
+import fr.vaeloria.echanges.model.Expiry;
 import fr.vaeloria.echanges.model.Tier;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -40,6 +41,15 @@ public final class BoostListener implements Listener {
         }
         Settings s = plugin.settings();
         Trades trades = plugin.trades();
+        trades.expireIfDue(v);
+        if (trades.exhausted(v)) {
+            plugin.msg(p, "&cCe villageois est épuisé : capture-le et relâche-le pour qu'il propose de nouveau un livre.");
+            return;
+        }
+        if (trades.sales(v) > 0) {
+            plugin.msg(p, "&cSon livre a déjà été acheté : il ne peut plus être boosté avant que ce livre disparaisse.");
+            return;
+        }
         int boosts = trades.boosts(v);
         int luck = Math.min(s.maxLuck(), trades.luck(v) + 1);
         int cost = s.boostCost().next(boosts);
@@ -57,6 +67,7 @@ public final class BoostListener implements Listener {
 
         MerchantRecipe recipe = trades.roll(offer);
         Trades.setBook(v, recipe);
+        trades.startBook(v, offer.uses());
         boolean reset = s.resetOn().contains(offer.tier());
         trades.setBoostState(v, reset ? 0 : luck, reset ? 0 : boosts + 1);
 
@@ -69,6 +80,8 @@ public final class BoostListener implements Listener {
             plugin.msg(p, "&7Chance : &e" + luck + "/" + s.maxLuck() + " &7· prochain boost : &a"
                     + Emeralds.format(s.boostCost().next(boosts + 1)) + "&7.");
         }
+        plugin.msg(p, "&7Ce livre se vend &e" + offer.uses() + " fois" + (s.bookLifetimeHours() > 0
+                ? " &7pendant &e" + Expiry.remaining(trades.expiresAt(v) - System.currentTimeMillis()) : "") + "&7, puis disparaît.");
         boolean big = offer.tier() == Tier.EPIQUE || offer.tier() == Tier.LEGENDAIRE;
         p.playSound(v.getLocation(), big ? Sound.UI_TOAST_CHALLENGE_COMPLETE : Sound.ENTITY_VILLAGER_YES, 1f, 1f);
         v.getWorld().spawnParticle(big ? Particle.TOTEM_OF_UNDYING : Particle.HAPPY_VILLAGER, v.getLocation().add(0, 1.2, 0), big ? 40 : 12, 0.4, 0.6, 0.4);

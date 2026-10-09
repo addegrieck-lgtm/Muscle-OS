@@ -2,6 +2,7 @@ package fr.vaeloria.echanges;
 
 import fr.vaeloria.echanges.model.BookOffer;
 import fr.vaeloria.echanges.model.BookTable;
+import fr.vaeloria.echanges.model.Expiry;
 import fr.vaeloria.echanges.model.Forbidden;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -97,6 +98,59 @@ public final class Trades {
     public String forbiddenRaw(Villager v) { return v.getPersistentDataContainer().getOrDefault(keys().forbidden, PersistentDataType.STRING, ""); }
     public Set<String> forbidden(Villager v) { return Forbidden.parse(forbiddenRaw(v)); }
     public boolean needsBoost(Villager v) { return v.getPersistentDataContainer().has(keys().needsBoost); }
+
+    public boolean exhausted(Villager v) { return v.getPersistentDataContainer().has(keys().exhausted); }
+    public int sales(Villager v) { return v.getPersistentDataContainer().getOrDefault(keys().bookSales, PersistentDataType.INTEGER, 0); }
+    public int salesLimit(Villager v) { return v.getPersistentDataContainer().getOrDefault(keys().bookLimit, PersistentDataType.INTEGER, 0); }
+    public long expiresAt(Villager v) { return v.getPersistentDataContainer().getOrDefault(keys().bookExpires, PersistentDataType.LONG, 0L); }
+
+    /** Nouveau livre : son délai de vie et son compteur de ventes repartent de zéro. */
+    public void startBook(Villager v, int salesLimit) {
+        PersistentDataContainer pdc = v.getPersistentDataContainer();
+        long expires = Expiry.expiresAt(System.currentTimeMillis(), settings().bookLifetimeHours());
+        if (expires > 0) pdc.set(keys().bookExpires, PersistentDataType.LONG, expires);
+        else pdc.remove(keys().bookExpires);
+        pdc.set(keys().bookSales, PersistentDataType.INTEGER, 0);
+        pdc.set(keys().bookLimit, PersistentDataType.INTEGER, salesLimit);
+        pdc.remove(keys().exhausted);
+    }
+
+    /** Compte une vente du livre ; renvoie true si c'était la dernière. */
+    public boolean recordSale(Villager v) {
+        int sales = sales(v) + 1;
+        v.getPersistentDataContainer().set(keys().bookSales, PersistentDataType.INTEGER, sales);
+        return salesLimit(v) > 0 && sales >= salesLimit(v);
+    }
+
+    public boolean salesDone(Villager v) {
+        return salesLimit(v) > 0 && sales(v) >= salesLimit(v);
+    }
+
+    /**
+     * Fait disparaître le livre s'il a fait son temps ou toutes ses ventes. Le villageois est alors épuisé :
+     * plus de livre ni de boost tant qu'il n'a pas été capturé et relâché. Renvoie true si le livre vient de disparaître.
+     */
+    public boolean expireIfDue(Villager v) {
+        if (!hasBook(v) || v.isTrading()) return false;
+        PersistentDataContainer pdc = v.getPersistentDataContainer();
+        if (!pdc.has(keys().bookLimit)) {
+            // Livre antérieur à cette règle : son délai démarre maintenant.
+            for (MerchantRecipe r : v.getRecipes()) if (isBook(r)) startBook(v, r.getMaxUses());
+            return false;
+        }
+        if (!Expiry.due(System.currentTimeMillis(), expiresAt(v), sales(v), salesLimit(v))) return false;
+        // Le livre disparu rejoint les livres interdits : ce villageois ne le reproposera jamais.
+        pdc.set(keys().forbidden, PersistentDataType.STRING,
+                Forbidden.merge(forbiddenRaw(v), bookIds(v), settings().maxForbidden()));
+        List<MerchantRecipe> kept = new ArrayList<>();
+        for (MerchantRecipe r : v.getRecipes()) if (!isBook(r)) kept.add(r);
+        v.setRecipes(kept);
+        pdc.remove(keys().bookExpires);
+        pdc.remove(keys().bookSales);
+        pdc.remove(keys().bookLimit);
+        pdc.set(keys().exhausted, PersistentDataType.BYTE, (byte) 1);
+        return true;
+    }
 
     public void setBoostState(Villager v, int luck, int boosts) {
         PersistentDataContainer pdc = v.getPersistentDataContainer();
