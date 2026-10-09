@@ -34,15 +34,18 @@ Chaque grade hérite du précédent. À la connexion, tout joueur est dans `defa
 | Grade | Obtention | Avantages |
 |---|---|---|
 | Joueur | gratuit, à la connexion | `/f`, `/shop`, `/vendre`, `/hdv`, `/f fly` dans son territoire, spawn, 1 home, tpa, msg, mail, warps, `/pay`, `/kit joueur` (24 h) |
-| Guerrier | 15 points | 2 homes, `/kit guerrier`, `/workbench` |
-| Seigneur | 35 points | 3 homes, `/kit seigneur`, `/hat` |
-| Roi | 65 points | 4 homes, `/kit roi`, `/nick`, couleurs dans le chat |
-| VÆLORIAN | 100 points | 5 homes, `/kit vaelorian`, pseudo coloré, formats et RGB dans le chat |
+| Guerrier | 15 points | 2 homes, `/workbench`, `/kit guerrier` : full diamant, épée et outils en diamant |
+| Seigneur | 35 points | 3 homes, `/hat`, `/kit seigneur` : full diamant Protection II, épée Tranchant II, arc, 4 pommes d'or |
+| Roi | 65 points | 4 homes, `/nick`, couleurs dans le chat, `/kit roi` : full diamant Protection III, épée Tranchant III, arc Puissance III, 8 pommes d'or, 8 perles |
+| VÆLORIAN | 100 points | 5 homes, pseudo coloré, formats et RGB dans le chat, `/kit vaelorian` : full diamant Protection IV, épée Tranchant IV, arc Puissance IV, outils Efficacité V, 16 pommes d'or, 16 perles |
 
 Kit de départ (`depart`, ≈ 3 500 $) : donné une seule fois à la première connexion. Outils en pierre, Houe de moisson I, graines, nourriture, bois, torches, établi, four, coffres.
 Kit `joueur` (≈ 300 $ + outils en pierre) : toutes les 24 h.
 
-Aucun grade payant ne donne d'avantage de combat ni d'argent. `/back`, `/rtp`, `/ec` et les tp sont de toute façon bloqués en combat par VæloriaFactions.
+Kits des grades payants : une fois par semaine chacun ; un grade garde l'accès aux kits des grades inférieurs.
+Argent de départ : 1 000 $ (`starting-balance`).
+
+> Les kits payants donnent un équipement de combat. Les règles commerciales de Mojang interdisent de vendre un avantage de jeu : risque à assumer par le serveur.
 
 ## Staff
 
@@ -90,6 +93,8 @@ sethome-multiple:
 
 newbies:
   kit: depart
+
+starting-balance: 1000
 ```
 
 ## `plugins/EssentialsChat` (ou section `chat:` d'Essentials)

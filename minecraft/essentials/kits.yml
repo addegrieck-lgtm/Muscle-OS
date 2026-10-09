@@ -33,3 +33,60 @@ kits:
       - torch 16
       - wheat_seeds 16
       - bone_meal 8
+
+  # ── Grades payants : /kit <grade>, une fois par semaine ─────────────
+  # Chaque grade hérite des précédents : un VÆLORIAN peut aussi prendre les kits Guerrier, Seigneur et Roi.
+  guerrier:
+    delay: 604800
+    items:
+      - diamond_helmet 1
+      - diamond_chestplate 1
+      - diamond_leggings 1
+      - diamond_boots 1
+      - diamond_sword 1
+      - diamond_pickaxe 1
+      - diamond_axe 1
+      - diamond_shovel 1
+      - golden_carrot 32
+  seigneur:
+    delay: 604800
+    items:
+      - diamond_helmet 1 protection:2 unbreaking:1
+      - diamond_chestplate 1 protection:2 unbreaking:1
+      - diamond_leggings 1 protection:2 unbreaking:1
+      - diamond_boots 1 protection:2 unbreaking:1
+      - diamond_sword 1 sharpness:2 unbreaking:1
+      - diamond_pickaxe 1 efficiency:3 unbreaking:1
+      - bow 1 power:2
+      - arrow 64
+      - golden_apple 4
+      - golden_carrot 32
+  roi:
+    delay: 604800
+    items:
+      - diamond_helmet 1 protection:3 unbreaking:2
+      - diamond_chestplate 1 protection:3 unbreaking:2
+      - diamond_leggings 1 protection:3 unbreaking:2
+      - diamond_boots 1 protection:3 unbreaking:2 feather_falling:2
+      - diamond_sword 1 sharpness:3 unbreaking:2
+      - diamond_pickaxe 1 efficiency:4 unbreaking:2 fortune:1
+      - bow 1 power:3 unbreaking:2
+      - arrow 64
+      - golden_apple 8
+      - ender_pearl 8
+      - golden_carrot 64
+  vaelorian:
+    delay: 604800
+    items:
+      - diamond_helmet 1 protection:4 unbreaking:3
+      - diamond_chestplate 1 protection:4 unbreaking:3
+      - diamond_leggings 1 protection:4 unbreaking:3
+      - diamond_boots 1 protection:4 unbreaking:3 feather_falling:4
+      - diamond_sword 1 sharpness:4 unbreaking:3
+      - diamond_pickaxe 1 efficiency:5 unbreaking:3 fortune:2
+      - diamond_axe 1 efficiency:5 unbreaking:3
+      - bow 1 power:4 unbreaking:3
+      - arrow 64
+      - golden_apple 16
+      - ender_pearl 16
+      - golden_carrot 64
