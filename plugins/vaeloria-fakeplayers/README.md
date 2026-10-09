@@ -7,7 +7,8 @@ Plugin Paper de faux joueurs, inspiré de [Fake Player Plugin](https://hangar.pa
 | Entrée dans la liste **TAB** (pseudo, skin Mojang, ping qui varie) | paquets `PlayerInfoUpdate` | plugin [PacketEvents](https://modrinth.com/plugin/packetevents) 2.14+ |
 | Messages de **connexion / déconnexion** | `messages.join` / `messages.quit` | — |
 | **Chat** réaliste piloté par `phrases.yml` : ~2 900 phrases spontanées (modèles + vocabulaire faction/PvP), sujets selon l'heure, conversations entre faux joueurs, réponses selon l'intention (salut, KOTH, 1v1, vente, recrutement…), conversation suivie avec un vrai joueur, style propre à chaque faux joueur (abréviations, fautes, « mdr »), apprentissage des phrases qui font réagir (`brain.yml`) | `/fp chat`, `chat.*`, `phrases.yml` | — |
-| **Corps** dans le monde avec skin, qui regardent les joueurs proches | entité Mannequin, sans NMS | Minecraft **1.21.9+** |
+| **Bots visibles au spawn** : vrais joueurs Minecraft (skin, pseudo, équipement) qui marchent entre les lieux du spawn VÆLORIA, regardent les joueurs, font du shift, sautent, réagissent quand on les frappe et repartent par la porte | `spawn-bots.*`, `/fp spawnzone` | PacketEvents, toutes versions 1.21 |
+| **Corps** fixes placés à la main, avec skin, qui regardent les joueurs proches | entité Mannequin, sans NMS | Minecraft **1.21.9+** |
 | **Mode ambiance** : arrivées et départs un par un, vers une cible | `auto.*`, `/fp auto on` | — |
 | **Planning** : cible selon l'heure, mercredi, week-end, vacances scolaires (zones A/B/C), jours fériés | `schedule.*`, `/fp schedule` | — |
 | **Menu Multijoueur** : compteur (« 87/200 ») et pseudos au survol | `server-list.*` | voir l'avertissement ci-dessous |
@@ -48,6 +49,18 @@ Les **vacances 2026-2027** (zones A, B, C) sont préremplies d'après le calendr
 ([data.education.gouv.fr](https://data.education.gouv.fr/explore/dataset/fr-en-calendrier-scolaire/)). À compléter
 chaque année dans `schedule.school-holidays.periods` ; un avertissement s'affiche au démarrage quand il n'y a plus
 de période à venir. Les jours fériés français sont calculés automatiquement (Pâques comprise).
+
+## Bots du spawn
+
+Repère du schematic du spawn (`minecraft/spawn/generate.py`) : x/z = 0 au centre de l'arbre, sol à y = 0, nord = -Z.
+Lieux par défaut : place d'arrivée et point d'apparition (sud), marché (est), arène (ouest), allée circulaire,
+porte de guerre (nord), îlot de l'arbre par les pontons. Les bots suivent le terrain réel (marches, dalles, tapis),
+contournent les obstacles et ne s'approchent jamais du vide (sol vérifié jusqu'à 3 blocs sous eux).
+
+Mise en place : debout sur le point d'apparition (la lodestone), `/fp spawnzone here` ; `/fp spawnzone info` donne
+la part praticable de chaque lieu et la position de chaque bot. `spawn-bots.rotation` si le spawn a été collé tourné.
+Ce sont des entités envoyées par paquets : aucune n'existe côté serveur, les autres plugins ne les voient pas, et
+les coups ne font pas de dégâts (animation, son et recul seulement).
 
 ## Chat
 

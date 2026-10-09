@@ -25,6 +25,8 @@ public final class FakePlayerManager {
     private final Map<String, FakePlayer> fakes = new LinkedHashMap<>();
     /** Pseudos des faux joueurs présents (hors départs annoncés), lisible depuis n'importe quel thread. */
     private volatile List<String> namesSnapshot = List.of();
+    /** Bots du spawn : prévenus d'un départ (avant le retrait de l'entrée TAB) et d'un nouveau skin. */
+    private java.util.function.Consumer<FakePlayer> onRemove = f -> {}, onSkin = f -> {};
     private TabList tab = TabList.NONE;
     private Bodies bodies;
     private final SkinFetcher skins;
@@ -40,6 +42,11 @@ public final class FakePlayerManager {
     }
 
     Bodies bodies() { return bodies; }
+
+    void listeners(java.util.function.Consumer<FakePlayer> onRemove, java.util.function.Consumer<FakePlayer> onSkin) {
+        this.onRemove = onRemove;
+        this.onSkin = onSkin;
+    }
 
     public Collection<FakePlayer> all() { return List.copyOf(fakes.values()); }
 
@@ -83,6 +90,7 @@ public final class FakePlayerManager {
         if (fake == null) return false;
         refreshSnapshot();
         if (bodies != null) bodies.despawn(fake);
+        onRemove.accept(fake); // l'entité visible au spawn disparaît avant l'entrée TAB
         tab.hide(List.of(fake), Bukkit.getOnlinePlayers());
         if (!silent) broadcast("messages.quit", fake);
         return true;
@@ -178,6 +186,7 @@ public final class FakePlayerManager {
                 // Le client ne relit le skin qu'à l'ajout : on retire puis on ré-ajoute l'entrée.
                 tab.hide(List.of(fake), Bukkit.getOnlinePlayers());
                 tab.show(List.of(fake), Bukkit.getOnlinePlayers());
+                onSkin.accept(fake);
                 if (fake.hasBody() && bodies != null) bodies.spawn(fake, fake.bodyLocation());
             });
         });

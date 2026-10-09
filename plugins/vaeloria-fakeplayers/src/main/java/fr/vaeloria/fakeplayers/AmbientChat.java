@@ -307,6 +307,18 @@ final class AmbientChat implements Listener {
         }, typingTicks(line.text()) + 20L * random.nextInt(3));
     }
 
+    /** Un vrai joueur frappe le faux joueur au spawn : il réagit parfois (« ? », « arrête »…), et poursuit la conversation. */
+    void reactToHit(FakePlayer fake, String attacker) {
+        ConfigurationSection hit = cfg("hit");
+        if (hit == null || !present(fake) || random.nextDouble() >= hit.getDouble("chance", 0.5)) return;
+        ChatBrain.Line line = brain.event("hit", personality(fake), Map.of("player", attacker), random);
+        if (line == null) return;
+        engage(attacker, fake);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (present(fake)) say(fake, line, false);
+        }, 10 + typingTicks(line.text()));
+    }
+
     /**
      * Réponse à un message privé (null = pas de réponse). Les intentions de phrases.yml sont utilisées d'abord,
      * puis les réponses génériques « whisper ». Le faux joueur reste engagé dans la conversation.

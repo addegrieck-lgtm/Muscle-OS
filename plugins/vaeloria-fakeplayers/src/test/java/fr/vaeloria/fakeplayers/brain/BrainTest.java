@@ -51,7 +51,7 @@ class BrainTest {
         book.intents().forEach(i -> all.addAll(i.replies()));
         book.threads().forEach(t -> { all.addAll(t.ask()); all.addAll(t.answers()); all.addAll(t.followUps()); });
         for (String key : List.of("join", "leave", "leave-night", "leave-meal", "greet-real", "welcome-new", "death",
-                "named", "continue", "whisper")) {
+                "named", "continue", "whisper", "hit")) {
             assertFalse(book.event(key).isEmpty(), "événement vide : " + key);
             all.addAll(book.event(key));
         }

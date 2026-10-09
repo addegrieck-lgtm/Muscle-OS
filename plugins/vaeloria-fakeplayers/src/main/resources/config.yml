@@ -184,6 +184,11 @@ chat:
     chance: 0.1
     delay-seconds: {min: 2, max: 6}
 
+  # Quand un vrai joueur frappe un bot du spawn : parfois « ? », « arrête »… (phrases.yml → events.hit).
+  hit:
+    enabled: true
+    chance: 0.5
+
   # Réponses aux messages des VRAIS joueurs, selon l'intention reconnue (phrases.yml → intents).
   replies:
     enabled: true
@@ -198,6 +203,46 @@ chat:
     # Une fois qu'un faux joueur a parlé avec un vrai joueur, il poursuit la conversation pendant N secondes.
     engage-seconds: 90
     engaged-chance: 0.6
+
+# Faux joueurs VISIBLES au spawn : de vrais joueurs Minecraft envoyés par paquets (PacketEvents), avec skin, pseudo
+# et équipement, qui marchent entre les lieux du spawn, regardent les joueurs, font du shift, sautent, réagissent
+# quand on les frappe et repartent par la porte. Toutes versions 1.21. Les autres plugins ne les voient pas.
+# Repère = celui du schematic du spawn VÆLORIA (x/z = 0 au centre de l'arbre, sol à y = 0, nord = -Z).
+# Pour le placer : tiens-toi sur le point d'apparition (la lodestone) et tape /fp spawnzone here, puis
+# /fp spawnzone info pour vérifier que chaque lieu est praticable.
+spawn-bots:
+  enabled: true
+  world: ""            # "" = monde principal
+  # Rotation du collage (0, 90, 180, 270, sens horaire vu du dessus) si le spawn a été collé tourné.
+  rotation: 0
+  # Ancre (bloc de sol au centre de l'arbre). Absente = déduite du point d'apparition du monde (lodestone).
+  # anchor: {x: 0, y: 64, z: 0}
+  # Part des faux joueurs « auto » présents au spawn, entre min et max (≈ 2 la nuit, 10 le soir).
+  share: 0.08
+  min: 2
+  max: 10
+  # Délai entre deux arrivées au spawn.
+  arrival-delay-seconds: {min: 8, max: 48}
+  # Chance d'arriver par la porte (retour de warzone) plutôt qu'au point d'apparition.
+  arrive-by-exit-chance: 0.3
+  spawn-point: {x: 0, z: 62, radius: 1.5}
+  exit: {x: 0, z: -56, radius: 2.5}
+  # Lieux fréquentés (repère du spawn), rayon et poids.
+  points:
+    place-arrivee: {x: 0, z: 46, radius: 12, weight: 5}
+    pres-du-blason: {x: 0, z: 60, radius: 5, weight: 2}
+    marche: {x: 57, z: 0, radius: 9, weight: 3}
+    entree-marche: {x: 40, z: 0, radius: 2, weight: 1}
+    arene: {x: -57, z: 0, radius: 7, weight: 2}
+    entree-arene: {x: -40, z: 0, radius: 2, weight: 1}
+    allee-sud: {x: 0, z: 32, radius: 2.5, weight: 1}
+    allee-est: {x: 32, z: 0, radius: 2.5, weight: 1}
+    allee-ouest: {x: -32, z: 0, radius: 2.5, weight: 1}
+    allee-nord: {x: 0, z: -32, radius: 2.5, weight: 1}
+    allee-nord-est: {x: 22.6, z: -22.6, radius: 2, weight: 1}
+    allee-sud-ouest: {x: -22.6, z: 22.6, radius: 2, weight: 1}
+    porte-de-guerre: {x: 0, z: -50, radius: 4, weight: 2}
+    ilot-arbre: {x: 0, z: -7, radius: 2.5, weight: 1}
 
 # Commandes visant un faux joueur. Sans ce module, /msg Pseudo, /tpa Pseudo… répondent « joueur introuvable ».
 # La commande est interceptée et reçoit une réponse crédible. Formats en MiniMessage :

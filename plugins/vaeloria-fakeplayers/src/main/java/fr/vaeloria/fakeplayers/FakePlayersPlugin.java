@@ -50,6 +50,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     private long nextLeaveAt;
     private AmbientChat chat;
     private FakeInteractions interactions;
+    private fr.vaeloria.fakeplayers.spawn.SpawnBots spawnBots;
     /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
     private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
 
@@ -101,6 +102,13 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         getCommand("fakeplayers").setExecutor(command);
         getCommand("fakeplayers").setTabCompleter(command);
 
+        // Bots visibles au spawn : entités « joueur » par paquets, il faut PacketEvents et les entrées TAB.
+        if (tab != TabList.NONE) {
+            spawnBots = new fr.vaeloria.fakeplayers.spawn.SpawnBots(this);
+            spawnBots.start();
+            manager.listeners(spawnBots::forget, spawnBots::respawn);
+        }
+
         restore();
         ticker = Bukkit.getScheduler().runTaskTimer(this, this::tick, 20L, 20L);
         getLogger().info("VæloriaFakePlayers actif — " + manager.count() + " faux joueur(s) restauré(s).");
@@ -109,6 +117,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (ticker != null) ticker.cancel();
+        if (spawnBots != null) spawnBots.stop();
         if (chat != null) chat.save();
         save();
         manager.removeAll(true);
@@ -126,6 +135,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         loadSchedule();
         if (interactions != null) interactions.reloadRules();
         if (chat != null) chat.load();
+        if (spawnBots != null) spawnBots.reload();
     }
 
     Schedule schedule() { return schedule; }
@@ -283,6 +293,14 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     }
 
     AmbientChat chat() { return chat; }
+
+    /** Bots du spawn (null sans PacketEvents). */
+    public fr.vaeloria.fakeplayers.spawn.SpawnBots spawnBots() { return spawnBots; }
+
+    /** Un vrai joueur a frappé le corps d'un faux joueur au spawn : réaction dans le chat (parfois). */
+    public void reactToHit(FakePlayer fake, String attacker) {
+        if (chat != null) chat.reactToHit(fake, attacker);
+    }
 
     /** Départ d'un faux joueur, précédé parfois d'un « a+ » quelques secondes avant. */
     void depart(FakePlayer fake) {

@@ -17,7 +17,7 @@ import java.util.Locale;
 
 /** /fakeplayers (alias /fp) — gestion des faux joueurs. Permission : vaeloria.fakeplayers.admin. */
 final class FakeCommand implements TabExecutor {
-    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "schedule", "reload");
+    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "schedule", "spawnzone", "reload");
     private static final int MAX_BULK = 100;
 
     private final FakePlayersPlugin plugin;
@@ -108,6 +108,27 @@ final class FakeCommand implements TabExecutor {
             case "schedule" -> {
                 return schedule(sender);
             }
+            case "spawnzone" -> {
+                // /fp spawnzone here|info
+                var bots = plugin.spawnBots();
+                if (bots == null) return error(sender, "Bots du spawn indisponibles : PacketEvents et tab.enabled requis.");
+                if (args.length >= 2 && args[1].equalsIgnoreCase("here")) {
+                    if (!(sender instanceof Player player)) return error(sender, "Commande réservée aux joueurs.");
+                    int rotation = plugin.getConfig().getInt("spawn-bots.rotation", 0);
+                    var l = player.getLocation();
+                    double[] a = fr.vaeloria.fakeplayers.spawn.SpawnZone.anchorFromSpawnPoint(l.getX(), l.getY(), l.getZ(), rotation,
+                            plugin.getConfig().getDouble("spawn-bots.spawn-point.z", 62));
+                    plugin.getConfig().set("spawn-bots.world", player.getWorld().getName());
+                    plugin.getConfig().set("spawn-bots.anchor.x", a[0]);
+                    plugin.getConfig().set("spawn-bots.anchor.y", a[1]);
+                    plugin.getConfig().set("spawn-bots.anchor.z", a[2]);
+                    plugin.saveConfig();
+                    bots.reload();
+                    ok(sender, "Spawn placé depuis le point d'apparition : centre de l'arbre en " + (int) a[0] + " " + (int) a[1] + " " + (int) a[2] + ".");
+                }
+                for (String line : bots.describe()) sender.sendMessage(Component.text(line, NamedTextColor.GRAY));
+                return true;
+            }
             case "reload" -> {
                 plugin.reload();
                 return ok(sender, "Configuration rechargée.");
@@ -134,6 +155,7 @@ final class FakeCommand implements TabExecutor {
                 case "auto" -> filter(List.of("on", "off"), args[1]);
                 case "add" -> filter(List.of("1", "5", "10", "20"), args[1]);
                 case "schedule" -> List.of();
+                case "spawnzone" -> filter(List.of("here", "info"), args[1]);
                 case "spawn" -> filter(List.of("body"), args[1]);
                 default -> List.of();
             };
@@ -197,6 +219,7 @@ final class FakeCommand implements TabExecutor {
                 "tphere <pseudo> — place son corps à ta position",
                 "auto <on|off> — mode ambiance (arrivées/départs automatiques)",
                 "schedule — planning : cible actuelle et prévision des prochaines heures",
+                "spawnzone here|info — place les bots du spawn (debout sur le point d'apparition) / vérifie",
                 "reload — recharge config.yml")) {
             sender.sendMessage(Component.text("/" + label + " " + line, NamedTextColor.GRAY));
         }
