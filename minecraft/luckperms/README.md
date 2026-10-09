@@ -34,10 +34,10 @@ Chaque grade hérite du précédent. À la connexion, tout joueur est dans `defa
 | Grade | Obtention | Avantages |
 |---|---|---|
 | Joueur | gratuit, à la connexion | `/f`, `/shop`, `/vendre`, `/hdv`, `/f fly` dans son territoire, spawn, 1 home, tpa, msg, mail, warps, `/pay`, `/kit joueur` (24 h) |
-| Guerrier | 15 points | 2 homes, `/workbench`, `/kit guerrier` : full diamant, épée et outils en diamant |
-| Seigneur | 35 points | 3 homes, `/hat`, `/kit seigneur` : full diamant Protection II, épée Tranchant II, arc, 4 pommes d'or |
-| Roi | 65 points | 4 homes, `/nick`, couleurs dans le chat, `/kit roi` : full diamant Protection III, épée Tranchant III, arc Puissance III, 8 pommes d'or, 8 perles |
-| VÆLORIAN | 100 points | 5 homes, pseudo coloré, formats et RGB dans le chat, `/kit vaelorian` : full diamant Protection IV, épée Tranchant IV, arc Puissance IV, outils Efficacité V, 16 pommes d'or, 16 perles |
+| Guerrier | 15 points | 2 homes, `/workbench`, `/kit guerrier` : full cotte de mailles, épée et pioche en fer |
+| Seigneur | 35 points | 3 homes, `/hat`, `/kit seigneur` : full fer, épée, pioche et hache en fer, arc, 1 pomme d'or |
+| Roi | 65 points | 4 homes, `/nick`, couleurs dans le chat, `/kit roi` : casque et bottes en diamant, plastron et jambières en fer, épée en diamant, arc, 2 pommes d'or |
+| VÆLORIAN | 100 points | 5 homes, pseudo coloré, formats et RGB dans le chat, `/kit vaelorian` : full diamant sans enchantement, épée, pioche et hache en diamant, arc, 4 pommes d'or |
 
 Kit de départ (`depart`, ≈ 3 500 $) : donné une seule fois à la première connexion. Outils en pierre, Houe de moisson I, graines, nourriture, bois, torches, établi, four, coffres.
 Kit `joueur` (≈ 300 $ + outils en pierre) : toutes les 24 h.
