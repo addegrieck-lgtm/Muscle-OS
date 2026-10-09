@@ -51,3 +51,19 @@ Un `/setwarp arene` sur la promenade, devant l'entrée, permet aux joueurs de ve
 python3 generate.py              # ponton de 40 blocs
 python3 generate.py --ponton 60  # autre distance avec le spawn ; arene.json donne les nouveaux décalages
 ```
+
+## Affiche « Comment parier »
+
+![Affiche des paris](affiche-paris-8x4.png)
+
+C'est une affiche paysage à poser devant l'entrée de l'arène. Elle explique en 3 étapes l'ouverture des paris, les commandes `/pari rouge|bleu <mise>` et le calcul des gains, avec les règles de remboursement.
+
+| Fichier | Taille | Usage |
+|---|---|---|
+| `affiche-paris-8x4.png` | 1024 × 512 | mur de 8 × 4 cartes (recommandé) |
+| `affiche-paris-6x3.png` | 768 × 384 | mur de 6 × 3 cartes |
+| `affiche-paris.png` | 2048 × 1024 | impression, écran, Discord |
+
+En jeu, le plus simple est de passer par un plugin d'images sur cartes. Avec ImageOnMap, on met l'image en ligne puis on lance `/tomap <url> resize 8 4`. Ensuite, il faut poser les cartes dans un mur de cadres de 8 × 4. Les cadres invisibles (`glow_item_frame` ou `item_frame` avec `Invisible:1b`) donnent un rendu plus propre.
+
+Les textes reprennent les réglages par défaut de `config.yml` : 30 s de paris et une mise de 100 à 100 000. Si tu changes ces valeurs, regénère l'affiche avec `python3 affiche-paris.py --duree 45 --min 50 --max 50000`.
