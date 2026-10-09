@@ -1,6 +1,6 @@
 # VæloriaFactions — le plugin Faction de VÆLORIA
 
-Plugin Paper 1.21 (`plugins/vaeloria-factions`, Java 21). Build : `gradle build` → `build/libs/vaeloria-factions-1.0.0.jar`.
+Plugin Paper 1.21 (`plugins/vaeloria-factions`, Java 21). Build : `gradle build` → `build/libs/vaeloria-factions-1.1.0.jar`.
 Dépendances facultatives : **Vault** + un plugin d'économie (banque de faction), **VæloriaBridge** (synchronisation avec le site).
 
 L'esprit : le Faction des années 2012-2016 (power, `/f map`, surclaim, guerre à la TNT), avec les outils actuels (menus, bouclier, alertes de raid, tableau latéral, chat coloré par relation, site web synchronisé).

@@ -183,6 +183,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             manager.fplayer(p);
             scoreboard.show(p);
         }
+        getLogger().info("Version " + getPluginMeta().getVersion() + " — Forteresse : /f war (admin : /f war admin) · guerres officielles : /f guerre");
         getLogger().info("VæloriaFactions actif : " + manager.playerFactions().size() + " factions, "
                 + (bank.available() ? "banque Vault" : "sans banque") + (bridge.active() ? ", synchronisé avec le site" : ""));
     }

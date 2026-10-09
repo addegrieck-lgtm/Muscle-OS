@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "fr.vaeloria"
-version = "1.0.0"
+version = "1.1.0"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
@@ -33,5 +33,6 @@ tasks.test {
 }
 
 tasks.processResources {
+    inputs.property("version", project.version)
     filesMatching("plugin.yml") { expand("version" to project.version) }
 }
