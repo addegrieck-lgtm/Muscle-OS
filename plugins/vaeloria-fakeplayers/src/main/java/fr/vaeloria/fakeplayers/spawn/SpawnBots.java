@@ -62,7 +62,7 @@ public final class SpawnBots {
     private static final double VIEW = 48;
     private static final double[] JUMP = {0.42, 0.75, 1.0, 1.17, 1.25, 1.25, 1.17, 1.0, 0.75, 0.42, 0.12, 0};
 
-    private enum State { ARRIVING, WALKING, IDLE, LEAVING }
+    private enum State { ARRIVING, WALKING, IDLE, USING, LEAVING }
 
     private final class Bot {
         final FakePlayer fake;
@@ -84,6 +84,8 @@ public final class SpawnBots {
         boolean goingAfk;
         /** Bot avec qui il discute (groupe face à face), ou null. */
         Bot buddy;
+        /** Poste visé ou utilisé (coffre de l'Ender, enclume…), ou null. */
+        Station station;
         /** Ticks restants de l'animation « manger » ; objet tenu en main actuellement. */
         int eating;
         ItemStack held;
@@ -110,6 +112,8 @@ public final class SpawnBots {
     private BukkitTask task;
     private PacketListenerCommon listener;
     private long tick, nextArrival, nextExit;
+    /** Postes repérés dans le spawn (coffres de l'Ender, enclumes, tables…), mis à jour toutes les 30 s. */
+    private List<Station> stations = List.of();
     private int nextId = ID_BASE;
 
     public SpawnBots(FakePlayersPlugin plugin) {
@@ -193,6 +197,7 @@ public final class SpawnBots {
         }
         zone = new SpawnZone(ax, ay, az, rotation, points, arrival, exit, afkPoints);
         terrain = new BukkitTerrain(world);
+        stations = List.of();
     }
 
     /** Pour /fp spawnzone : ancre, bots, et part des lieux où l'on peut réellement marcher. */
@@ -216,6 +221,9 @@ public final class SpawnBots {
             for (int i = 0; i < 20; i++) if (!Double.isNaN(ground(zone.randomIn(p, r)))) ok++;
             out.add("  zone AFK " + p.name() + " : " + ok * 5 + " % praticable");
         }
+        Map<Station.Kind, Integer> kinds = new java.util.EnumMap<>(Station.Kind.class);
+        for (Station st : stations) kinds.merge(st.kind(), 1, Integer::sum);
+        out.add("  postes repérés : " + (kinds.isEmpty() ? "aucun (tronçons non chargés ?)" : kinds.toString().toLowerCase(java.util.Locale.ROOT)));
         if (zone.afkPoints().isEmpty()) out.add("  pas de zone AFK : les bots passent AFK là où ils s'arrêtent (/fp spawnzone afk add <nom>)");
         for (Bot b : bots.values()) {
             String under = world.getBlockAt((int) Math.floor(b.x), (int) Math.floor(b.y - 0.01), (int) Math.floor(b.z)).getType().name();
@@ -234,6 +242,7 @@ public final class SpawnBots {
             return;
         }
         if (tick % 20 == 0) balance();
+        if (tick % 600 == 1) scanStations();
         if (tick % 10 == 0) updateViewers();
         for (Bot b : new ArrayList<>(bots.values())) update(b);
     }
@@ -307,6 +316,7 @@ public final class SpawnBots {
         double[] out = zone.randomIn(zone.exit(), random);
         b.tx = out[0];
         b.tz = out[1];
+        stopUsing(b);
         b.state = State.LEAVING;
         b.stuck = 0;
         endAfk(b, false);
@@ -314,6 +324,7 @@ public final class SpawnBots {
     }
 
     private void remove(Bot b) {
+        stopUsing(b);
         b.fake.afk(false);
         for (Bot other : bots.values()) if (other.buddy == b) other.buddy = null;
         despawnAll(b);
@@ -351,6 +362,7 @@ public final class SpawnBots {
             }
             case WALKING, LEAVING -> walk(b);
             case IDLE -> idle(b);
+            case USING -> use(b);
         }
         if (b.sneakToggles > 0 && tick % 3 == 0) {
             setSneak(b, !b.sneaking);
@@ -377,6 +389,18 @@ public final class SpawnBots {
         double[] t = zone.randomIn(zone.pick(random), random);
         b.buddy = null;
         b.goingAfk = false;
+        b.station = null;
+        Station st = random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.stations.chance", 0.25) ? freeStation() : null;
+        if (st != null) { // va se servir d'un coffre de l'Ender, d'une enclume…
+            b.station = st;
+            b.tx = st.sx();
+            b.tz = st.sz();
+            b.stuck = 0;
+            b.side = random.nextBoolean() ? 1 : -1;
+            b.state = State.WALKING;
+            b.speed = 0.17 + random.nextDouble() * 0.06;
+            return;
+        }
         SpawnZone.Point afkZone = zone.pickAfk(random);
         if (afkZone != null && random.nextDouble() < plugin.getConfig().getDouble("spawn-bots.afk.chance", 0.3)) {
             // Il va s'installer dans une zone AFK (pas de groupe : on y va pour être tranquille).
@@ -420,6 +444,7 @@ public final class SpawnBots {
         double dist = Math.hypot(b.tx - b.x, b.tz - b.z);
         if (dist < 0.6) {
             if (b.state == State.LEAVING) { remove(b); return; } // passé la porte : il reste connecté ailleurs
+            if (b.station != null) { startUsing(b); return; }
             b.state = State.IDLE;
             ConfigurationSection afk = plugin.getConfig().getConfigurationSection("spawn-bots.afk");
             // Avec des zones AFK, seuls ceux qui y sont allés passent AFK ; sans, n'importe où, au hasard.
@@ -439,9 +464,10 @@ public final class SpawnBots {
             }
             return;
         }
-        Walker.Step step = Walker.step(terrain, b.x, b.y, b.z, b.tx, b.tz, b.speed, b.side);
+        Walker.Step step = Walker.step(avoidPlayers(b), b.x, b.y, b.z, b.tx, b.tz, b.speed, b.side);
         if (step == null) {
             if (++b.stuck > 15) {
+                b.station = null;
                 if (b.state == State.LEAVING) remove(b); else pickTarget(b);
             }
             return;
@@ -454,6 +480,26 @@ public final class SpawnBots {
         b.yaw = turn(b.yaw, step.yaw(), 30);
         b.headYaw = turn(b.headYaw, step.yaw(), 30);
         b.pitch = turn(b.pitch, 0, 10);
+    }
+
+    /**
+     * Terrain où les cases occupées par un vrai joueur (à moins de 0,9 bloc) sont des obstacles : un joueur qui en
+     * chevauche un autre le pousse, un bot qui lui marcherait dessus l'entraînerait sur des dizaines de blocs.
+     */
+    private Terrain avoidPlayers(Bot b) {
+        List<double[]> near = new ArrayList<>();
+        for (Player p : world.getPlayers()) {
+            double dx = p.getX() - b.x, dz = p.getZ() - b.z;
+            if (dx * dx + dz * dz < 36) near.add(new double[]{p.getX(), p.getZ()});
+        }
+        if (near.isEmpty()) return terrain;
+        return (x, fromY, z) -> {
+            for (double[] p : near) {
+                if (Math.abs(p[0] - (x + 0.5)) < 1.2 && Math.abs(p[1] - (z + 0.5)) < 1.2
+                        && Math.hypot(p[0] - (x + 0.5), p[1] - (z + 0.5)) < 1.1) return Double.NaN;
+            }
+            return terrain.feet(x, fromY, z);
+        };
     }
 
     private void idle(Bot b) {
@@ -545,6 +591,116 @@ public final class SpawnBots {
         ItemStack shown = item == null ? new ItemStack(org.bukkit.Material.AIR) : item;
         broadcast(b, () -> new WrapperPlayServerEntityEquipment(b.id,
                 List.of(new Equipment(EquipmentSlot.MAIN_HAND, SpigotConversionUtil.fromBukkitItemStack(shown)))));
+    }
+
+    // --- Postes : coffre de l'Ender, forge (enclume, table de forge, meule), enchantement, établi, four… ---
+
+    /** Repère les blocs utilisables dans les tronçons chargés du spawn et la place où se tenir devant chacun. */
+    private void scanStations() {
+        if (zone == null) return;
+        double[] c = zone.toWorld(0, 0);
+        int cx = (int) Math.floor(c[0]), cz = (int) Math.floor(c[1]), floor = (int) Math.floor(zone.floorFeet()) - 1;
+        int r = plugin.getConfig().getInt("spawn-bots.stations.radius", 100);
+        List<Station> found = new ArrayList<>();
+        for (org.bukkit.Chunk chunk : world.getLoadedChunks()) {
+            int x0 = chunk.getX() << 4, z0 = chunk.getZ() << 4;
+            if (x0 + 15 < cx - r || x0 > cx + r || z0 + 15 < cz - r || z0 > cz + r) continue;
+            for (int dx = 0; dx < 16; dx++) for (int dz = 0; dz < 16; dz++) {
+                for (int y = floor - 2; y <= floor + 8; y++) {
+                    org.bukkit.block.Block block = chunk.getBlock(dx, y, dz);
+                    Station.Kind kind = Station.Kind.of(block.getType());
+                    if (kind == null) continue;
+                    Station st = standFor(block, kind);
+                    if (st != null) found.add(st);
+                }
+            }
+        }
+        stations = List.copyOf(found);
+    }
+
+    /** Place libre devant le bloc (d'abord sa face avant s'il est orienté), sur un sol praticable. */
+    private Station standFor(org.bukkit.block.Block block, Station.Kind kind) {
+        List<int[]> sides = new ArrayList<>(List.of(new int[]{0, -1}, new int[]{0, 1}, new int[]{-1, 0}, new int[]{1, 0}));
+        if (block.getBlockData() instanceof org.bukkit.block.data.Directional d) {
+            org.bukkit.block.BlockFace f = d.getFacing();
+            sides.add(0, new int[]{f.getModX(), f.getModZ()});
+        }
+        for (int[] side : sides) {
+            int x = block.getX() + side[0], z = block.getZ() + side[1];
+            double feet = terrain.feet(x, block.getY(), z);
+            if (!Double.isNaN(feet) && Math.abs(feet - block.getY()) <= 1.01) {
+                return new Station(kind, block.getX(), block.getY(), block.getZ(), x + 0.5, feet, z + 0.5);
+            }
+        }
+        return null;
+    }
+
+    /** Poste au hasard (selon le poids de son type) que personne n'utilise ou ne vise déjà. */
+    private Station freeStation() {
+        List<Station> free = new ArrayList<>();
+        double total = 0;
+        for (Station st : stations) {
+            boolean taken = bots.values().stream().anyMatch(o -> st.equals(o.station));
+            if (!taken) { free.add(st); total += st.kind().weight; }
+        }
+        double roll = random.nextDouble() * total;
+        for (Station st : free) {
+            roll -= st.kind().weight;
+            if (roll < 0) return st;
+        }
+        return null;
+    }
+
+    private void startUsing(Bot b) {
+        Station st = b.station;
+        b.state = State.USING;
+        b.until = tick + st.kind().minTicks + random.nextInt(st.kind().maxTicks - st.kind().minTicks + 1);
+        b.yaw = b.headYaw = Walker.yaw(st.bx() + 0.5 - b.x, st.bz() + 0.5 - b.z);
+        b.pitch = 35 + random.nextFloat() * 15; // regarde le bloc
+        if (st.kind() == Station.Kind.ENDER_CHEST) {
+            chestLid(b, st, true);
+            world.playSound(new org.bukkit.Location(world, st.bx() + 0.5, st.by() + 0.5, st.bz() + 0.5), Sound.BLOCK_ENDER_CHEST_OPEN, 0.5f, 0.9f + random.nextFloat() * 0.1f);
+        }
+    }
+
+    private void use(Bot b) {
+        Station st = b.station;
+        if (st == null) { b.state = State.IDLE; return; }
+        boolean works = st.kind() == Station.Kind.ANVIL || st.kind() == Station.Kind.SMITHING
+                || st.kind() == Station.Kind.GRINDSTONE || st.kind() == Station.Kind.CRAFTING;
+        if (works && random.nextDouble() < 0.08) broadcast(b, () -> new WrapperPlayServerEntityAnimation(b.id,
+                WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_MAIN_ARM));
+        if (st.kind().sound != null && random.nextDouble() < 0.035) world.playSound(
+                new org.bukkit.Location(world, st.bx() + 0.5, st.by() + 0.5, st.bz() + 0.5), st.kind().sound, 0.6f, 0.9f + random.nextFloat() * 0.2f);
+        if (st.kind() == Station.Kind.ENDER_CHEST && random.nextDouble() < 0.02) // range ses affaires
+            hold(b, random.nextBoolean() ? b.loadout.alt() : b.loadout.food());
+        if (tick >= b.until) {
+            stopUsing(b);
+            hold(b, b.loadout.mainHand());
+            b.state = State.IDLE;
+            b.until = tick + 20 + random.nextInt(80);
+        }
+    }
+
+    private void stopUsing(Bot b) {
+        Station st = b.station;
+        if (st != null && b.state == State.USING && st.kind() == Station.Kind.ENDER_CHEST) {
+            chestLid(b, st, false);
+            world.playSound(new org.bukkit.Location(world, st.bx() + 0.5, st.by() + 0.5, st.bz() + 0.5), Sound.BLOCK_ENDER_CHEST_CLOSE, 0.5f, 0.9f + random.nextFloat() * 0.1f);
+        }
+        b.station = null;
+    }
+
+    /** Ouvre ou ferme le couvercle du coffre de l'Ender pour les joueurs proches (animation seulement). */
+    private void chestLid(Bot b, Station st, boolean open) {
+        for (Player p : world.getPlayers()) {
+            if (p.getLocation().distanceSquared(new org.bukkit.Location(world, st.bx(), st.by(), st.bz())) > VIEW * VIEW) continue;
+            var user = PacketEvents.getAPI().getPlayerManager().getUser(p);
+            if (user == null) continue;
+            int blockId = com.github.retrooper.packetevents.protocol.world.states.type.StateTypes.ENDER_CHEST.getMapped().getId(user.getClientVersion());
+            send(p, new com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockAction(
+                    new com.github.retrooper.packetevents.util.Vector3i(st.bx(), st.by(), st.bz()), 1, open ? 1 : 0, blockId));
+        }
     }
 
     /** Un vrai joueur frappe le bot : animation et son de dégât, petit recul, il se tourne, parfois il parle. */

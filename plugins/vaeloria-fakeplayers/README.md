@@ -68,6 +68,10 @@ s'excusent à leur retour (`afk`, avec `interactions.whisper.afk-notice` façon 
 changement d'objet en main, shift, sauts. Frappés dans un spawn protégé (`hit.pvp-protected`), ils ne bougent pas,
 comme un vrai joueur, et le message de ta protection peut être reproduit (`hit.protected-message`).
 
+Postes : coffres de l'Ender, enclumes, tables de forge, meules, tables d'enchantement, établis, fours et alambics
+du spawn sont repérés tout seuls ; les bots vont s'en servir (ouverture du coffre animée et sonore, coups sur
+l'enclume…). Ils contournent les vrais joueurs au lieu de les traverser (un joueur chevauché est poussé).
+
 Ce sont des entités envoyées par paquets : aucune n'existe côté serveur, les autres plugins ne les voient pas, et
 les coups ne font pas de dégâts (animation, son et recul seulement).
 
