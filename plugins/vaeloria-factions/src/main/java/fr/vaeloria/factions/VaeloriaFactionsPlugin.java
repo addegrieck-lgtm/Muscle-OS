@@ -82,6 +82,8 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     private fr.vaeloria.factions.service.BountyService bounties;
     private fr.vaeloria.factions.service.ConvoyService convoy;
     private fr.vaeloria.factions.gui.ConvoyAdminMenu convoyAdmin;
+    private fr.vaeloria.factions.service.FortressService fortress;
+    private fr.vaeloria.factions.gui.FortressAdminMenu fortressAdmin;
     private final fr.vaeloria.factions.rules.FarmGuard farmGuard = new fr.vaeloria.factions.rules.FarmGuard();
     private final List<BukkitTask> tasks = new ArrayList<>();
     private volatile boolean saving;
@@ -124,9 +126,12 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         bounties = new fr.vaeloria.factions.service.BountyService(this);
         convoy = new fr.vaeloria.factions.service.ConvoyService(this, settings, state);
         convoyAdmin = new fr.vaeloria.factions.gui.ConvoyAdminMenu(this);
+        fortress = new fr.vaeloria.factions.service.FortressService(this, settings, state);
+        fortressAdmin = new fr.vaeloria.factions.gui.FortressAdminMenu(this);
         manager.setExtraPower(captures::outpostPower);
         missions.roll();
         for (String bad : settings.totemScheduleErrors) getLogger().warning("totem.schedule : entrée illisible « " + bad + " »");
+        for (String bad : settings.fortressScheduleErrors) getLogger().warning("fortress.schedule : entrée illisible « " + bad + " »");
         bank = Banks.detect();
         fr.vaeloria.factions.service.ShopHook.detect(getLogger(), settings.currencySymbol);
         if (!bank.available() && settings.economyRequired) {
@@ -158,6 +163,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         pm.registerEvents(new fr.vaeloria.factions.listener.SpawnerListener(this), this);
         pm.registerEvents(new fr.vaeloria.factions.listener.MissionListener(this), this);
         pm.registerEvents(new fr.vaeloria.factions.listener.ConvoyListener(this), this);
+        pm.registerEvents(new fr.vaeloria.factions.listener.FortressListener(this), this);
         if (fr.vaeloria.factions.service.Papi.register(this)) getLogger().info("PlaceholderAPI : placeholders %vfactions_…% disponibles.");
 
         FactionCommand cmd = new FactionCommand(this);
@@ -195,6 +201,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
             totems.tick();
             captures.tick();
             convoy.tick();
+            fortress.tick();
             purgeInvites();
         }, 20L, 20L));
         tasks.add(sch.runTaskTimer(this, scoreboard::updateAll, 40L, settings.scoreboardRefreshTicks));
@@ -316,6 +323,7 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
         totems.shutdown();
         captures.shutdown();
         convoy.shutdown();
+        if (fortress != null) fortress.shutdown();
         scoreboard.clear();
         obsidian.unregisterRecipe();
         save(false);
@@ -350,6 +358,9 @@ public final class VaeloriaFactionsPlugin extends JavaPlugin {
     public fr.vaeloria.factions.service.BountyService bounties() { return bounties; }
     public fr.vaeloria.factions.service.ConvoyService convoy() { return convoy; }
     public fr.vaeloria.factions.gui.ConvoyAdminMenu convoyAdmin() { return convoyAdmin; }
+    public fr.vaeloria.factions.service.FortressService fortress() { return fortress; }
+    public Store.State state() { return state; }
+    public fr.vaeloria.factions.gui.FortressAdminMenu fortressAdmin() { return fortressAdmin; }
 
     /** Modifie config.yml depuis un menu : écrit le fichier (commentaires conservés) et applique aussitôt. */
     public void setConfigValue(String path, Object value) {

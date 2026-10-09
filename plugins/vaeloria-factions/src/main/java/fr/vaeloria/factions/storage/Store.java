@@ -53,6 +53,8 @@ public final class Store {
         public Map<String, List<String>> missionsCompleted = new HashMap<>();
         /** Points d'atterrissage du convoi (vide = un chunk de warzone au hasard). */
         public List<fr.vaeloria.factions.model.Pos> convoyDrops = new ArrayList<>();
+        /** La Forteresse placée par le staff (null tant qu'elle n'est pas configurée). */
+        public fr.vaeloria.factions.model.FortressDef fortress;
     }
 
     public List<Faction> loadFactions() throws IOException {

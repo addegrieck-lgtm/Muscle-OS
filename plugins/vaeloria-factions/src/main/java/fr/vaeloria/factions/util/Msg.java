@@ -42,7 +42,10 @@ public final class Msg {
     }
 
     public static String raw(String key) {
-        return messages.getString(key, "<red>[message manquant : " + key + "]");
+        // getString(clé, défaut) ignorerait les valeurs par défaut du jar : un messages.yml d'une version précédente
+        // n'aurait pas les nouveaux textes. getString(clé) les consulte.
+        String v = messages.getString(key);
+        return v != null ? v : "<red>[message manquant : " + key + "]";
     }
 
     /** Placeholders par paires : nom, valeur, nom, valeur… */

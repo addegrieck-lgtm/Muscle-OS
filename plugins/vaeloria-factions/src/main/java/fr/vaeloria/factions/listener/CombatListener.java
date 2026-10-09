@@ -52,6 +52,8 @@ public final class CombatListener implements Listener {
     /** Raison du refus, ou null si le coup est permis. */
     private String denyReason(Player attacker, Player victim) {
         if (attacker.equals(victim)) return null;
+        Boolean fortress = plugin.fortress().pvp(attacker, victim);
+        if (fortress != null) return fortress ? null : "pvp.member";
         Faction za = manager.factionAt(attacker.getLocation());
         Faction zv = manager.factionAt(victim.getLocation());
         if (za != null && za.isSafezone() || zv != null && zv.isSafezone()) return "pvp.safezone";
@@ -185,6 +187,7 @@ public final class CombatListener implements Listener {
         manager.markDirty();
         if (zone != null && zone.isSafezone()) return;
         if (victim.hasPermission("vaeloria.factions.bypass.powerloss")) return;
+        if (plugin.fortress().noPowerLoss(victim.getUniqueId())) return;
         if (farmed) {
             Msg.send(victim, "power.farm-protected");
             return;

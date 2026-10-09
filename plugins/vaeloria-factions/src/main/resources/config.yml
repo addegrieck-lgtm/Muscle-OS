@@ -289,6 +289,32 @@ convoy:
     money: 25000               # versé à la banque de la faction du porteur
     commands: []               # ex. "crate key give {player} convoi 1" — {player}, {faction}
 
+# ── Forteresse ───────────────────────────────────────────────────
+# Plusieurs factions prennent d'assaut la Forteresse. Inscriptions (/f forteresse rejoindre), puis chaque faction
+# apparaît dans son camp ; les portes s'ouvrent pour l'assaut puis se referment : qui est dehors est éliminé, ceux de
+# l'intérieur ont summit-grace-seconds pour gagner le sommet du donjon, ensuite seul le sommet compte.
+# Une mort = éliminé. La dernière faction en vie gagne ; au bout de battle-minutes, la plus nombreuse au sommet.
+# Mise en place : /f forteresse admin (construire ici, ou configurer après un //paste WorldEdit de forteresse.schem).
+fortress:
+  enabled: true
+  registration-minutes: 5
+  min-factions: 2
+  min-players-per-faction: 2
+  max-players-per-faction: 0   # 0 = sans limite
+  preparation-seconds: 30      # dans les camps, portes fermées
+  assault-minutes: 5           # portes ouvertes
+  summit-grace-seconds: 60     # après la fermeture, pour monter au sommet
+  battle-minutes: 10           # portes fermées, jusqu'à la dernière équipe
+  keep-inventory: false        # false = le butin des morts tombe au sommet
+  power-loss: false            # mourir dans la Forteresse ne coûte pas de power
+  block-elytra: true
+  min-online: 10               # pour un lancement automatique
+  schedule:                    # ouverture des inscriptions
+    - "DIMANCHE 21:00"
+  reward:
+    money: 150000              # versé à la banque de la faction gagnante
+    commands: []               # pour chaque participant gagnant — {player}, {faction}
+
 # ── Primes ────────────────────────────────────────────────────────
 # Un joueur en série de kills a la tête mise à prix : un pourcentage de SA fortune (argent du marché), versé à celui
 # qui l'abat. Annonce à tout le serveur à chaque palier puis tous les announce-every kills.

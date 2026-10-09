@@ -159,4 +159,30 @@ public final class BridgeHook {
         o.addProperty("username", username);
         send(o);
     }
+
+    public void eventStart(String eventId, String title, String type, String zone) {
+        if (!active()) return;
+        JsonObject o = base("EVENT_START");
+        o.addProperty("eventId", eventId.length() > 64 ? eventId.substring(0, 64) : eventId);
+        o.addProperty("title", title.length() > 120 ? title.substring(0, 120) : title);
+        o.addProperty("type", type);
+        if (zone != null) o.addProperty("zone", zone.length() > 40 ? zone.substring(0, 40) : zone);
+        send(o);
+    }
+
+    public void eventEnd(String eventId, java.util.Map<UUID, String> participants) {
+        if (!active()) return;
+        JsonObject o = base("EVENT_END");
+        o.addProperty("eventId", eventId.length() > 64 ? eventId.substring(0, 64) : eventId);
+        com.google.gson.JsonArray a = new com.google.gson.JsonArray();
+        for (var e : participants.entrySet()) {
+            if (a.size() >= 1000) break;
+            JsonObject p = new JsonObject();
+            p.addProperty("uuid", e.getKey().toString());
+            p.addProperty("username", e.getValue());
+            a.add(p);
+        }
+        o.add("participants", a);
+        send(o);
+    }
 }

@@ -1,0 +1,139 @@
+{
+  "name": "Forteresse de VÆLORIA",
+  "size": [
+    241,
+    72,
+    241
+  ],
+  "origin": "centre de la forteresse, au niveau du sol (on s'y tient)",
+  "gates": [
+    {
+      "name": "north",
+      "min": [
+        -2,
+        0,
+        -31
+      ],
+      "max": [
+        2,
+        6,
+        -31
+      ],
+      "block": "minecraft:iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]"
+    },
+    {
+      "name": "south",
+      "min": [
+        -2,
+        0,
+        31
+      ],
+      "max": [
+        2,
+        6,
+        31
+      ],
+      "block": "minecraft:iron_bars[east=true,north=false,south=false,waterlogged=false,west=true]"
+    },
+    {
+      "name": "west",
+      "min": [
+        -31,
+        0,
+        -2
+      ],
+      "max": [
+        -31,
+        6,
+        2
+      ],
+      "block": "minecraft:iron_bars[east=false,north=true,south=true,waterlogged=false,west=false]"
+    },
+    {
+      "name": "east",
+      "min": [
+        31,
+        0,
+        -2
+      ],
+      "max": [
+        31,
+        6,
+        2
+      ],
+      "block": "minecraft:iron_bars[east=false,north=true,south=true,waterlogged=false,west=false]"
+    }
+  ],
+  "summit": {
+    "min": [
+      -12,
+      45,
+      -12
+    ],
+    "max": [
+      12,
+      55,
+      12
+    ]
+  },
+  "fortress": {
+    "min": [
+      -34,
+      -2,
+      -34
+    ],
+    "max": [
+      34,
+      64,
+      34
+    ]
+  },
+  "camps": [
+    {
+      "team": "red",
+      "x": 0,
+      "y": 0,
+      "z": -88,
+      "yaw": 0
+    },
+    {
+      "team": "blue",
+      "x": 88,
+      "y": 0,
+      "z": 0,
+      "yaw": 90
+    },
+    {
+      "team": "green",
+      "x": 0,
+      "y": 0,
+      "z": 88,
+      "yaw": 180
+    },
+    {
+      "team": "yellow",
+      "x": -88,
+      "y": 0,
+      "z": 0,
+      "yaw": 270
+    }
+  ],
+  "arena": {
+    "min": [
+      -120,
+      -9,
+      -120
+    ],
+    "max": [
+      120,
+      62,
+      120
+    ]
+  },
+  "lobby": {
+    "x": 0,
+    "y": 0,
+    "z": -48
+  },
+  "warzone_radius_chunks": 7
+}

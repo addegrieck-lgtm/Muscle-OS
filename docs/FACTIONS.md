@@ -23,6 +23,8 @@ Le plugin Faction et le marché (VæloriaShop) partagent **la même monnaie** : 
 | Avant-poste tenu | 1 500 $ toutes les 10 min (9 000 $/h, le revenu d'un golem, mais à défendre) |
 | KOTH gagné | 60 000 $ |
 | Totem abattu | 75 000 $ |
+| Convoi rapporté | 25 000 $ |
+| Forteresse remportée (hebdomadaire) | 150 000 $ |
 | Dépôts des membres | `/f banque deposer`, avec l'argent gagné au marché |
 
 **Où il repart** (dépenses qui détruisent la monnaie, contre l'inflation) :
@@ -254,6 +256,79 @@ Chaque changement est écrit dans `config.yml`, commentaires conservés, et appl
 - Placeholders : `%vfactions_streak%`, `%vfactions_bounty_percent%`, `%vfactions_bounty%`.
 - Paliers, plafond et fréquence d'annonce : `config.yml → bounty`.
 
+## La Forteresse (`/f forteresse`)
+Un mode de guerre à plusieurs factions autour d'une vraie forteresse, livrée avec le plugin (schéma + carte autour).
+
+**La carte** (241 × 241 blocs, `forteresse.schem`) :
+- au centre, une forteresse de 61 × 61 :
+  - remparts de 18 blocs avec chemin de ronde et meurtrières ;
+  - 4 tours d'angle avec échelle ;
+  - **4 portes à herse**, une par point cardinal ;
+  - une cour avec puits, lanternes et chariots ;
+  - un **donjon** de 25 × 25 et 47 blocs de haut. Un grand escalier intérieur de 3 blocs de large monte le long des murs jusqu'au **sommet** : créneaux, tourelles, mât et bannière ;
+- des **douves** tout autour, franchies par 4 ponts de bois face aux portes ;
+- **4 camps d'équipe** (rouge, bleu, vert, jaune) à 88 blocs du centre, avec palissade, tentes, feu de camp et chemin jusqu'au pont ;
+- une plaine semée de ruines, rochers et arbres pour se couvrir, et des montagnes en bordure.
+
+**Déroulement** :
+1. **Inscriptions** (5 min) : annonce cliquable, puis `/f forteresse rejoindre`. Il faut une faction, 2 inscrits minimum par faction et 2 factions minimum.
+2. **Préparation** (30 s) : chaque faction apparaît dans son camp. Les portes sont fermées et il n'y a pas encore de PvP. Au-delà de 4 factions, les camps sont partagés.
+3. **Assaut** (5 min) : les herses se lèvent et tout le monde court vers la forteresse.
+4. **Fermeture** : les herses retombent :
+   - tout combattant **resté dehors est éliminé** ;
+   - ceux de l'intérieur ont **60 s pour atteindre le sommet du donjon** ;
+   - ensuite, quiconque n'est pas au sommet est éliminé.
+5. **Bataille au sommet** (10 min max) :
+   - une mort = éliminé ;
+   - **la dernière faction en vie gagne** ;
+   - au bout du temps, la faction la plus nombreuse au sommet gagne (égalité = pas de vainqueur).
+
+**Règles pendant la bataille** :
+- Alliés et trêves ne protègent pas : seuls les membres d'une même faction ne se blessent pas.
+- Les combattants ne peuvent ni se téléporter (commandes, plugins, portails) ni planer en élytres.
+- `/f forteresse quitter` permet d'abandonner.
+- Quitter le serveur = éliminé. Chacun est ramené à sa position d'origine : à son élimination, ou 15 s après la victoire pour laisser le temps de ramasser le butin.
+- Les non-combattants trouvés dans l'enceinte sont renvoyés à la sortie.
+- Par défaut, le butin des morts tombe au sol (`keep-inventory: false`) et mourir ne coûte pas de power (`power-loss: false`).
+- La carte est **indestructible** : ni construction, ni explosion, ni seau, ni feu, ni monstres.
+
+**Récompense** :
+- 150 000 $ dans la banque de la faction gagnante (le plus gros gain des événements : KOTH 60 000 $, Totem 75 000 $, convoi 25 000 $) ;
+- des commandes pour chaque participant gagnant (ex. `crate key give {player} forteresse 1`).
+- Les victoires sont comptées par faction, notées dans `/f logs`, annoncées sur Discord et envoyées au site (VæloriaBridge, événement « siege »).
+
+**Lancement** : par le staff, ou automatiquement aux horaires (dimanche 21h par défaut, avec 10 joueurs connectés minimum).
+
+### Installer la forteresse
+Deux façons de faire :
+- **Sans WorldEdit** :
+  1. Va à l'endroit voulu, debout au sol, de préférence dans un monde plat ou une zone vide.
+  2. Tape `/f forteresse construire confirmer`, ou utilise le bouton « Construire ici » de `/f forteresse admin`.
+  3. La carte est collée par lots, sans figer le serveur, puis **configurée toute seule** : portes, sommet, enceinte, carte protégée, camps et sortie.
+- **Avec WorldEdit** :
+  1. Copie `plugins/VaeloriaFactions/forteresse/forteresse.schem`, créé au premier usage, dans `plugins/WorldEdit/schematics/`.
+  2. Tape `//schem load forteresse` puis `//paste` : l'origine est le centre de la forteresse, au sol.
+  3. **Sans bouger**, clique sur « Configurer depuis le schéma » dans `/f forteresse admin`, ou tape `/f forteresse configurer`.
+
+La carte mesure 241 × 241 blocs sur 72 de haut. L'origine se trouve 9 blocs au-dessus du bas du schéma : prévois de la place en dessous. En monde plat, les couches sous le bedrock sont simplement ignorées.
+
+### Interface admin : `/f forteresse admin`
+- **Partie** : ouvrir les inscriptions, arrêter (sans vainqueur, chacun rentre), ouvrir et fermer les portes pour tester.
+- **Lieux** : se téléporter au centre, montrer les zones en particules (sommet, enceinte, portes, camps).
+- **Construction** : construire ici, ou configurer depuis le schéma.
+- **Positions personnalisées**, pour utiliser ta propre forteresse :
+  - choisis deux coins, puis fais-en le sommet, l'enceinte, la carte protégée ou une nouvelle porte. Une porte retient le bloc du coin 1, par exemple des barreaux ;
+  - ajoute des camps à ta position ;
+  - place la sortie et le centre.
+- **Horaires** : jour et heure d'ouverture des inscriptions, joueurs minimum.
+- **Gains** : argent (±10 000 ou montant exact) et commandes.
+- **Réglages** :
+  - durées : inscriptions, préparation, assaut, délai pour le sommet, bataille ;
+  - effectifs : factions minimum, joueurs minimum et maximum par faction ;
+  - options : garder l'inventaire, perte de power, élytres.
+
+Le générateur de la carte est dans `tools/forteresse/generer_forteresse.py`. Il produit le schéma, son plan (`layout.json`) et un aperçu vu du dessus.
+
 ## Missions quotidiennes (`/f missions`)
 - Chaque jour à minuit, 3 missions sont tirées du catalogue, **les mêmes pour toutes les factions**.
 - Chaque faction progresse de son côté et touche la récompense en banque, avec annonce, journal et Discord.
@@ -300,6 +375,7 @@ Chaque changement est écrit dans `config.yml`, commentaires conservés, et appl
 | Progression | `ameliorations`, `missions`, `avantposte [liste]`, `koth [liste]` ; staff : `avantposte creer\|supprimer`, `koth creer\|supprimer\|lancer\|arreter` |
 | Territoire partagé | `acces <joueur\|faction>`, `acces liste` |
 | Convoi et primes | `convoi`, `prime [joueur]`, `primes` ; staff : `convoi admin\|lancer\|arreter` |
+| Forteresse | `forteresse`, `forteresse rejoindre\|quitter` ; staff : `forteresse admin\|lancer\|arreter\|ouvrir\|fermer\|construire confirmer [x y z [monde]]\|configurer [x y z [monde]]` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.

@@ -26,6 +26,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `pnpm build` | Builds de production |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 | `cd plugins/vaeloria-factions && gradle build` | Jar du plugin Faction + tests Java |
+| `python3 tools/forteresse/generer_forteresse.py <dossier>` | Régénère le schéma de la Forteresse, son plan et ses aperçus (numpy, pillow) |
 
 ## Documentation
 

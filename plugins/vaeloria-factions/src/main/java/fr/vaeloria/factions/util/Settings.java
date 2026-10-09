@@ -109,6 +109,14 @@ public final class Settings {
     public int convoyIntervalMinutes, convoyMinOnline, convoyOpenSeconds, convoyDurationMinutes, convoyRevealSeconds, convoyFallHeight;
     public double convoyRewardMoney;
     public java.util.List<String> convoyRewardCommands = new java.util.ArrayList<>();
+    // Forteresse
+    public boolean fortressEnabled, fortressKeepInventory, fortressPowerLoss, fortressBlockElytra;
+    public int fortressRegistrationMinutes, fortressMinFactions, fortressMinPlayers, fortressMaxPlayers, fortressPreparationSeconds,
+            fortressAssaultMinutes, fortressSummitGraceSeconds, fortressBattleMinutes, fortressMinOnline;
+    public double fortressRewardMoney;
+    public java.util.List<String> fortressRewardCommands = new java.util.ArrayList<>();
+    public java.util.List<fr.vaeloria.factions.rules.TotemSchedule.Entry> fortressSchedule = new java.util.ArrayList<>();
+    public java.util.List<String> fortressScheduleErrors = new java.util.ArrayList<>();
     // Primes
     public boolean bountyEnabled;
     public double bountyMaxAmount;
@@ -317,6 +325,29 @@ public final class Settings {
         convoyFallHeight = Math.max(5, c.getInt("convoy.fall-height", 40));
         convoyRewardMoney = Math.max(0, c.getDouble("convoy.reward.money", 25000));
         convoyRewardCommands = new java.util.ArrayList<>(c.getStringList("convoy.reward.commands"));
+
+        fortressEnabled = c.getBoolean("fortress.enabled", true);
+        fortressRegistrationMinutes = Math.max(1, c.getInt("fortress.registration-minutes", 5));
+        fortressMinFactions = Math.max(2, c.getInt("fortress.min-factions", 2));
+        fortressMinPlayers = Math.max(1, c.getInt("fortress.min-players-per-faction", 2));
+        fortressMaxPlayers = Math.max(0, c.getInt("fortress.max-players-per-faction", 0));
+        fortressPreparationSeconds = Math.max(5, c.getInt("fortress.preparation-seconds", 30));
+        fortressAssaultMinutes = Math.max(1, c.getInt("fortress.assault-minutes", 5));
+        fortressSummitGraceSeconds = Math.max(10, c.getInt("fortress.summit-grace-seconds", 60));
+        fortressBattleMinutes = Math.max(1, c.getInt("fortress.battle-minutes", 10));
+        fortressMinOnline = Math.max(0, c.getInt("fortress.min-online", 10));
+        fortressKeepInventory = c.getBoolean("fortress.keep-inventory", false);
+        fortressPowerLoss = c.getBoolean("fortress.power-loss", false);
+        fortressBlockElytra = c.getBoolean("fortress.block-elytra", true);
+        fortressRewardMoney = Math.max(0, c.getDouble("fortress.reward.money", 150000));
+        fortressRewardCommands = new java.util.ArrayList<>(c.getStringList("fortress.reward.commands"));
+        fortressSchedule = new java.util.ArrayList<>();
+        fortressScheduleErrors = new java.util.ArrayList<>();
+        for (String e : c.getStringList("fortress.schedule")) {
+            var entry = fr.vaeloria.factions.rules.TotemSchedule.parse(e);
+            if (entry == null) fortressScheduleErrors.add(e);
+            else fortressSchedule.add(entry);
+        }
 
         bountyEnabled = c.getBoolean("bounty.enabled", true);
         bountyMaxAmount = Math.max(0, c.getDouble("bounty.max-amount", 0));

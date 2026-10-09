@@ -123,6 +123,10 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer", "lancer", "arreter") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.KOTH));
         reg("convoi", "[admin|lancer|arreter]", "Convoi : la caisse de la warzone", false, use, this::convoy,
                 (s, a) -> s.hasPermission("vaeloria.factions.admin") ? List.of("admin", "lancer", "arreter") : List.of(), "convoy");
+        reg("forteresse", "[rejoindre|quitter|admin|lancer|arreter|construire|configurer]", "La Forteresse : assaut et bataille au sommet", false, use, this::fortress,
+                (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin")
+                        ? List.of("rejoindre", "quitter", "admin", "lancer", "arreter", "construire", "configurer", "ouvrir", "fermer")
+                        : List.of("rejoindre", "quitter")) : List.of(), "fortress", "fort", "siege");
         reg("prime", "[joueur]", "Prime sur la tête d'un joueur", false, use, (s, p, a) -> {
             Player t = a.length > 0 ? Bukkit.getPlayerExact(a[0]) : p;
             if (t == null) { Msg.send(s, "error.player-offline", "player", a.length > 0 ? a[0] : "?"); return; }
@@ -1194,6 +1198,85 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
             }
             case "arreter", "arrêter", "stop" -> cv.end(null, "stopped");
             default -> usage(s, "convoi");
+        }
+    }
+
+    private void fortress(CommandSender s, Player p, String[] a) {
+        var fs = plugin.fortress();
+        if (a.length == 0) {
+            fs.status(s);
+            return;
+        }
+        String sub = a[0].toLowerCase(Locale.ROOT);
+        switch (sub) {
+            case "rejoindre", "join" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                fs.join(p);
+                return;
+            }
+            case "quitter", "leave" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                fs.leave(p);
+                return;
+            }
+            default -> { }
+        }
+        if (!s.hasPermission("vaeloria.factions.admin")) { Msg.send(s, "error.no-permission"); return; }
+        switch (sub) {
+            case "admin", "menu", "gui" -> {
+                if (p == null) { Msg.send(s, "error.player-only"); return; }
+                plugin.fortressAdmin().open(p);
+            }
+            case "lancer", "start" -> {
+                var r = fs.openRegistration(false);
+                if (r != fr.vaeloria.factions.service.FortressService.StartResult.OK) Msg.send(s, "fortress.start-fail." + r.name().toLowerCase(Locale.ROOT));
+            }
+            case "arreter", "arrêter", "stop" -> fs.stop();
+            case "ouvrir", "fermer" -> {
+                if (fs.running()) { Msg.send(s, "fortress.gates-locked"); return; }
+                fs.setGates(sub.equals("ouvrir"));
+                Msg.send(s, sub.equals("ouvrir") ? "fortress.gates-opened-admin" : "fortress.gates-closed-admin");
+            }
+            case "construire", "build" -> {
+                if (a.length < 2 || !a[1].equalsIgnoreCase("confirmer")) { Msg.send(s, "fortress.build-confirm"); return; }
+                org.bukkit.Location at = p == null ? null : p.getLocation();
+                if (a.length >= 5) {
+                    org.bukkit.World w = p != null ? p.getWorld() : Bukkit.getWorlds().get(0);
+                    if (a.length >= 6 && Bukkit.getWorld(a[5]) != null) w = Bukkit.getWorld(a[5]);
+                    try {
+                        at = new org.bukkit.Location(w, Integer.parseInt(a[2]), Integer.parseInt(a[3]), Integer.parseInt(a[4]));
+                    } catch (NumberFormatException e) {
+                        at = null;
+                    }
+                }
+                if (at == null) { Msg.send(s, "error.usage", "usage", "/f forteresse construire confirmer [x y z [monde]]"); return; }
+                fs.build(s, at);
+            }
+            case "configurer", "setup" -> {
+                org.bukkit.Location at;
+                if (a.length >= 4) {
+                    org.bukkit.World w = p != null ? p.getWorld() : Bukkit.getWorlds().get(0);
+                    if (a.length >= 5 && Bukkit.getWorld(a[4]) != null) w = Bukkit.getWorld(a[4]);
+                    try {
+                        at = new org.bukkit.Location(w, Integer.parseInt(a[1]), Integer.parseInt(a[2]), Integer.parseInt(a[3]));
+                    } catch (NumberFormatException e) {
+                        Msg.send(s, "error.usage", "usage", "/f forteresse configurer [x y z [monde]]");
+                        return;
+                    }
+                } else if (p != null) {
+                    at = p.getLocation();
+                } else {
+                    Msg.send(s, "error.usage", "usage", "/f forteresse configurer x y z [monde]");
+                    return;
+                }
+                try {
+                    fs.configureFromLayout(at);
+                    Msg.send(s, "fortress.configured", "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ());
+                } catch (java.io.IOException | RuntimeException e) {
+                    Msg.send(s, "fortress.build-error", "error", String.valueOf(e.getMessage()));
+                }
+            }
+            default -> usage(s, "forteresse");
         }
     }
 

@@ -52,6 +52,7 @@ public final class Faction {
     public int warsWon;
     public int warsLost;
     public int totemsWon;
+    public int fortressWins;
     public int outpostsCaptured;
     public int kothsWon;
     public int missionsDone;
