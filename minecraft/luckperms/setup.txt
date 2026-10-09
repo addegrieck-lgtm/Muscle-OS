@@ -4,12 +4,18 @@ lp creategroup seigneur
 lp creategroup roi
 lp creategroup vaelorian
 lp creategroup helper
+lp creategroup builder
 lp creategroup moderateur
 lp creategroup admin
 lp creategroup fondateur
 lp group default setweight 1
 lp group default setdisplayname Joueur
-lp group default meta setprefix 1 "&#a9aeb8"
+lp group default permission set vaeloria.factions.use true
+lp group default permission set vaeloria.factions.fly true
+lp group default permission set vaeloria.shop.use true
+lp group default permission set vaeloria.shop.sell true
+lp group default permission set vaeloria.hdv.use true
+lp group default permission set vaeloria.link true
 lp group default permission set essentials.spawn true
 lp group default permission set essentials.home true
 lp group default permission set essentials.sethome true
@@ -35,18 +41,18 @@ lp group default permission set essentials.warp true
 lp group default permission set essentials.warps.* true
 lp group default permission set essentials.helpop true
 lp group default permission set essentials.kit true
-lp group default permission set essentials.kits.depart true
-lp group default permission set vaeloria.link true
 lp group joueur setweight 5
 lp group joueur setdisplayname Joueur
 lp group joueur parent add default
+lp group joueur meta setprefix 5 "&#a9aeb8[Joueur] "
+lp group joueur permission set essentials.kits.joueur true
 lp group guerrier setweight 10
 lp group guerrier setdisplayname Guerrier
 lp group guerrier parent add joueur
 lp group guerrier meta setprefix 10 "&#d9dce2[Guerrier] "
-lp group guerrier permission set essentials.sethome.multiple true
 lp group guerrier permission set essentials.sethome.multiple.guerrier true
 lp group guerrier permission set essentials.kits.guerrier true
+lp group guerrier permission set essentials.sethome.multiple true
 lp group guerrier permission set essentials.workbench true
 lp group seigneur setweight 20
 lp group seigneur setdisplayname Seigneur
@@ -75,37 +81,44 @@ lp group vaelorian permission set essentials.chat.rgb true
 lp group helper setweight 100
 lp group helper setdisplayname Helper
 lp group helper meta setprefix 100 "&#5fb3d9[Helper] "
+lp group helper permission set vaeloria.staff.use true
+lp group helper permission set vaeloria.staff.chat true
+lp group helper permission set vaeloria.staff.warn true
+lp group helper permission set vaeloria.staff.mute true
+lp group helper permission set vaeloria.staff.kick true
+lp group helper permission set vaeloria.staff.freeze true
 lp group helper permission set essentials.helpop.receive true
-lp group helper permission set essentials.mute true
-lp group helper permission set essentials.mute.notify true
-lp group helper permission set essentials.kick true
-lp group helper permission set essentials.kick.notify true
 lp group helper permission set essentials.seen true
+lp group builder setweight 150
+lp group builder setdisplayname Builder
+lp group builder meta setprefix 150 "&#c9a36b[Builder] "
+lp group builder permission set vaeloria.staff.content true
+lp group builder permission set vaeloria.staff.chat true
+lp group builder permission set vaeloria.factions.zones.build true
+lp group builder permission set worldedit.* true
+lp group builder permission set essentials.fly true
 lp group moderateur setweight 200
 lp group moderateur setdisplayname Modérateur
 lp group moderateur parent add helper
 lp group moderateur meta setprefix 200 "&#3c8f5a[Modo] "
-lp group moderateur permission set essentials.mute.offline true
-lp group moderateur permission set essentials.tempban true
-lp group moderateur permission set essentials.ban true
-lp group moderateur permission set essentials.ban.notify true
-lp group moderateur permission set essentials.unban true
-lp group moderateur permission set essentials.jail true
-lp group moderateur permission set essentials.vanish true
-lp group moderateur permission set essentials.invsee true
-lp group moderateur permission set essentials.tp true
-lp group moderateur permission set essentials.tphere true
+lp group moderateur permission set vaeloria.staff.moderator true
+lp group moderateur permission set vaeloria.staff.ban true
+lp group moderateur permission set vaeloria.factions.spy true
 lp group moderateur permission set essentials.socialspy true
 lp group moderateur permission set essentials.whois true
-lp group moderateur permission set essentials.gamemode true
-lp group moderateur permission set essentials.gamemode.spectator true
 lp group admin setweight 300
 lp group admin setdisplayname Admin
 lp group admin parent add moderateur
+lp group admin parent add builder
 lp group admin meta setprefix 300 "&#b3262f[Admin] "
+lp group admin permission set vaeloria.staff.admin true
+lp group admin permission set vaeloria.factions.admin true
+lp group admin permission set vaeloria.shop.admin true
+lp group admin permission set vaeloria.bridge.admin true
 lp group admin permission set essentials.* true
 lp group admin permission set minecraft.command.* true
-lp group admin permission set vaeloria.bridge.admin true
+lp group admin permission set worldedit.* true
+lp group admin permission set worldguard.* true
 lp group admin permission set luckperms.user.info true
 lp group admin permission set luckperms.user.parent.info true
 lp group admin permission set luckperms.user.permission.info true
@@ -118,6 +131,16 @@ lp group fondateur setdisplayname Fondateur
 lp group fondateur parent add admin
 lp group fondateur meta setprefix 1000 "&#d4af37[Fondateur] "
 lp group fondateur permission set * true
+lp group admin permission set vaeloria.factions.bypass.combat false
+lp group admin permission set vaeloria.factions.bypass.powerloss false
+lp group admin permission set vaeloria.factions.bypass.warmup false
+lp group admin permission set vaeloria.factions.bypass.fly false
+lp group admin permission set vaeloria.shop.bypass.level false
+lp group fondateur permission set vaeloria.factions.bypass.combat false
+lp group fondateur permission set vaeloria.factions.bypass.powerloss false
+lp group fondateur permission set vaeloria.factions.bypass.warmup false
+lp group fondateur permission set vaeloria.factions.bypass.fly false
+lp group fondateur permission set vaeloria.shop.bypass.level false
 lp createtrack grades
 lp track grades append joueur
 lp track grades append guerrier

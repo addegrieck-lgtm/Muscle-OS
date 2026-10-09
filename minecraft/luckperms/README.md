@@ -1,57 +1,84 @@
 # LuckPerms — grades et permissions de VÆLORIA
 
-`setup.txt` crée tous les groupes, préfixes, permissions et tracks. Une ligne = une commande console (sans `/`).
+`setup.txt` crée tous les groupes, préfixes, permissions et tracks (une ligne = une commande console, sans `/`).
+`vaeloria.json.gz` contient la même chose, à charger en une seule commande.
 
-## Prérequis
+## Plugins du serveur
 
 | Plugin | Rôle |
 |---|---|
-| LuckPerms (Bukkit/Paper) | Groupes, permissions, préfixes |
-| EssentialsX | Commandes joueurs/staff, kits (`/kit`), homes |
-| EssentialsX Chat | Affiche les préfixes LuckPerms dans le chat |
-
-Les permissions de **factions** ne sont pas incluses : elles dépendent du plugin choisi. Les donner à `default`.
+| LuckPerms | Groupes, permissions, préfixes |
+| Vault + EssentialsX | Monnaie unique (utilisée par VæloriaShop et VæloriaFactions), homes, tpa, kits |
+| VæloriaFactions | `/f` : factions, claims, power, raids, events |
+| VæloriaShop | `/shop`, `/vendre`, `/hdv`, rangs de marchand |
+| VæloriaStaff | `/staff`, `/sc` : modération, annonces, pancartes, PNJ, images |
+| WorldGuard / WorldEdit | Protection du spawn, construction |
+| EssentialsX Chat (**à ajouter**) | Sans lui, les préfixes de grade ne s'affichent pas dans le chat |
 
 ## Installation
 
-1. Installer les plugins, démarrer le serveur une fois.
+1. Démarrer le serveur une fois avec tous les plugins.
 2. Charger les grades, au choix :
-   - **en une commande** : déposer `vaeloria.json.gz` dans `plugins/LuckPerms/`, puis taper en console `lp import vaeloria.json.gz`. L'import remplace le contenu des groupes du même nom : à faire sur une installation neuve ;
-   - **ligne par ligne** : coller le contenu de `setup.txt` dans la console (relancer le script ne casse rien).
-
-   `vaeloria.json.gz` est généré depuis `setup.txt` : après toute modification, `python3 build-import.py setup.txt vaeloria.json.gz`.
+   - **en une commande** : déposer `vaeloria.json.gz` dans `plugins/LuckPerms/`, puis en console `lp import vaeloria.json.gz`. L'import remplace le contenu des groupes du même nom ;
+   - **ligne par ligne** : coller `setup.txt` dans la console.
 3. Se donner le grade fondateur : `lp user <pseudo> parent add fondateur`.
-4. Compléter `plugins/Essentials/config.yml` (voir plus bas), puis `/essentials reload`.
+4. Kits : copier `../essentials/kits.yml` dans `plugins/Essentials/kits.yml`.
+5. Compléter les configs (plus bas), puis redémarrer.
 
-## Structure
+Après une modification de `setup.txt` : `python3 build-import.py setup.txt vaeloria.json.gz`.
 
-```
-default (tout le monde)
- └ joueur (0 point)
-    └ guerrier (15) └ seigneur (35) └ roi (65) └ vaelorian (100)
+## Grades joueurs
 
-helper └ moderateur └ admin └ fondateur
-```
+Chaque grade hérite du précédent. À la connexion, tout joueur est dans `default` ; la règle `default-assignments` (plus bas) lui ajoute le grade **Joueur**. Même sans cette règle, il a toutes les permissions de base.
 
-Chaque grade hérite du précédent. Le préfixe affiché est celui du groupe de plus haute priorité : un modérateur VÆLORIAN s'affiche `[Modo]`. Les clés `joueur`, `guerrier`, `seigneur`, `roi`, `vaelorian` sont celles de `rank_thresholds` : le site les attribue avec `lp user {uuid} parent add <clé>`.
-
-| Groupe | Préfixe | Avantages |
+| Grade | Obtention | Avantages |
 |---|---|---|
-| default | — | spawn, 1 home, tpa, msg, mail, warps, économie, `/kit depart` |
-| guerrier | `[Guerrier]` | 2 homes, `/kit guerrier`, `/workbench` |
-| seigneur | `[Seigneur]` | 3 homes, `/kit seigneur`, `/hat` |
-| roi | `[Roi]` | 4 homes, `/kit roi`, `/nick`, couleurs dans le chat |
-| vaelorian | `[VÆLORIAN]` | 5 homes, `/kit vaelorian`, pseudo coloré, formats et RGB dans le chat |
-| helper | `[Helper]` | reçoit `/helpop`, mute, kick, `/seen` |
-| moderateur | `[Modo]` | ban/tempban, jail, vanish, invsee, tp, socialspy, whois, spectateur |
-| admin | `[Admin]` | tout EssentialsX et vanilla, `/vbridge`, LuckPerms en **lecture seule** |
-| fondateur | `[Fondateur]` | `*` (tout, dont la gestion des grades) |
+| Joueur | gratuit, à la connexion | `/f`, `/shop`, `/vendre`, `/hdv`, `/f fly` dans son territoire, spawn, 1 home, tpa, msg, mail, warps, `/pay`, `/kit joueur` (24 h) |
+| Guerrier | 15 points | 2 homes, `/kit guerrier`, `/workbench` |
+| Seigneur | 35 points | 3 homes, `/kit seigneur`, `/hat` |
+| Roi | 65 points | 4 homes, `/kit roi`, `/nick`, couleurs dans le chat |
+| VÆLORIAN | 100 points | 5 homes, `/kit vaelorian`, pseudo coloré, formats et RGB dans le chat |
 
-Les grades payants ne donnent **aucun avantage de combat** (`docs/MONETIZATION.md`) : volontairement absents, `/fly`, `/heal`, `/feed`, `/back`, `/near`, `/enderchest` à distance.
+Kit de départ (`depart`, ≈ 3 500 $) : donné une seule fois à la première connexion. Outils en pierre, Houe de moisson I, graines, nourriture, bois, torches, établi, four, coffres.
+Kit `joueur` (≈ 300 $ + outils en pierre) : toutes les 24 h.
 
-Seul le fondateur peut modifier les grades : un admin ne peut pas se promouvoir lui-même.
+Aucun grade payant ne donne d'avantage de combat ni d'argent. `/back`, `/rtp`, `/ec` et les tp sont de toute façon bloqués en combat par VæloriaFactions.
 
-## EssentialsX : `plugins/Essentials/config.yml`
+## Staff
+
+```
+helper ── moderateur ──┐
+builder ───────────────┴── admin ── fondateur
+```
+
+| Grade | VæloriaStaff | Autres |
+|---|---|---|
+| Helper | `/staff`, chat staff, warn, mute, kick, freeze | reçoit `/helpop`, `/seen` |
+| Builder | annonces, pancartes, PNJ, images, chat staff | construire en SafeZone/WarZone, WorldEdit, `/fly` |
+| Modérateur | tout le pack modérateur (mode staff, vanish, invsee, tp, gestion du chat) + **ban** | lire les chats de faction (`/f` spy), socialspy, whois |
+| Admin | tout (`vaeloria.staff.admin`) | `/f admin`, `/shop admin`, `/vbridge`, tout EssentialsX, WorldEdit, WorldGuard, vanilla ; LuckPerms en **lecture seule** |
+| Fondateur | `*` | seul à pouvoir modifier les grades |
+
+Admin et fondateur ont explicitement **refusés** les contournements de jeu (pas de tag de combat, pas de perte de power, tp instantanées, vol près des ennemis, achats sans rang de marchand) : un staff qui joue joue comme tout le monde. Le mode staff de VæloriaStaff donne déjà vol et invulnérabilité pendant la modération.
+
+Ne pas mettre le staff **OP** : les permissions `default: op` des plugins passeraient au-dessus de cette config.
+
+## `plugins/LuckPerms/config.yml`
+
+```yaml
+server: vaeloria
+primary-group-calculation: parents-by-weight
+
+# Ajoute le grade Joueur à chaque connexion s'il ne l'a pas
+default-assignments:
+  grade-joueur:
+    if:
+      lacks: <group.joueur>
+    give:
+      - group.joueur
+```
+
+## `plugins/Essentials/config.yml`
 
 ```yaml
 sethome-multiple:
@@ -60,25 +87,17 @@ sethome-multiple:
   seigneur: 3
   roi: 4
   vaelorian: 5
+
+newbies:
+  kit: depart
 ```
 
-Les kits `depart`, `guerrier`, `seigneur`, `roi`, `vaelorian` sont à créer dans `plugins/Essentials/kits.yml` (ou en jeu : `/createkit <nom> <délai>` avec l'inventaire voulu).
-
-## EssentialsX Chat
+## `plugins/EssentialsChat` (ou section `chat:` d'Essentials)
 
 ```yaml
 chat:
   format: '{PREFIX}{DISPLAYNAME}&7: &f{MESSAGE}'
 ```
-
-## LuckPerms : `plugins/LuckPerms/config.yml`
-
-```yaml
-server: vaeloria
-primary-group-calculation: parents-by-weight
-```
-
-Passer `storage-method` à `mysql`/`postgresql` seulement le jour où plusieurs serveurs doivent partager les grades.
 
 ## Commandes utiles
 
@@ -88,4 +107,5 @@ Passer `storage-method` à `mysql`/`postgresql` seulement le jour où plusieurs 
 | Retirer un grade | `lp user <pseudo> parent remove moderateur` |
 | Promouvoir sur un track | `lp user <pseudo> promote staff` |
 | Voir les groupes d'un joueur | `lp user <pseudo> info` |
+| Vérifier une permission | `lp user <pseudo> permission check vaeloria.staff.ban` |
 | Éditeur web | `lp editor` |
