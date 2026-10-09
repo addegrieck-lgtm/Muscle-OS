@@ -662,68 +662,124 @@ def build_surroundings(w: World, pad_x: int) -> None:
 # --------------------------------------------------------------------------- ponton (copie des ponts du spawn)
 
 
-def pontoon_slice(w: World, x: int, k: int) -> None:
+def pontoon_slice(w: World, x: int, k: int, drop: float = 0.0) -> None:
     """Une tranche du ponton, sur le modèle des ponts du spawn :
     trappe | briques | 3 planches pale oak | briques | trappe, garde-corps en barreaux,
-    poteau + lanterne tous les 4 blocs, lanterne suspendue sous le tablier (décalée de 2)."""
-    w.set(x, G, -3, "pale_oak_trapdoor[facing=north,half=top,open=true]")
-    w.set(x, G, 3, "pale_oak_trapdoor[facing=south,half=top,open=true]")
+    poteau + lanterne tous les 4 blocs, lanterne suspendue sous le tablier (décalée de 2).
+    drop : affaissement du tablier en blocs (par demi-blocs : 0.5 = demi-dalle)."""
+    y, half = G - int(drop), drop % 1 != 0
+    w.set(x, y, -3, "pale_oak_trapdoor[facing=north,half=top,open=true]")
+    w.set(x, y, 3, "pale_oak_trapdoor[facing=south,half=top,open=true]")
     for z in (-2, 2):
-        w.set(x, G, z, BRICK)
-        w.set(x, G - 1, z, BRICK)
-        w.set(x, G + 1, z, "iron_bars")
+        w.set(x, y, z, "polished_blackstone_brick_slab[type=bottom]" if half else BRICK)
+        w.set(x, y - 1, z, BRICK)
+        w.set(x, y + 1, z, "iron_bars")
+        w.set(x, y + 2, z, None)
     for z in range(-1, 2):
-        w.set(x, G, z, "pale_oak_planks")
-        w.set(x, G - 1, z, "polished_blackstone_brick_slab[type=top]")
-    w.set(x, G + 2, -2, None)
-    w.set(x, G + 2, 2, None)
+        w.set(x, y, z, "pale_oak_slab[type=bottom]" if half else "pale_oak_planks")
+        w.set(x, y - 1, z, "polished_blackstone_brick_slab[type=top]")
+        w.fill(x, y + 1, z, x, y + 3, z, None)
     if k % 4 == 0:
         for z in (-2, 2):
-            w.set(x, G + 1, z, BWALL)
-            w.set(x, G + 2, z, "lantern[hanging=false]")
+            w.set(x, y + 1, z, BWALL)
+            w.set(x, y + 2, z, "lantern[hanging=false]")
     if k % 4 == 2:
         n = 6 + (k // 4) % 3
-        w.fill(x, G - n, 0, x, G - 2, 0, "chain")
-        w.set(x, G - n - 1, 0, "lantern[hanging=true]")
+        w.fill(x, y - n, 0, x, y - 2, 0, "chain[axis=y]")
+        w.set(x, y - n - 1, 0, "lantern[hanging=true]")
 
 
-def bridge_pillars(w: World, x: int) -> None:
+def sag_drops(n: int, plateau: bool = False) -> list[float]:
+    """Affaissement de chaque tranche d'un ponton de n blocs : courbe en chaînette (parabole) par demi-blocs,
+    nulle aux deux bouts, jamais plus d'un demi-bloc d'une tranche à l'autre (on y marche sans sauter).
+    plateau : aplatit le fond à un niveau entier (pour l'îlot de repos)."""
+    if n < 6:
+        return [0.0] * n
+    amp = min((n - 1) / 9, 6.0)
+    while True:
+        d = [round(amp * 4 * (i / (n - 1)) * (1 - i / (n - 1)) * 2) / 2 for i in range(n)]
+        if plateau:  # palier plat, à un niveau entier, au point le plus bas
+            cap = math.floor(max(d))
+            d = [min(v, cap) for v in d]
+        if d[0] == d[-1] == 0 and all(abs(a - b) <= 0.5 for a, b in zip(d, d[1:])):
+            return d
+        amp -= 0.25
+
+
+def suspension(w: World, xs: int, xe: int, drops: list[float]) -> None:
+    """Pylônes aux deux bouts et câbles en chaînes qui retombent en courbe, avec des suspentes vers le tablier."""
+    n = xe - xs
+    top = G + 7
+    low = G - int(max(drops)) + 3
+    for x in (xs, xe - 1):
+        y0 = G - int(drops[x - xs])
+        for z in (-3, 3):
+            w.fill(x, y0 - 1, z, x, top, z, BRICK)
+            w.set(x, top + 1, z, CHISEL)
+            w.set(x, top + 2, z, "lantern[hanging=false]")
+    prev = None
+    for i, x in enumerate(range(xs, xe)):
+        t = i / (n - 1)
+        cy = round(top - (top - low) * 4 * t * (1 - t))
+        for z in (-3, 3):
+            if 0 < i < n - 1:
+                w.set(x, cy, z, "chain[axis=x]")
+                if prev is not None and prev != cy:  # marche verticale du câble
+                    w.fill(x, min(prev, cy), z, x, max(prev, cy), z, "chain[axis=y]")
+                if i % 3 == 0:  # suspente jusqu'au tablier
+                    y = G - int(drops[i])
+                    w.fill(x, y + 1, z, x, cy - 1, z, "chain[axis=y]")
+        prev = cy
+
+
+def bridge_pillars(w: World, x: int, drop: float = 0.0) -> None:
     """Piliers d'entrée des ponts du spawn : briques sur 4, chapiteau ciselé, lanterne."""
+    y = G - int(drop)
     for z in (-2, 2):
-        w.fill(x, G + 1, z, x, G + 4, z, BRICK)
-        w.set(x, G + 5, z, CHISEL)
-        w.set(x, G + 6, z, "lantern[hanging=false]")
+        w.fill(x, y + 1, z, x, y + 4, z, BRICK)
+        w.set(x, y + 5, z, CHISEL)
+        w.set(x, y + 6, z, "lantern[hanging=false]")
 
 
-def build_pontoon(w: World, xs: int, xe: int) -> None:
-    """Ponton de xs (bout libre, côté spawn) à xe (côté île, exclu), avec un îlot de repos à mi-chemin."""
-    for x in range(xs, xe):
-        pontoon_slice(w, x, x - xs)
+def build_pontoon(w: World, xs: int, xe: int, rest: bool = True) -> None:
+    """Ponton suspendu de xs à xe (exclu) : tablier qui s'affaisse en courbe vers le milieu, pylônes et câbles,
+    et, s'il est assez long, un îlot de repos posé sur un petit rocher flottant au point le plus bas."""
     length = xe - xs
-    if length < 28:
+    rest = rest and length >= 28
+    drops = sag_drops(length, plateau=rest)
+    for i, x in enumerate(range(xs, xe)):
+        pontoon_slice(w, x, i, drops[i])
+    suspension(w, xs, xe, drops)
+    if not rest:
         return
-    mx = xs + (length // 8) * 4
+    mx = xs + (length - 1) // 2
+    ym = G - int(drops[mx - xs])  # niveau du tablier au palier
     for x in range(mx - 7, mx + 8):  # petit rocher flottant sous le belvédère de repos
         for z in range(-8, 9):
             r = math.hypot(x - mx, z * 0.85)
-            if r > 6.5:
+            if r > 6.5 or abs(z) <= 3 and abs(x - mx) > 4:
                 continue
             depth = 2 + int(7 * (1 - r / 6.5) ** 0.8 * (0.8 + 0.4 * h2(x, z, 61)))
-            floating_rock(w, x, z, G - 1, depth, r / 6.5)
+            if abs(z) >= 3 or abs(x - mx) <= 4:
+                floating_rock(w, x, z, ym - (1 if abs(z) >= 3 else 2), depth, r / 6.5)
             if abs(z) >= 3:
-                w.set(x, G, z, "pale_moss_block" if r > 5.6 else DSLATE if r > 4.8 else TILES)
-                w.set(x, G + 1, z, "pale_moss_carpet" if r > 5.6 and h2(x, z, 63) < 0.4 else None)
+                w.set(x, ym, z, "pale_moss_block" if r > 5.6 else DSLATE if r > 4.8 else TILES)
+                w.set(x, ym + 1, z, "pale_moss_carpet" if r > 5.6 and h2(x, z, 63) < 0.4 else None)
     for x in range(mx - 3, mx + 4):  # ouvre le garde-corps vers les deux terrasses
         for z in (-2, 2):
-            w.set(x, G + 1, z, None)
-            w.set(x, G + 2, z, None)
+            w.set(x, ym + 1, z, None)
+            w.set(x, ym + 2, z, None)
+        for z in (-3, 3):
+            for y in range(ym + 1, G + 8):
+                if (w.get(x, y, z) or "").startswith("chain[axis=y]") and y < ym + 3:
+                    w.set(x, y, z, None)
     for sz in (-1, 1):
         for x in range(mx - 2, mx + 3):
-            w.set(x, G + 1, sz * 6, stairs("south" if sz > 0 else "north"))
+            w.set(x, ym + 1, sz * 6, stairs("south" if sz > 0 else "north"))
         for sx in (-4, 4):
-            w.set(mx + sx, G + 1, sz * 5, BWALL)
-            w.set(mx + sx, G + 2, sz * 5, "lantern[hanging=false]")
-        w.set(mx, G + 1, sz * 5, "decorated_pot")
+            w.set(mx + sx, ym + 1, sz * 5, BWALL)
+            w.set(mx + sx, ym + 2, sz * 5, "lantern[hanging=false]")
+        w.set(mx, ym + 1, sz * 5, "decorated_pot")
 
 
 # --------------------------------------------------------------------------- export

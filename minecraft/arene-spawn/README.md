@@ -13,7 +13,7 @@ Une île flottante dans l'identité visuelle du spawn, avec une fosse de combat 
 - **Promenade** au niveau du spawn tout autour de la fosse, derrière un muret continu.
 - **4 rangs de gradins** en pale oak, avec un mur du fond crénelé, des lanternes et des bannières rouges et bleues.
 - **Entrée à l'est**, sous un porche en verre rouge et bleu. Sur le côté, un **panneau des paris** explique `/pari rouge|bleu <mise>`.
-- **Ponton** de 40 blocs vers le spawn, sur le modèle des ponts du spawn, avec un îlot de repos à mi-chemin.
+- **Ponton suspendu** de 40 blocs vers le spawn, sur le modèle des ponts du spawn. Le tablier s'incurve vers le bas, entre des pylônes et des câbles en chaînes, avec un îlot de repos au point le plus bas.
 
 ![Plan de la fosse](plan.png)
 

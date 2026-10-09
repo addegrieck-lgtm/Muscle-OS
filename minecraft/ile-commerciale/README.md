@@ -47,7 +47,7 @@ L'île se rattache **au côté est du spawn, dans l'axe du chemin est**, celui q
 - Une **place du marché** au sud, avec 3 étals et des tables.
 - Un **balcon panoramique** au nord, en surplomb du vide.
 - Un **obélisque rouge** à l'est.
-- Un **ponton** de 41 blocs, dont 40 dans le vide, avec à mi-chemin un îlot de repos posé sur un petit rocher flottant.
+- Un **ponton suspendu** de 41 blocs, dont 40 dans le vide. Son tablier s'incurve vers le bas jusqu'à 4 blocs sous le niveau des bouts, par demi-dalles, donc on y marche sans sauter. Il est tenu par des pylônes aux deux bouts et par des câbles en chaînes qui retombent en courbe, avec des suspentes. Au point le plus bas, un îlot de repos est posé sur un petit rocher flottant. Le `ponton-module-8` reste droit : il sert à rallonger un ponton.
 
 ![Plan des boutiques](plan-boutiques.png)
 

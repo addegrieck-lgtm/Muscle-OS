@@ -350,8 +350,7 @@ def main() -> None:
     pad_x = west + 7
     build_outside(w, x_out, pad_x)
     xe, xs = pad_x - 6, west - args.ponton
-    for x in range(xs, xe):
-        ile.pontoon_slice(w, x, x - xs)
+    ile.build_pontoon(w, xs, xe, rest=False)
     ile.bridge_pillars(w, xe - 1)
     origin = (xs, G, 0)
     interior = w.copy()

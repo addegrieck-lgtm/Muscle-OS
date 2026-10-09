@@ -25,7 +25,7 @@ Pour coller la grotte :
 
 ![Intérieur](apercu-interieur.png)
 
-On entre par un portail à piliers, puis un escalier de 3 marches descend dans la grotte (30 × 20 blocs, jusqu'à 9 de haut).
+On arrive par un ponton suspendu de 31 blocs : son tablier s'incurve vers le bas jusqu'à 3,5 blocs, entre des pylônes et des câbles en chaînes. On entre ensuite par un portail à piliers, puis un escalier de 3 marches descend dans la grotte (30 × 20 blocs, jusqu'à 9 de haut).
 
 **Forge** (moitié nord) :
 - un bassin de lave derrière des barreaux, sous une hotte en blackstone ;
