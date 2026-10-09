@@ -35,6 +35,6 @@ pnpm dev                                         # site :3000, admin :3001/admin
 - **[Mettre en ligne sur un VPS](docs/DEPLOIEMENT_VPS.md)** · [Intégration Minecraft](docs/MINECRAFT_INTEGRATION.md) · [Performance & PvP fluide](docs/MINECRAFT_PERFORMANCE.md) · [Arène de bots P4 U3](docs/ARENA_BOTS.md) · [Coffres à clés](docs/CRATES.md) · [Warps farm par grade](minecraft/warps-farm/README.md) · [Authentification](docs/AUTHENTICATION.md) · [Sécurité](docs/SECURITY.md)
 - [Monétisation](docs/MONETIZATION.md) · [Scalabilité, coûts, sauvegardes](docs/SCALABILITY.md)
 - **[Avancement](docs/SITE_BUILD_PROGRESS.md)**
-- Constructions : [Île Marchande flottante + ponton](minecraft/ile-commerciale/README.md) · [Arène de bots du spawn](minecraft/arene-spawn/README.md) (schematics WorldEdit)
+- Constructions (schematics WorldEdit) : [Île Marchande + ponton](minecraft/ile-commerciale/README.md) · [Arène de bots du spawn](minecraft/arene-spawn/README.md) · [Grotte de la Forge](minecraft/grotte-forge/README.md)
 
 Serveur non officiel, non affilié à Mojang Studios ni à Microsoft.
