@@ -411,7 +411,7 @@ Avec VæloriaBridge installé, le plugin envoie `FACTION_CREATE/DISBAND/JOIN/LEA
   - **fermeture des portes** : les joueurs restés dehors sont éliminés, et faute de survivant il n'y a pas de vainqueur ;
   - `/f war admin` s'ouvre.
 - Le schéma livré est mis à jour avec le plugin, sauf s'il a été modifié à la main.
-- Une vidéo de présentation de 30 s, en motion design, se génère depuis la vraie carte avec `tools/forteresse/video/`. C'est un rendu isométrique des blocs ; les combattants sont mis en scène.
+- Une vidéo de présentation de 30 s, en motion design, se génère depuis la vraie carte avec `tools/forteresse/video/` : `render_iso.py` fait le rendu isométrique des blocs, `compose.py` le montage, `bande_son.py` la musique de bataille synthétisée (tambours, cuivres, épées). Les combattants y sont mis en scène.
 
 ## Ce qui a été vérifié (convoi et primes)
 - 37 tests unitaires, dont les paliers et montants des primes, les annonces et la condition de victoire du convoi.
