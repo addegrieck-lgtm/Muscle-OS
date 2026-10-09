@@ -56,7 +56,7 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("relative rounded-md px-2.5 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
+                  className={cn("relative block rounded-md px-2.5 py-2 font-display text-sm font-semibold uppercase tracking-[0.08em] transition-colors", active ? "text-fg after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:bg-ruby" : "text-muted hover:text-fg")}
                 >
                   {item.label}
                 </Link>
