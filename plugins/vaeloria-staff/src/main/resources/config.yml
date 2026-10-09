@@ -1,0 +1,43 @@
+# VaeloriaStaff — réglages généraux.
+# Annonces, pancartes, PNJ et images se configurent EN JEU avec /staff
+# (enregistrés dans broadcasts.yml, holograms.yml, npcs.yml, images.yml).
+
+prefix: "&6[VÆLORIA] &7"
+staff-notify-prefix: "&8[&6Staff&8] &7"
+
+broadcasts:
+  # Intervalle de la rotation automatique au premier démarrage (modifiable ensuite dans /staff → Annonces).
+  default-interval-seconds: 300
+  # Annonce rapide (/staff dire) : durée d'affichage et son.
+  quick-seconds: 6
+  quick-sound: "block.note_block.pling"
+
+images:
+  # Nombre maximal de cadres pour une image (1 cadre = 1 carte 128×128 px).
+  max-frames: 64
+  # Poids maximal d'une image téléchargée ou lue dans images/.
+  max-download-mb: 15
+  # Cadres lumineux : l'image reste lumineuse même dans le noir (recommandé).
+  glow-frames: true
+
+staff-mode:
+  # SURVIVAL (recommandé : pas d'objets créatifs) avec vol + invulnérabilité, ou CREATIVE / ADVENTURE.
+  gamemode: SURVIVAL
+  # Invisible automatiquement en mode staff.
+  auto-vanish: true
+
+freeze:
+  title: "&c&lIMMOBILISÉ"
+  subtitle: "&fNe te déconnecte pas, un membre du staff arrive."
+  # Commandes encore possibles quand on est immobilisé.
+  allowed-commands: [msg, tell, w, r, reply, m]
+
+sanctions:
+  default-reason: "Non-respect du règlement"
+  # Commandes interdites aux joueurs muets.
+  muted-blocked-commands: [msg, tell, w, r, reply, m, me, say, mail]
+  kick-screen: "&c&lVÆLORIA\n\n&fTu as été expulsé.\n&7Raison : &f{reason}"
+  ban-screen: "&c&lVÆLORIA\n\n&fTu es banni ({duration}).\n&7Raison : &f{reason}"
+
+staff-chat:
+  format: "&d[Staff] &f{player} &8» &d"

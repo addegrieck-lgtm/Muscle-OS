@@ -1,0 +1,111 @@
+name: VaeloriaStaff
+version: '${version}'
+main: fr.vaeloria.staff.VaeloriaStaffPlugin
+api-version: '1.21'
+description: Outils du staff de VÆLORIA — annonces, pancartes, PNJ, images HD sur cadres et modération, tout depuis /staff.
+authors: [VÆLORIA]
+commands:
+  staff:
+    description: Menu staff (annonces, pancartes, PNJ, images, modération)
+    usage: "/staff [mode|vanish|joueur|freeze|invsee|warn|kick|mute|ban|annonce|dire|image|chat|reload]"
+    aliases: [st]
+  sc:
+    description: Chat staff (/sc <message>, ou /sc seul pour basculer)
+    usage: "/sc [message]"
+    aliases: [staffchat]
+permissions:
+  vaeloria.staff.admin:
+    description: Tout VaeloriaStaff (contenu + modération + rechargement)
+    default: op
+    children:
+      vaeloria.staff.content: true
+      vaeloria.staff.moderator: true
+      vaeloria.staff.ban: true
+      vaeloria.staff.invsee.edit: true
+      vaeloria.staff.reload: true
+  vaeloria.staff.content:
+    description: Créer annonces, pancartes, PNJ et images
+    default: op
+    children:
+      vaeloria.staff.use: true
+      vaeloria.staff.broadcast: true
+      vaeloria.staff.hologram: true
+      vaeloria.staff.npc: true
+      vaeloria.staff.image: true
+  vaeloria.staff.moderator:
+    description: Modération courante (à donner aux modérateurs)
+    default: op
+    children:
+      vaeloria.staff.use: true
+      vaeloria.staff.mode: true
+      vaeloria.staff.vanish: true
+      vaeloria.staff.vanish.see: true
+      vaeloria.staff.freeze: true
+      vaeloria.staff.invsee: true
+      vaeloria.staff.teleport: true
+      vaeloria.staff.warn: true
+      vaeloria.staff.kick: true
+      vaeloria.staff.mute: true
+      vaeloria.staff.chat: true
+      vaeloria.staff.chatmanage: true
+      vaeloria.staff.chat.bypass: true
+  vaeloria.staff.use:
+    description: Ouvrir /staff, recevoir les alertes staff
+    default: op
+  vaeloria.staff.broadcast:
+    description: Gérer et envoyer les annonces
+    default: op
+  vaeloria.staff.hologram:
+    description: Gérer les pancartes flottantes
+    default: op
+  vaeloria.staff.npc:
+    description: Gérer les PNJ
+    default: op
+  vaeloria.staff.image:
+    description: Poser et retirer des images HD (téléchargement depuis Internet)
+    default: op
+  vaeloria.staff.mode:
+    description: Mode staff (outils, vol, invulnérabilité), soigner un joueur
+    default: op
+  vaeloria.staff.vanish:
+    description: Devenir invisible
+    default: op
+  vaeloria.staff.vanish.see:
+    description: Voir les membres du staff invisibles
+    default: op
+  vaeloria.staff.freeze:
+    description: Immobiliser un joueur
+    default: op
+  vaeloria.staff.invsee:
+    description: Voir l'inventaire et le coffre de l'Ender d'un joueur
+    default: op
+  vaeloria.staff.invsee.edit:
+    description: Modifier l'inventaire d'un joueur (hors mode staff)
+    default: op
+  vaeloria.staff.teleport:
+    description: Se téléporter à un joueur / le téléporter
+    default: op
+  vaeloria.staff.warn:
+    description: Avertir un joueur
+    default: op
+  vaeloria.staff.kick:
+    description: Expulser un joueur
+    default: op
+  vaeloria.staff.mute:
+    description: Rendre muet / rendre la parole
+    default: op
+  vaeloria.staff.ban:
+    description: Bannir un joueur
+    default: op
+  vaeloria.staff.chat:
+    description: Lire et écrire dans le chat staff
+    default: op
+  vaeloria.staff.chatmanage:
+    description: Verrouiller / nettoyer le chat public
+    default: op
+  vaeloria.staff.chat.bypass:
+    description: Parler malgré le chat verrouillé, ne pas être nettoyé
+    default: op
+  vaeloria.staff.reload:
+    description: /staff reload
+    default: op
