@@ -125,14 +125,40 @@ public final class FortressService {
     public Path exportSchematic() throws IOException {
         Path dir = plugin.getDataFolder().toPath().resolve("forteresse");
         Files.createDirectories(dir);
+        // Une copie que le staff n'a pas modifiée est remplacée par celle du jar à chaque mise à jour du plugin ;
+        // un fichier modifié à la main (empreinte différente de la dernière copie livrée) est conservé.
+        Path stamp = dir.resolve(".livree");
+        java.util.Properties delivered = new java.util.Properties();
+        if (Files.exists(stamp)) try (InputStream in = Files.newInputStream(stamp)) { delivered.load(in); }
+        boolean changed = false;
         for (String f : List.of("forteresse.schem", "layout.json")) {
-            Path out = dir.resolve(f);
-            if (Files.exists(out)) continue;
+            byte[] bundled;
             try (InputStream in = plugin.getResource("forteresse/" + f)) {
-                if (in != null) Files.copy(in, out);
+                if (in == null) continue;
+                bundled = in.readAllBytes();
             }
+            Path out = dir.resolve(f);
+            String newHash = sha(bundled);
+            if (Files.exists(out)) {
+                String current = sha(Files.readAllBytes(out));
+                if (current.equals(newHash)) continue;
+                String last = delivered.getProperty(f);
+                if (last != null && !current.equals(last)) continue; // modifié par le staff : on n'y touche pas
+            }
+            Files.write(out, bundled);
+            delivered.setProperty(f, newHash);
+            changed = true;
         }
+        if (changed) try (var o = Files.newOutputStream(stamp)) { delivered.store(o, "Empreintes des fichiers livrés par VæloriaFactions"); }
         return dir;
+    }
+
+    private static String sha(byte[] b) {
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(b));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private InputStream open(String file) throws IOException {
