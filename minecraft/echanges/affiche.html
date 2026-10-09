@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Affiche Échanges PNJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07070a; --surface: #101115; --surface2: #1b1c21; --line: #2a2c33; --line2: #3a3d45;
+    --fg: #f4f5f7; --muted: #a9aeb8; --subtle: #8b909b;
+    --ruby: #d21f2f; --ruby-text: #ef4450; --ruby-deep: #5e0710;
+    --emerald: #3ddc84; --commun: #b8bcc6; --rare: #5b8cff; --epique: #b05cff; --legendaire: #ffb020;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; background: var(--bg); overflow: hidden; }
+  body {
+    font-family: Inter, sans-serif; color: var(--fg);
+    background:
+      radial-gradient(1100px 520px at 78% -8%, rgba(210,31,47,.22), transparent 70%),
+      radial-gradient(900px 600px at 5% 110%, rgba(61,220,132,.08), transparent 70%),
+      var(--bg);
+    padding: 44px 72px 40px; display: flex; flex-direction: column; gap: 30px;
+  }
+  body::before { /* grille discrète */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .display { font-family: "Chakra Petch", sans-serif; text-transform: uppercase; letter-spacing: .04em; }
+  .metal { background: linear-gradient(180deg, #fff 0%, #e2e4e9 48%, #aeb3bc 52%, #d6d9df 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  header { display: flex; align-items: center; gap: 48px; position: relative; }
+  header img { height: 96px; }
+  .sep { width: 2px; align-self: stretch; background: linear-gradient(var(--ruby), transparent); }
+  .kicker { color: var(--ruby-text); font-weight: 700; font-size: 20px; letter-spacing: .28em; text-transform: uppercase; }
+  h1 { font-size: 74px; line-height: 1; font-weight: 700; margin-top: 4px; white-space: nowrap; }
+  .tagline { font-size: 25px; color: var(--muted); margin-top: 10px; }
+  .tagline b { color: var(--emerald); font-weight: 700; }
+
+  /* Étapes */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 46px; position: relative; }
+  .step {
+    position: relative; background: linear-gradient(180deg, var(--surface2), var(--surface));
+    border: 1px solid var(--line); border-radius: 18px; padding: 22px 26px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .step::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; border-radius: 18px 18px 0 0; background: var(--accent); }
+  .step:nth-child(-n+3)::after { /* flèche vers l'étape suivante */
+    content: ""; position: absolute; right: -36px; top: 66px; width: 26px; height: 26px;
+    border-top: 5px solid var(--line2); border-right: 5px solid var(--line2); transform: rotate(45deg);
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .num { font-family: "Chakra Petch"; font-size: 60px; font-weight: 700; line-height: 1; color: var(--accent); opacity: .9; }
+  .icon { width: 88px; height: 88px; image-rendering: pixelated; filter: drop-shadow(0 6px 18px var(--glow)); }
+  h2 { font-family: "Chakra Petch"; text-transform: uppercase; font-size: 32px; line-height: 1.05; letter-spacing: .03em; }
+  .how { font-size: 21px; line-height: 1.36; color: var(--fg); }
+  .how kbd, .chip {
+    font-family: Inter; font-weight: 700; font-size: .92em; padding: 2px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.07); border: 1px solid var(--line2); white-space: nowrap;
+  }
+  .note { margin-top: auto; font-size: 18px; line-height: 1.4; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+  .note b { color: var(--fg); }
+  .em { color: var(--emerald); font-weight: 700; }
+  .warn { color: var(--ruby-text); font-weight: 700; }
+
+  .s1 { --accent: var(--emerald); --glow: rgba(61,220,132,.35); }
+  .s2 { --accent: var(--epique); --glow: rgba(176,92,255,.4); }
+  .s3 { --accent: var(--legendaire); --glow: rgba(255,176,32,.35); }
+  .s4 { --accent: var(--ruby-text); --glow: rgba(239,68,80,.35); }
+
+  .loop {
+    position: absolute; left: 12.5%; right: 12.5%; bottom: -30px; height: 30px;
+    border: 4px dashed var(--line2); border-top: none; border-radius: 0 0 22px 22px;
+  }
+  .loop span {
+    position: absolute; left: 50%; bottom: -17px; transform: translateX(-50%); background: var(--bg);
+    padding: 0 18px; color: var(--subtle); font-size: 20px; font-weight: 600; letter-spacing: .06em; white-space: nowrap;
+  }
+  .loop::before { content: ""; position: absolute; left: -12px; top: -14px; border: 10px solid transparent; border-bottom: 14px solid var(--line2); }
+
+  /* Bas */
+  .bottom { display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; margin-top: 18px; }
+  .panel { background: rgba(16,17,21,.85); border: 1px solid var(--line); border-radius: 18px; padding: 20px 28px; }
+  .panel h3 { font-family: "Chakra Petch"; text-transform: uppercase; font-size: 22px; letter-spacing: .1em; color: var(--muted); margin-bottom: 12px; }
+  .bars { display: grid; grid-template-columns: 200px 1fr; row-gap: 16px; column-gap: 18px; align-items: center; }
+  .bars .lbl { font-size: 20px; color: var(--muted); font-weight: 600; }
+  .bar { display: flex; height: 44px; border-radius: 8px; overflow: hidden; }
+  .bar div { display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; color: #07070a; white-space: nowrap; }
+  .c { background: var(--commun); } .r { background: var(--rare); } .e { background: var(--epique); } .l { background: var(--legendaire); }
+  .legend { display: flex; gap: 26px; margin-top: 20px; font-size: 19px; color: var(--muted); }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 8px; vertical-align: -1px; }
+  .p4 { margin-top: 16px; font-size: 20px; color: var(--muted); }
+  .p4 b { color: var(--epique); }
+
+  ul.tips { list-style: none; display: grid; gap: 8px; font-size: 20px; line-height: 1.3; }
+  ul.tips li { padding-left: 30px; position: relative; }
+  ul.tips li::before { content: ""; position: absolute; left: 4px; top: 9px; width: 10px; height: 10px; background: var(--ruby); transform: rotate(45deg); }
+  .cmds { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .cmds .chip { font-size: 17px; color: var(--fg); padding: 3px 9px; }
+  .cmds .chip small { font-size: 15px; }
+  .cmds .chip small { color: var(--subtle); font-weight: 500; margin-left: 6px; }
+</style>
+</head>
+<body>
+  <header>
+    <img src="../../brand/valoria-logo-horizontal-transparent.svg" alt="VÆLORIA">
+    <div class="sep"></div>
+    <div>
+      <div class="kicker">Nouveau · Échanges PNJ</div>
+      <h1 class="display metal">Livres des bibliothécaires</h1>
+      <div class="tagline">Tente ta chance pour un <b>Protection IV</b>. Tout se paie en <b>émeraudes</b>.</div>
+    </div>
+  </header>
+
+  <section class="steps">
+    <article class="step s1">
+      <div class="top"><span class="num">1</span><svg class="icon" data-icon="emerald"></svg></div>
+      <h2>Booste</h2>
+      <p class="how"><kbd>Accroupi</kbd> + <kbd>clic droit</kbd> sur un bibliothécaire, des <span class="em">émeraudes</span> en main.</p>
+      <p class="how">Son livre change et sa <b>chance</b> monte : les bons livres sortent plus souvent.</p>
+      <p class="note">Boost : <b class="em">2 émeraudes</b>, puis +1 à chaque fois, <b>6 au maximum</b>. Chance : 15 au maximum.</p>
+    </article>
+    <article class="step s2">
+      <div class="top"><span class="num">2</span><svg class="icon" data-icon="book"></svg></div>
+      <h2>Achète le livre</h2>
+      <p class="how">Le bon livre est sorti ? Achète-le au villageois avec des <span class="em">émeraudes</span> + 1 livre.</p>
+      <p class="how">Dès la première vente, <span class="warn">plus de boost possible</span> sur ce villageois.</p>
+      <p class="note">Exemple : <b>Protection IV</b> à <b class="em">36–44 émeraudes</b>.</p>
+    </article>
+    <article class="step s3">
+      <div class="top"><span class="num">3</span><svg class="icon" data-icon="hourglass"></svg></div>
+      <h2>Il disparaît</h2>
+      <p class="how">Le livre s'en va après <b>ses ventes</b> ou au bout de <b>48 h</b>, selon ce qui arrive en premier.</p>
+      <p class="how">Le villageois est <span class="warn">épuisé</span> : plus de livre, plus de boost.</p>
+      <p class="note">Ventes par livre : commun <b>12</b>, rare <b>6</b>, épique <b>3</b>, légendaire <b>1</b>.</p>
+    </article>
+    <article class="step s4">
+      <div class="top"><span class="num">4</span><svg class="icon" data-icon="egg"></svg></div>
+      <h2>Capture &amp; relâche</h2>
+      <p class="how">Lance un <b>Œuf de capture</b> sur le villageois, puis <kbd>clic droit</kbd> sur un bloc <b>dans ton claim</b>.</p>
+      <p class="how">Il repart niveau 1, <b>sans livre</b>, et ne reproposera <span class="warn">jamais</span> ses anciens livres.</p>
+      <p class="note"><b>/echanges oeuf</b> : <b class="em">24 émeraudes</b> l'œuf.</p>
+    </article>
+    <div class="loop"><span>↺ ET ON RECOMMENCE : BOOSTE-LE POUR UN NOUVEAU LIVRE</span></div>
+  </section>
+
+  <section class="bottom">
+    <div class="panel">
+      <h3>Chances d'un livre</h3>
+      <div class="bars">
+        <span class="lbl">Villageois neuf</span>
+        <div class="bar"><div class="c" style="width:73.6%">73,6 %</div><div class="r" style="width:23.6%">23,6 %</div><div class="e" style="width:2.5%"></div><div class="l" style="width:0.3%"></div></div>
+        <span class="lbl">Chance max (15)</span>
+        <div class="bar"><div class="c" style="width:46%">46 %</div><div class="r" style="width:36.9%">36,9 %</div><div class="e" style="width:15.5%">15,4 %</div><div class="l" style="width:1.6%"></div></div>
+      </div>
+      <div class="legend">
+        <span><i class="c"></i>Commun</span><span><i class="r"></i>Rare</span><span><i class="e"></i>Épique 2,5 → 15,4 %</span><span><i class="l"></i>Légendaire 0,3 → 1,6 %</span>
+      </div>
+      <p class="p4">Protection IV : <b>0,7 %</b> sur un villageois neuf, <b>4,5 %</b> à chance max. Bonne chance !</p>
+    </div>
+    <div class="panel">
+      <h3>Bon à savoir</h3>
+      <ul class="tips">
+        <li>Un seul livre par villageois.</li>
+        <li>Casser son pupitre ne change plus son livre : il faut le booster.</li>
+        <li>Impossible de capturer ou de relâcher dans le claim d'une autre faction.</li>
+        <li>Un bon bibliothécaire est un trésor : protège-le des raids !</li>
+      </ul>
+      <div class="cmds">
+        <span class="chip">/echanges <small>aide</small></span>
+        <span class="chip">/echanges oeuf <small>œuf de capture</small></span>
+        <span class="chip">/echanges chances <small>vise un PNJ</small></span>
+      </div>
+    </div>
+  </section>
+
+<script>
+  // Icônes pixel art 16×16 dessinées en SVG (style Minecraft).
+  const ICONS = {
+    emerald: { pal: { a: "#0b5d2e", b: "#17a34a", c: "#3ddc84", d: "#b9ffd6", e: "#073d1f" }, px: [
+      "......eeee......",
+      ".....ecccce.....",
+      "....ecddccbe....",
+      "...ecdccccbbe...",
+      "..ecdcccccbbbe..",
+      "..ecccccccbbbe..",
+      ".ecccccccbbbbbe.",
+      ".ecccccccbbbbae.",
+      ".ebcccccbbbbbae.",
+      ".ebbcccbbbbbaae.",
+      "..ebbbbbbbbbae..",
+      "..eabbbbbbbaae..",
+      "...eaabbbbaae...",
+      "....eaaaaaae....",
+      ".....eaaaae.....",
+      "......eeee......"] },
+    book: { pal: { a: "#3b1a5e", b: "#6d2fb3", c: "#b05cff", d: "#e8d3ff", e: "#d9c9a3", f: "#f6efe0", g: "#1c0d2e" }, px: [
+      "................",
+      "..gggggggggggg..",
+      ".gcccccccccccbg.",
+      ".gcdcccccccccbg.",
+      ".gcccccdccccbbg.",
+      ".gccccccccccbbg.",
+      ".gcccdcccccbbbg.",
+      ".gcccccccccbbbg.",
+      ".gcccccccdcbbbg.",
+      ".gccdccccccbbbg.",
+      ".gcccccccccbbag.",
+      ".gbbbbbbbbbbaag.",
+      ".gffffffffffffg.",
+      ".geeeeeeeeeeeeg.",
+      "..gggggggggggg..",
+      "................"] },
+    hourglass: { pal: { a: "#7a4a00", b: "#ffb020", c: "#ffe08a", s: "#f2c46d", g: "#cfd6e6", h: "#8f9bb3" }, px: [
+      "..aaaaaaaaaaaa..",
+      "..abbbbbbbbbba..",
+      "...ghsssssshg...",
+      "...gh.sssss.g...",
+      "....gh.sss.g....",
+      ".....gh.s.g.....",
+      "......gssg......",
+      ".......ss.......",
+      "......g.sg......",
+      ".....g..s.g.....",
+      "....g...s..g....",
+      "...g...sss..g...",
+      "...g.sssssssg...",
+      "..abbbbbbbbbba..",
+      "..aaaaaaaaaaaa..",
+      "................"] },
+    egg: { pal: { a: "#5a5240", b: "#d8cfb4", c: "#f4eedb", d: "#ffffff", g: "#3ddc84", h: "#17a34a" }, px: [
+      "......aaaa......",
+      ".....acccca.....",
+      "....accddcca....",
+      "...accdcccgca...",
+      "...acdcccghca...",
+      "..acccgcccccca..",
+      "..acchgccccbca..",
+      "..accccccgcbca..",
+      ".acccccccghbbca.",
+      ".acgcccccccbbca.",
+      ".achgcccccbbbca.",
+      ".acccccccbbbbca.",
+      "..acbccbbbbbba..",
+      "..abbbbbbbbbba..",
+      "...aabbbbbbaa...",
+      ".....aaaaaa....."] },
+  };
+  document.querySelectorAll("svg[data-icon]").forEach((svg) => {
+    const { pal, px } = ICONS[svg.dataset.icon];
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("shape-rendering", "crispEdges");
+    let out = "";
+    px.forEach((row, y) => [...row].forEach((ch, x) => {
+      const c = pal[ch];
+      if (c) out += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`;
+    }));
+    svg.innerHTML = out;
+  });
+</script>
+</body>
+</html>
