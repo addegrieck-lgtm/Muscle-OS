@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Interface d'administration de la Forteresse (/f forteresse admin) : construction, configuration depuis le schéma,
+ * Interface d'administration de la Forteresse (/f war admin) : construction, configuration depuis le schéma,
  * positions personnalisées, lancement, portes, horaires, gains et réglages.
  */
 public final class FortressAdminMenu {
@@ -61,7 +61,7 @@ public final class FortressAdminMenu {
         String state = switch (fs().phase()) {
             case IDLE -> "<gray>Aucune bataille en cours";
             case REGISTRATION -> "<yellow>Inscriptions ouvertes (" + fs().registered().size() + " inscrits)";
-            case PREPARATION -> "<gold>Préparation dans les camps";
+            case PREPARATION -> "<gold>Préparation : chacun cherche son équipe";
             case ASSAULT -> "<gold>Assaut : portes ouvertes";
             case CLOSED -> "<red>Portes fermées : bataille au sommet";
         };
@@ -71,13 +71,13 @@ public final class FortressAdminMenu {
         info.add(c(d != null && d.ready() ? "<green>Forteresse configurée" : "<red>Forteresse non configurée"));
         if (d != null) {
             info.add(c("<gray>Origine : <white><v>", "v", where(d.origin)));
-            info.add(c("<gray><g> porte(s), <n> camp(s)", "g", d.gates.size(), "n", d.camps.size()));
+            info.add(c("<gray><g> porte(s), <n> point(s) d'apparition", "g", d.gates.size(), "n", d.spawns.size()));
         }
         m.set(4, Menu.item(Material.RED_BANNER, c("<dark_red><b>Forteresse"), info), null);
 
         m.set(10, Menu.item(Material.LIME_CONCRETE, c("<green><b>Ouvrir les inscriptions"), List.of(
                 c("<gray>Durée : <white><v> min", "v", s().fortressRegistrationMinutes),
-                c("<gray>Puis camps, assaut, fermeture des portes"))), (pl, ct) -> {
+                c("<gray>Puis forêt, assaut, fermeture des portes"))), (pl, ct) -> {
             var r = fs().openRegistration(false);
             if (r != FortressService.StartResult.OK) pl.sendMessage(Msg.prefixed("fortress.start-fail." + r.name().toLowerCase(Locale.ROOT)));
             open(pl);
@@ -104,7 +104,7 @@ public final class FortressAdminMenu {
             pl.teleportAsync(l);
         });
         m.set(16, Menu.item(Material.SPYGLASS, c("<white><b>Montrer les zones"), List.of(
-                c("<green>vert<gray> : sommet · <gold>flammes<gray> : enceinte"), c("<white>blanc<gray> : portes · totems : camps"))), (pl, ct) -> {
+                c("<green>vert<gray> : sommet · <gold>flammes<gray> : enceinte"), c("<white>blanc<gray> : portes · totems : apparitions"))), (pl, ct) -> {
             pl.closeInventory();
             fs().showZones(pl);
         });
@@ -118,7 +118,7 @@ public final class FortressAdminMenu {
                 }));
         m.set(29, Menu.item(Material.MAP, c("<aqua><b>Configurer depuis le schéma"), List.of(
                 c("<gray>Tu as collé forteresse.schem avec WorldEdit ?"), c("<gray>Tiens-toi là où tu étais pour le //paste,"),
-                c("<gray>les portes, le sommet et les camps sont placés"), c("<yellow>Clic : configurer à ma position"))), (pl, ct) -> {
+                c("<gray>portes, sommet et apparitions sont placés"), c("<yellow>Clic : configurer à ma position"))), (pl, ct) -> {
             try {
                 fs().configureFromLayout(pl.getLocation());
                 say(pl, "<green>Forteresse configurée autour de ta position. <gray>Vérifie avec « Montrer les zones ».");
@@ -128,7 +128,7 @@ public final class FortressAdminMenu {
             open(pl);
         });
         m.set(30, Menu.item(Material.COMPASS, c("<white><b>Positions personnalisées"), List.of(
-                c("<gray>Pour ta propre forteresse :"), c("<gray>sommet, enceinte, portes, camps, sortie"), c("<yellow>Clic : ouvrir"))), (pl, ct) -> openPositions(pl));
+                c("<gray>Pour ta propre forteresse :"), c("<gray>sommet, enceinte, portes, apparitions, sortie"), c("<yellow>Clic : ouvrir"))), (pl, ct) -> openPositions(pl));
 
         m.set(32, Menu.item(Material.GOLD_BLOCK, c("<yellow><b>Gains"), List.of(
                 c("<gray>Banque : <white><v>", "v", plugin.bank().format(s().fortressRewardMoney)),
@@ -234,16 +234,17 @@ public final class FortressAdminMenu {
             plugin.manager().markDirty();
             openPositions(pl);
         });
-        m.set(19, Menu.item(Material.WHITE_BED, c("<aqua><b>Ajouter un camp ici"), List.of(
-                c("<gray>Point d'apparition d'une équipe"), c("<gray><v> camp(s)", "v", d == null ? 0 : d.camps.size()))), (pl, ct) -> {
-            def(pl).camps.add(Pos.of(pl.getLocation()));
+        m.set(19, Menu.item(Material.OAK_SAPLING, c("<aqua><b>Ajouter un point d'apparition ici"), List.of(
+                c("<gray>Chacun apparaît seul sur l'un de ces points"), c("<gray>Aucun point : au hasard dans la carte protégée"),
+                c("<gray><v> point(s)", "v", d == null ? 0 : d.spawns.size()))), (pl, ct) -> {
+            def(pl).spawns.add(Pos.of(pl.getLocation()));
             plugin.manager().markDirty();
-            say(pl, "<green>Camp ajouté.");
+            say(pl, "<green>Point d'apparition ajouté.");
             openPositions(pl);
         });
-        m.set(20, Menu.item(Material.BARRIER, c("<red><b>Retirer tous les camps"), List.of(c("<red>Maj + clic droit"))), (pl, ct) -> {
+        m.set(20, Menu.item(Material.BARRIER, c("<red><b>Retirer tous les points d'apparition"), List.of(c("<red>Maj + clic droit"))), (pl, ct) -> {
             if (ct != ClickType.SHIFT_RIGHT || fs().def() == null) return;
-            fs().def().camps.clear();
+            fs().def().spawns.clear();
             plugin.manager().markDirty();
             openPositions(pl);
         });
@@ -402,7 +403,7 @@ public final class FortressAdminMenu {
         Menu m = new Menu(5, c("<white>Forteresse · Réglages"));
         toggle(m, 4, "Forteresse activée", "fortress.enabled", s().fortressEnabled, "Inscriptions et lancements automatiques");
         stepper(m, 10, Material.WRITABLE_BOOK, "Inscriptions", " min", "fortress.registration-minutes", s().fortressRegistrationMinutes, 1, 1, 5, null);
-        stepper(m, 11, Material.WHITE_BED, "Préparation", " s", "fortress.preparation-seconds", s().fortressPreparationSeconds, 5, 5, 30, "Dans les camps, portes fermées");
+        stepper(m, 11, Material.OAK_SAPLING, "Préparation", " s", "fortress.preparation-seconds", s().fortressPreparationSeconds, 5, 5, 30, "Dans la forêt, sans PvP, portes fermées");
         stepper(m, 12, Material.IRON_DOOR, "Assaut", " min", "fortress.assault-minutes", s().fortressAssaultMinutes, 1, 1, 5, "Portes ouvertes");
         stepper(m, 13, Material.LADDER, "Délai pour le sommet", " s", "fortress.summit-grace-seconds", s().fortressSummitGraceSeconds, 10, 10, 60, "Après la fermeture des portes");
         stepper(m, 14, Material.NETHERITE_SWORD, "Bataille", " min", "fortress.battle-minutes", s().fortressBattleMinutes, 1, 1, 5, "Portes fermées, jusqu'au dernier");

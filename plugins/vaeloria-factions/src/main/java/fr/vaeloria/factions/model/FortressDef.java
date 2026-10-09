@@ -5,7 +5,8 @@ import org.bukkit.Location;
 import java.util.ArrayList;
 import java.util.List;
 
-/** La Forteresse telle que le staff l'a placée : monde, portes, sommet, enceinte, carte entière, camps et point de sortie. */
+/** La Forteresse telle que le staff l'a placée : monde, portes, sommet, enceinte, carte entière,
+ * points d'apparition dans la forêt et point de sortie. */
 public final class FortressDef {
     public String world;
     /** Point d'origine du schéma (centre de la forteresse, au sol) : sert à la téléportation du staff. */
@@ -17,12 +18,13 @@ public final class FortressDef {
     public Box area;
     /** Toute la carte : constructions, explosions et seaux y sont interdits. */
     public Box arena;
-    public List<Pos> camps = new ArrayList<>();
+    /** Points d'apparition : chacun apparaît seul, au hasard, et doit retrouver son équipe. Vide = au hasard dans la carte. */
+    public List<Pos> spawns = new ArrayList<>();
     /** Où l'on renvoie les curieux trouvés dans l'enceinte pendant l'assaut. */
     public Pos lobby;
 
     public boolean ready() {
-        return world != null && summit != null && area != null && !camps.isEmpty();
+        return world != null && summit != null && area != null && (!spawns.isEmpty() || arena != null);
     }
 
     /** Pavé de blocs, bornes incluses. */

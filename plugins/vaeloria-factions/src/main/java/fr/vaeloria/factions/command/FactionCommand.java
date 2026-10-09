@@ -107,7 +107,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
         reg("perm", "[permission] [rang]", "Permissions par rang", true, use, this::perm, this::permComplete, "perms");
         reg("bouclier", "[heure 0-23|off]", "Bouclier anti-pillage quotidien", true, use, this::shield, (s, a) -> List.of("0", "2", "4", "20", "22", "off"), "shield");
         reg("guerre", "[declarer <faction>|abandonner]", "Guerres officielles", true, use, this::war,
-                (s, a) -> a.length <= 1 ? List.of("declarer", "abandonner") : factionNames(), "war");
+                (s, a) -> a.length <= 1 ? List.of("declarer", "abandonner") : factionNames(), "guerres");
         reg("totem", "[liste|admin|creer|supprimer|lancer|arreter]", "Événement Totem", false, use, this::totem,
                 (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin") ? List.of("admin", "liste", "creer", "supprimer", "lancer", "arreter") : List.of("liste"))
                         : plugin.totems().definitions().stream().map(d -> d.name).toList());
@@ -123,10 +123,10 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                 (s, a) -> a.length <= 1 ? List.of("liste", "admin", "creer", "supprimer", "lancer", "arreter") : zoneNames(fr.vaeloria.factions.model.Zone.Kind.KOTH));
         reg("convoi", "[admin|lancer|arreter]", "Convoi : la caisse de la warzone", false, use, this::convoy,
                 (s, a) -> s.hasPermission("vaeloria.factions.admin") ? List.of("admin", "lancer", "arreter") : List.of(), "convoy");
-        reg("forteresse", "[rejoindre|quitter|admin|lancer|arreter|construire|configurer]", "La Forteresse : assaut et bataille au sommet", false, use, this::fortress,
+        reg("war", "[rejoindre|quitter|admin|lancer|arreter|construire|configurer]", "Forteresse : assaut du Temple-Tour", false, use, this::fortress,
                 (s, a) -> a.length <= 1 ? (s.hasPermission("vaeloria.factions.admin")
                         ? List.of("rejoindre", "quitter", "admin", "lancer", "arreter", "construire", "configurer", "ouvrir", "fermer")
-                        : List.of("rejoindre", "quitter")) : List.of(), "fortress", "fort", "siege");
+                        : List.of("rejoindre", "quitter")) : List.of(), "forteresse", "fortress", "siege", "tour");
         reg("prime", "[joueur]", "Prime sur la tête d'un joueur", false, use, (s, p, a) -> {
             Player t = a.length > 0 ? Bukkit.getPlayerExact(a[0]) : p;
             if (t == null) { Msg.send(s, "error.player-offline", "player", a.length > 0 ? a[0] : "?"); return; }
@@ -1249,7 +1249,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                         at = null;
                     }
                 }
-                if (at == null) { Msg.send(s, "error.usage", "usage", "/f forteresse construire confirmer [x y z [monde]]"); return; }
+                if (at == null) { Msg.send(s, "error.usage", "usage", "/f war construire confirmer [x y z [monde]]"); return; }
                 fs.build(s, at);
             }
             case "configurer", "setup" -> {
@@ -1260,13 +1260,13 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                     try {
                         at = new org.bukkit.Location(w, Integer.parseInt(a[1]), Integer.parseInt(a[2]), Integer.parseInt(a[3]));
                     } catch (NumberFormatException e) {
-                        Msg.send(s, "error.usage", "usage", "/f forteresse configurer [x y z [monde]]");
+                        Msg.send(s, "error.usage", "usage", "/f war configurer [x y z [monde]]");
                         return;
                     }
                 } else if (p != null) {
                     at = p.getLocation();
                 } else {
-                    Msg.send(s, "error.usage", "usage", "/f forteresse configurer x y z [monde]");
+                    Msg.send(s, "error.usage", "usage", "/f war configurer x y z [monde]");
                     return;
                 }
                 try {
@@ -1276,7 +1276,7 @@ public final class FactionCommand implements CommandExecutor, TabCompleter {
                     Msg.send(s, "fortress.build-error", "error", String.valueOf(e.getMessage()));
                 }
             }
-            default -> usage(s, "forteresse");
+            default -> usage(s, "war");
         }
     }
 

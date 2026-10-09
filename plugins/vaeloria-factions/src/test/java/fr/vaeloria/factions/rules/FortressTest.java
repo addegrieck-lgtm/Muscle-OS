@@ -23,12 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FortressTest {
 
     @Test
-    void campsAreSharedRoundRobin() {
-        Map<String, Integer> m = FortressRules.assignCamps(List.of("a", "b", "c", "d", "e"), 4);
-        assertEquals(0, m.get("a"));
-        assertEquals(3, m.get("d"));
-        assertEquals(0, m.get("e"));
-        assertTrue(FortressRules.assignCamps(List.of("a"), 0).isEmpty());
+    void spawnsAreSpreadOut() {
+        List<int[]> pts = new java.util.ArrayList<>();
+        for (int i = 0; i < 40; i++) pts.add(new int[]{i * 3, 0});
+        List<Integer> pick = FortressRules.pickSpawns(5, pts, 12, new java.util.Random(7));
+        assertEquals(5, pick.size());
+        for (int i : pick) for (int j : pick) if (i != j) assertTrue(Math.abs(pts.get(i)[0] - pts.get(j)[0]) >= 12);
+        // Plus de combattants que de points éloignés : on complète quand même.
+        assertEquals(30, FortressRules.pickSpawns(30, pts, 50, new java.util.Random(1)).size());
+        assertTrue(FortressRules.pickSpawns(3, List.of(), 5, new java.util.Random()).isEmpty());
     }
 
     @Test
@@ -60,7 +63,7 @@ class FortressTest {
         assertEquals(0, FortressRules.graceLeft(1000, 10_000, 20_000));
     }
 
-    /** Le plan livré correspond bien au schéma : herses aux portes, sol au sommet, camps praticables. */
+    /** Le plan livré correspond bien au schéma : herses aux portes, sol au sommet, points d'apparition praticables dans la forêt. */
     @Test
     void layoutMatchesTheSchematic() throws Exception {
         SchematicPaster.Raw s;
@@ -86,22 +89,30 @@ class FortressTest {
             // Le passage sous la herse est dégagé de part et d'autre.
             int mx = (a.get(0).getAsInt() + b.get(0).getAsInt()) / 2, mz = (a.get(2).getAsInt() + b.get(2).getAsInt()) / 2;
             int dx = Integer.signum(mx), dz = Integer.signum(mz);
-            assertEquals("minecraft:air", s.at(ox + mx - dx, oy, oz + mz - dz));
-            assertEquals("minecraft:air", s.at(ox + mx + dx, oy, oz + mz + dz));
+            int gy = oy + a.get(1).getAsInt();
+            assertEquals("minecraft:air", s.at(ox + mx - dx, gy, oz + mz - dz));
+            assertEquals("minecraft:air", s.at(ox + mx + dx, gy, oz + mz + dz));
         }
         JsonObject summit = j.getAsJsonObject("summit");
         int sy = summit.getAsJsonArray("min").get(1).getAsInt();
         // Le toit du donjon est plein sous les pieds de ceux qui s'y tiennent.
-        String roof = s.at(ox + 5, oy + sy, oz + 5);
+        String roof = s.at(ox + 2, oy + sy, oz + 2);
         assertNotNull(roof);
         assertFalse(roof.equals("minecraft:air"));
-        assertEquals("minecraft:air", s.at(ox + 5, oy + sy + 1, oz + 5));
-        for (JsonElement e : j.getAsJsonArray("camps")) {
+        assertEquals("minecraft:air", s.at(ox + 2, oy + sy + 1, oz + 2));
+        JsonArray spawns = j.getAsJsonArray("spawns");
+        assertTrue(spawns.size() >= 100, "assez de points d'apparition");
+        for (JsonElement e : spawns) {
             JsonObject c = e.getAsJsonObject();
             int x = c.get("x").getAsInt(), y = c.get("y").getAsInt(), z = c.get("z").getAsInt();
-            assertFalse(s.at(ox + x, oy + y - 1, oz + z).equals("minecraft:air"), "sol du camp");
-            assertEquals("minecraft:air", s.at(ox + x, oy + y, oz + z));
-            assertEquals("minecraft:air", s.at(ox + x, oy + y + 1, oz + z));
+            String ground = s.at(ox + x, oy + y - 1, oz + z);
+            assertFalse(ground.equals("minecraft:air") || ground.contains("leaves") || ground.contains("_log"), "sol en " + x + "," + z + " : " + ground);
+            for (int dy = 0; dy < 2; dy++) {
+                String b = s.at(ox + x, oy + y + dy, oz + z);
+                assertTrue(b.equals("minecraft:air") || b.contains("grass") || b.contains("fern") || b.contains("carpet")
+                        || b.contains("mushroom") || b.contains("poppy") || b.contains("lily") || b.contains("orchid"), "place libre en " + x + "," + z + " : " + b);
+            }
+            assertTrue(Math.hypot(x, z) > 45, "dans la forêt, pas dans le temple");
         }
     }
 }

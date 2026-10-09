@@ -290,20 +290,21 @@ convoy:
     commands: []               # ex. "crate key give {player} convoi 1" — {player}, {faction}
 
 # ── Forteresse ───────────────────────────────────────────────────
-# Plusieurs factions prennent d'assaut la Forteresse. Inscriptions (/f forteresse rejoindre), puis chaque faction
-# apparaît dans son camp ; les portes s'ouvrent pour l'assaut puis se referment : qui est dehors est éliminé, ceux de
-# l'intérieur ont summit-grace-seconds pour gagner le sommet du donjon, ensuite seul le sommet compte.
+# Plusieurs factions prennent d'assaut le Temple-Tour, au cœur d'une forêt. Inscriptions (/f war rejoindre), puis
+# chacun apparaît SEUL, au hasard dans la forêt, et doit retrouver son équipe ; les portes du temple s'ouvrent pour
+# l'assaut puis se referment : qui est dehors est éliminé, ceux de l'intérieur ont summit-grace-seconds pour monter
+# l'escalier en colimaçon jusqu'au sommet de la tour, ensuite seul le sommet compte.
 # Une mort = éliminé. La dernière faction en vie gagne ; au bout de battle-minutes, la plus nombreuse au sommet.
-# Mise en place : /f forteresse admin (construire ici, ou configurer après un //paste WorldEdit de forteresse.schem).
+# Mise en place : /f war admin (construire ici, ou configurer après un //paste WorldEdit de forteresse.schem).
 fortress:
   enabled: true
   registration-minutes: 5
   min-factions: 2
   min-players-per-faction: 2
   max-players-per-faction: 0   # 0 = sans limite
-  preparation-seconds: 30      # dans les camps, portes fermées
+  preparation-seconds: 45      # dans la forêt, sans PvP, portes fermées : retrouve ton équipe
   assault-minutes: 5           # portes ouvertes
-  summit-grace-seconds: 60     # après la fermeture, pour monter au sommet
+  summit-grace-seconds: 90     # après la fermeture, pour monter au sommet de la tour
   battle-minutes: 10           # portes fermées, jusqu'à la dernière équipe
   keep-inventory: false        # false = le butin des morts tombe au sommet
   power-loss: false            # mourir dans la Forteresse ne coûte pas de power

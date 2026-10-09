@@ -256,27 +256,25 @@ Chaque changement est écrit dans `config.yml`, commentaires conservés, et appl
 - Placeholders : `%vfactions_streak%`, `%vfactions_bounty_percent%`, `%vfactions_bounty%`.
 - Paliers, plafond et fréquence d'annonce : `config.yml → bounty`.
 
-## La Forteresse (`/f forteresse`)
-Un mode de guerre à plusieurs factions autour d'une vraie forteresse, livrée avec le plugin (schéma + carte autour).
+## La Forteresse (`/f war`)
+Un mode de guerre à plusieurs factions : l'assaut du **Temple-Tour**, au cœur d'une forêt. Le schéma et la carte sont livrés avec le plugin.
 
 **La carte** (241 × 241 blocs, `forteresse.schem`) :
-- au centre, une forteresse de 61 × 61 :
-  - remparts de 18 blocs avec chemin de ronde et meurtrières ;
-  - 4 tours d'angle avec échelle ;
-  - **4 portes à herse**, une par point cardinal ;
-  - une cour avec puits, lanternes et chariots ;
-  - un **donjon** de 25 × 25 et 47 blocs de haut. Un grand escalier intérieur de 3 blocs de large monte le long des murs jusqu'au **sommet** : créneaux, tourelles, mât et bannière ;
-- des **douves** tout autour, franchies par 4 ponts de bois face aux portes ;
-- **4 camps d'équipe** (rouge, bleu, vert, jaune) à 88 blocs du centre, avec palissade, tentes, feu de camp et chemin jusqu'au pont ;
-- une plaine semée de ruines, rochers et arbres pour se couvrir, et des montagnes en bordure.
+- **une forêt dense** : chênes, bouleaux, sapins, chênes noirs, vieux chênes géants, troncs couchés, rochers moussus, fougères, champignons ; des collines boisées en bordure ; 4 sentiers sinueux qui mènent au temple ;
+- au centre, une clairière parsemée de colonnes brisées, et le **Temple-Tour**, aux couleurs de VÆLORIA (pierre noire, cramoisi et or) :
+  - un podium de 57 × 57 et 4 **grands escaliers** gardés par des braseros ;
+  - une colonnade et une **grande salle** aux vitraux rouges, avec **4 portes à herse** de 7 × 9 ;
+  - une **tour** de 23 blocs de diamètre qui monte à **82 blocs** au-dessus de la forêt. À l'intérieur, un **escalier en colimaçon** de 4 blocs de large tourne autour d'un pilier central jusqu'au sommet, en demi-marches (pas besoin de sauter) ;
+  - au **sommet** : une plateforme de 27 blocs de diamètre, des créneaux, une couronne en encorbellement, 8 obélisques dorés et l'étendard cramoisi.
+- Le générateur vérifie qu'on monte bien à pied de la porte sud jusqu'au sommet (287 pas).
 
 **Déroulement** :
-1. **Inscriptions** (5 min) : annonce cliquable, puis `/f forteresse rejoindre`. Il faut une faction, 2 inscrits minimum par faction et 2 factions minimum.
-2. **Préparation** (30 s) : chaque faction apparaît dans son camp. Les portes sont fermées et il n'y a pas encore de PvP. Au-delà de 4 factions, les camps sont partagés.
-3. **Assaut** (5 min) : les herses se lèvent et tout le monde court vers la forteresse.
+1. **Inscriptions** (5 min) : annonce cliquable, puis `/f war rejoindre`. Il faut une faction, 2 inscrits minimum par faction et 2 factions minimum.
+2. **Seul dans la forêt** (45 s) : chaque combattant apparaît **seul, au hasard**, sur l'un des 260 points de la forêt, loin des autres. Il doit **retrouver son équipe**. Pendant ce temps, pas de PvP et les portes du temple restent fermées.
+3. **Assaut** (5 min) : les herses se lèvent. On se bat dans la forêt et sur les marches du temple.
 4. **Fermeture** : les herses retombent :
    - tout combattant **resté dehors est éliminé** ;
-   - ceux de l'intérieur ont **60 s pour atteindre le sommet du donjon** ;
+   - ceux de l'intérieur ont **90 s pour monter l'escalier en colimaçon jusqu'au sommet** ;
    - ensuite, quiconque n'est pas au sommet est éliminé.
 5. **Bataille au sommet** (10 min max) :
    - une mort = éliminé ;
@@ -286,10 +284,10 @@ Un mode de guerre à plusieurs factions autour d'une vraie forteresse, livrée a
 **Règles pendant la bataille** :
 - Alliés et trêves ne protègent pas : seuls les membres d'une même faction ne se blessent pas.
 - Les combattants ne peuvent ni se téléporter (commandes, plugins, portails) ni planer en élytres.
-- `/f forteresse quitter` permet d'abandonner.
-- Quitter le serveur = éliminé. Chacun est ramené à sa position d'origine : à son élimination, ou 15 s après la victoire pour laisser le temps de ramasser le butin.
-- Les non-combattants trouvés dans l'enceinte sont renvoyés à la sortie.
-- Par défaut, le butin des morts tombe au sol (`keep-inventory: false`) et mourir ne coûte pas de power (`power-loss: false`).
+- `/f war quitter` permet d'abandonner.
+- Quitter le serveur = éliminé. Chacun est ramené à sa position d'origine : à son élimination, ou 15 s après la victoire.
+- Les non-combattants trouvés dans le temple sont renvoyés à la sortie.
+- Par défaut, le butin des morts tombe au sol et mourir ne coûte pas de power.
 - La carte est **indestructible** : ni construction, ni explosion, ni seau, ni feu, ni monstres.
 
 **Récompense** :
@@ -299,26 +297,28 @@ Un mode de guerre à plusieurs factions autour d'une vraie forteresse, livrée a
 
 **Lancement** : par le staff, ou automatiquement aux horaires (dimanche 21h par défaut, avec 10 joueurs connectés minimum).
 
+**Commandes** : `/f war` (alias `/f forteresse`). Les guerres officielles entre deux factions restent sur `/f guerre`.
+
 ### Installer la forteresse
 Deux façons de faire :
 - **Sans WorldEdit** :
   1. Va à l'endroit voulu, debout au sol, de préférence dans un monde plat ou une zone vide.
-  2. Tape `/f forteresse construire confirmer`, ou utilise le bouton « Construire ici » de `/f forteresse admin`.
-  3. La carte est collée par lots, sans figer le serveur, puis **configurée toute seule** : portes, sommet, enceinte, carte protégée, camps et sortie.
+    2. Tape `/f war construire confirmer`, ou utilise le bouton « Construire ici » de `/f war admin`.
+  3. La carte est collée par lots, sans figer le serveur, puis **configurée toute seule** : portes, sommet, enceinte, carte protégée, points d'apparition et sortie.
 - **Avec WorldEdit** :
   1. Copie `plugins/VaeloriaFactions/forteresse/forteresse.schem`, créé au premier usage, dans `plugins/WorldEdit/schematics/`.
   2. Tape `//schem load forteresse` puis `//paste` : l'origine est le centre de la forteresse, au sol.
-  3. **Sans bouger**, clique sur « Configurer depuis le schéma » dans `/f forteresse admin`, ou tape `/f forteresse configurer`.
+  3. **Sans bouger**, clique sur « Configurer depuis le schéma » dans `/f war admin`, ou tape `/f war configurer`.
 
-La carte mesure 241 × 241 blocs sur 72 de haut. L'origine se trouve 9 blocs au-dessus du bas du schéma : prévois de la place en dessous. En monde plat, les couches sous le bedrock sont simplement ignorées.
+La carte mesure 241 × 241 blocs sur 110 de haut. L'origine se trouve 9 blocs au-dessus du bas du schéma : prévois de la place en dessous. En monde plat, les couches sous le bedrock sont simplement ignorées.
 
-### Interface admin : `/f forteresse admin`
+### Interface admin : `/f war admin`
 - **Partie** : ouvrir les inscriptions, arrêter (sans vainqueur, chacun rentre), ouvrir et fermer les portes pour tester.
-- **Lieux** : se téléporter au centre, montrer les zones en particules (sommet, enceinte, portes, camps).
+- **Lieux** : se téléporter au centre, montrer les zones en particules (sommet, enceinte, portes, points d'apparition).
 - **Construction** : construire ici, ou configurer depuis le schéma.
 - **Positions personnalisées**, pour utiliser ta propre forteresse :
   - choisis deux coins, puis fais-en le sommet, l'enceinte, la carte protégée ou une nouvelle porte. Une porte retient le bloc du coin 1, par exemple des barreaux ;
-  - ajoute des camps à ta position ;
+  - ajoute des points d'apparition à ta position (sans aucun point : au hasard au sol dans la carte protégée) ;
   - place la sortie et le centre.
 - **Horaires** : jour et heure d'ouverture des inscriptions, joueurs minimum.
 - **Gains** : argent (±10 000 ou montant exact) et commandes.
@@ -370,12 +370,12 @@ Le générateur de la carte est dans `tools/forteresse/generer_forteresse.py`. I
 | Déplacement | `home`, `sethome`, `warp`, `setwarp`, `delwarp`, `fly` (préparation de 5 s, bloqué si un ennemi est à moins de 16 blocs) |
 | Diplomatie | `allie`, `treve`, `neutre`, `ennemi`, `relations` (l'alliance et la trêve se signent à deux, la guerre se déclare seul) |
 | Faction | `chat [f\|a\|p]`, `banque [deposer\|retirer]`, `coffre`, `perm`, `bouclier`, `scoreboard`, `logs`, `discord` |
-| Guerre | `guerre`, `guerre declarer <faction>`, `guerre abandonner` |
+| Guerre officielle | `guerre`, `guerre declarer <faction>`, `guerre abandonner` |
 | Totem | `totem`, `totem liste` ; staff : `totem admin\|creer\|supprimer\|lancer\|arreter` |
 | Progression | `ameliorations`, `missions`, `avantposte [liste]`, `koth [liste]` ; staff : `avantposte creer\|supprimer`, `koth creer\|supprimer\|lancer\|arreter` |
 | Territoire partagé | `acces <joueur\|faction>`, `acces liste` |
 | Convoi et primes | `convoi`, `prime [joueur]`, `primes` ; staff : `convoi admin\|lancer\|arreter` |
-| Forteresse | `forteresse`, `forteresse rejoindre\|quitter` ; staff : `forteresse admin\|lancer\|arreter\|ouvrir\|fermer\|construire confirmer [x y z [monde]]\|configurer [x y z [monde]]` |
+| Forteresse | `war`, `war rejoindre\|quitter` (alias `forteresse`) ; staff : `war admin\|lancer\|arreter\|ouvrir\|fermer\|construire confirmer [x y z [monde]]\|configurer [x y z [monde]]` |
 | Admin | `admin bypass\|safezone\|warzone\|unclaim [rayon]\|dissoudre\|setpower\|powerboost\|grace\|eclats\|reload\|save` |
 
 Rangs : Recrue (`-`), Membre (`+`), Officier (`*`), Chef (`**`). Seize actions ont un rang minimum, réglable dans `/f perm`, par commande ou dans le menu : construire, coffres, portes, inviter, expulser, claim, unclaim, home, sethome, warps, coffre de faction, retrait banque, relations, vol, bouclier.

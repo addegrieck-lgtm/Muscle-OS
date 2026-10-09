@@ -10,12 +10,31 @@ import java.util.Map;
 public final class FortressRules {
     private FortressRules() {}
 
-    /** Répartit les factions inscrites dans les camps, à tour de rôle : faction → indice de camp. */
-    public static Map<String, Integer> assignCamps(List<String> factions, int camps) {
-        Map<String, Integer> m = new HashMap<>();
-        if (camps <= 0) return m;
-        for (int i = 0; i < factions.size(); i++) m.put(factions.get(i), i % camps);
-        return m;
+    /**
+     * Choisit un point d'apparition par combattant, au hasard, en les écartant d'au moins minDist blocs les uns des
+     * autres tant que c'est possible (sinon on réutilise des points). points : {x, z} ; renvoie les indices choisis.
+     */
+    public static List<Integer> pickSpawns(int count, List<int[]> points, int minDist, java.util.Random rnd) {
+        List<Integer> out = new ArrayList<>();
+        if (points.isEmpty() || count <= 0) return out;
+        List<Integer> order = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) order.add(i);
+        java.util.Collections.shuffle(order, rnd);
+        long min2 = (long) minDist * minDist;
+        for (int i : order) {
+            if (out.size() >= count) break;
+            int[] p = points.get(i);
+            boolean ok = true;
+            for (int j : out) {
+                int[] q = points.get(j);
+                long dx = p[0] - q[0], dz = p[1] - q[1];
+                if (dx * dx + dz * dz < min2) { ok = false; break; }
+            }
+            if (ok) out.add(i);
+        }
+        int k = 0;
+        while (out.size() < count) out.add(order.get(k++ % order.size()));
+        return out;
     }
 
     /** Joueurs en vie par faction (participant → faction). */

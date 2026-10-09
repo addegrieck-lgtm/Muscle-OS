@@ -331,9 +331,9 @@ public final class Settings {
         fortressMinFactions = Math.max(2, c.getInt("fortress.min-factions", 2));
         fortressMinPlayers = Math.max(1, c.getInt("fortress.min-players-per-faction", 2));
         fortressMaxPlayers = Math.max(0, c.getInt("fortress.max-players-per-faction", 0));
-        fortressPreparationSeconds = Math.max(5, c.getInt("fortress.preparation-seconds", 30));
+        fortressPreparationSeconds = Math.max(5, c.getInt("fortress.preparation-seconds", 45));
         fortressAssaultMinutes = Math.max(1, c.getInt("fortress.assault-minutes", 5));
-        fortressSummitGraceSeconds = Math.max(10, c.getInt("fortress.summit-grace-seconds", 60));
+        fortressSummitGraceSeconds = Math.max(10, c.getInt("fortress.summit-grace-seconds", 90));
         fortressBattleMinutes = Math.max(1, c.getInt("fortress.battle-minutes", 10));
         fortressMinOnline = Math.max(0, c.getInt("fortress.min-online", 10));
         fortressKeepInventory = c.getBoolean("fortress.keep-inventory", false);

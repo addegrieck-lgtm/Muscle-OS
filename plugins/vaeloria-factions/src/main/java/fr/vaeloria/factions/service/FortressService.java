@@ -43,8 +43,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * La Forteresse : plusieurs factions prennent d'assaut une forteresse. Inscriptions, puis chaque faction apparaît dans
- * son camp ; les portes s'ouvrent pour l'assaut, puis se referment : qui est dehors est éliminé, ceux de l'intérieur
+ * La Forteresse : plusieurs factions prennent d'assaut le Temple-Tour. Inscriptions, puis chaque combattant apparaît
+ * seul, au hasard dans la forêt, et doit retrouver son équipe ; les portes s'ouvrent pour l'assaut, puis se referment : qui est dehors est éliminé, ceux de l'intérieur
  * ont un court délai pour gagner le sommet du donjon, ensuite seul le sommet compte. Une mort = éliminé.
  * La dernière faction en vie au sommet gagne ; à la fin du temps, la plus nombreuse au sommet.
  */
@@ -162,11 +162,14 @@ public final class FortressService {
         d.summit = box(j.getAsJsonObject("summit"), ox, oy, oz);
         d.area = box(j.getAsJsonObject("fortress"), ox, oy, oz);
         if (j.has("arena")) d.arena = box(j.getAsJsonObject("arena"), ox, oy, oz);
-        for (JsonElement e : j.getAsJsonArray("camps")) {
-            JsonObject c = e.getAsJsonObject();
-            Location l = new Location(w, ox + c.get("x").getAsInt() + 0.5, oy + c.get("y").getAsInt(), oz + c.get("z").getAsInt() + 0.5,
-                    c.has("yaw") ? c.get("yaw").getAsFloat() : 0f, 0f);
-            d.camps.add(Pos.of(l));
+        if (j.has("spawns")) {
+            for (JsonElement e : j.getAsJsonArray("spawns")) {
+                JsonObject c = e.getAsJsonObject();
+                int x = c.get("x").getAsInt(), z = c.get("z").getAsInt();
+                // Regard tourné vers la tour.
+                float yaw = (float) Math.toDegrees(Math.atan2(x, -z));
+                d.spawns.add(Pos.of(new Location(w, ox + x + 0.5, oy + c.get("y").getAsInt(), oz + z + 0.5, yaw, 0f)));
+            }
         }
         if (j.has("lobby")) {
             JsonObject lb = j.getAsJsonObject("lobby");
@@ -255,7 +258,7 @@ public final class FortressService {
             p.playSound(p.getLocation(), Sound.EVENT_RAID_HORN, 1f, 1f);
             p.showBossBar(bar);
         }
-        plugin.discord().totem("🏰 Forteresse", "Les inscriptions à la **Forteresse** sont ouvertes : `/f forteresse rejoindre` !");
+        plugin.discord().totem("🏰 Forteresse", "Les inscriptions à la **Forteresse** sont ouvertes : `/f war rejoindre` !");
         return StartResult.OK;
     }
 
@@ -289,7 +292,41 @@ public final class FortressService {
         Msg.send(p, "fortress.not-registered");
     }
 
-    /** Fin des inscriptions : les factions retenues partent dans leur camp. */
+    /** Un point d'apparition par combattant : ceux du plan, sinon des endroits au hasard dans la carte. */
+    private List<Location> spawnSpots(int count) {
+        FortressDef d = def();
+        List<Location> out = new ArrayList<>();
+        List<Location> pts = new ArrayList<>();
+        for (Pos p : d.spawns) {
+            Location l = p.toLocation();
+            if (l != null) pts.add(l);
+        }
+        if (pts.isEmpty()) pts = randomGround(Math.max(count * 3, 30));
+        List<int[]> xz = new ArrayList<>();
+        for (Location l : pts) xz.add(new int[]{l.getBlockX(), l.getBlockZ()});
+        for (int i : FortressRules.pickSpawns(count, xz, 12, java.util.concurrent.ThreadLocalRandom.current())) out.add(pts.get(i));
+        return out;
+    }
+
+    /** Endroits au sol (sous les arbres) dans la carte, hors de l'enceinte. */
+    private List<Location> randomGround(int n) {
+        FortressDef d = def();
+        List<Location> l = new ArrayList<>();
+        World w = Bukkit.getWorld(d.world);
+        if (w == null || d.arena == null) return l;
+        var r = java.util.concurrent.ThreadLocalRandom.current();
+        for (int t = 0; t < n * 20 && l.size() < n; t++) {
+            int x = r.nextInt(d.arena.x1 + 2, d.arena.x2 - 1), z = r.nextInt(d.arena.z1 + 2, d.arena.z2 - 1);
+            int y = w.getHighestBlockYAt(x, z, org.bukkit.HeightMap.MOTION_BLOCKING_NO_LEAVES);
+            Location at = new Location(w, x + 0.5, y + 1, z + 0.5);
+            if (y + 1 > d.arena.y2 || d.area.contains(at) || !w.getBlockAt(x, y, z).getType().isSolid()) continue;
+            if (!w.getBlockAt(x, y + 1, z).isPassable() || !w.getBlockAt(x, y + 2, z).isPassable()) continue;
+            l.add(at);
+        }
+        return l;
+    }
+
+    /** Fin des inscriptions : chaque combattant apparaît seul, au hasard dans la forêt. */
     private void startBattle() {
         registered.keySet().removeIf(id -> Bukkit.getPlayer(id) == null);
         Map<String, Integer> counts = FortressRules.aliveByFaction(registered.values());
@@ -307,26 +344,35 @@ public final class FortressService {
             return;
         }
         FortressDef d = def();
-        Map<String, Integer> camp = FortressRules.assignCamps(teams, d.camps.size());
-        Map<String, Integer> slot = new HashMap<>();
+        List<UUID> fighters = new ArrayList<>(registered.keySet());
+        java.util.Collections.shuffle(fighters);
+        List<Location> spots = spawnSpots(fighters.size());
         teleporting = true;
         try {
-            for (var e : registered.entrySet()) {
-                Player p = Bukkit.getPlayer(e.getKey());
-                if (p == null) continue;
-                Location base = d.camps.get(camp.get(e.getValue())).toLocation();
-                if (base == null) continue;
-                int k = slot.merge(e.getValue(), 1, Integer::sum) - 1;
-                Location to = base.clone().add((k % 3) - 1, 0, ((k / 3) % 3) - 1);
-                origins.put(p.getUniqueId(), p.getLocation());
-                alive.put(p.getUniqueId(), e.getValue());
-                teamOf.put(p.getUniqueId(), e.getValue());
+            for (int i = 0; i < fighters.size(); i++) {
+                UUID id = fighters.get(i);
+                Player p = Bukkit.getPlayer(id);
+                Location to = i < spots.size() ? spots.get(i) : null;
+                if (p == null || to == null) continue;
+                String fid = registered.get(id);
+                origins.put(id, p.getLocation());
+                alive.put(id, fid);
+                teamOf.put(id, fid);
                 plugin.territory().setFly(p, false);
                 p.teleport(to);
                 p.setFallDistance(0);
             }
         } finally {
             teleporting = false;
+        }
+        Title lost = Title.title(Msg.get("fortress.lost-title"), Msg.get("fortress.lost-subtitle", "seconds", settings.fortressPreparationSeconds),
+                Title.Times.times(Duration.ofMillis(300), Duration.ofSeconds(4), Duration.ofMillis(700)));
+        for (UUID id : alive.keySet()) {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null) {
+                p.showTitle(lost);
+                p.playSound(p.getLocation(), Sound.AMBIENT_CAVE, 1f, 1f);
+            }
         }
         registered.clear();
         phase = Phase.PREPARATION;
@@ -712,9 +758,10 @@ public final class FortressService {
                 outline(p, w, d.summit, Particle.HAPPY_VILLAGER);
                 outline(p, w, d.area, Particle.FLAME);
                 for (FortressDef.Gate g : d.gates) outline(p, w, g.box, Particle.END_ROD);
-                for (Pos c : d.camps) {
+                for (Pos c : d.spawns) {
                     Location l = c.toLocation();
-                    if (l != null) p.spawnParticle(Particle.TOTEM_OF_UNDYING, l.clone().add(0, 1, 0), 20, 0.5, 1, 0.5, 0);
+                    if (l != null && l.getWorld() == p.getWorld() && l.distanceSquared(p.getLocation()) < 80 * 80)
+                        p.spawnParticle(Particle.TOTEM_OF_UNDYING, l.clone().add(0, 1, 0), 6, 0.3, 0.6, 0.3, 0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 20L);
