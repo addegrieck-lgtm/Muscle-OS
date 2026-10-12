@@ -55,6 +55,6 @@ public final class Text {
 
     public static String percent(double chance) {
         double p = chance * 100;
-        return String.format(Locale.FRANCE, p >= 10 || p == 0 ? "%.0f %%" : "%.1f %%", p);
+        return String.format(Locale.FRANCE, p >= 10 || p == 0 ? "%.0f %%" : p >= 1 ? "%.1f %%" : "%.2f %%", p);
     }
 }

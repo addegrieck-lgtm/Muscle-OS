@@ -9,6 +9,8 @@ final class Keys {
     final NamespacedKey boosts;
     /** Villageois : un livre lui a déjà été ajouté par un boost (add-book-if-none). */
     final NamespacedKey bookAdded;
+    /** Villageois : livres vendus, nombre de livres avant épuisement (tiré une fois), épuisé. */
+    final NamespacedKey booksSold, bookLimit, exhausted;
     /** Objet : œuf de capture. */
     final NamespacedKey captureEgg;
     /** Objet : villageois capturé (type de biome, ancien métier, nom, identifiant unique). */
@@ -17,6 +19,9 @@ final class Keys {
     Keys(Plugin plugin) {
         boosts = new NamespacedKey(plugin, "boosts");
         bookAdded = new NamespacedKey(plugin, "book_added");
+        booksSold = new NamespacedKey(plugin, "books_sold");
+        bookLimit = new NamespacedKey(plugin, "book_limit");
+        exhausted = new NamespacedKey(plugin, "exhausted");
         captureEgg = new NamespacedKey(plugin, "capture_egg");
         capturedType = new NamespacedKey(plugin, "captured_type");
         capturedProfession = new NamespacedKey(plugin, "captured_profession");

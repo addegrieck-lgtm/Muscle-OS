@@ -28,7 +28,7 @@ pnpm dev                                         # site :3000, admin :3001/admin
 | `cd plugins/vaeloria-combat && gradle build` | Jar du plugin PvP (combat 1.8, MSPT, ping) + tests |
 | `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 |
 | `cd plugins/vaeloria-crates && gradle build` | Jar du plugin de coffres à clés + tests |
-| `cd plugins/vaeloria-villageois && gradle build` | Jar du plugin de villageois (livres boostés en émeraudes, œuf de capture) + tests |
+| `cd plugins/vaeloria-villageois && gradle build` | Jar du plugin de villageois (farms de bibliothécaires, livres rares, usure, œuf de capture) + tests |
 
 ## Documentation
 

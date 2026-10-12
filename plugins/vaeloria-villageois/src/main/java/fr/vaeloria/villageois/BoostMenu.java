@@ -6,7 +6,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantRecipe;
 
 import java.util.ArrayList;
@@ -18,12 +17,14 @@ final class BoostMenu extends Menu {
     private static final int[] BOOK_SLOTS = {10, 11, 12, 13, 14, 15, 16};
     private final Villager villager;
     private final Boosts boosts;
+    private final WearTracker wear;
     private final Supplier<Settings> settings;
 
-    BoostMenu(Player viewer, Villager villager, Boosts boosts, Supplier<Settings> settings) {
+    BoostMenu(Player viewer, Villager villager, Boosts boosts, WearTracker wear, Supplier<Settings> settings) {
         super(viewer, 3, "<ruby>Bibliothécaire <graphite>·</graphite> Boost");
         this.villager = villager;
         this.boosts = boosts;
+        this.wear = wear;
         this.settings = settings;
     }
 
@@ -31,11 +32,24 @@ final class BoostMenu extends Menu {
     protected void render() {
         Settings s = settings.get();
         int paid = boosts.paid(villager), luck = boosts.luck(villager);
+        boolean exhausted = wear.exhausted(villager);
         set(4, icon(Material.LECTERN, "<gold>Chance de ce villageois : " + luck + " / " + s.table().maxLuck(),
                 "<silver>Boosts payés : <snow>" + paid,
                 "<ash>Chaque boost relance les livres jamais achetés",
                 "<ash>et rend les livres rares plus fréquents.",
                 "<ash>Perdue s'il change de métier ou est capturé."), null);
+        if (s.wear().enabled()) {
+            int sold = wear.sold(villager);
+            set(8, exhausted
+                    ? icon(Material.BARRIER, "<loss>Épuisé après " + sold + " livres vendus",
+                            "<silver>Il ne vend plus de livre et ne peut plus être boosté.",
+                            "<steel>Capture-le avec un œuf et relâche-le :",
+                            "<steel>il repart à zéro, avec de nouveaux livres.")
+                    : icon(Material.CLOCK, "<silver>Livres vendus : <snow>" + sold,
+                            "<ash>Un bibliothécaire s'épuise après une quinzaine",
+                            "<ash>de livres vendus (entre " + s.wear().min() + " et " + s.wear().max() + ").",
+                            "<ash>Il faudra alors le capturer et le relâcher."), null);
+        }
 
         List<MerchantRecipe> recipes = villager.getRecipes();
         List<Integer> rerollable = Boosts.rerollable(recipes);
@@ -98,12 +112,15 @@ final class BoostMenu extends Menu {
                 viewer.sendMessage(Text.prefixed("<loss>Il te faut " + r.cost() + " émeraudes.</loss> <ash>/emeraudes pour en acheter.</ash>"));
             }
             case NOTHING_TO_REROLL -> viewer.sendMessage(Text.prefixed("<loss>Tous ses livres ont déjà été achetés : plus rien à relancer.</loss> <ash>Monte-le de niveau ou capture-le pour repartir de zéro.</ash>"));
+            case EXHAUSTED -> viewer.sendMessage(Text.prefixed(TradeListener.EXHAUSTED));
             case BUSY -> viewer.sendMessage(Text.prefixed("<loss>Quelqu'un commerce déjà avec ce villageois.</loss>"));
             case NOT_LIBRARIAN -> viewer.sendMessage(Text.prefixed("<loss>Ce villageois n'est plus bibliothécaire.</loss>"));
         }
         redraw();
     }
 
+    /** openMerchant est déprécié en 1.21.4 au profit de MenuType, encore expérimental : on garde l'API stable. */
+    @SuppressWarnings("deprecation")
     private void trade() {
         if (!stillThere()) return;
         if (villager.isTrading()) {
@@ -111,7 +128,7 @@ final class BoostMenu extends Menu {
             return;
         }
         viewer.closeInventory();
-        viewer.openMerchant((Merchant) villager, false);
+        viewer.openMerchant(villager, false);
     }
 
     /** « 56 émeraudes + livre » à partir des ingrédients réels (échange vanilla compris). */

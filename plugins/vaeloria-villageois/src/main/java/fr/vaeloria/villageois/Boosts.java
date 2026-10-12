@@ -19,16 +19,18 @@ import java.util.function.Supplier;
  * et le villageois gagne 1 niveau de chance. La chance est perdue s'il change de métier (lutrin cassé, capture).
  */
 final class Boosts {
-    enum Outcome { DONE, NOT_LIBRARIAN, BUSY, NOTHING_TO_REROLL, NOT_ENOUGH }
+    enum Outcome { DONE, NOT_LIBRARIAN, BUSY, EXHAUSTED, NOTHING_TO_REROLL, NOT_ENOUGH }
 
     record Result(Outcome outcome, int cost, List<BookOffer> drawn) {}
 
     private final Keys keys;
     private final Supplier<Settings> settings;
+    private final WearTracker wear;
 
-    Boosts(Keys keys, Supplier<Settings> settings) {
+    Boosts(Keys keys, Supplier<Settings> settings, WearTracker wear) {
         this.keys = keys;
         this.settings = settings;
+        this.wear = wear;
     }
 
     Keys keys() {
@@ -65,6 +67,7 @@ final class Boosts {
         Settings s = settings.get();
         if (v.getProfession() != Villager.Profession.LIBRARIAN) return new Result(Outcome.NOT_LIBRARIAN, 0, List.of());
         if (v.isTrading()) return new Result(Outcome.BUSY, 0, List.of());
+        if (wear.exhausted(v)) return new Result(Outcome.EXHAUSTED, 0, List.of());
 
         List<MerchantRecipe> recipes = new ArrayList<>(v.getRecipes());
         List<Integer> targets = rerollable(recipes);

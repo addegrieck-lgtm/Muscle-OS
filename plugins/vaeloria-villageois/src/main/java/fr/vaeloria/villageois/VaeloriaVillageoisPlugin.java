@@ -18,12 +18,13 @@ public final class VaeloriaVillageoisPlugin extends JavaPlugin {
         bank = Bank.create(this);
 
         Keys keys = new Keys(this);
-        Boosts boosts = new Boosts(keys, this::settings);
+        WearTracker wear = new WearTracker(keys, this::settings);
+        Boosts boosts = new Boosts(keys, this::settings, wear);
         Capture capture = new Capture(keys);
         var pm = getServer().getPluginManager();
-        pm.registerEvents(new TradeListener(this::settings, boosts), this);
+        pm.registerEvents(new TradeListener(this, this::settings, boosts, wear), this);
         pm.registerEvents(new CaptureListener(capture, this::settings), this);
-        pm.registerEvents(new VillagerListener((player, villager) -> new BoostMenu(player, villager, boosts, this::settings)), this);
+        pm.registerEvents(new VillagerListener(wear, (player, villager) -> new BoostMenu(player, villager, boosts, wear, this::settings)), this);
         pm.registerEvents(new MenuListener(), this);
 
         Commands commands = new Commands(this, this::settings, capture);
@@ -34,7 +35,7 @@ public final class VaeloriaVillageoisPlugin extends JavaPlugin {
                 c.setTabCompleter(commands);
             }
         }
-        getLogger().info(settings.table().offers().size() + " livres, boost " + settings.boostCost().forBoost(0) + " émeraudes, change "
+        getLogger().info(settings.table().offers().size() + " livres en " + settings.table().tiers().size() + " paliers, boost " + settings.boostCost().forBoost(0) + " émeraudes, usure " + (settings.wear().enabled() ? settings.wear().min() + " à " + settings.wear().max() + " livres" : "désactivée") + ", change "
                 + (settings.exchangeEnabled() && bank != null ? settings.buyPrice() + " / " + settings.sellPrice() : "désactivé") + ".");
     }
 

@@ -12,16 +12,22 @@ import java.util.function.BiFunction;
 
 /** Accroupi + clic droit sur un bibliothécaire : menu de boost, là où le joueur pourrait frapper le villageois. */
 final class VillagerListener implements Listener {
+    private final WearTracker wear;
     private final BiFunction<Player, Villager, Menu> menus;
 
-    VillagerListener(BiFunction<Player, Villager, Menu> menus) {
+    VillagerListener(WearTracker wear, BiFunction<Player, Villager, Menu> menus) {
+        this.wear = wear;
         this.menus = menus;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInteract(PlayerInteractEntityEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND || !event.getPlayer().isSneaking()) return;
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (!(event.getRightClicked() instanceof Villager v) || v.getProfession() != Villager.Profession.LIBRARIAN) return;
+        if (!event.getPlayer().isSneaking()) {
+            if (wear.exhausted(v)) event.getPlayer().sendActionBar(Text.mm(TradeListener.EXHAUSTED));
+            return;
+        }
         if (Capture.isPluginNpc(v) || !event.getPlayer().hasPermission("vaeloria.villageois.use")) return;
         event.setCancelled(true);
         // Relancer les livres d'un villageois chez une autre faction serait du grief : même règle que pour le frapper.

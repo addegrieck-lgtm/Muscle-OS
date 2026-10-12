@@ -1,6 +1,7 @@
 package fr.vaeloria.villageois;
 
 import fr.vaeloria.villageois.model.BookOffer;
+import fr.vaeloria.villageois.model.Tier;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -51,6 +52,9 @@ final class Commands implements TabExecutor {
         sender.sendMessage(Text.prefixed("<snow>Villageois de VÆLORIA</snow>"));
         sender.sendMessage(Text.mm("<ash>·</ash> <silver>Accroupi + clic droit sur un bibliothécaire : <snow>booster</snow> pour " + Text.emeralds(s.boostCost().forBoost(0))
                 + ". Les livres jamais achetés sont relancés, les rares sortent de plus en plus souvent.</silver>"));
+        if (s.wear().enabled()) {
+            sender.sendMessage(Text.mm("<ash>·</ash> <silver>Un bibliothécaire s'épuise après une quinzaine de livres vendus : capture-le et relâche-le pour le relancer à zéro.</silver>"));
+        }
         sender.sendMessage(Text.mm("<ash>·</ash> <snow>/villageois chances [boosts]</snow> <silver>— probabilité de chaque livre</silver>"));
         if (s.captureEnabled()) {
             sender.sendMessage(Text.mm("<ash>·</ash> <snow>/villageois oeuf</snow> <silver>— œuf de capture"
@@ -73,12 +77,19 @@ final class Commands implements TabExecutor {
         int luck = s.table().luck(boosts);
         sender.sendMessage(Text.prefixed("<snow>Chances par livre tiré</snow> <ash>— " + boosts + " boost" + (boosts > 1 ? "s" : "")
                 + ", chance " + luck + " / " + s.table().maxLuck() + "</ash>"));
-        List<BookOffer> list = new ArrayList<>(s.table().offers());
+        List<Tier> tiers = s.table().tiers();
+        for (Tier t : tiers) {
+            sender.sendMessage(Text.mm("<ash>·</ash> <snow>Palier " + Text.esc(t.name()) + "</snow> <ash>(" + t.books().size() + " livres)</ash> <ash>—</ash> <gain>"
+                    + Text.percent(s.table().chance(t, boosts)) + "</gain>"));
+        }
+        // Détail du palier le plus recherché (le dernier) : c'est lui qui intéresse les joueurs.
+        Tier top = tiers.getLast();
+        List<BookOffer> list = new ArrayList<>(top.books());
         list.sort(Comparator.comparingInt(BookOffer::price).reversed());
+        sender.sendMessage(Text.mm("<steel>Palier " + Text.esc(top.name()) + ", livre par livre :</steel>"));
         for (BookOffer o : list) {
-            double c = s.table().chance(o, boosts);
-            sender.sendMessage(Text.mm("<ash>·</ash> " + (o.announce() ? "<gold>" : "<snow>") + Books.name(o) + "</> <ash>—</ash> "
-                    + (c > 0 ? "<gain>" + Text.percent(c) + "</gain>" : "<ash>0 %</ash>") + " <ash>— " + o.price() + " ém.</ash>"));
+            sender.sendMessage(Text.mm("<ash>·</ash> <gold>" + Books.name(o) + "</gold> <ash>—</ash> <gain>"
+                    + Text.percent(s.table().chance(o, boosts)) + "</gain> <ash>— " + o.price() + " ém.</ash>"));
         }
     }
 
