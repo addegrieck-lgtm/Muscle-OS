@@ -1,4 +1,7 @@
-"""Petite warzone sous le spawn VÆLORIA : « La Fosse ». Arène fermée sous l'Île-Cœur (Paper 1.21.4+, Sponge v2).
+"""Petite warzone sous le spawn VÆLORIA : « La Fosse ». Arène de combat fermée sous l'Île-Cœur (Paper 1.21.4+, Sponge v2).
+
+Quatre terrains : Tranchées au nord, Forêt de piliers à l'est, Ruines au sud, Hauteurs à l'ouest ; le Ring au centre
+(fosse de duel avec trône de capture) et un chemin de ronde pour les archers le long du rempart.
 
 Usage : python3 minecraft/spawn-warzone/generate.py   (Pillow + numpy ; réutilise minecraft/spawn et minecraft/warzone)
 Sorties dans minecraft/spawn-warzone/ : vaeloria-spawn-warzone.schem, apercu-*.png.
@@ -110,22 +113,118 @@ def build():
                 if w.get(x, 0, z) == "minecraft:pale_moss_carpet":
                     w.put(x, 0, z, "minecraft:air")
     logo = _spawn.logo_grid(25)
+
+    def cap(x, z):
+        """Hauteur maximale d'une construction sur cette colonne (dessous de l'île moins la marge)."""
+        b = bottom.get((x, z))
+        return 99 if b is None else b - CLEARANCE - 1
+
+    def sector(x, z):
+        ang = math.degrees(math.atan2(z, x)) % 360
+        return "est" if ang < 45 or ang >= 315 else "sud" if ang < 135 else "ouest" if ang < 225 else "nord"
+
+    placed = {}
+
+    # Centre : le Ring. Une fosse de duel sous le vide de l'île, bords en gradins, trône de capture au milieu.
+    for x in range(-19, 20):
+        for z in range(-19, 20):
+            d = math.hypot(x, z)
+            if d > 18:
+                continue
+            depth = 3 if d <= 14 else 2 if d <= 16 else 1
+            for y in range(-depth, 1):
+                w.put(x, y, z, "minecraft:air")
+            w.put(x, -depth - 1, z, "minecraft:polished_blackstone" if d <= 14 else PB)
     for gy, row in enumerate(logo):
         for gx, b in enumerate(row):
-            if b:
-                w.put(gx - 12, -1, gy - len(logo) // 2, b)
-                w.put(gx - 12, 0, gy - len(logo) // 2, "minecraft:air")
+            if b and math.hypot(gx - 12, gy - len(logo) // 2) <= 14:
+                w.put(gx - 12, -4, gy - len(logo) // 2, b)
+    for x in range(-2, 3):
+        for z in range(-2, 3):
+            w.put(x, -3, z, "minecraft:red_nether_bricks" if max(abs(x), abs(z)) == 2 else "minecraft:polished_blackstone")
+    w.put(0, -3, 0, "minecraft:redstone_block")
+    for k in range(8):  # braseros sur le pourtour du Ring
+        a = k * math.pi / 4
+        x, z = round(20 * math.cos(a)), round(20 * math.sin(a))
+        w.put(x, 0, z, "minecraft:polished_blackstone_wall[up=true]")
+        w.put(x, 1, z, "minecraft:lantern[hanging=false]")
+    placed["Ring"] = 1
 
-    # Couvert : ruines, postes de garde, piliers, murs brisés. Tout reste bas sous l'île.
-    placed = {"ruine": 0, "poste de garde": 0, "pilier": 0, "mur": 0, "obélisque": 0}
-    for kind, count, size, top in (("ruine", 10, (4, 5), 6), ("poste de garde", 8, (3, 3), 4), ("pilier", 18, (1, 1), 4),
-                                   ("mur", 14, (4, 4), 3), ("obélisque", 6, (2, 2), 11)):
+    # Nord : les Tranchées. Lignes en zigzag creusées sur 2 blocs, sacs de pierre noire sur les bords.
+    trenches = 0
+    for r0 in (42, 66, 90):
+        pts = []
+        for k, ang in enumerate(range(228, 314, 6)):
+            rr = r0 + (4 if k % 2 else -4)
+            pts.append((rr * math.cos(math.radians(ang)), rr * math.sin(math.radians(ang))))
+        for p0, p1 in zip(pts, pts[1:]):
+            for x, z in _wz.line_pts(p0, p1, 0.5):
+                X, Z = round(x), round(z)
+                for dx in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        w.put(X + dx, 0, Z + dz, "minecraft:air")
+                        w.put(X + dx, -1, Z + dz, "minecraft:air")
+                        w.put(X + dx, -2, Z + dz, "minecraft:air")
+                        w.put(X + dx, -3, Z + dz, "minecraft:cobbled_deepslate")
+        for p0, p1 in zip(pts, pts[1:]):
+            for x, z in _wz.line_pts(p0, p1, 1.0):
+                for side in (-2, 2):
+                    nx, nz = p1[1] - p0[1], p0[0] - p1[0]
+                    ln = math.hypot(nx, nz) or 1
+                    X, Z = round(x + side * nx / ln), round(z + side * nz / ln)
+                    if w.get(X, -1, Z) in _wz.GROUND and (X + Z) % 3:
+                        w.put(X, 0, Z, "minecraft:polished_blackstone_brick_slab[type=bottom]")
+        trenches += 1
+    placed["tranchées"] = trenches
+
+    # Est : la Forêt de piliers. Corps à corps, angles morts partout.
+    n = 0
+    for x in range(30, 112, 6):
+        for z in range(-80, 81, 6):
+            X, Z = x + int(rng.integers(-1, 2)), z + int(rng.integers(-1, 2))
+            r = math.hypot(X, Z)
+            if not (32 < r < 102) or sector(X, Z) != "est" or not _wz.free(w, X - 1, Z - 1, X + 1, Z + 1, margin=1):
+                continue
+            h = min(int(rng.integers(3, 6)), cap(X, Z))
+            if h < 2:
+                continue
+            big = rng.random() < 0.3
+            for dx in ((0, 1) if big else (0,)):
+                for dz in ((0, 1) if big else (0,)):
+                    for y in range(0, h):
+                        w.put(X + dx, y, Z + dz, DT if y < h - 1 else "minecraft:chiseled_polished_blackstone")
+            if rng.random() < 0.25:
+                w.put(X, h, Z, "minecraft:lantern[hanging=false]")
+            n += 1
+    placed["piliers"] = n
+
+    # Ouest : les Hauteurs. Plateaux en gradins pour les archers, sommet crénelé.
+    n = 0
+    for r0, ang in ((52, 160), (55, 200), (78, 180), (82, 148), (84, 212), (100, 165), (100, 195)):
+        cx, cz = round(r0 * math.cos(math.radians(ang))), round(r0 * math.sin(math.radians(ang)))
+        R = 8 if r0 < 90 else 6
+        if not _wz.free(w, cx - R, cz - R, cx + R, cz + R, margin=1):
+            continue
+        for x in range(cx - R, cx + R + 1):
+            for z in range(cz - R, cz + R + 1):
+                d = math.hypot(x - cx, z - cz)
+                if d > R:
+                    continue
+                lvl = min(5, int((R - d) / 1.6) + 1, cap(x, z))
+                for y in range(0, lvl):
+                    w.put(x, y, z, PB if y == lvl - 1 and lvl >= 4 else "minecraft:tuff" if y < lvl - 1 else "minecraft:polished_deepslate")
+                if lvl >= 4 and abs(d - (R - 4.5)) < 0.6 and (x + z) % 2 == 0 and lvl + 1 <= cap(x, z):
+                    w.put(x, lvl, z, PB)
+        n += 1
+    placed["plateaux"] = n
+
+    # Sud : les Ruines. Maisons effondrées, toiles d'araignée, postes de garde, murs brisés.
+    counts = {"ruine": 0, "poste de garde": 0, "mur": 0}
+    for kind, count, size, top in (("ruine", 9, (4, 5), 6), ("poste de garde", 6, (3, 3), 4), ("mur", 12, (4, 4), 3)):
         tries = 0
-        while placed[kind] < count and tries < 3000:
+        while counts[kind] < count and tries < 3000:
             tries += 1
-            a, r = rng.random() * 2 * math.pi, 30 + rng.random() * (R_ARENA - 42)
-            if kind == "obélisque":
-                r = 96 + rng.random() * 10  # hors de l'aplomb de l'île : seuls les obélisques montent plus haut
+            a, r = math.radians(45 + rng.random() * 90), 30 + rng.random() * 72
             x, z = round(r * math.cos(a)), round(r * math.sin(a))
             sx, sz = size
             if not _wz.free(w, x - sx, z - sz, x + sx, z + sz, margin=3) or not room_ok(x - sx, z - sz, x + sx, z + sz, top):
@@ -134,14 +233,47 @@ def build():
                 ruin(w, x, z, rng)
             elif kind == "poste de garde":
                 bunker(w, x, z)
-            elif kind == "pilier":
-                pillar(w, x, z, 4)
-            elif kind == "mur":
-                b = (x + int(rng.integers(-4, 5)), z + int(rng.integers(-4, 5)))
-                wall_seg(w, (x, z), b, 3, rng)
             else:
-                obelisk(w, x, z)
-            placed[kind] += 1
+                wall_seg(w, (x, z), (x + int(rng.integers(-5, 6)), z + int(rng.integers(-5, 6))), 3, rng)
+            counts[kind] += 1
+    placed.update(counts)
+
+    # Chemin de ronde le long du rempart, à 6 de haut : le poste des archers, à découvert de toute l'arène.
+    for a in np.linspace(0, 2 * math.pi, 3200, endpoint=False):
+        for rr in (R_ARENA - 3, R_ARENA - 2, R_ARENA - 1):
+            x, z = round(rr * math.cos(a)), round(rr * math.sin(a))
+            w.put(x, 5, z, PB if rr == R_ARENA - 3 else "minecraft:polished_blackstone")
+        x, z = round((R_ARENA - 4) * math.cos(a)), round((R_ARENA - 4) * math.sin(a))
+        if round(a * R_ARENA) % 2 == 0:
+            w.put(x, 6, z, "minecraft:polished_blackstone_brick_slab[type=bottom]")
+    for k in range(48):  # piliers porteurs
+        a = k * 2 * math.pi / 48
+        x, z = round((R_ARENA - 2) * math.cos(a)), round((R_ARENA - 2) * math.sin(a))
+        for y in range(0, 5):
+            w.put(x, y, z, DT)
+    for k in range(8):  # huit escaliers pour y monter, le long du rempart
+        a0 = k * math.pi / 4 + math.pi / 8
+        for step in range(6):
+            a = a0 + step * 1.6 / R_ARENA
+            for rr in (R_ARENA - 6, R_ARENA - 5, R_ARENA - 4):
+                x, z = round(rr * math.cos(a)), round(rr * math.sin(a))
+                for y in range(0, step + 1):
+                    w.put(x, y, z, PB if y == step else "minecraft:tuff")
+        a = a0 + 6 * 1.6 / R_ARENA  # palier qui rejoint le chemin de ronde
+        for rr in (R_ARENA - 6, R_ARENA - 5, R_ARENA - 4):
+            x, z = round(rr * math.cos(a)), round(rr * math.sin(a))
+            w.put(x, 5, z, PB)
+    placed["chemin de ronde"] = 1
+
+    # Obélisques au bord, hors de l'aplomb de l'île : repères pour se regrouper.
+    n = 0
+    for k in range(6):
+        a = k * math.pi / 3 + math.pi / 6
+        x, z = round(98 * math.cos(a)), round(98 * math.sin(a))
+        if _wz.free(w, x - 2, z - 2, x + 2, z + 2, margin=1) and room_ok(x - 1, z - 1, x + 1, z + 1, 11):
+            obelisk(w, x, z)
+            n += 1
+    placed["obélisques"] = n
     w.placed = placed
     return w, bottom
 
