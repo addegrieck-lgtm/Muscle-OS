@@ -39,10 +39,10 @@ PB, DT = _wz.PB, _wz.DT
 
 FLOOR_WORLD_Y = 25  # pieds des joueurs sur le sol de l'arène
 SPAWN_WORLD_Y = 100  # niveau de marche de l'île (point de collage du spawn)
-R_ARENA = 115  # rayon intérieur du rempart
+R_ARENA = 100  # rayon intérieur du rempart : l'île fait 90 de rayon, on atterrit toujours dedans
 WALL_H = 18
 CLEARANCE = 10  # vide minimal entre le haut d'une construction et le dessous de l'île
-HALF = 120
+HALF = R_ARENA + 4
 
 
 def island_bottom():
@@ -152,7 +152,7 @@ def build():
 
     # Nord : les Tranchées. Lignes en zigzag creusées sur 2 blocs, sacs de pierre noire sur les bords.
     trenches = 0
-    for r0 in (42, 66, 90):
+    for r0 in (34, 50, 66, 82):
         pts = []
         for k, ang in enumerate(range(228, 314, 6)):
             rr = r0 + (4 if k % 2 else -4)
@@ -179,11 +179,11 @@ def build():
 
     # Est : la Forêt de piliers. Corps à corps, angles morts partout.
     n = 0
-    for x in range(30, 112, 6):
-        for z in range(-80, 81, 6):
+    for x in range(26, 98, 5):
+        for z in range(-72, 73, 5):
             X, Z = x + int(rng.integers(-1, 2)), z + int(rng.integers(-1, 2))
             r = math.hypot(X, Z)
-            if not (32 < r < 102) or sector(X, Z) != "est" or not _wz.free(w, X - 1, Z - 1, X + 1, Z + 1, margin=1):
+            if not (28 < r < 91) or sector(X, Z) != "est" or not _wz.free(w, X - 1, Z - 1, X + 1, Z + 1, margin=1):
                 continue
             h = min(int(rng.integers(3, 6)), cap(X, Z))
             if h < 2:
@@ -200,9 +200,9 @@ def build():
 
     # Ouest : les Hauteurs. Plateaux en gradins pour les archers, sommet crénelé.
     n = 0
-    for r0, ang in ((52, 160), (55, 200), (78, 180), (82, 148), (84, 212), (100, 165), (100, 195)):
+    for r0, ang in ((40, 165), (42, 197), (58, 150), (60, 182), (62, 214), (78, 162), (80, 196), (86, 140), (86, 222)):
         cx, cz = round(r0 * math.cos(math.radians(ang))), round(r0 * math.sin(math.radians(ang)))
-        R = 8 if r0 < 90 else 6
+        R = 7 if r0 < 80 else 5
         if not _wz.free(w, cx - R, cz - R, cx + R, cz + R, margin=1):
             continue
         for x in range(cx - R, cx + R + 1):
@@ -220,11 +220,11 @@ def build():
 
     # Sud : les Ruines. Maisons effondrées, toiles d'araignée, postes de garde, murs brisés.
     counts = {"ruine": 0, "poste de garde": 0, "mur": 0}
-    for kind, count, size, top in (("ruine", 9, (4, 5), 6), ("poste de garde", 6, (3, 3), 4), ("mur", 12, (4, 4), 3)):
+    for kind, count, size, top in (("ruine", 14, (4, 5), 6), ("poste de garde", 8, (3, 3), 4), ("mur", 18, (4, 4), 3)):
         tries = 0
         while counts[kind] < count and tries < 3000:
             tries += 1
-            a, r = math.radians(45 + rng.random() * 90), 30 + rng.random() * 72
+            a, r = math.radians(45 + rng.random() * 90), 26 + rng.random() * 64
             x, z = round(r * math.cos(a)), round(r * math.sin(a))
             sx, sz = size
             if not _wz.free(w, x - sx, z - sz, x + sx, z + sz, margin=3) or not room_ok(x - sx, z - sz, x + sx, z + sz, top):
@@ -265,11 +265,47 @@ def build():
             w.put(x, 5, z, PB)
     placed["chemin de ronde"] = 1
 
+    # Remplissage : partout où il reste du vide, un couvert (rocher, muret, pilier, caisses). Pas de ligne droite dégagée.
+    fill = 0
+    for gx in range(-92, 93, 6):
+        for gz in range(-92, 93, 6):
+            x, z = gx + int(rng.integers(-1, 2)), gz + int(rng.integers(-1, 2))
+            r = math.hypot(x, z)
+            if not (23 < r < R_ARENA - 9) or not _wz.free(w, x - 2, z - 2, x + 2, z + 2, margin=1):
+                continue
+            kind = int(rng.integers(4))
+            hmax = min(cap(xx, zz) for xx in range(x - 2, x + 3) for zz in range(z - 2, z + 3))
+            if hmax < 2:
+                continue
+            if kind == 0:  # rocher veiné de rubis
+                rr = 1.6 + rng.random()
+                for dx in range(-2, 3):
+                    for dz in range(-2, 3):
+                        for y in range(0, min(3, hmax)):
+                            if (dx / rr) ** 2 + (dz / rr) ** 2 + (y / (rr * 0.9)) ** 2 <= 1:
+                                n = rng.random()
+                                w.put(x + dx, y, z + dz, "minecraft:deepslate_redstone_ore" if n < 0.1 else "minecraft:calcite" if n < 0.3 else "minecraft:tuff")
+            elif kind == 1:  # muret en L
+                for k in range(-2, 3):
+                    for y in range(0, 2):
+                        w.put(x + k, y, z, PB)
+                        w.put(x - 2, y, z + k, PB)
+            elif kind == 2:  # pilier
+                for y in range(0, min(4, hmax)):
+                    w.put(x, y, z, DT if y < min(4, hmax) - 1 else "minecraft:chiseled_polished_blackstone")
+            else:  # caisses empilées
+                for dx, dz, h in ((0, 0, 2), (1, 0, 1), (0, 1, 1)):
+                    for y in range(0, h):
+                        w.put(x + dx, y, z + dz, "minecraft:polished_blackstone")
+                    w.put(x + dx, h, z + dz, "minecraft:polished_blackstone_slab[type=bottom]")
+            fill += 1
+    placed["couverts"] = fill
+
     # Obélisques au bord, hors de l'aplomb de l'île : repères pour se regrouper.
     n = 0
     for k in range(6):
         a = k * math.pi / 3 + math.pi / 6
-        x, z = round(98 * math.cos(a)), round(98 * math.sin(a))
+        x, z = round((R_ARENA - 13) * math.cos(a)), round((R_ARENA - 13) * math.sin(a))
         if _wz.free(w, x - 2, z - 2, x + 2, z + 2, margin=1) and room_ok(x - 1, z - 1, x + 1, z + 1, 11):
             obelisk(w, x, z)
             n += 1
