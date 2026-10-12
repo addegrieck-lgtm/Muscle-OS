@@ -10,6 +10,7 @@ Repère du gabarit : x/z = 0 au centre de l'arbre, y = 0 au niveau de marche. No
 from __future__ import annotations
 
 import gzip
+import importlib.util
 import io
 import json
 import math
@@ -284,9 +285,9 @@ SPAWN_Z = 62  # point d'apparition, regard vers le nord (l'arbre)
 LOGO_Z = 70  # face avant du blason monumental, dos au vide sud, tourné vers l'arbre
 GATE_Z = -58  # porte de guerre (nord)
 INVEST = (30, 48)  # zone d'investissement (AFK), juste à l'est de la place d'arrivée
-PORTES = (-44, -29)  # Hall des Portes (nord-ouest) : une arche par destination
-ARCHIVE = (42, -32)  # L'Archive (nord-est) : tutoriel, règles, guides
-COFFRE = (-30, 46)  # Le Coffre-Royal (sud-ouest) : salle des caisses, en miroir de la zone d'investissement
+PORTES = (-30, -45)  # Galerie des Portes (nord-ouest) : cathédrale, un portail par destination
+ARCHIVE = (33, -44)  # Rotonde du Savoir (nord-est) : tutoriel, règles, PNJ guide
+COFFRE = (-32, 45)  # Chambre forte (sud-ouest) : salle des caisses
 DESTINATIONS = [  # arches du Hall des Portes, d'ouest en est : (nom, vitrail)
     ("warzone", "minecraft:red_stained_glass"), ("koth", "minecraft:white_stained_glass"), ("totem", "minecraft:black_stained_glass"),
     ("mine-obsidienne", "minecraft:gray_stained_glass"), ("fosse", "minecraft:light_gray_stained_glass"),
@@ -731,13 +732,16 @@ def build_invest(w):
                     w.put(x, y, z, "minecraft:air")
 
 
-def _site(w, cx, cz, hx, hz, top, floor):
-    """Prépare l'emprise : vide au-dessus, sol posé selon floor(dx, dz)."""
-    for x in range(cx - hx, cx + hx + 1):
-        for z in range(cz - hz, cz + hz + 1):
-            for y in range(1, top):
-                w.put(x, y, z, "minecraft:air")
-            w.put(x, 0, z, floor(x - cx, z - cz))
+_bat = None
+
+
+def _batiments():
+    global _bat
+    if _bat is None:
+        spec = importlib.util.spec_from_file_location("vaeloria_batiments", HERE / "batiments.py")
+        _bat = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_bat)
+    return _bat
 
 
 def _path(w, x0, z0, x1, z1):
@@ -752,154 +756,24 @@ def _path(w, x0, z0, x1, z1):
 
 
 def build_portes(w):
-    """Hall des Portes : nef de 25 × 15, toit à deux pans avec verrière, cinq arches-portails sur le mur nord."""
-    cx, cz = PORTES
-    hx, hz, H = 12, 7, 10
-    _site(w, cx, cz, hx, hz, 16, lambda dx, dz: PB if max(abs(dx) - hx + hz, abs(dz)) >= hz else
-          "minecraft:polished_deepslate" if (dx + dz) % 2 else DT)
-    for x in range(cx - hx, cx + hx + 1):
-        for z in range(cz - hz, cz + hz + 1):
-            dx, dz = x - cx, z - cz
-            if abs(dx) != hx and abs(dz) != hz:
-                continue
-            door = dz == hz and abs(dx) <= 2
-            for y in range(1, H):
-                if door and y <= 5:
-                    continue
-                window = dz == hz and 3 <= y <= 6 and abs(dx) % 5 == 3
-                w.put(x, y, z, "minecraft:red_stained_glass" if window else PB if y % 4 == 0 or y == 1 else DT)
-    for dx in range(-hx, hx + 1, 5):  # contreforts sur les deux longs côtés
-        for sz in (-1, 1):
-            for y in range(0, H + 1):
-                w.put(cx + dx, y, cz + sz * (hz + 1), DT if y < H else "minecraft:chiseled_polished_blackstone")
-    for dx in range(-hx, hx + 1):  # toit à deux pans, verrière rubis au faîtage, pignons pleins
-        for dz in range(-hz - 1, hz + 2):
-            y = H + (hz + 1 - abs(dz)) // 2
-            w.put(cx + dx, y, cz + dz, "minecraft:red_stained_glass" if dz == 0 and abs(dx) < hx else "minecraft:deepslate_tiles")
-            if abs(dx) == hx:
-                for yy in range(H, y):
-                    w.put(cx + dx, yy, cz + dz, PB)
-    for k in (-1, 1):  # encadrement de la grande porte
-        for y in range(1, 7):
-            w.put(cx + k * 3, y, cz + hz, "minecraft:chiseled_polished_blackstone")
-    for y, half in ((7, 0), (8, 1), (9, 0)):
-        for k in range(-half, half + 1):
-            w.put(cx + k, y, cz + hz, "minecraft:redstone_block")
-    # Les cinq arches : panneau noir, cadre sculpté, plaque de pression devant, vitrail de couleur au-dessus.
-    for i, (name, glass) in enumerate(DESTINATIONS):
-        ax = cx + (i - 2) * 5
-        for y in range(1, 6):
-            for k in (-1, 0, 1):
-                w.put(ax + k, y, cz - hz, "minecraft:black_concrete")
-        for k in (-2, 2):
-            for y in range(1, 7):
-                w.put(ax + k, y, cz - hz + 1, PB if y < 6 else "minecraft:chiseled_polished_blackstone")
-        for k in range(-2, 3):
-            w.put(ax + k, 6, cz - hz + 1, PB)
-        w.put(ax, 7, cz - hz + 1, "minecraft:redstone_block")
-        for y in (7, 8):
-            for k in (-1, 0, 1):
-                w.put(ax + k, y, cz - hz, glass)
-        for k in (-1, 0, 1):
-            w.put(ax + k, 0, cz - hz + 1, "minecraft:red_nether_bricks")
-        w.put(ax, 1, cz - hz + 1, "minecraft:polished_blackstone_pressure_plate")
-    for dx in (-8, 0, 8):  # lanternes sous le faîtage
-        for y in range(H + 1, H + 4):
-            w.put(cx + dx, y, cz, "minecraft:chain")
-        w.put(cx + dx, H, cz, "minecraft:lantern[hanging=true]")
-    _path(w, cx - 1, cz + hz + 1, cx + 1, -3)
+    """Galerie des Portes : cathédrale noire, cinq portails (voir batiments.galerie)."""
+    plates = _batiments().galerie(w, *PORTES, DESTINATIONS)
+    _path(w, PORTES[0] - 1, PORTES[1] + 14, PORTES[0] + 1, -34)
+    return plates
 
 
 def build_archive(w):
-    """L'Archive : salle carrée aux angles coupés, coupole en calcite à fenêtres rubis, bibliothèques et pupitres."""
-    cx, cz = ARCHIVE
-    h = 8
-    _site(w, cx, cz, 8, 8, 18, lambda dx, dz: PB if max(abs(dx), abs(dz)) == 8 else
-          "minecraft:red_nether_bricks" if max(abs(dx), abs(dz)) == 2 else
-          "minecraft:calcite" if (dx + dz) % 2 else "minecraft:smooth_quartz")
-    for x in range(cx - 8, cx + 9):
-        for z in range(cz - 8, cz + 9):
-            dx, dz = x - cx, z - cz
-            if abs(dx) + abs(dz) > 13:  # angles coupés : plan octogonal
-                for y in range(0, 2):
-                    w.put(x, y, z, "minecraft:air") if y else None
-                continue
-            edge = abs(dx) == 8 or abs(dz) == 8 or abs(dx) + abs(dz) == 13
-            if not edge:
-                continue
-            door = dz == 8 and abs(dx) <= 1
-            for y in range(1, h + 1):
-                if door and y <= 4:
-                    continue
-                window = 3 <= y <= 5 and (abs(dx) == 4 or abs(dz) == 4) and (abs(dx) == 8 or abs(dz) == 8)
-                w.put(x, y, z, "minecraft:red_stained_glass" if window else PB if y in (1, h) else DT)
-            if not door:  # bibliothèques contre les murs intérieurs
-                ix, iz = x - (1 if dx > 0 else -1 if dx < 0 else 0) * (abs(dx) >= abs(dz)), z - (1 if dz > 0 else -1 if dz < 0 else 0) * (abs(dz) >= abs(dx))
-                if max(abs(ix - cx), abs(iz - cz)) <= 7 and abs(ix - cx) + abs(iz - cz) <= 12 and not (iz - cz == 7 and abs(ix - cx) <= 1):
-                    for y in (1, 2, 3):
-                        w.put(ix, y, iz, "minecraft:bookshelf")
-    # Coupole : demi-sphère de calcite (rayon 7) avec une couronne de fenêtres rubis et un oculus.
-    for x in range(cx - 8, cx + 9):
-        for z in range(cz - 8, cz + 9):
-            for y in range(h, h + 9):
-                d = math.sqrt((x - cx) ** 2 + (z - cz) ** 2 + (y - h) ** 2)
-                if 6.2 < d <= 7.4:
-                    ring = y == h + 2 and ((x - cx) % 3 == 0 or (z - cz) % 3 == 0)
-                    top = y >= h + 7
-                    w.put(x, y, z, "minecraft:red_stained_glass" if ring or top else "minecraft:calcite")
-    for x in range(cx - 8, cx + 9):  # plafond plat sous la coupole, ouvert au centre
-        for z in range(cz - 8, cz + 9):
-            if 5 < math.hypot(x - cx, z - cz) <= 7.4 and abs(x - cx) + abs(z - cz) <= 13:
-                w.put(x, h, z, PB)
-    for y in range(h + 1, h + 7):  # lustre
-        w.put(cx, y, cz, "minecraft:chain")
-    w.put(cx, h, cz, "minecraft:lantern[hanging=true]")
-    for k in ((-3, 0, "east"), (3, 0, "west"), (0, -3, "south")):  # pupitres tournés vers le centre
-        w.put(cx + k[0], 1, cz + k[1], f"minecraft:lectern[facing={k[2]}]")
-    w.put(cx, 0, cz, "minecraft:lodestone")  # place du PNJ guide
-    for y, half in ((h + 1, 0), (h + 2, 1), (h + 3, 0)):
-        for k in range(-half, half + 1):
-            w.put(cx + k, y, cz + 8, "minecraft:redstone_block")
-    _path(w, cx - 1, cz + 9, cx + 1, -3)
+    """Rotonde du Savoir : coupole, péristyle, portique (voir batiments.rotonde)."""
+    info = _batiments().rotonde(w, *ARCHIVE)
+    _path(w, ARCHIVE[0] - 1, ARCHIVE[1] + 15, ARCHIVE[0] + 1, -34)
+    return info
 
 
 def build_coffre(w):
-    """Le Coffre-Royal : salle forte aux murs doubles, herse levée, quatre coffres de caisses sur socles, cristal rubis."""
-    cx, cz = COFFRE
-    h = 7
-    _site(w, cx, cz, 7, 7, 14, lambda dx, dz: PB if max(abs(dx), abs(dz)) >= 6 else
-          "minecraft:red_nether_bricks" if dz == 0 and dx > 0 else
-          "minecraft:calcite" if (dx + dz) % 2 else "minecraft:smooth_quartz")
-    for x in range(cx - 7, cx + 8):
-        for z in range(cz - 7, cz + 8):
-            dx, dz = x - cx, z - cz
-            if max(abs(dx), abs(dz)) < 6:
-                continue
-            door = dx >= 6 and abs(dz) <= 1
-            for y in range(1, h + 1):
-                if door and y <= 3:
-                    continue
-                w.put(x, y, z, "minecraft:red_nether_bricks" if y == 4 else PB if y in (1, h) else "minecraft:polished_blackstone")
-            if max(abs(dx), abs(dz)) == 7 and (dx + dz) % 2 == 0:
-                w.put(x, h + 1, z, PB)
-    for dz in (-1, 0, 1):  # herse levée au-dessus de l'entrée
-        w.put(cx + 7, 3, cz + dz, "minecraft:iron_bars[north=true,south=true]")
-        w.put(cx + 6, 3, cz + dz, "minecraft:iron_bars[north=true,south=true]")
-    for x in range(cx - 5, cx + 6):  # voûte et oculus rubis
-        for z in range(cz - 5, cz + 6):
-            w.put(x, h, z, "minecraft:red_stained_glass" if abs(x - cx) <= 1 and abs(z - cz) <= 1 else PB)
-    for sx in (-1, 1):  # quatre socles de caisses, ouverture vers l'allée centrale
-        for sz in (-1, 1):
-            x, z = cx + sx * 3, cz + sz * 3
-            w.put(x, 1, z, "minecraft:chiseled_polished_blackstone")
-            w.put(x, 2, z, "minecraft:chest[facing=north]" if sz > 0 else "minecraft:chest[facing=south]")
-            w.put(x, h - 1, z, "minecraft:lantern[hanging=true]")
-    w.put(cx, 0, cz, "minecraft:shroomlight")  # cristal rubis au centre
-    for y in (1, 2, 3):
-        w.put(cx, y, cz, "minecraft:red_stained_glass")
-    w.put(cx - 1, 1, cz, "minecraft:red_stained_glass")
-    w.put(cx, 1, cz + 1, "minecraft:red_stained_glass")
-    _path(w, cx + 8, cz - 1, -17, cz + 1)
+    """Chambre forte : donjon, tourelles, herse (voir batiments.chambre_forte)."""
+    info = _batiments().chambre_forte(w, *COFFRE)
+    _path(w, COFFRE[0] + 14, COFFRE[1] - 1, -17, COFFRE[1] + 1)
+    return info
 
 
 def build_island(logo41, logo25):
