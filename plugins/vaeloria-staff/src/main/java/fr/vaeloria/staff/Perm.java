@@ -23,5 +23,7 @@ public final class Perm {
     public static final String CHAT = "vaeloria.staff.chat";
     public static final String CHAT_MANAGE = "vaeloria.staff.chatmanage";
     public static final String CHAT_BYPASS = "vaeloria.staff.chat.bypass";
+    public static final String WHITELIST = "vaeloria.staff.whitelist";
+    public static final String WHITELIST_BYPASS = "vaeloria.staff.whitelist.bypass";
     public static final String RELOAD = "vaeloria.staff.reload";
 }

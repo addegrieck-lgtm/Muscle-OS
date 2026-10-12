@@ -41,3 +41,35 @@ sanctions:
 
 staff-chat:
   format: "&d[Staff] &f{player} &8» &d"
+
+# Ouverture du serveur (/staff → Ouverture). Variables : {date}, {countdown}, {waiting} (joueurs refusés qui attendent).
+opening:
+  # Liste des serveurs pendant la fermeture (2 lignes séparées par \n).
+  motd:
+    enabled: true
+    closed: "&6&lVÆLORIA &8• &7Faction & PvP 1.8\n&eOuverture très bientôt &8• &f{waiting} &7joueurs attendent déjà"
+    countdown: "&6&lVÆLORIA &8• &aOuverture dans &f{countdown}\n&e{date} &8• &f{waiting} &7joueurs attendent déjà"
+  # Écran des joueurs refusés par la whitelist.
+  kick-message: "&6&lVÆLORIA\n\n&fLe serveur n'est pas encore ouvert.\n&7Ouverture : &e{date}\n&7Dans : &f{countdown}\n\n&7Tu fais partie des &f{waiting} &7joueurs qui attendent :\n&ates premières heures de jeu te rapporteront un bonus Fondateur !\n\n&7Discord : &bdiscord.gg/vaeloria"
+  # Annonces du compte à rebours (secondes restantes). En dessous de 10 : grand chiffre à l'écran.
+  announce-at: [86400, 21600, 3600, 1800, 900, 600, 300, 120, 60, 30, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+  announce-message: "&6L'ouverture de VÆLORIA a lieu dans &f{countdown}&6 !"
+  # Barre de boss visible par tous à partir de N secondes avant l'ouverture.
+  bossbar-from-seconds: 3600
+  bossbar: "&6&lOuverture de VÆLORIA &8• &f{countdown}"
+  # Spectacle à l'ouverture (programmée ou « avec compte à rebours »).
+  fireworks: true
+  title: "&6&lVÆLORIA EST OUVERT !"
+  subtitle: "&fQue la vraie guerre commence."
+  broadcast: "&a&lLe serveur est ouvert ! &7Bon jeu à tous."
+  # Commandes console lancées à l'ouverture (ex. démarrer un événement, ouvrir un warp).
+  commands: []
+  # Récompense unique des joueurs qui se connectent dans les premières heures après l'ouverture.
+  founder:
+    hours: 48
+    message: "&6Merci d'être là dès l'ouverture ! &7Tu reçois le titre &6Fondateur&7."
+    # {player}, {uuid}. Exemples : "lp user {player} permission set vaeloria.tag.fondateur true", "crate give {player} coffre_fondateur 1"
+    commands: []
+    # En plus, pour ceux qui avaient essayé de se connecter pendant la fermeture.
+    waiting-message: "&eBonus : tu attendais l'ouverture, voici un petit cadeau en plus !"
+    waiting-commands: []

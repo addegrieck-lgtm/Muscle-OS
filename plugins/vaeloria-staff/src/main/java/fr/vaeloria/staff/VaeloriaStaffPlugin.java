@@ -18,6 +18,8 @@ import fr.vaeloria.staff.moderation.StaffMode;
 import fr.vaeloria.staff.moderation.Vanish;
 import fr.vaeloria.staff.npc.NpcListener;
 import fr.vaeloria.staff.npc.NpcManager;
+import fr.vaeloria.staff.opening.OpeningListener;
+import fr.vaeloria.staff.opening.OpeningManager;
 import fr.vaeloria.staff.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -49,6 +51,7 @@ public final class VaeloriaStaffPlugin extends JavaPlugin {
     private Sanctions sanctions;
     private StaffMode staffMode;
     private ChatControl chat;
+    private OpeningManager opening;
     private final Map<UUID, ImageManager.Pending> pendingImages = new ConcurrentHashMap<>();
     /** Joueurs qui regardent un inventaire en lecture seule. */
     private final Set<UUID> readOnly = ConcurrentHashMap.newKeySet();
@@ -67,6 +70,7 @@ public final class VaeloriaStaffPlugin extends JavaPlugin {
         sanctions = new Sanctions(this);
         staffMode = new StaffMode(this);
         chat = new ChatControl(this);
+        opening = new OpeningManager(this);
         loadData();
 
         var pm = getServer().getPluginManager();
@@ -75,6 +79,7 @@ public final class VaeloriaStaffPlugin extends JavaPlugin {
         pm.registerEvents(new NpcListener(this), this);
         pm.registerEvents(new ImageListener(this), this);
         pm.registerEvents(new ModerationListener(this), this);
+        pm.registerEvents(new OpeningListener(this), this);
 
         StaffCommand command = new StaffCommand(this);
         for (String name : List.of("staff", "sc")) {
@@ -111,6 +116,7 @@ public final class VaeloriaStaffPlugin extends JavaPlugin {
         npcs.load();
         images.load();
         mutes.load();
+        opening.load();
     }
 
     public void reload() {
@@ -140,6 +146,7 @@ public final class VaeloriaStaffPlugin extends JavaPlugin {
     public Sanctions sanctions() { return sanctions; }
     public StaffMode staffMode() { return staffMode; }
     public ChatControl chat() { return chat; }
+    public OpeningManager opening() { return opening; }
     public Set<UUID> readOnly() { return readOnly; }
 
     // ---- Messages ----

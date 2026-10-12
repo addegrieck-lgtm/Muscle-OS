@@ -8,6 +8,8 @@ import fr.vaeloria.staff.hologram.HologramsMenu;
 import fr.vaeloria.staff.image.ImagesMenu;
 import fr.vaeloria.staff.moderation.PlayersMenu;
 import fr.vaeloria.staff.npc.NpcsMenu;
+import fr.vaeloria.staff.opening.OpeningMenu;
+import fr.vaeloria.staff.opening.OpeningTimes;
 import fr.vaeloria.staff.util.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -53,6 +55,15 @@ public final class StaffHubMenu extends Menu {
         if (can(Perm.BROADCAST)) set(14, Items.icon(Material.GOAT_HORN, "&e&lAnnonce rapide",
                 "&7Envoie un message unique sans",
                 "&7l'enregistrer (chat, titre…)."), e -> quickBroadcast());
+
+        if (can(Perm.WHITELIST)) {
+            boolean closed = plugin.opening().closed();
+            var at = plugin.opening().scheduled();
+            set(16, Items.icon(closed ? Material.RED_BANNER : Material.LIME_BANNER, "&6&lOuverture : " + (closed ? "&cfermé" : "&aouvert"),
+                    "&7Whitelist, ouverture programmée,",
+                    "&7compte à rebours, joueurs en attente.",
+                    at == null ? "" : "&7Ouverture : &e" + OpeningTimes.display(at)), e -> new OpeningMenu(plugin, viewer).open());
+        }
 
         // Modération
         set(28, Items.icon(Material.PLAYER_HEAD, "&b&lJoueurs connectés", "&7Fiche, téléportation, sanctions."),

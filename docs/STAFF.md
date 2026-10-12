@@ -61,6 +61,25 @@ Qualité : l'image est réduite par paliers (net), puis convertie vers les ~240 
 
 Limites (`config.yml`) : 64 cadres par image, 15 Mo, 8192 px de côté (une image plus grande est refusée avant d'être décodée). Retirer une image (shift-clic droit dans la liste) enlève aussi ses cadres.
 
+## Ouverture du serveur (`/staff` → Ouverture)
+
+Utilise la whitelist du serveur (compatible `/whitelist add`).
+
+- **Fermer** : active la whitelist et expulse les joueurs non autorisés (op, whitelist ou `vaeloria.staff.whitelist.bypass` restent). **Ouvrir** : tout de suite, ou avec un compte à rebours de 10 s / 1 min et le spectacle.
+- **Programmer l'ouverture** : `20/10 18h`, `2026-10-20 18:00`, `18h30` (aujourd'hui ou demain), `+2h`, `dans 1d12h`. Le serveur s'ouvre **tout seul** à l'heure, même s'il a redémarré entre-temps.
+- **Whitelist** : têtes des joueurs autorisés, ajout par pseudo, retrait au shift-clic droit.
+
+Ce qui rend l'attente attractive (tout est modifiable dans `config.yml`, section `opening`) :
+
+| Moment | Ce que voient les joueurs |
+|---|---|
+| Fermé | **MOTD** dans la liste des serveurs : date d'ouverture, compte à rebours, nombre de joueurs qui attendent. **Écran de refus** personnalisé (date, compte à rebours, Discord, promesse du bonus Fondateur). Chaque joueur refusé est compté. |
+| Avant l'ouverture | Annonces dans le chat à J-1, H-6, H-1, 30, 15, 10, 5, 2 et 1 min, **barre de boss** la dernière heure, **gros chiffres à l'écran** de 10 à 1 avec un son qui monte. |
+| Ouverture | Titre plein écran, sons, **feux d'artifice** sans dégâts autour de chaque joueur, message, commandes console (`opening.commands`). |
+| 48 premières heures | **Récompense Fondateur** unique à la première connexion (`founder.commands` : titre, grade, coffre…) + **bonus** pour ceux qui avaient essayé de venir pendant la fermeture (`founder.waiting-commands`). |
+
+Commandes : `/staff whitelist on|off|add <j>|remove <j>|list` · `/staff ouverture <date>|+2h|maintenant|annuler`.
+
 ## Modération
 
 | Outil | Où | Détail |
@@ -78,7 +97,7 @@ Limites (`config.yml`) : 64 cadres par image, 15 Mo, 8192 px de côté (une imag
 
 | Groupe | Contient |
 |---|---|
-| `vaeloria.staff.admin` | Tout (contenu + modération + `ban` + `invsee.edit` + `reload`) |
+| `vaeloria.staff.admin` | Tout (contenu + modération + `ban` + `invsee.edit` + `whitelist` + `whitelist.bypass` + `reload`) |
 | `vaeloria.staff.content` | `use`, `broadcast`, `hologram`, `npc`, `image` — pour les builders / animateurs |
 | `vaeloria.staff.moderator` | `use`, `mode`, `vanish`, `vanish.see`, `freeze`, `invsee`, `teleport`, `warn`, `kick`, `mute`, `chat`, `chatmanage`, `chat.bypass` |
 
@@ -97,4 +116,4 @@ Idées non incluses dans cette première version : PNJ à apparence de joueur (s
 
 ## Tests
 
-`gradle test` : durées de sanction, identifiants, conversion de couleurs et tramage, découpe et mise à l'échelle des images.
+`gradle test` : dates d'ouverture, durées de sanction, identifiants, conversion de couleurs et tramage, découpe et mise à l'échelle des images.

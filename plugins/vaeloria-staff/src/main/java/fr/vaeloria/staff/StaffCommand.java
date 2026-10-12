@@ -6,6 +6,8 @@ import fr.vaeloria.staff.gui.StaffHubMenu;
 import fr.vaeloria.staff.image.ImagesMenu;
 import fr.vaeloria.staff.moderation.PlayerMenu;
 import fr.vaeloria.staff.moderation.PlayersMenu;
+import fr.vaeloria.staff.opening.OpeningMenu;
+import fr.vaeloria.staff.opening.OpeningTimes;
 import fr.vaeloria.staff.util.Durations;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -30,12 +32,14 @@ import java.util.Locale;
  * /staff annonce <id>                     envoyer une annonce enregistrée (console, blocs de commande…)
  * /staff dire <chat|titre|action|boss> <texte, lignes séparées par |>
  * /staff image [lien|fichier] [LxH]
+ * /staff whitelist [on|off|add <j>|remove <j>|list]
+ * /staff ouverture [<date>|+durée|maintenant|annuler]
  * /staff chat lock|unlock|clear · reload
  * /sc [message]                           chat staff (sans message : bascule)
  */
 public final class StaffCommand implements TabExecutor {
     private static final List<String> SUBS = List.of("mode", "vanish", "joueurs", "joueur", "freeze", "invsee", "endersee",
-            "warn", "kick", "mute", "unmute", "ban", "annonce", "dire", "image", "chat", "reload");
+            "warn", "kick", "mute", "unmute", "ban", "annonce", "dire", "image", "whitelist", "ouverture", "chat", "reload");
 
     private final VaeloriaStaffPlugin plugin;
 
@@ -105,6 +109,8 @@ public final class StaffCommand implements TabExecutor {
                 if (args.length == 1) ImagesMenu.start(plugin, p);
                 else ImagesMenu.load(plugin, p, args[1], args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null);
             }
+            case "whitelist", "wl" -> whitelist(sender, args);
+            case "ouverture", "opening" -> opening(sender, args);
             case "chat" -> {
                 if (!need(sender, Perm.CHAT_MANAGE)) return true;
                 String action = args.length > 1 ? args[1].toLowerCase(Locale.ROOT) : "";
@@ -145,6 +151,48 @@ public final class StaffCommand implements TabExecutor {
         else plugin.sanctions().ban(sender, t, d, reason);
     }
 
+    private void whitelist(CommandSender sender, String[] args) {
+        if (!need(sender, Perm.WHITELIST)) return;
+        String action = args.length > 1 ? args[1].toLowerCase(Locale.ROOT) : "";
+        switch (action) {
+            case "on" -> plugin.opening().close(sender);
+            case "off" -> plugin.opening().open(sender, false);
+            case "add", "remove" -> {
+                if (args.length < 3) plugin.msg(sender, "&c/staff whitelist " + action + " <joueur>");
+                else plugin.opening().setWhitelisted(sender, args[2], action.equals("add"));
+            }
+            case "list" -> plugin.msg(sender, "Whitelist (" + Bukkit.getWhitelistedPlayers().size() + ") : &f" + String.join(", ",
+                    Bukkit.getWhitelistedPlayers().stream().map(p -> p.getName() == null ? "?" : p.getName()).sorted().toList()));
+            default -> {
+                if (sender instanceof Player p) new OpeningMenu(plugin, p).open();
+                else plugin.msg(sender, "&c/staff whitelist <on|off|add|remove|list>");
+            }
+        }
+    }
+
+    private void opening(CommandSender sender, String[] args) {
+        if (!need(sender, Perm.WHITELIST)) return;
+        if (args.length < 2) {
+            if (sender instanceof Player p) new OpeningMenu(plugin, p).open();
+            else plugin.msg(sender, "&c/staff ouverture <20/10 18h|+2h|maintenant|annuler>");
+            return;
+        }
+        String input = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+        switch (input.toLowerCase(Locale.ROOT)) {
+            case "maintenant", "now" -> plugin.opening().open(sender, true);
+            case "annuler", "cancel" -> plugin.opening().cancelSchedule(sender);
+            default -> {
+                try {
+                    var at = OpeningTimes.parse(input, java.time.ZonedDateTime.now());
+                    plugin.opening().schedule(sender, at);
+                    plugin.msg(sender, "Ouverture programmée : &e" + OpeningTimes.display(at));
+                } catch (IllegalArgumentException e) {
+                    plugin.msg(sender, "&cDate illisible ou passée : &f" + input + " &c(ex. 20/10 18h, 18h30, +2h)");
+                }
+            }
+        }
+    }
+
     private boolean staffChat(CommandSender sender, String[] args) {
         if (!need(sender, Perm.CHAT)) return true;
         if (args.length > 0) {
@@ -162,6 +210,7 @@ public final class StaffCommand implements TabExecutor {
         plugin.msg(sender, "&f/staff mute|ban <j> <durée|perm> [raison] &7· &f/staff unmute <j>");
         plugin.msg(sender, "&f/staff annonce <id> &7· &f/staff dire <chat|titre|action|boss> <texte>");
         plugin.msg(sender, "&f/staff image [lien] [LxH] &7· &f/staff chat lock|unlock|clear &7· &f/sc <msg>");
+        plugin.msg(sender, "&f/staff whitelist on|off|add|remove|list &7· &f/staff ouverture <20/10 18h|+2h|maintenant|annuler>");
     }
 
     // ---- Aides ----
@@ -211,10 +260,14 @@ public final class StaffCommand implements TabExecutor {
                 case "dire" -> out.addAll(List.of("chat", "titre", "action", "boss"));
                 case "image" -> out.addAll(plugin.images().files());
                 case "chat" -> out.addAll(List.of("lock", "unlock", "clear"));
+                case "whitelist" -> out.addAll(List.of("on", "off", "add", "remove", "list"));
+                case "ouverture" -> out.addAll(List.of("maintenant", "annuler", "+1h", "18h"));
                 default -> {}
             }
         } else if (args.length == 3 && (args[0].equalsIgnoreCase("mute") || args[0].equalsIgnoreCase("ban"))) {
             out.addAll(List.of("30m", "1h", "1d", "7d", "30d", "perm"));
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("whitelist") && args[1].equalsIgnoreCase("remove")) {
+            Bukkit.getWhitelistedPlayers().forEach(p -> { if (p.getName() != null) out.add(p.getName()); });
         } else if (args.length == 3 && args[0].equalsIgnoreCase("image")) {
             out.addAll(List.of("2x2", "3x2", "4x3", "6x4"));
         }

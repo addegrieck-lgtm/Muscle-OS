@@ -7,7 +7,7 @@ authors: [VÆLORIA]
 commands:
   staff:
     description: Menu staff (annonces, pancartes, PNJ, images, modération)
-    usage: "/staff [mode|vanish|joueur|freeze|invsee|warn|kick|mute|ban|annonce|dire|image|chat|reload]"
+    usage: "/staff [mode|vanish|joueur|freeze|invsee|warn|kick|mute|ban|annonce|dire|image|whitelist|ouverture|chat|reload]"
     aliases: [st]
   sc:
     description: Chat staff (/sc <message>, ou /sc seul pour basculer)
@@ -22,6 +22,8 @@ permissions:
       vaeloria.staff.moderator: true
       vaeloria.staff.ban: true
       vaeloria.staff.invsee.edit: true
+      vaeloria.staff.whitelist: true
+      vaeloria.staff.whitelist.bypass: true
       vaeloria.staff.reload: true
   vaeloria.staff.content:
     description: Créer annonces, pancartes, PNJ et images
@@ -105,6 +107,12 @@ permissions:
     default: op
   vaeloria.staff.chat.bypass:
     description: Parler malgré le chat verrouillé, ne pas être nettoyé
+    default: op
+  vaeloria.staff.whitelist:
+    description: Ouvrir / fermer le serveur, programmer l'ouverture, gérer la whitelist
+    default: op
+  vaeloria.staff.whitelist.bypass:
+    description: Se connecter quand le serveur est fermé (sans être sur la whitelist)
     default: op
   vaeloria.staff.reload:
     description: /staff reload
