@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Œuf de capture</title>
+<style>
+  :root {
+    --black: #07070A; --anth: #1B1C21; --anth2: #2A2C33;
+    --ruby: #A3121E; --ruby-hi: #D21F2F; --ruby-lo: #5E0710;
+    --snow: #FFFFFF; --silver: #D9DCE2; --steel: #A9AEB8; --ash: #6E737E;
+    --gold: #E2C27F; --emerald: #3FD47E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 2048px; height: 1152px; background: var(--black); overflow: hidden; }
+  body {
+    font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--silver);
+    background:
+      radial-gradient(ellipse 900px 520px at 50% 34%, rgba(163,18,30,.28), transparent 70%),
+      radial-gradient(ellipse 700px 400px at 100% 100%, rgba(94,7,16,.35), transparent 70%),
+      linear-gradient(180deg, #121318 0%, var(--black) 100%);
+    position: relative; padding: 48px 88px;
+  }
+  /* trame fine façon gravure */
+  body::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 2px, transparent 2px 10px);
+  }
+  .frame { position: absolute; inset: 24px; border: 2px solid rgba(169,174,184,.18); border-radius: 18px; pointer-events: none; }
+  .frame::after { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(210,31,47,.22); border-radius: 12px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; position: relative; }
+  header img { height: 92px; margin-left: -26px; }
+  .tag {
+    font-weight: 800; letter-spacing: .32em; font-size: 22px; color: var(--steel);
+    border: 1px solid rgba(169,174,184,.35); padding: 12px 22px; border-radius: 999px;
+  }
+  .tag b { color: var(--ruby-hi); }
+
+  .hero { text-align: center; margin-top: 6px; position: relative; }
+  .hero .kicker { font-size: 26px; letter-spacing: .5em; font-weight: 700; color: var(--ruby-hi); }
+  .hero h1 {
+    font-family: "Inter Display", "Inter", sans-serif; font-weight: 900; font-size: 120px; line-height: 1.0;
+    letter-spacing: .04em; margin-top: 6px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #E2E4E9 47%, #AEB3BC 53%, #D6D9DF 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 0 rgba(0,0,0,.55));
+  }
+  .hero h1 em { font-style: normal; background: linear-gradient(180deg, var(--ruby-hi), var(--ruby-lo)); -webkit-background-clip: text; background-clip: text; }
+  .hero p { font-size: 31px; color: var(--steel); margin-top: 8px; }
+  .hero p strong { color: var(--snow); font-weight: 700; }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 46px; margin-top: 52px; position: relative; }
+  .step {
+    position: relative; background: linear-gradient(180deg, rgba(42,44,51,.92), rgba(27,28,33,.92));
+    border: 1px solid rgba(169,174,184,.22); border-radius: 22px; padding: 22px 28px 26px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+    min-height: 350px;
+  }
+  .step:not(:last-child)::after {
+    content: ""; position: absolute; right: -40px; top: 50%; width: 34px; height: 34px; transform: translateY(-50%);
+    background: no-repeat center / contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 12h12M12 5l7 7-7 7' fill='none' stroke='%23D21F2F' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+  .num {
+    position: absolute; top: -22px; left: 26px; width: 52px; height: 52px; border-radius: 14px; transform: rotate(45deg);
+    background: linear-gradient(180deg, var(--ruby-hi), var(--ruby-lo)); box-shadow: 0 6px 14px rgba(0,0,0,.5);
+    display: grid; place-items: center;
+  }
+  .num span { transform: rotate(-45deg); color: var(--snow); font-weight: 900; font-size: 26px; }
+  .icon { height: 120px; display: flex; align-items: center; justify-content: center; margin: 10px 0 14px; }
+  .icon svg { height: 112px; width: auto; image-rendering: pixelated; filter: drop-shadow(0 8px 10px rgba(0,0,0,.55)); }
+  .step h2 { font-size: 36px; font-weight: 800; color: var(--snow); text-align: center; }
+  .step p { font-size: 25px; line-height: 1.38; color: var(--steel); text-align: center; margin-top: 10px; }
+  .step p b { color: var(--silver); }
+  .cmd { font-family: "DejaVu Sans Mono", monospace; color: var(--gold); font-weight: 700; }
+  .em { color: var(--emerald); font-weight: 800; }
+
+  .bottom { display: grid; grid-template-columns: 1.15fr 1fr; gap: 46px; margin-top: 44px; position: relative; }
+  .panel { border-radius: 22px; padding: 22px 32px 24px; border: 1px solid rgba(169,174,184,.2); background: rgba(27,28,33,.82); }
+  .panel.use { border-color: rgba(210,31,47,.45); background: linear-gradient(135deg, rgba(94,7,16,.42), rgba(27,28,33,.85) 60%); }
+  .panel h3 { font-size: 22px; letter-spacing: .28em; font-weight: 800; color: var(--ruby-hi); margin-bottom: 12px; }
+  .panel ul { list-style: none; display: grid; gap: 9px; }
+  .panel li { font-size: 25px; line-height: 1.34; color: var(--silver); padding-left: 34px; position: relative; }
+  .panel li::before { content: ""; position: absolute; left: 4px; top: 12px; width: 12px; height: 12px; transform: rotate(45deg); background: var(--ruby-hi); }
+  .panel.know li::before { background: var(--steel); }
+  .panel li b { color: var(--snow); }
+  .warn { color: var(--gold) !important; }
+
+  footer {
+    position: absolute; left: 88px; right: 88px; bottom: 46px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 23px; color: var(--ash);
+  }
+  footer .cmds span { margin-right: 30px; }
+  footer .ip { font-weight: 800; letter-spacing: .14em; color: var(--steel); }
+  footer .ip b { color: var(--ruby-hi); }
+</style>
+</head>
+<body>
+<div class="frame"></div>
+
+<header>
+  <img src="logo.png" alt="VÆLORIA">
+  <div class="tag">FARMS DE <b>BIBLIOTHÉCAIRES</b></div>
+</header>
+
+<section class="hero">
+  <div class="kicker">VILLAGEOIS</div>
+  <h1>L'ŒUF DE <em>CAPTURE</em></h1>
+  <p>Déplace tes villageois et <strong>relance tes bibliothécaires épuisés</strong>.</p>
+</section>
+
+<section class="steps">
+  <article class="step">
+    <div class="num"><span>1</span></div>
+    <div class="icon" data-art="emerald"></div>
+    <h2>Achète l'œuf</h2>
+    <p><span class="cmd">/villageois oeuf</span><br>pour <span class="em">24 émeraudes</span>.<br>Pas d'émeraudes ? <span class="cmd">/emeraudes</span></p>
+  </article>
+  <article class="step">
+    <div class="num"><span>2</span></div>
+    <div class="icon" data-art="egg"></div>
+    <h2>Lance-le</h2>
+    <p>Vise un <b>villageois</b> : il disparaît et arrive <b>dans ton inventaire</b>.</p>
+  </article>
+  <article class="step">
+    <div class="num"><span>3</span></div>
+    <div class="icon" data-art="spawn"></div>
+    <h2>Relâche-le</h2>
+    <p><b>Clic droit sur un bloc</b>, là où tu veux : dans ta farm, près d'un lutrin.</p>
+  </article>
+  <article class="step">
+    <div class="num"><span>4</span></div>
+    <div class="icon" data-art="book"></div>
+    <h2>Il repart à zéro</h2>
+    <p>Sans métier, <b>sans livres</b>, sans chance, sans usure. Pose-lui un <b>lutrin</b> : nouveaux livres !</p>
+  </article>
+</section>
+
+<section class="bottom">
+  <div class="panel use">
+    <h3>QUAND L'UTILISER ?</h3>
+    <ul>
+      <li>Un bibliothécaire est <b>épuisé après une quinzaine de livres vendus</b> : capture&#8209;le et relâche&#8209;le pour le relancer.</li>
+      <li>Pour <b>déplacer un villageois</b> jusqu'à ta farm, sans rails ni bateau.</li>
+    </ul>
+  </div>
+  <div class="panel know">
+    <h3>À SAVOIR</h3>
+    <ul>
+      <li class="warn">Ses livres sont perdus : <b>achète d'abord ce qui t'intéresse.</b></li>
+      <li>Raté ou zone protégée ? <b>L'œuf t'est rendu.</b></li>
+      <li>Impossible au spawn et dans un claim ennemi.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="cmds"><span class="cmd">/villageois</span><span class="cmd">/villageois chances</span><span class="cmd">/emeraudes</span></div>
+  <div class="ip">PLAY.<b>VAELORIA</b>.FR</div>
+</footer>
+
+<script>
+  // Icônes en pixel art 16×16, façon objets Minecraft. Chaque lettre = une couleur, « . » = transparent.
+  const ART = {
+    emerald: { pal: { a: "#0E5E2E", b: "#17A34A", c: "#3FD47E", d: "#A7F3C4", e: "#FFFFFF", f: "#0B3F20" }, px: [
+      "................",
+      "......ffff......",
+      ".....fbccbf.....",
+      "....fbcddcbf....",
+      "...fbcdeedcbf...",
+      "..fbbcdddccbbf..",
+      "..fabbccccbbaf..",
+      "..fabbbccbbbaf..",
+      "..faabbbbbbaaf..",
+      "..faabbbbbbaaf..",
+      "...faabbbbaaf...",
+      "....faabbaaf....",
+      ".....faaaaf.....",
+      "......ffff......",
+      "................",
+      "................"] },
+    egg: { pal: { a: "#3A2E22", b: "#E9DCC0", c: "#F8F1E1", d: "#FFFFFF", e: "#C9B48E", r: "#A3121E", s: "#D21F2F" }, px: [
+      "......aaaa......",
+      ".....acccca.....",
+      "....acdddcca....",
+      "...acdddcccba...",
+      "...acddcccbba...",
+      "..acdcccccbbea..",
+      "..arrrrrrrrrrra..",
+      "..asrssrrssrsra..",
+      "..arrrrrrrrrrra..",
+      "..acccccccbbea..",
+      "..abccccbbbeea..",
+      "...abbbbbbeea...",
+      "...aebbbbeeea...",
+      "....aeeeeeea....",
+      ".....aaaaaa.....",
+      "................"] },
+    spawn: { pal: { a: "#2B1D12", b: "#7A5230", c: "#9C6B40", d: "#B9845A", g: "#3C8A3C", h: "#5BBE5B" }, px: [
+      "......aaaa......",
+      ".....adddda.....",
+      "....addcddca....",
+      "...adddcchcba...",
+      "...addcchhcba...",
+      "..adccccccccba..",
+      "..adcgcccccbba..",
+      "..acgghcccgbba..",
+      "..accgccchhcba..",
+      "..acccccccgbba..",
+      "..abccchcbbbba..",
+      "...abcchhbbba...",
+      "...abbbcbbbba...",
+      "....abbbbbba....",
+      ".....aaaaaa.....",
+      "................"] },
+    book: { pal: { a: "#1A0F2E", b: "#5B2A86", c: "#8A4FC7", d: "#C69AF2", p: "#E9E2D0", q: "#B9AE92", s: "#FFFFFF" }, px: [
+      "................",
+      ".aaaaaaaaaaa....",
+      "abbbbbbbbbbba...",
+      "abcccccccccbap..",
+      "abcddcccccbbap..",
+      "abcdcccccccbap..",
+      "abccccdccccbap..",
+      "abcccccccccbap..",
+      "abcccccdcccbap..",
+      "abccccccccdbap..",
+      "abcccccccccbap..",
+      "abbbbbbbbbbbap..",
+      "aqqqqqqqqqqqqa..",
+      ".appppppppppppa.",
+      "..aaaaaaaaaaaaa.",
+      "................"] },
+  };
+  for (const el of document.querySelectorAll("[data-art]")) {
+    const { pal, px } = ART[el.dataset.art];
+    let rects = "";
+    px.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (pal[ch]) rects += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[ch]}"/>`;
+    }));
+    el.innerHTML = `<svg viewBox="0 0 16 16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+  }
+</script>
+</body>
+</html>
