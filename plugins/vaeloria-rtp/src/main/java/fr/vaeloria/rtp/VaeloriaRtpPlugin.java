@@ -72,6 +72,13 @@ public final class VaeloriaRtpPlugin extends JavaPlugin {
 
     public void reloadAll() {
         reloadConfig();
+        // Mise à jour du plugin : ajoute au config.yml existant les réglages apparus depuis (styles de portails,
+        // nouveaux messages…), sans toucher aux valeurs déjà modifiées par l'admin.
+        if (!getConfig().getKeys(true).containsAll(getConfig().getDefaults().getKeys(true))) {
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+            reloadConfig();
+        }
         registry.load();
         finder.reload();
         portals.reload();
