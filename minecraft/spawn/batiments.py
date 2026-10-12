@@ -543,3 +543,131 @@ def chambre_forte(w, cx, cz):
     m.put(0, 2, 1, GLASS)
     m.put(0, 2, -1, GLASS)
     return {"coffres": chests}
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# 4. Le Trésor de Vælor (zone d'investissement) : plan carré aux angles coupés, chaque angle ouvert par une arche
+#    (aucun coin mort : qui s'y cache reste visible), portique face à la place, coupole à nervures au-dessus de la
+#    zone AFK. En miroir de la Chambre forte de l'autre côté de la place.
+# ---------------------------------------------------------------------------------------------------------------
+
+def tresor(w, cx, cz):
+    m = Mason(w, cx, cz, 404)
+    m.clear(14, 14, 32)
+    S, CUT, TOP = 9, 14, 10  # demi-côté, coupe des angles (|dx| + |dz|), haut des murs
+
+    def inside(dx, dz, s=S, cut=CUT):
+        return abs(dx) <= s and abs(dz) <= s and abs(dx) + abs(dz) <= cut
+
+    for dx in range(-12, 13):  # socle et sol
+        for dz in range(-12, 13):
+            if inside(dx, dz, 11, 18):
+                m.put(dx, 0, dz, PB)
+            if inside(dx, dz, 10, 16):
+                m.put(dx, 1, dz, PB)
+            if inside(dx, dz):
+                zone = max(abs(dx), abs(dz))
+                m.put(dx, 1, dz, "minecraft:red_nether_bricks" if zone == 4 else
+                      ("minecraft:calcite" if (dx + dz) % 2 else "minecraft:smooth_quartz") if zone < 4 else
+                      "minecraft:polished_deepslate" if (dx + dz) % 2 else "minecraft:deepslate_tiles")
+    m.put(0, 1, 0, "minecraft:redstone_block")  # sceau rubis au centre de la zone
+
+    # Murs droits (ouest = entrée, trois autres côtés = deux fenêtres en arc brisé), faces d'angle = arches ouvertes.
+    for dx in range(-S, S + 1):
+        for dz in range(-S, S + 1):
+            if not inside(dx, dz) or inside(dx, dz, S - 1, CUT - 1):
+                continue
+            corner_face = abs(dx) + abs(dz) >= CUT - 0 and abs(dx) > 4 and abs(dz) > 4
+            for y in range(2, TOP + 1):
+                m.put(dx, y, dz, "minecraft:red_nether_bricks" if y == 5 else m.stone())
+            if corner_face:
+                # arche d'angle : ouverture de 3 de large au milieu de la face, 5 de haut, arc brisé
+                mid = abs(abs(dx) - abs(dz)) <= 2
+                if mid:
+                    for y in range(2, 7 if abs(abs(dx) - abs(dz)) == 0 else 6):
+                        m.put(dx, y, dz, "minecraft:air")
+                    if abs(abs(dx) - abs(dz)) == 2:
+                        m.put(dx, 6, dz, CHIS)
+    for sx in (-1, 1):  # pilastres de quartz encadrant chaque arche d'angle
+        for sz in (-1, 1):
+            for a, b in ((7, 7), (5, 9), (9, 5)):
+                x, z = sx * a, sz * b
+                if (a, b) == (7, 7):
+                    m.put(x, 7, z, "minecraft:redstone_block")  # clé de voûte rubis
+                    continue
+                for y in range(2, TOP):
+                    m.put(x, y, z, PILLAR if y < TOP - 1 else CHQ)
+    # Côtés droits : entrée à l'ouest, fenêtres ailleurs.
+    for dz in (-2, 2):
+        for side, (axis, out) in {"est": ("z", 1), "nord": ("x", -1), "sud": ("x", 1)}.items():
+            if axis == "z":
+                arch_window(m, S, dz * 1, 4, 8, axis="z", outward=1) if dz == -2 else arch_window(m, S, 2, 4, 8, axis="z", outward=1)
+            else:
+                arch_window(m, dz, out * S, 4, 8, axis="x", outward=out)
+    for dz in range(-1, 2):  # porte ouest
+        for y in range(2, 8):
+            m.put(-S, y, dz, "minecraft:air")
+    m.put(-S, 8, -1, st(PBB, "north", "top"))
+    m.put(-S, 8, 1, st(PBB, "south", "top"))
+    m.put(-S, 9, 0, "minecraft:redstone_block")
+    # Corniche tout autour et pinacles aux huit angles.
+    for dx in range(-S - 1, S + 2):
+        for dz in range(-S - 1, S + 2):
+            if inside(dx, dz, S + 1, CUT + 1) and not inside(dx, dz):
+                f = "east" if dx < -S + 1 else "west" if dx > S - 1 else "south" if dz < 0 else "north"
+                m.put(dx, TOP + 1, dz, st(PBB, f, "top"))
+            if inside(dx, dz):
+                m.put(dx, TOP + 1, dz, PB if not inside(dx, dz, 4, 8) else "minecraft:air")
+                if not inside(dx, dz, S - 1, CUT - 1) and (dx + dz) % 2 == 0:
+                    m.put(dx, TOP + 2, dz, PB)
+    for x, z in ((-S, -5), (-S, 5), (S, -5), (S, 5), (-5, -S), (5, -S), (-5, S), (5, S)):
+        m.put(x, TOP + 2, z, CHIS)
+        m.put(x, TOP + 3, z, "minecraft:polished_blackstone_brick_wall[up=true]")
+        m.put(x, TOP + 4, z, "minecraft:end_rod[facing=up]")
+    # Portique ouest : quatre colonnes, entablement, fronton, marches vers la place.
+    for dz in (-4, -2, 2, 4):
+        m.put(-12, 2, dz, CHQ)
+        for y in range(3, 9):
+            m.put(-12, y, dz, PILLAR)
+        m.put(-12, 9, dz, CHQ)
+    for dz in range(-5, 6):
+        for dx in range(-12, -S):
+            m.put(dx, 10, dz, PB)
+            m.put(dx, 1, dz, PB)
+        m.put(-13, 10, dz, st(PBB, "east", "top"))
+        m.put(-13, 1, dz, st(PBB, "east"))
+    for dz in range(-6, 7):
+        y = 11 + (6 - abs(dz)) // 2
+        for yy in range(11, y):
+            m.put(-12, yy, dz, PB)
+        m.put(-12, y, dz, st(PBB, "north" if dz < 0 else "south") if dz else CHIS)
+    for y, half in ((12, 0), (13, 1), (14, 0)):
+        for dz in range(-half, half + 1):
+            m.put(-13, y, dz, "minecraft:redstone_block")
+    # Coupole au-dessus de la zone AFK : tambour à oculi, nervures noires, calcite, lanternon.
+    for dx in range(-6, 7):
+        for dz in range(-6, 7):
+            d = math.hypot(dx, dz)
+            if 4.5 < d <= 5.5:
+                for y in range(TOP + 1, TOP + 4):
+                    m.put(dx, y, dz, GLASS if y == TOP + 2 and (dx == 0 or dz == 0 or abs(dx) == abs(dz)) else m.stone())
+            for y in range(TOP + 4, TOP + 10):
+                dd = math.sqrt(dx * dx + dz * dz + (y - TOP - 4) ** 2)
+                if 4.6 < dd <= 5.6:
+                    ang = math.degrees(math.atan2(dz, dx)) % 360
+                    rib = min(abs((ang - a + 180) % 360 - 180) for a in range(0, 360, 45)) < 7
+                    m.put(dx, y, dz, PB if rib else "minecraft:calcite")
+    for y, mat in ((TOP + 10, CHQ), (TOP + 11, "minecraft:polished_blackstone_brick_wall[up=true]"),
+                   (TOP + 12, "minecraft:redstone_block"), (TOP + 13, "minecraft:end_rod[facing=up]")):
+        m.put(0, y, 0, mat)
+    for y in range(TOP + 2, TOP + 9):  # lustre
+        m.put(0, y, 0, "minecraft:chain")
+    m.put(0, TOP + 1, 0, HANG)
+    for dx, dz in ((3, 3), (-3, 3), (3, -3), (-3, -3)):
+        m.put(dx, TOP, dz, HANG)
+    # Bancs le long des murs droits, tournés vers la zone.
+    for k in (-3, -2, 2, 3):
+        m.put(k, 2, -S + 1, st("pale_oak", "north"))
+        m.put(k, 2, S - 1, st("pale_oak", "south"))
+        m.put(S - 1, 2, k, st("pale_oak", "east"))
+    return {"zone": ((cx - 4, 2, cz - 4), (cx + 4, 5, cz + 4))}

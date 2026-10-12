@@ -284,7 +284,7 @@ PLAZA_Z, PLAZA_R = 48, 17  # place d'arrivée (sud)
 SPAWN_Z = 62  # point d'apparition, regard vers le nord (l'arbre)
 LOGO_Z = 70  # face avant du blason monumental, dos au vide sud, tourné vers l'arbre
 GATE_Z = -58  # porte de guerre (nord)
-INVEST = (30, 48)  # zone d'investissement (AFK), juste à l'est de la place d'arrivée
+INVEST = (32, 45)  # Trésor de Vælor : zone d'investissement (AFK), en miroir de la Chambre forte
 PORTES = (-30, -45)  # Galerie des Portes (nord-ouest) : cathédrale, un portail par destination
 ARCHIVE = (33, -44)  # Rotonde du Savoir (nord-est) : tutoriel, règles, PNJ guide
 COFFRE = (-32, 45)  # Chambre forte (sud-ouest) : salle des caisses
@@ -671,65 +671,10 @@ class World:
 
 
 def build_invest(w):
-    """Zone d'investissement : pavillon 17 × 17 à colonnade, verrière rubis, zone AFK 9 × 9 en calcite au centre."""
-    cx, cz = INVEST
-    for x in range(cx - 8, cx + 9):
-        for z in range(cz - 8, cz + 9):
-            for y in range(1, 11):
-                w.put(x, y, z, "minecraft:air")
-            dx, dz = abs(x - cx), abs(z - cz)
-            if max(dx, dz) == 8:
-                floor = PB
-            elif max(dx, dz) == 4:
-                floor = "minecraft:red_nether_bricks"  # bord de la zone AFK
-            elif max(dx, dz) < 4:
-                floor = "minecraft:calcite" if (x + z) % 2 else "minecraft:smooth_quartz"
-            else:
-                floor = "minecraft:polished_deepslate"
-            w.put(x, 0, z, floor)
-    w.put(cx, 0, cz, "minecraft:redstone_block")  # sceau rubis au centre
-
-    # Colonnade : un pilier tous les 4 blocs, banquette basse entre eux, entrée face à la place (ouest).
-    for x in range(cx - 8, cx + 9):
-        for z in range(cz - 8, cz + 9):
-            dx, dz = x - cx, z - cz
-            if max(abs(dx), abs(dz)) != 8:
-                continue
-            entrance = dx == -8 and abs(dz) <= 1
-            if dx % 4 == 0 and dz % 4 == 0:
-                for y in range(1, 7):
-                    w.put(x, y, z, PB if y in (1, 6) else DT)
-            elif not entrance:
-                w.put(x, 1, z, "minecraft:polished_blackstone_brick_slab[type=bottom]")
-    # Bancs en chêne pâle le long des murs intérieurs, tournés vers la zone.
-    for k in range(-3, 4):
-        if abs(k) == 0:
-            continue
-        w.put(cx + k, 1, cz - 6, "minecraft:pale_oak_stairs[facing=north]")
-        w.put(cx + k, 1, cz + 6, "minecraft:pale_oak_stairs[facing=south]")
-        w.put(cx + 6, 1, cz + k, "minecraft:pale_oak_stairs[facing=east]")
-    # Toit : bordure en pierre noire, verrière rubis au centre traversée de deux poutres.
-    for x in range(cx - 8, cx + 9):
-        for z in range(cz - 8, cz + 9):
-            dx, dz = abs(x - cx), abs(z - cz)
-            glass = dx <= 5 and dz <= 5 and dx != 0 and dz != 0
-            w.put(x, 7, z, "minecraft:red_stained_glass" if glass else PB)
-            if max(dx, dz) == 8 and (dx + dz) % 2 == 0:
-                w.put(x, 8, z, PB)
-    for x, z in ((cx - 6, cz - 6), (cx + 6, cz - 6), (cx - 6, cz + 6), (cx + 6, cz + 6), (cx, cz - 6), (cx, cz + 6)):
-        w.put(x, 6, z, "minecraft:chain")
-        w.put(x, 5, z, "minecraft:lantern[hanging=true]")
-    for y, half in ((8, 0), (9, 1), (10, 1), (11, 0)):  # losange rubis au-dessus de l'entrée
-        for k in range(-half, half + 1):
-            w.put(cx - 8, y, cz + k, "minecraft:redstone_block")
-    # Allée depuis la place d'arrivée jusqu'à l'entrée.
-    for x in range(cx - 15, cx - 8):
-        for z in range(cz - 1, cz + 2):
-            if w.name_at(x, 0, z) in ("minecraft:pale_moss_block", "minecraft:polished_blackstone_bricks", "minecraft:smooth_quartz", "minecraft:red_nether_bricks"):
-                w.put(x, 0, z, "minecraft:deepslate_tiles" if z == cz else "minecraft:polished_deepslate")
-            for y in range(1, 3):
-                if w.name_at(x, y, z) in ("minecraft:pale_moss_carpet", "minecraft:red_tulip", "minecraft:poppy"):
-                    w.put(x, y, z, "minecraft:air")
+    """Trésor de Vælor : zone d'investissement, angles ouverts, coupole (voir batiments.tresor)."""
+    info = _batiments().tresor(w, *INVEST)
+    _path(w, 17, INVEST[1] - 1, INVEST[0] - 14, INVEST[1] + 1)
+    return info
 
 
 _bat = None
