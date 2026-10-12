@@ -14,9 +14,39 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks, i
                    int compactAbove, String compactHeader, String compactFooter,
                    Thresholds ping, Thresholds tps, List<Rank> ranks) {
 
+    /**
+     * Section du fichier, ou celle du config.yml d'origine (dans le jar) si elle manque ou est vide : sinon un
+     * config.yml incomplet afficherait les balises de couleur en texte brut (« &lt;ruby_lo&gt; »).
+     */
+    static ConfigurationSection section(FileConfiguration c, String path) {
+        // get(path, null) : getConfigurationSection créerait une section vide dans le fichier si elle n'existe pas.
+        ConfigurationSection own = c.get(path, null) instanceof ConfigurationSection cs ? cs : null;
+        if (own != null && !own.getKeys(false).isEmpty()) return own;
+        org.bukkit.configuration.Configuration defaults = c.getDefaults();
+        if (defaults != null && defaults.isConfigurationSection(path)) return defaults.getConfigurationSection(path);
+        return own;
+    }
+
+    private static String fromDefaults(FileConfiguration c, String path, String fallback) {
+        org.bukkit.configuration.Configuration defaults = c.getDefaults();
+        return defaults != null && defaults.isString(path) ? defaults.getString(path) : fallback;
+    }
+
+    /** Ce qui manque dans le config.yml du serveur (remplacé par les valeurs d'origine) : pour prévenir l'admin. */
+    static List<String> missing(FileConfiguration c) {
+        List<String> out = new ArrayList<>();
+        // contains(…, true) : ce qui est réellement dans le fichier, sans les valeurs d'origine du jar.
+        if (!c.contains("palette", true)) out.add("palette");
+        if (!c.contains("ranks", true)) out.add("ranks");
+        else for (String key : c.getConfigurationSection("ranks").getKeys(false)) {
+            if (!c.contains("ranks." + key + ".display", true)) out.add("ranks." + key + ".display");
+        }
+        return out;
+    }
+
     static TabSettings load(FileConfiguration c) {
         Map<String, String> palette = new LinkedHashMap<>();
-        ConfigurationSection pal = c.getConfigurationSection("palette");
+        ConfigurationSection pal = section(c, "palette");
         if (pal != null) {
             for (String key : pal.getKeys(false)) {
                 String hex = pal.getString(key, "");
@@ -43,13 +73,14 @@ record TabSettings(String serverName, int refreshTicks, int namesRefreshTicks, i
                 c.getString("tps.good", "#E6E8EC"), c.getString("tps.medium", "#A9AEB8"), c.getString("tps.bad", "#D21F2F"));
 
         List<Rank> ranks = new ArrayList<>();
-        ConfigurationSection rs = c.getConfigurationSection("ranks");
+        ConfigurationSection rs = section(c, "ranks");
         if (rs != null) {
             for (String key : rs.getKeys(false)) {
                 ConfigurationSection r = rs.getConfigurationSection(key);
                 if (r == null) continue;
                 ranks.add(new Rank(key, r.getString("permission", ""), r.getInt("order", 0),
-                        r.getString("display", key), r.getString("format", "<player>"), r.getString("compact"),
+                        r.getString("display", fromDefaults(c, "ranks." + key + ".display", key)),
+                        r.getString("format", fromDefaults(c, "ranks." + key + ".format", "<player>")), r.getString("compact"),
                         r.getString("chat"), r.getString("join"), r.getString("quit")));
             }
         }

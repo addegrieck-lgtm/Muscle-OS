@@ -83,6 +83,9 @@ public final class VaeloriaTabPlugin extends JavaPlugin {
             return false;
         }
         settings = next;
+        List<String> missing = TabSettings.missing(getConfig());
+        if (!missing.isEmpty()) getLogger().warning("config.yml incomplet (" + String.join(", ", missing)
+                + ") : valeurs d'origine utilisées. Pour un fichier complet, renomme config.yml et redémarre.");
         ServerListSettings nextList = ServerListSettings.load(getConfig());
         MessagesSettings nextMessages = MessagesSettings.load(getConfig());
         icon = loadIcon();
