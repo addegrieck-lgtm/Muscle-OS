@@ -1,0 +1,27 @@
+name: VaeloriaVillageois
+version: '${version}'
+main: fr.vaeloria.villageois.VaeloriaVillageoisPlugin
+api-version: '1.21'
+description: "Villageois VÆLORIA : livres enchantés chanceux, boosts en émeraudes, œuf de capture, change d'émeraudes."
+authors: [VÆLORIA]
+softdepend: [Vault, VaeloriaShop, VaeloriaFactions]
+commands:
+  villageois:
+    description: Bibliothécaires, boosts et œuf de capture
+    usage: /villageois [chances [boosts]|oeuf|give <joueur> [quantité]|reload]
+    aliases: [pnj, villager]
+    permission: vaeloria.villageois.use
+  emeraudes:
+    description: Acheter ou revendre des émeraudes
+    usage: /emeraudes
+    aliases: [emeraude, emeralds]
+    permission: vaeloria.villageois.exchange
+permissions:
+  vaeloria.villageois.use:
+    description: Booster les bibliothécaires, voir les chances, acheter et lancer l'œuf de capture
+    default: true
+  vaeloria.villageois.exchange:
+    default: true
+  vaeloria.villageois.admin:
+    description: /villageois give et reload
+    default: op
