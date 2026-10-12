@@ -60,7 +60,7 @@ def island_bottom():
 def build():
     rng = np.random.default_rng(31)
     bottom = island_bottom()
-    w = Vol(half=HALF, ymin=-14, ymax=WALL_H + 2)
+    w = Vol(half=HALF, ymin=-14, ymax=40)  # assez haut pour le phare
 
     def room_ok(x0, z0, x1, z1, top):
         """Rien de construit ne doit approcher le dessous de l'île : pas de pont pour remonter."""
@@ -150,11 +150,101 @@ def build():
         w.put(x, 1, z, "minecraft:lantern[hanging=false]")
     placed["Ring"] = 1
 
+    # Le canal : un anneau d'eau autour du Ring, quatre ponts. On traverse à découvert ou on nage.
+    for x in range(-30, 31):
+        for z in range(-30, 31):
+            d = math.hypot(x, z)
+            if 24.5 <= d <= 27.5:
+                bridge = min(abs(x), abs(z)) <= 1
+                for y in range(0, 2):
+                    w.put(x, y, z, "minecraft:air")
+                if bridge:
+                    w.put(x, -1, z, "minecraft:pale_oak_planks")
+                    w.put(x, -2, z, "minecraft:water")
+                    w.put(x, -3, z, "minecraft:deepslate")
+                else:
+                    w.put(x, -1, z, "minecraft:water")
+                    w.put(x, -2, z, "minecraft:water")
+                    w.put(x, -3, z, "minecraft:calcite" if (x + z) % 3 else "minecraft:deepslate")
+            elif 23.5 <= d < 24.5 or 27.5 < d <= 28.5:
+                w.put(x, -1, z, PB)
+                if w.get(x, 0, z) == "minecraft:pale_moss_carpet":
+                    w.put(x, 0, z, "minecraft:air")
+    for k in range(16):  # lampadaires le long du canal
+        a = k * math.pi / 8 + math.pi / 16
+        x, z = round(29.5 * math.cos(a)), round(29.5 * math.sin(a))
+        w.put(x, 0, z, "minecraft:polished_blackstone_wall[up=true]")
+        w.put(x, 1, z, "minecraft:polished_blackstone_wall[up=true]")
+        w.put(x, 2, z, "minecraft:lantern[hanging=false]")
+    placed["canal"] = 1
+
+    def pond(cx, cz, rad, depth=2):
+        for x in range(cx - rad - 2, cx + rad + 3):
+            for z in range(cz - rad - 2, cz + rad + 3):
+                d = math.hypot(x - cx, z - cz) + 0.8 * noise(x * 3, z * 3, cx * 0.1)
+                if d <= rad:
+                    for y in range(0, 3):
+                        w.put(x, y, z, "minecraft:air")
+                    for y in range(-depth, 0):
+                        w.put(x, y, z, "minecraft:water")
+                    w.put(x, -depth - 1, z, "minecraft:calcite" if rng.random() < 0.4 else "minecraft:tuff")
+                elif d <= rad + 1.5:
+                    w.put(x, -1, z, "minecraft:polished_deepslate" if rng.random() < 0.6 else "minecraft:calcite")
+                    if w.get(x, 0, z) == "minecraft:pale_moss_carpet":
+                        w.put(x, 0, z, "minecraft:air")
+
+    def lighthouse(cx, cz):
+        """Phare rayé noir et argent, lanterne rubis au sommet, échelle intérieure et galerie."""
+        H = 24
+        while H > 10 and not room_ok(cx - 5, cz - 5, cx + 5, cz + 5, H + 8):
+            H -= 2
+        for y in range(-1, H):
+            r_out = 4.5 - 1.0 * max(y, 0) / H
+            band = "minecraft:calcite" if (y // 4) % 2 else "minecraft:polished_blackstone"
+            for x in range(cx - 5, cx + 6):
+                for z in range(cz - 5, cz + 6):
+                    d = math.hypot(x - cx, z - cz)
+                    if d <= r_out:
+                        inside = d < 2.5 and y >= 0
+                        door = y in (0, 1) and x == cx and z > cz and not inside
+                        window = y % 8 == 5 and z == cz and not inside  # fenêtres est-ouest : l'échelle est au nord
+                        w.put(x, y, z, "minecraft:air" if inside or door or window else band)
+        for y in range(0, H + 1):
+            w.put(cx, y, cz - 2, "minecraft:ladder[facing=south]")
+        for x in range(cx - 5, cx + 6):  # galerie et garde-corps
+            for z in range(cz - 5, cz + 6):
+                d = math.hypot(x - cx, z - cz)
+                if d <= 5:
+                    if (x, z) != (cx, cz - 2):
+                        w.put(x, H, z, PB)
+                    if d > 4.2:
+                        w.put(x, H + 1, z, "minecraft:polished_blackstone_wall[up=true]")
+        for dx in (-1, 0, 1):  # lanterne : verre rubis autour d'un cœur lumineux
+            for dz in (-1, 0, 1):
+                for y in range(H + 1, H + 4):
+                    w.put(cx + dx, y, cz + dz, "minecraft:sea_lantern" if (dx, dz) == (0, 0) else "minecraft:red_stained_glass")
+        for y, rr in ((H + 4, 2), (H + 5, 1)):
+            for dx in range(-rr, rr + 1):
+                for dz in range(-rr, rr + 1):
+                    w.put(cx + dx, y, cz + dz, PB)
+        w.put(cx, H + 6, cz, "minecraft:redstone_block")
+        w.put(cx, H + 7, cz, "minecraft:end_rod[facing=up]")
+        return H
+
+    # Le lac du phare (nord-est), entre les tranchées et la forêt de piliers.
+    pond(46, -46, 12)
+    placed["phare"] = lighthouse(62, -62)
+    # La cour inondée, au cœur des ruines (sud).
+    pond(0, 62, 7)
+    # Deux bassins sur les hauteurs (ouest).
+    pond(-70, -20, 5, depth=1)
+    pond(-70, 22, 5, depth=1)
+
     # Nord : les Tranchées. Lignes en zigzag creusées sur 2 blocs, sacs de pierre noire sur les bords.
     trenches = 0
     for r0 in (34, 50, 66, 82):
         pts = []
-        for k, ang in enumerate(range(228, 314, 6)):
+        for k, ang in enumerate(range(228, 302, 6)):  # s'arrête avant le lac du phare
             rr = r0 + (4 if k % 2 else -4)
             pts.append((rr * math.cos(math.radians(ang)), rr * math.sin(math.radians(ang))))
         for p0, p1 in zip(pts, pts[1:]):
@@ -310,6 +400,39 @@ def build():
             obelisk(w, x, z)
             n += 1
     placed["obélisques"] = n
+    # Décor : tulipes rouges sur la mousse, cristaux rubis, petits chênes pâles où il y a la place.
+    flowers = crystals = trees = 0
+    for x in range(-R_ARENA + 6, R_ARENA - 6):
+        for z in range(-R_ARENA + 6, R_ARENA - 6):
+            if math.hypot(x, z) > R_ARENA - 8 or w.get(x, -1, z) != "minecraft:pale_moss_block" or not w.air(x, 0, z):
+                continue
+            p_ = rng.random()
+            if p_ < 0.012:
+                w.put(x, 0, z, "minecraft:red_tulip" if p_ < 0.006 else "minecraft:poppy")
+                flowers += 1
+    for _ in range(2000):
+        x, z = int(rng.integers(-90, 91)), int(rng.integers(-90, 91))
+        if not (24 < math.hypot(x, z) < R_ARENA - 9) or not _wz.free(w, x - 2, z - 2, x + 2, z + 2, margin=1):
+            continue
+        if crystals < 14 and (rng.random() < 0.5 or trees >= 10):
+            for dy in range(0, min(3, cap(x, z))):
+                w.put(x, dy, z, "minecraft:red_stained_glass")
+            w.put(x + 1, 0, z, "minecraft:red_stained_glass")
+            w.put(x, -1, z, "minecraft:shroomlight")
+            crystals += 1
+        elif trees < 10 and min(cap(xx, zz) for xx in range(x - 2, x + 3) for zz in range(z - 2, z + 3)) >= 7:
+            for y in range(0, 4):
+                w.put(x, y, z, "minecraft:pale_oak_log")
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    for y in range(3, 6):
+                        if abs(dx) + abs(dz) + abs(y - 4) <= 3 and w.air(x + dx, y, z + dz):
+                            w.put(x + dx, y, z + dz, "minecraft:pale_oak_leaves[persistent=true]")
+            for dx, dz in ((2, 0), (-2, 0), (0, 2)):
+                if w.air(x + dx, 2, z + dz):
+                    w.put(x + dx, 2, z + dz, "minecraft:pale_hanging_moss[tip=true]")
+            trees += 1
+    placed.update({"fleurs": flowers, "cristaux": crystals, "chênes pâles": trees})
     w.placed = placed
     return w, bottom
 

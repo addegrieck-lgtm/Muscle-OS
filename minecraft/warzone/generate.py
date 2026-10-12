@@ -851,7 +851,8 @@ def build_outer():
 
 
 def render(w, path_top, path_side, scale):
-    shade = {"pale_moss": (160, 166, 156), "tuff": (108, 109, 102), "deepslate": (72, 72, 73),
+    shade = {"water": (52, 92, 170), "sea_lantern": (210, 235, 235), "pale_oak_leaves": (128, 134, 126), "pale_oak": (210, 204, 198),
+             "tulip": (200, 40, 40), "poppy": (200, 30, 30), "pale_moss": (160, 166, 156), "tuff": (108, 109, 102), "deepslate": (72, 72, 73),
              "blackstone": (53, 48, 56), "calcite": (223, 224, 220), "quartz": (236, 230, 223), "red_stained": (190, 40, 40),
              "white_stained": (235, 235, 235), "black_stained": (30, 30, 34), "redstone": (175, 24, 5), "red_nether": (69, 7, 9),
              "lantern": (230, 180, 90), "iron": (220, 220, 220), "beacon": (120, 230, 220), "shroom": (240, 140, 70),
