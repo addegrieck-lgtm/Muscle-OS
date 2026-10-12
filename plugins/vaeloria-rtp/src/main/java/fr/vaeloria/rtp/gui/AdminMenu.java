@@ -40,6 +40,9 @@ public final class AdminMenu extends Menu {
 
         set(45, item(Material.EMERALD, "<green><bold>Ajouter un monde", List.of(
                 "<gray>Rendre un monde chargé disponible au RTP.")), e -> new AddWorldMenu(plugin, viewer).open());
+        set(46, item(Material.END_PORTAL_FRAME, "<light_purple><bold>Portails", List.of(
+                "<gray>Zones qui téléportent quand on y entre,",
+                "<gray>avec des particules colorées.")), e -> new PortalListMenu(plugin, viewer).open());
         set(48, item(Material.COMPASS, "<aqua>Aperçu joueur", List.of(
                 "<gray>Ouvrir le menu /rtp tel que les joueurs le voient.")), e -> new PlayerMenu(plugin, viewer).open());
         set(50, item(Material.REPEATER, "<gold>Recharger", List.of(

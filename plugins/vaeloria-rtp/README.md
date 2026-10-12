@@ -45,7 +45,47 @@ Commandes équivalentes (console comprise) :
 | `/rtpadmin set <monde> <réglage> <valeur>` | `enabled`, `display-name`, `icon`, `description` (lignes séparées par `\|`), `slot`, `shape`, `center-x`, `center-z`, `min-radius`, `max-radius`, `cooldown`, `warmup`, `permission`, `max-y` |
 | `/rtpadmin resetcooldown <joueur>` | Remet ses délais à zéro |
 | `/rtpadmin reload` | Relit `config.yml` et `worlds.yml` |
+| `/rtpadmin wand` | Hache de sélection des portails |
+| `/rtpadmin portal [list\|create\|remove\|edit\|dest\|style\|zone\|enable\|disable] <nom>` | Gestion des portails (sans argument : menu) |
 | `/rtp <monde> <joueur>` | RTP forcé, sans délai (console, PNJ Citizens, portails, menus) |
+
+## Portails
+
+Une zone qui téléporte le joueur dès qu'il y entre, animée par des particules colorées.
+
+1. `/rtpadmin wand` (ou menu **Portails** → hache) : **clic gauche** sur un bloc = coin 1, **clic droit** = coin 2.
+   Le contour de la sélection s'affiche en jaune tant que la hache est en main. Seule cette hache marquée
+   sert d'outil : les haches normales ne sont pas touchées.
+2. `/rtpadmin portal create <nom>` (ou menu → **Créer un portail**).
+3. Destination :
+   - `/rtpadmin portal dest <nom>` : **ta position actuelle** (direction du regard comprise) ;
+   - `/rtpadmin portal dest <nom> rtp <monde>` : un **RTP** dans ce monde (délai et permission du monde respectés,
+     sans compte à rebours).
+4. Style : `/rtpadmin portal style <nom> <style>` ou clic dans le menu.
+
+Le portail se déclenche à l'entrée (rester dedans ne relance rien). Un joueur refusé (permission
+`vaeloria.rtp.portal.<nom>`, délai RTP…) est repoussé hors de la zone. Gerbe de particules au départ et à l'arrivée,
+protection anti-chute, bourdonnement discret. Les particules ne tournent que si un joueur est à moins de
+48 blocs (`portals.view-distance`).
+
+Conseil de construction : un **cadre en blocs** (blackstone poli, deepslate, bloc de netherite, verre teinté rouge…)
+et l'**intérieur vide** : les particules le remplissent. Pas de vrais blocs de portail du Nether (violets, non
+recolorables sans pack de ressources, et ils déclenchent le passage vers le Nether).
+
+Styles fournis (`portals.styles` de `config.yml`, entièrement modifiables) :
+
+| Style | Rendu |
+|---|---|
+| `vaeloria` (défaut) | Rouge Væloria `#D21F2F` qui fond vers le bordeaux `#5E0710`, étincelles blanches, spores pourpres |
+| `sang` | Rouge sombre, flammes et gouttes de lave |
+| `ame` | Bleu âme, flammes d'âme, âmes de sculk |
+| `neant` | Violet vers noir, portail inversé, bâtons de l'End |
+| `royal` | Or, éclats de cire, bâtons de l'End |
+| `nature` | Vert émeraude, particules villageois, pétales de cerisier |
+| `ombre` | Noir rougeâtre, fumée, cendres |
+
+Créer son style : couches `DUST` (`color`), `DUST_COLOR_TRANSITION` (`from` → `to`) avec n'importe quelle couleur
+hexadécimale et une taille, plus n'importe quelle particule du jeu sans paramètre ; `weight` règle la proportion.
 
 ## Permissions
 
@@ -53,6 +93,7 @@ Commandes équivalentes (console comprise) :
 |---|---|---|
 | `vaeloria.rtp.use` | tous | `/rtp` |
 | `vaeloria.rtp.world.<monde>` | — | Accès à un monde marqué « permission requise » (ex. monde VIP) |
+| `vaeloria.rtp.portal.<nom>` | — | Accès à un portail marqué « permission requise » |
 | `vaeloria.rtp.bypass.cooldown` | op | Pas de délai |
 | `vaeloria.rtp.bypass.warmup` | op | Pas de compte à rebours |
 | `vaeloria.rtp.others` | op | `/rtp <monde> <joueur>` |

@@ -43,6 +43,70 @@ search:
     - river
     - frozen_river
 
+# Portails : zone sélectionnée avec la hache (/rtpadmin wand), qui téléporte quand on y entre.
+portals:
+  wand-material: GOLDEN_AXE
+  max-volume: 2000              # blocs max par portail
+  particle-interval-ticks: 4    # fréquence d'animation (20 ticks = 1 s)
+  density: 0.4                  # particules par bloc de zone à chaque animation
+  max-particles-per-portal: 60  # plafond par portail et par animation
+  view-distance: 48             # animation seulement si un joueur est à moins de 48 blocs
+  ambient-sound: true           # bourdonnement discret de portail
+  default-style: vaeloria
+  # Styles de particules. DUST (couleur) et DUST_COLOR_TRANSITION (from → to) acceptent n'importe
+  # quelle couleur hexadécimale ; les autres particules sont celles du jeu (PORTAL, END_ROD…).
+  # weight = proportion de cette couche dans le mélange.
+  styles:
+    vaeloria:
+      display-name: "<#D21F2F>Rouge Væloria"
+      icon: RED_STAINED_GLASS
+      layers:
+        - {particle: DUST_COLOR_TRANSITION, from: "#D21F2F", to: "#5E0710", size: 1.4, weight: 6}
+        - {particle: DUST, color: "#FFFFFF", size: 0.6, weight: 1}
+        - {particle: CRIMSON_SPORE, weight: 2}
+    sang:
+      display-name: "<dark_red>Sang & braises"
+      icon: REDSTONE_BLOCK
+      layers:
+        - {particle: DUST, color: "#8B0000", size: 1.6, weight: 5}
+        - {particle: FLAME, weight: 1}
+        - {particle: LAVA, weight: 1}
+    ame:
+      display-name: "<aqua>Âmes bleues"
+      icon: SOUL_LANTERN
+      layers:
+        - {particle: DUST_COLOR_TRANSITION, from: "#3AD1E6", to: "#0B3D91", size: 1.3, weight: 5}
+        - {particle: SOUL_FIRE_FLAME, weight: 2}
+        - {particle: SCULK_SOUL, weight: 1}
+    neant:
+      display-name: "<dark_purple>Néant"
+      icon: CRYING_OBSIDIAN
+      layers:
+        - {particle: DUST_COLOR_TRANSITION, from: "#7A2BD6", to: "#07070A", size: 1.5, weight: 5}
+        - {particle: REVERSE_PORTAL, weight: 3}
+        - {particle: END_ROD, weight: 1}
+    royal:
+      display-name: "<gold>Or royal"
+      icon: GOLD_BLOCK
+      layers:
+        - {particle: DUST_COLOR_TRANSITION, from: "#F5C542", to: "#A96E00", size: 1.3, weight: 5}
+        - {particle: WAX_ON, weight: 2}
+        - {particle: END_ROD, weight: 1}
+    nature:
+      display-name: "<green>Émeraude"
+      icon: EMERALD_BLOCK
+      layers:
+        - {particle: DUST, color: "#2ECC71", size: 1.3, weight: 5}
+        - {particle: HAPPY_VILLAGER, weight: 1}
+        - {particle: CHERRY_LEAVES, weight: 1}
+    ombre:
+      display-name: "<gray>Ombre"
+      icon: BLACKSTONE
+      layers:
+        - {particle: DUST_COLOR_TRANSITION, from: "#2A0A0E", to: "#000000", size: 1.6, weight: 5}
+        - {particle: SMOKE, weight: 2}
+        - {particle: ASH, weight: 2}
+
 messages:
   prefix: "<gradient:#D21F2F:#5E0710><bold>VÆLORIA</bold></gradient> <dark_gray>»</dark_gray> "
   menu-title: "<dark_gray>Téléportation aléatoire"
@@ -83,6 +147,19 @@ messages:
   admin-cooldown-reset: "<prefix><green>Délais RTP de <white><player></white> réinitialisés."
   admin-list-empty: "<prefix><gray>Aucun monde configuré. <white>/rtpadmin add <monde>"
   admin-list-entry: "<prefix><white><world></white> <dark_gray>(</dark_gray><name><dark_gray>)</dark_gray> <gray><state> · <min> → <max> blocs"
+  wand-given: "<prefix><green>Hache des portails reçue : clic gauche = coin 1, clic droit = coin 2."
+  wand-pos1: "<prefix><gray>Coin 1 : <white><x> <y> <z></white> <dark_gray>· zone : <size>"
+  wand-pos2: "<prefix><gray>Coin 2 : <white><x> <y> <z></white> <dark_gray>· zone : <size>"
+  wand-no-selection: "<prefix><red>Sélectionne d'abord les deux coins avec la hache (<white>/rtpadmin wand</white>)."
+  portal-created: "<prefix><green>Portail <white><portal></white> créé. Choisis sa destination : <white>/rtpadmin portal dest <portal></white> ou le menu."
+  portal-removed: "<prefix><green>Portail <white><portal></white> supprimé."
+  portal-unknown: "<prefix><red>Portail inconnu : <white><portal>"
+  portal-dest-set: "<prefix><green>Destination de <white><portal></white> : <white><dest>"
+  portal-no-destination: "<prefix><yellow>Le portail <white><portal></white> n'a pas encore de destination."
+  portal-no-permission: "<prefix><red>Ce portail ne s'ouvre pas pour toi."
+  portal-unavailable: "<prefix><red>Ce portail ne mène nulle part pour le moment."
+  portal-list-empty: "<prefix><gray>Aucun portail. <white>/rtpadmin wand</white> puis <white>/rtpadmin portal create <nom>"
+  portal-list-entry: "<prefix><white><portal></white> <gray><state> · <world> <dark_gray>(<size>)</dark_gray> → <white><dest></white> · <style>"
   admin-help:
     - "<gradient:#D21F2F:#5E0710><bold>VæloriaRTP</bold></gradient> <gray>— administration"
     - "<white>/rtpadmin</white> <gray>ouvre l'interface"
@@ -91,4 +168,8 @@ messages:
     - "<white>/rtpadmin set <monde> <réglage> <valeur>"
     - "<white>/rtpadmin resetcooldown <joueur>"
     - "<white>/rtpadmin reload"
+    - "<white>/rtpadmin wand</white> <gray>hache de sélection des portails"
+    - "<white>/rtpadmin portal</white> <gray>menu des portails · <white>list|create|remove|edit <nom>"
+    - "<white>/rtpadmin portal dest <nom> [rtp <monde>]</white> <gray>ta position, ou un RTP"
+    - "<white>/rtpadmin portal style|zone|enable|disable <nom>"
     - "<white>/rtp <monde> <joueur></white> <gray>téléportation forcée (console, PNJ)"

@@ -51,6 +51,11 @@ public final class TeleportService implements Listener {
      * @return vrai si la demande a été acceptée.
      */
     public boolean request(Player player, RtpWorld s, boolean forced) {
+        return request(player, s, forced, false);
+    }
+
+    /** {@code skipWarmup} : départ immédiat mais délai et permission respectés (portails). */
+    public boolean request(Player player, RtpWorld s, boolean forced, boolean skipWarmup) {
         Messages msg = plugin.messages();
         World world = Bukkit.getWorld(s.worldName());
         if (world == null) {
@@ -79,7 +84,7 @@ public final class TeleportService implements Listener {
 
         Pending req = new Pending(s, player.getLocation());
         pending.put(player.getUniqueId(), req);
-        int warmup = forced || player.hasPermission("vaeloria.rtp.bypass.warmup") ? 0 : s.warmupSeconds();
+        int warmup = forced || skipWarmup || player.hasPermission("vaeloria.rtp.bypass.warmup") ? 0 : s.warmupSeconds();
         if (warmup <= 0) {
             search(player, req, forced);
             return true;
@@ -154,8 +159,7 @@ public final class TeleportService implements Listener {
         if (!forced && !player.hasPermission("vaeloria.rtp.bypass.cooldown")) {
             plugin.cooldowns().start(player.getUniqueId(), s.worldName(), s.cooldownSeconds());
         }
-        int protection = plugin.getConfig().getInt("teleport.fall-protection-seconds", 5);
-        if (protection > 0) protectedUntil.put(player.getUniqueId(), System.currentTimeMillis() + protection * 1000L);
+        protectFromFall(player);
         msg.send(player, "success", rich("world", s.displayName()),
                 p("x", loc.getBlockX()), p("y", loc.getBlockY()), p("z", loc.getBlockZ()));
         if (plugin.getConfig().getBoolean("teleport.title", true)) {
@@ -163,6 +167,12 @@ public final class TeleportService implements Listener {
                     Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(1800), Duration.ofMillis(500))));
         }
         player.playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+    }
+
+    /** Pas de dégâts de chute pendant teleport.fall-protection-seconds. */
+    public void protectFromFall(Player player) {
+        int protection = plugin.getConfig().getInt("teleport.fall-protection-seconds", 5);
+        if (protection > 0) protectedUntil.put(player.getUniqueId(), System.currentTimeMillis() + protection * 1000L);
     }
 
     /** Annule une demande en attente. {@code reasonKey} : message envoyé au joueur, ou null. */
