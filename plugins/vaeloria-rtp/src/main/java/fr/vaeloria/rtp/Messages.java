@@ -6,7 +6,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 
 /** Messages configurables (section « messages » de config.yml), au format MiniMessage. */
 public final class Messages {
@@ -28,8 +27,9 @@ public final class Messages {
     }
 
     public String raw(String key) {
-        ConfigurationSection s = plugin.getConfig().getConfigurationSection("messages");
-        return s == null ? key : s.getString(key, key);
+        // Sans valeur par défaut explicite : une clé absente d'un ancien config.yml reprend le texte du jar.
+        String raw = plugin.getConfig().getString("messages." + key);
+        return raw == null ? key : raw;
     }
 
     public Component parse(String raw, TagResolver... placeholders) {

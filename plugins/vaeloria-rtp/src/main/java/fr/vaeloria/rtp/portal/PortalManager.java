@@ -107,10 +107,16 @@ public final class PortalManager implements Listener {
         return portal;
     }
 
+    public int maxVolume() {
+        return Math.max(1, plugin.getConfig().getInt("portals.max-volume", 10000));
+    }
+
     public void checkVolume(Cuboid zone) {
-        int max = plugin.getConfig().getInt("portals.max-volume", 2000);
+        int max = maxVolume();
         if (zone.volume() > max) {
-            throw new IllegalArgumentException("Zone trop grande : " + zone.volume() + " blocs (max " + max + ", portals.max-volume)");
+            throw new IllegalArgumentException("Zone trop grande : " + zone.describe() + " = " + zone.volume()
+                    + " blocs (max " + max + "). Vérifie tes deux coins (un ancien coin est peut-être resté ailleurs) : "
+                    + "/rtpadmin wand clear, ou augmente la limite : /rtpadmin portal maxvolume <blocs>");
         }
     }
 

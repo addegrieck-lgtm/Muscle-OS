@@ -204,6 +204,11 @@ public final class VaeloriaRtpPlugin extends JavaPlugin {
                     messages.send(sender, "players-only");
                     return true;
                 }
+                if (args.length >= 2 && args[1].equalsIgnoreCase("clear")) {
+                    wand.clear(player);
+                    messages.send(sender, "wand-cleared");
+                    return true;
+                }
                 player.getInventory().addItem(wand.create());
                 messages.send(sender, "wand-given");
             }
@@ -219,6 +224,22 @@ public final class VaeloriaRtpPlugin extends JavaPlugin {
         if (sub.isEmpty()) {
             if (sender instanceof Player player) new PortalListMenu(this, player).open();
             else portal(sender, new String[] {"portal", "list"});
+            return;
+        }
+        if (sub.equals("maxvolume")) {
+            if (args.length < 3) {
+                messages.send(sender, "portal-maxvolume", p("max", portals.maxVolume()));
+                return;
+            }
+            try {
+                int max = Integer.parseInt(args[2]);
+                if (max < 1 || max > 1_000_000) throw new NumberFormatException();
+                getConfig().set("portals.max-volume", max);
+                saveConfig();
+                messages.send(sender, "portal-maxvolume", p("max", max));
+            } catch (NumberFormatException e) {
+                messages.send(sender, "admin-invalid", p("error", "Nombre entre 1 et 1000000 attendu : " + args[2]));
+            }
             return;
         }
         if (sub.equals("list")) {
@@ -353,12 +374,13 @@ public final class VaeloriaRtpPlugin extends JavaPlugin {
                     case "add" -> registry.unconfigured().forEach(w -> options.add(w.getName()));
                     case "remove", "edit", "set" -> registry.all().forEach(w -> options.add(w.worldName()));
                     case "resetcooldown" -> Bukkit.getOnlinePlayers().forEach(pl -> options.add(pl.getName()));
-                    case "portal" -> options.addAll(List.of("list", "create", "remove", "edit", "dest", "style", "zone", "enable", "disable"));
+                    case "portal" -> options.addAll(List.of("list", "create", "remove", "edit", "dest", "style", "zone", "enable", "disable", "maxvolume"));
+                    case "wand" -> options.add("clear");
                     default -> { }
                 }
             } else if (args[0].equalsIgnoreCase("portal")) {
                 String sub = args[1].toLowerCase(Locale.ROOT);
-                if (args.length == 3 && !sub.equals("create") && !sub.equals("list")) {
+                if (args.length == 3 && !sub.equals("create") && !sub.equals("list") && !sub.equals("maxvolume")) {
                     portals.all().forEach(pt -> options.add(pt.name()));
                 } else if (args.length == 4 && sub.equals("dest")) {
                     options.add("rtp");

@@ -75,6 +75,10 @@ public final class Wand implements Listener {
                 && item.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.BYTE);
     }
 
+    public void clear(Player player) {
+        selections.remove(player.getUniqueId());
+    }
+
     public Selection selection(Player player) {
         return selections.get(player.getUniqueId());
     }
@@ -101,6 +105,12 @@ public final class Wand implements Listener {
         plugin.messages().send(player, first ? "wand-pos1" : "wand-pos2",
                 p("x", pos[0]), p("y", pos[1]), p("z", pos[2]),
                 p("size", sel.complete() ? sel.cuboid().describe() + " (" + sel.cuboid().volume() + " blocs)" : "—"));
+        // Prévenir tout de suite plutôt qu'à la création : souvent un vieux coin resté ailleurs.
+        int max = plugin.portals().maxVolume();
+        if (sel.complete() && sel.cuboid().volume() > max) {
+            plugin.messages().send(player, "wand-too-big", p("size", sel.cuboid().describe()),
+                    p("volume", sel.cuboid().volume()), p("max", max));
+        }
     }
 
     /** En créatif, un clic gauche casse le bloc : on l'empêche avec la hache. */

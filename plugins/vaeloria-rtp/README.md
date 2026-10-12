@@ -57,6 +57,9 @@ Une zone qui téléporte le joueur dès qu'il y entre, animée par des particule
    Le contour de la sélection s'affiche en jaune tant que la hache est en main. Seule cette hache marquée
    sert d'outil : les haches normales ne sont pas touchées.
 2. `/rtpadmin portal create <nom>` (ou menu → **Créer un portail**).
+   Taille max : 10 000 blocs par défaut (garde-fou contre un coin oublié loin du portail). Le plugin prévient
+   dès le clic si la sélection dépasse ; `/rtpadmin wand clear` efface la sélection,
+   `/rtpadmin portal maxvolume <blocs>` change la limite.
 3. Destination :
    - `/rtpadmin portal dest <nom>` : **ta position actuelle** (direction du regard comprise) ;
    - `/rtpadmin portal dest <nom> rtp <monde>` : un **RTP** dans ce monde (délai et permission du monde respectés,
