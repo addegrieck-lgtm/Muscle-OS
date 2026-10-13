@@ -23,7 +23,8 @@ pnpm dev                                         # site :3000, admin :3001/admin
 |---|---|
 | `pnpm test` | Tests API (PostgreSQL `DATABASE_URL_TEST`) + site |
 | `pnpm typecheck` | Vérification TypeScript de tout le workspace |
-| `pnpm build` | Builds de production |
+| `pnpm build:all` | Builds de production |
+| `pnpm build` | Export statique du site vitrine (publié sur Cloudflare Workers à chaque push sur `main`) |
 | `cd plugins/vaeloria-bridge && gradle build` | Jar du plugin + tests Java |
 | `cd plugins/vaeloria-combat && gradle build` | Jar du plugin PvP (combat 1.8, MSPT, ping) + tests |
 | `cd plugins/vaeloria-arena && gradle build` | Jar du plugin d'arène de bots P4 U3 |

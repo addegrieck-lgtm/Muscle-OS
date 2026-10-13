@@ -1,0 +1,12 @@
+// Publication du site vitrine sur Cloudflare Workers (https://vaeloria-site.paysapro-prospection.workers.dev).
+// Workers Builds lance `pnpm run build` (export statique de apps/web, sans API ni données en direct)
+// puis `npx wrangler deploy`, qui publie apps/web/out en fichiers statiques. Déclenché à chaque push sur main.
+{
+  "name": "vaeloria-site",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./apps/web/out",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
