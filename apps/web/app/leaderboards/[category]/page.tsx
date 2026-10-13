@@ -18,7 +18,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const c = find((await params).category);
   if (!c) return {};
-  return pageMeta({ title: `Classement ${c.label}`, description: `Classement complet « ${c.label} » de la saison en cours sur VÆLORIA.`, path: `/leaderboards/${c.id}` });
+  return pageMeta({ live: true, title: `Classement ${c.label}`, description: `Classement complet « ${c.label} » de la saison en cours sur VÆLORIA.`, path: `/leaderboards/${c.id}` });
 }
 
 export default async function CategoryPage({ params, searchParams }: { params: Promise<{ category: string }>; searchParams: Promise<{ page?: string }> }) {

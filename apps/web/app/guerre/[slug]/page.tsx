@@ -6,7 +6,7 @@ import { TrackView } from "@/components/world/TrackView";
 import { WarCard } from "@/components/world/WarCard";
 import { api, orNull } from "@/lib/api";
 import { PREVIEW } from "@/lib/preview";
-import { pageMeta } from "@/lib/seo";
+import { NOT_FOUND_META, pageMeta } from "@/lib/seo";
 
 export const revalidate = 10;
 const KIND: Record<string, string> = { start: "Début", capture: "Capture", battle: "Bataille", note: "Info", end: "Fin" };
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const w = await orNull(api.war((await params).slug));
-  if (!w) return {};
+  if (!w) return NOT_FOUND_META;
   return pageMeta({ title: `${w.attacker.name} vs ${w.defender.name} — ${w.title}`, description: w.summary || `Guerre entre ${w.attacker.name} et ${w.defender.name} sur VÆLORIA.`, path: `/guerre/${w.slug}` });
 }
 

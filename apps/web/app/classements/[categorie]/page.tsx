@@ -19,7 +19,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ categorie: string }> }) {
   const c = find((await params).categorie);
   if (!c) return {};
-  return pageMeta({ title: `Classement ${c.label}`, description: `${c.description} — classement ${c.label} de VÆLORIA.`, path: `/classements/${c.id}` });
+  return pageMeta({ live: true, title: `Classement ${c.label}`, description: `${c.description} — classement ${c.label} de VÆLORIA.`, path: `/classements/${c.id}` });
 }
 
 export default async function RankingPage({ params }: { params: Promise<{ categorie: string }> }) {

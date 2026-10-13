@@ -7,7 +7,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 120;
 export const metadata = pageMeta({
-  title: "News & blog — actualités du serveur",
+  live: true, title: "News & blog — actualités du serveur",
   description: "Actualités, patch notes, équilibrage PvP, saisons et guides du serveur Minecraft Faction VÆLORIA.",
   path: "/news",
 });

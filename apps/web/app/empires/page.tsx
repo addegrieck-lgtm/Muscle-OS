@@ -6,7 +6,7 @@ import { EmpireBrowser } from "./EmpireBrowser";
 
 export const revalidate = 20;
 export const metadata = pageMeta({
-  title: "Les empires de VÆLORIA",
+  live: true, title: "Empires et factions du serveur",
   description: "Tous les empires de VÆLORIA : influence, membres, territoires, guerres. Trouve ton camp ou fonde le tien.",
   path: "/empires",
 });

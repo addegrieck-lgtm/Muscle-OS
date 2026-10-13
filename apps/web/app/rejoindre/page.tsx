@@ -8,7 +8,7 @@ import { JoinFlow } from "./JoinFlow";
 
 export const revalidate = 15;
 export const metadata = pageMeta({
-  title: "Rejoindre VÆLORIA — Deviens fondateur",
+  live: true, title: "Deviens fondateur",
   description: `Rejoins ${BRAND.name} : crée ton compte, obtiens ton numéro de fondateur, fonde ton empire et invite tes alliés.`,
   path: "/rejoindre",
 });

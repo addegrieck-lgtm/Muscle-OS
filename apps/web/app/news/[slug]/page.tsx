@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { api, orNull } from "@/lib/api";
 import { Markdown } from "@/lib/markdown";
 import { PREVIEW } from "@/lib/preview";
-import { JsonLd, articleLd, pageMeta } from "@/lib/seo";
+import { JsonLd, articleLd, NOT_FOUND_META, pageMeta } from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const a = await orNull(api.article((await params).slug));
-  if (!a) return {};
+  if (!a) return NOT_FOUND_META;
   return pageMeta({ title: a.title, description: a.excerpt, path: `/news/${a.slug}`, type: "article" });
 }
 

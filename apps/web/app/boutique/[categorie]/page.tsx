@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ categorie
   const c = (await orNull(api.shopCatalog()))?.categories.find((x) => x.slug === categorie);
   const name = c?.name ?? categorie;
   return pageMeta({
-    title: c?.seoTitle ?? `${name} — Boutique`,
+    live: true, title: c?.seoTitle ?? `${name} — Boutique`,
     description: c?.seoDescription ?? `${name} de la boutique VÆLORIA, serveur Minecraft Faction & PvP. ${c?.description ?? ""}`.trim(),
     path: `/boutique/${categorie}`,
   });

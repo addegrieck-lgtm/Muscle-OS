@@ -9,7 +9,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 30;
 export const metadata = pageMeta({
-  title: "Les fondateurs de VÆLORIA",
+  live: true, title: "Les 3 000 fondateurs",
   description: "Le registre des fondateurs de VÆLORIA : numéro, empire, invitations et influence des premiers habitants du monde.",
   path: "/fondateurs",
 });

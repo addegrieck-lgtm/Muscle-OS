@@ -1,0 +1,11 @@
+# En-têtes de l'export statique (Cloudflare Workers). Miroir des headers() de next.config.ts.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+# Fichiers versionnés par Next (nom avec empreinte) : cache long.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

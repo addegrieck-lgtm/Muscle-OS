@@ -7,8 +7,10 @@ import { LINKS } from "@vaeloria/config";
 import { buttonClass, cn } from "@vaeloria/ui";
 import { Wordmark } from "./Logo";
 import { CartButton } from "./shop/CartButton";
+import { IS_OPEN, STAGE_CTA } from "@/lib/launch";
 
-export const NAV = [
+/** Navigation du serveur ouvert : le monde vivant (carte, empires, guerres…). */
+const OPEN_NAV = [
   { href: "/jouer", label: "Jouer" },
   { href: "/monde", label: "Monde" },
   { href: "/empires", label: "Empires", match: ["/empire/"] },
@@ -19,21 +21,36 @@ export const NAV = [
   { href: "/voter", label: "Voter" },
 ];
 
+/** Avant l'ouverture : ce qui se lit déjà (mécaniques, guides), pas des pages vides en attente de joueurs. */
+const PRELAUNCH_NAV = [
+  { href: "/factions", label: "Faction" },
+  { href: "/pvp", label: "PvP 1.8" },
+  { href: "/economie", label: "Économie" },
+  { href: "/evenements", label: "Événements", match: ["/evenement/"] },
+  { href: "/guides", label: "Guides" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/beta", label: "Bêta" },
+];
+
+export const NAV = IS_OPEN ? OPEN_NAV : PRELAUNCH_NAV;
+
 /** Menu mobile : la navigation principale, puis le reste du site. */
 const MORE = [
+  ...(IS_OPEN
+    ? [{ href: "/factions", label: "Factions" }, { href: "/economie", label: "Économie" }, { href: "/pvp", label: "PvP" }, { href: "/guides", label: "Guides" }, { href: "/faq", label: "FAQ" }]
+    : [{ href: "/jouer", label: "Jouer" }, { href: "/monde", label: "Monde" }, { href: "/voter", label: "Voter" }]),
+  { href: "/fonctionnalites", label: "Fonctionnalités" },
   { href: "/fondateurs", label: "Fondateurs" },
   { href: "/boutique", label: "Boutique" },
-  { href: "/factions", label: "Factions" },
-  { href: "/economie", label: "Économie" },
-  { href: "/pvp", label: "PvP" },
   { href: "/commandes", label: "Commandes" },
   { href: "/journal", label: "Journal" },
   { href: "/roadmap", label: "Roadmap" },
   { href: "/news", label: "News" },
-  { href: "/guides", label: "Guides" },
-  { href: "/faq", label: "FAQ" },
   { href: "/support", label: "Support" },
 ];
+
+/** Bouton principal du header : libellé court selon le stade. */
+const NAV_CTA = { ...STAGE_CTA.primary, label: IS_OPEN ? "Jouer" : STAGE_CTA.primary.id === "beta" ? "Bêta" : "Discord" };
 
 export function Navbar() {
   const pathname = usePathname();
@@ -75,8 +92,8 @@ export function Navbar() {
             <Link href="/login" className={buttonClass("ghost", "sm")}>
               Connexion
             </Link>
-            <Link href="/rejoindre" data-track="cta_click" data-track-id="nav-rejoindre" className={buttonClass("primary", "sm")}>
-              Rejoindre
+            <Link href={NAV_CTA.href} data-track="cta_click" data-track-id={`nav-${NAV_CTA.id}`} className={buttonClass("primary", "sm")}>
+              {NAV_CTA.label}
             </Link>
           </div>
           <button
@@ -97,7 +114,7 @@ export function Navbar() {
       {open && (
         <div id="menu-mobile" className="fixed inset-x-0 top-16 z-40 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-bg px-4 pb-28 pt-4 xl:hidden">
           <div className="grid grid-cols-2 gap-2">
-            <Link href="/rejoindre" data-track="cta_click" data-track-id="menu-rejoindre" className={buttonClass("primary", "lg")}>Rejoindre</Link>
+            <Link href={STAGE_CTA.primary.href} data-track="cta_click" data-track-id={`menu-${STAGE_CTA.primary.id}`} className={buttonClass("primary", "lg")}>{NAV_CTA.label}</Link>
             <Link href="/login" className={buttonClass("secondary", "lg")}>Connexion</Link>
           </div>
           <ul className="mt-4 flex flex-col">

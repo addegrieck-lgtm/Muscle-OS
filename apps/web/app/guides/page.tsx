@@ -5,15 +5,15 @@ import { GUIDES } from "@/content/guides";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Guides Faction & PvP Minecraft",
-  description: "Guides pour bien débuter et progresser sur un serveur Minecraft Faction : créer une faction, claim, argent, spawners, PvP, KOTH et raids.",
+  title: "Guides Minecraft Faction et PvP 1.8",
+  description: "Guides Faction écrits à partir des règles du serveur : débuter, créer une faction, claim, power, surclaim, raids TNT, PvP 1.8.9, KOTH et économie.",
   path: "/guides",
 });
 
 export default function GuidesPage() {
   return (
     <>
-      <PageHeader eyebrow="Guides" title="Apprendre à jouer" description="Du premier pas au premier raid." crumbs={[{ name: "Guides", path: "/guides" }]} />
+      <PageHeader eyebrow="Guides" title="Guides Faction et PvP" description="Du premier pas au premier raid. Chaque valeur citée vient de la configuration des plugins du serveur." crumbs={[{ name: "Guides", path: "/guides" }]} />
       <Section>
         <Container>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

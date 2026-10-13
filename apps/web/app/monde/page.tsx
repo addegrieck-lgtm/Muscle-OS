@@ -7,7 +7,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 export const metadata = pageMeta({
-  title: "Carte du monde de VÆLORIA",
+  live: true, title: "Carte du monde et territoires",
   description: "La carte géopolitique de VÆLORIA : territoires des empires, guerres, zones KOTH et événements en direct.",
   path: "/monde",
 });

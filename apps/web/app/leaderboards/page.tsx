@@ -7,7 +7,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 export const metadata = pageMeta({
-  title: "Classements — factions, kills, richesse, KOTH",
+  live: true, title: "Classements — factions, kills, richesse, KOTH",
   description: "Classements en direct de la saison VÆLORIA : factions, kills, richesse, power, territoire, KOTH et activité.",
   path: "/leaderboards",
 });

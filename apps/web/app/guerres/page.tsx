@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 15;
 export const metadata = pageMeta({
-  title: "Guerres de VÆLORIA",
+  live: true, title: "Guerres de factions en cours",
   description: "Les guerres entre empires de VÆLORIA : en cours, déclarées et terminées. Territoires, scores, participants, en direct.",
   path: "/guerres",
 });

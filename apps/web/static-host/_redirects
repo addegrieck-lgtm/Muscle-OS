@@ -1,0 +1,18 @@
+# Redirections permanentes de l'export statique (Cloudflare Workers, fichiers statiques).
+# Miroir des redirects() de next.config.ts, qui ne s'appliquent pas à un export HTML.
+/leaderboard /classements/ 301
+/leaderboard/ /classements/ 301
+/classement /classements/ 301
+/classement/ /classements/ 301
+/leaderboards /classements/ 301
+/leaderboards/ /classements/ 301
+/events /evenements/ 301
+/events/ /evenements/ 301
+/carte /monde/ 301
+/carte/ /monde/ 301
+/season /seasons/ 301
+/season/ /seasons/ 301
+/shop /boutique/ 301
+/shop/ /boutique/ 301
+/account /compte/ 301
+/account/ /compte/ 301

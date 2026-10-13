@@ -10,8 +10,8 @@ export default function Page() {
     <BetaPage
       form={
         <div className="space-y-4">
-          <p className="text-muted">Les inscriptions à la bêta ouvriront avec le site officiel. En attendant, les annonces passent par Discord.</p>
-          <ButtonLink href={LINKS.discord} external>Rejoindre le Discord</ButtonLink>
+          <p className="text-muted">Les candidatures à la bêta passent par le Discord : les places, les conditions et les dates de test y sont annoncées.</p>
+          <ButtonLink href={LINKS.discord} external data-track="click_discord" data-track-id="beta">Candidater sur Discord</ButtonLink>
         </div>
       }
     />

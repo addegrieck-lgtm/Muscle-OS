@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "build:preview": "NEXT_PUBLIC_PREVIEW=1 next build",
+    "build:preview": "NEXT_PUBLIC_PREVIEW=1 next build && cp static-host/_redirects static-host/_headers out/",
     "start": "next start -p 3000",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

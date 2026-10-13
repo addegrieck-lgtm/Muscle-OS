@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/seo";
 import { EmpireCreator } from "./EmpireCreator";
 
 export const metadata = pageMeta({
-  title: "Fonder un empire",
+  live: true, title: "Fonder un empire",
   description: "Fonde ton empire sur VÆLORIA : nom, tag, devise, couleur et blason. Invite tes alliés avant le lancement.",
   path: "/empires/creer",
 });

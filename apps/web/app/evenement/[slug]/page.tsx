@@ -6,7 +6,7 @@ import { Clock } from "@/components/world/Clock";
 import { TrackView } from "@/components/world/TrackView";
 import { api, orNull } from "@/lib/api";
 import { PREVIEW } from "@/lib/preview";
-import { JsonLd, SITE_URL, pageMeta } from "@/lib/seo";
+import { JsonLd, SITE_URL, NOT_FOUND_META, pageMeta } from "@/lib/seo";
 
 export const revalidate = 30;
 
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const e = await orNull(api.event((await params).slug));
-  if (!e) return {};
+  if (!e) return NOT_FOUND_META;
   return pageMeta({ title: `${e.title} — ${eventTypeLabel(e.type)}`, description: e.description || `${eventTypeLabel(e.type)} sur VÆLORIA, le ${formatDateTime(e.startsAt)}.`, path: `/evenement/${e.slug}` });
 }
 
