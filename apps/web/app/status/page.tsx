@@ -4,7 +4,7 @@ import { api, orNull } from "@/lib/api";
 import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 30;
-export const metadata = pageMeta({ title: "Statut des services", description: "État en temps réel du site, de l'API, du serveur Minecraft, de la base de données et du bot Discord VÆLORIA.", path: "/status" });
+export const metadata = pageMeta({ live: true, title: "Statut des services", description: "État en temps réel du site, de l'API, du serveur Minecraft, de la base de données et du bot Discord VÆLORIA.", path: "/status" });
 
 const SEVERITY = { minor: "warning", major: "danger", critical: "danger", maintenance: "neutral" } as const;
 const INCIDENT_STATUS = { investigating: "Analyse en cours", identified: "Cause identifiée", monitoring: "Surveillance", resolved: "Résolu" };

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BRAND } from "@vaeloria/config";
 import { Badge, ButtonLink, Card, Container, Section, SectionHeader, Table } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
@@ -5,8 +6,8 @@ import { GENERATORS, MARKET, MERCHANT_RANKS, TOOLS, rankName } from "@/content/g
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Économie : marché, rangs de marchand, générateurs, HDV",
-  description: `L'économie de ${BRAND.name} : marché dynamique, 6 rangs de marchand, générateurs, outils de farm, hôtel des ventes et boutiques de joueurs. Tous les prix.`,
+  title: "Économie Faction : marché, générateurs, HDV",
+  description: `L'économie Faction de ${BRAND.name} : marché dynamique, 6 rangs de marchand, générateurs, outils de farm, hôtel des ventes et boutiques de joueurs. Tous les prix.`,
   path: "/economie",
 });
 
@@ -26,9 +27,9 @@ export default function EconomyPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Économie"
-        title="Le farm finance la guerre"
-        description="Marché dynamique, rangs de marchand, générateurs et commerce entre joueurs. Tous les prix sont ceux du serveur."
+        eyebrow="Le farm finance la guerre"
+        title="L'économie du Faction"
+        description={<>Marché dynamique, rangs de marchand, générateurs et commerce entre joueurs. Tous les prix sont ceux de la configuration du serveur. La méthode pas à pas : <Link href="/guides/gagner-de-l-argent" className="text-accent">gagner de l&apos;argent en Faction</Link>.</>}
         crumbs={[{ name: "Économie", path: "/economie" }]}
       >
         <div className="flex flex-wrap gap-2 text-sm">
@@ -50,7 +51,7 @@ export default function EconomyPage() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {MARKET_RULES.map((r) => (
               <Card key={r.title}>
-                <p className="font-semibold">{r.title}</p>
+                <h3 className="font-semibold">{r.title}</h3>
                 <p className="mt-2 text-sm text-muted">{r.body}</p>
               </Card>
             ))}

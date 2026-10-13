@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Markdown } from "@/lib/markdown";
+import { existsSync } from "node:fs";
 import { GUIDES } from "@/content/guides";
 
 const html = (src: string) => renderToStaticMarkup(<Markdown source={src} />);
@@ -21,6 +22,12 @@ describe("Markdown", () => {
     expect(out).toContain("&lt;script&gt;");
   });
 
+  it("rend les tableaux avec en-têtes", () => {
+    const out = html("| Règle | Valeur |\n| --- | --- |\n| Power | **5** |");
+    expect(out).toContain('<th scope="col">Règle</th>');
+    expect(out).toContain("<td><strong>5</strong></td>");
+  });
+
   it("n'accepte que les liens internes ou https", () => {
     expect(html("[ok](/rules)")).toContain('href="/rules"');
     expect(html("[ext](https://exemple.fr)")).toContain('rel="noopener noreferrer"');
@@ -37,6 +44,22 @@ describe("Guides", () => {
     for (const g of GUIDES) {
       for (const [, href] of g.body.matchAll(/\]\((\/guides\/[^)]+)\)/g)) {
         expect(slugs.has(href!.replace("/guides/", "")), `${g.slug} → ${href}`).toBe(true);
+      }
+    }
+  });
+});
+
+describe("Guides : SEO", () => {
+  it("ont un titre court et unique, et des liens « À lire aussi » vers des pages existantes", () => {
+    const titles = new Set(GUIDES.map((g) => g.seoTitle));
+    expect(titles.size).toBe(GUIDES.length);
+    for (const g of GUIDES) {
+      // ≤ 50 caractères + « · VÆLORIA » : le titre reste lisible dans les résultats.
+      expect(g.seoTitle.length, g.slug).toBeLessThanOrEqual(52);
+      expect(g.description.length, g.slug).toBeLessThanOrEqual(170);
+      for (const r of g.related) {
+        const route = r.href.startsWith("/guides/") ? GUIDES.some((x) => `/guides/${x.slug}` === r.href) : existsSync(new URL(`../app${r.href}`, import.meta.url));
+        expect(route, `${g.slug} → ${r.href}`).toBe(true);
       }
     }
   });

@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 120;
 export const metadata = pageMeta({
-  title: "Journal — VÆLORIA se construit en public",
+  live: true, title: "Journal de développement",
   description: "Le journal de bord de VÆLORIA : épisodes vidéo, coulisses et étapes de la construction du serveur, en public.",
   path: "/journal",
 });

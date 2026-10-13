@@ -6,8 +6,10 @@ import { Footer } from "@/components/Footer";
 import { MobilePlayBar } from "@/components/MobilePlayBar";
 import { Navbar } from "@/components/Navbar";
 import { CartProvider } from "@/components/shop/cart";
-import { PREVIEW } from "@/lib/preview";
-import { JsonLd, SITE_URL } from "@/lib/seo";
+import Link from "next/link";
+import { IS_OPEN, STAGE, STAGE_SENTENCE } from "@/lib/launch";
+import { INDEXABLE } from "@/lib/preview";
+import { JsonLd, OG_IMAGE, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 // Polices auto-hébergées par Next au build : aucune requête vers Google côté visiteur (RGPD).
@@ -20,10 +22,15 @@ export const metadata: Metadata = {
   title: { default: `${BRAND.name} — Serveur Minecraft Faction & PvP français`, template: `%s · ${BRAND.name}` },
   description: BRAND.description,
   applicationName: BRAND.name,
-  openGraph: { siteName: BRAND.name, locale: BRAND.locale, type: "website" },
-  twitter: { card: "summary_large_image" },
-  ...(PREVIEW ? { robots: { index: false, follow: false } } : {}),
+  openGraph: { siteName: BRAND.name, locale: BRAND.locale, type: "website", images: [OG_IMAGE] },
+  twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
+  ...(INDEXABLE ? {} : { robots: { index: false, follow: false } }),
+  // Google Search Console (propriété « préfixe d'URL ») : jeton fourni par la console, sans le contenu de la balise.
+  ...(process.env.NEXT_PUBLIC_GSC_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION } } : {}),
 };
+
+// Cloudflare Web Analytics : mesure d'audience sans cookie ni donnée personnelle, activée seulement si un jeton est fourni.
+const CF_BEACON = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
 export const viewport: Viewport = { themeColor: "#07070a", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
@@ -41,9 +48,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             slogan: BRAND.tagline,
           }}
         />
-        {PREVIEW && (
+        {!IS_OPEN && (
           <p className="border-b border-accent/30 bg-accent/10 px-4 py-2 text-center text-xs text-accent">
-            Aperçu du site — les données en direct (joueurs, classements, saison) arriveront avec l&apos;ouverture du serveur.
+            {STAGE_SENTENCE[STAGE]}{" "}
+            <Link href="/discord" className="font-semibold underline underline-offset-2" data-track="click_discord" data-track-id="bandeau">Suivre le développement</Link>
           </p>
         )}
         <CartProvider>
@@ -53,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MobilePlayBar />
         </CartProvider>
         <Analytics />
+        {CF_BEACON && <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: CF_BEACON })} />}
       </body>
     </html>
   );

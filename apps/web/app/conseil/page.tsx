@@ -7,7 +7,7 @@ import { CouncilVote } from "./CouncilVote";
 
 export const revalidate = 15;
 export const metadata = pageMeta({
-  title: "Le Conseil — la communauté décide",
+  live: true, title: "Le Conseil — la communauté décide",
   description: "Le Conseil de VÆLORIA : les joueurs votent sur les événements, les règles et l'avenir du serveur. Un vote par compte.",
   path: "/conseil",
 });

@@ -10,7 +10,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 export const metadata = pageMeta({
-  title: "Classements de VÆLORIA",
+  live: true, title: "Classements des factions et joueurs",
   description: "Qui domine VÆLORIA ? Classements des empires, guerriers, richesse, territoires, guerres, saison et recruteurs.",
   path: "/classements",
 });

@@ -4,12 +4,13 @@ import { Badge, ButtonLink, Card, Container, EmptyState, Section, SectionHeader,
 import { PageHeader } from "@/components/PageHeader";
 import { VOTE, VOTE_SITES, dailyPot, formatCooldown, wheelOdds } from "@/content/gameplay";
 import { api, orNull } from "@/lib/api";
+import { IS_OPEN } from "@/lib/launch";
 import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 
 export const metadata = pageMeta({
-  title: "Voter pour VÆLORIA — récompenses et roue du jour",
+  title: "Voter pour le serveur : récompenses et roue du jour",
   description: `Vote pour ${BRAND.name} sur 3 sites : ${VOTE.perVote.money} $ par vote, bonus de fidélité et roue du jour jusqu'à ×4. Classement des meilleurs votants du mois.`,
   path: "/voter",
 });
@@ -40,7 +41,7 @@ export default async function VotePage() {
       <PageHeader
         eyebrow="Voter"
         title="Vote, gagne, fais grandir le serveur"
-        description={`3 sites, environ 2 minutes par jour. Chaque vote rapporte en jeu et fait monter ${BRAND.name} dans les classements de serveurs.`}
+        description={IS_OPEN ? `3 sites, environ 2 minutes par jour. Chaque vote rapporte en jeu et fait monter ${BRAND.name} dans les classements de serveurs.` : `Les votes ouvriront avec le serveur. Voici ce qu'ils rapporteront : 3 sites, environ 2 minutes par jour, des récompenses en jeu et une roue jusqu'à ×4.`}
         crumbs={[{ name: "Voter", path: "/voter" }]}
       />
 

@@ -6,7 +6,7 @@ import { Crest } from "@/components/world/Crest";
 import { TrackView } from "@/components/world/TrackView";
 import { api, orNull } from "@/lib/api";
 import { PREVIEW } from "@/lib/preview";
-import { pageMeta } from "@/lib/seo";
+import { NOT_FOUND_META, pageMeta } from "@/lib/seo";
 import { EmpireActions } from "./EmpireActions";
 
 export const revalidate = 20;
@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const e = await orNull(api.empire((await params).slug));
-  if (!e) return {};
+  if (!e) return NOT_FOUND_META;
   return pageMeta({ title: `${e.name} [${e.tag}] — Empire`, description: e.motto ? `« ${e.motto} » — ${e.name}, empire de VÆLORIA : ${e.members} membres, ${e.territories} territoires.` : `${e.name}, empire de VÆLORIA : ${e.members} membres, ${e.territories} territoires.`, path: `/empire/${e.slug}` });
 }
 

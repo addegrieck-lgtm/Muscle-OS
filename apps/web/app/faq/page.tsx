@@ -7,8 +7,8 @@ import { JsonLd, faqLd, pageMeta } from "@/lib/seo";
 
 export const revalidate = 300;
 export const metadata = pageMeta({
-  title: "FAQ — version, IP, comment rejoindre",
-  description: "Questions fréquentes sur VÆLORIA : version Minecraft, IP du serveur, comment rejoindre, fonctionnement du Faction, PvP 1.8, saison et Discord.",
+  title: "FAQ du serveur Minecraft Faction",
+  description: "Questions fréquentes sur VÆLORIA : ouverture, IP, bêta, version Minecraft, PvP 1.8, fonctionnement du Faction, raids hors ligne et Discord.",
   path: "/faq",
 });
 
@@ -18,7 +18,7 @@ export default async function FaqPage() {
   return (
     <>
       <JsonLd data={faqLd(items)} />
-      <PageHeader eyebrow="FAQ" title="Questions fréquentes" crumbs={[{ name: "FAQ", path: "/faq" }]} />
+      <PageHeader eyebrow="FAQ" title="Questions fréquentes sur VÆLORIA" description="Pour les règles détaillées, consulte les guides : power, claims, surclaim, raids et PvP." crumbs={[{ name: "FAQ", path: "/faq" }]} />
       <Section>
         <Container className="max-w-3xl">
           <FaqList items={items} />

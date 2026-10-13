@@ -3,7 +3,7 @@ import { ButtonLink, Container, Section } from "@vaeloria/ui";
 import { PageHeader } from "@/components/PageHeader";
 import { pageMeta } from "@/lib/seo";
 
-export const metadata = pageMeta({ title: "Discord", description: "Rejoins le Discord VÆLORIA : annonces, recrutement de factions, événements et support.", path: "/discord" });
+export const metadata = pageMeta({ title: "Discord du serveur Faction", description: "Rejoins le Discord VÆLORIA : date d'ouverture, journal de développement, candidatures bêta, recrutement de factions et support.", path: "/discord" });
 
 // Page intermédiaire (et non redirection directe) : lien partageable, mesurable, et utile pour le SEO.
 export default function DiscordPage() {

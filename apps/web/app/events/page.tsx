@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 export const metadata = pageMeta({
-  title: "Événements — KOTH, boss, tournois, supply drops",
+  live: true, title: "Événements — KOTH, boss, tournois, supply drops",
   description: "Le calendrier des événements VÆLORIA : KOTH, boss, tournois, supply drops, guerres et événements saisonniers.",
   path: "/events",
 });

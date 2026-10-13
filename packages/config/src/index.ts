@@ -15,6 +15,22 @@ export const BRAND = {
   locale: "fr_FR",
 } as const;
 
+/**
+ * Stade du projet. Pilote les appels à l'action du site (Discord / bêta / jouer),
+ * l'affichage de l'IP et les mentions « prévu » des événements.
+ * - prelaunch : en développement, on suit le projet et on candidate à la bêta ;
+ * - beta : tests fermés en cours ;
+ * - open : le serveur est ouvert au public.
+ * Ne passer à "open" que le jour où l'IP accepte réellement les joueurs.
+ */
+export type LaunchStage = "prelaunch" | "beta" | "open";
+
+export const LAUNCH: { stage: LaunchStage; openingDate: string | null } = {
+  stage: "prelaunch",
+  /** Date d'ouverture confirmée (ISO 8601). null tant qu'elle n'est pas annoncée publiquement. */
+  openingDate: null,
+};
+
 export const LINKS = {
   // À remplacer par l'invitation définitive.
   discord: "https://discord.gg/vaeloria",

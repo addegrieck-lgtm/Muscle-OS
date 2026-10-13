@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 300;
 export const metadata = pageMeta({
-  title: "Roadmap — de l'idée au lancement",
+  live: true, title: "Roadmap — de l'idée au lancement",
   description: "La feuille de route de VÆLORIA : PvP, factions, empires, guerres, bêta, 3 000 fondateurs, lancement. Où en est le projet ?",
   path: "/roadmap",
 });

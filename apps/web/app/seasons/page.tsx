@@ -6,7 +6,7 @@ import { pageMeta } from "@/lib/seo";
 
 export const revalidate = 60;
 export const metadata = pageMeta({
-  title: "Saison I — saison compétitive Faction",
+  live: true, title: "Saison I — saison compétitive Faction",
   description: "La saison en cours sur VÆLORIA : date de début, temps restant, joueurs, factions, classements, objectifs et récompenses.",
   path: "/seasons",
 });

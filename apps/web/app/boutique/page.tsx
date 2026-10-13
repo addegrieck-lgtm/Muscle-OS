@@ -7,7 +7,7 @@ import { JsonLd, SITE_URL, pageMeta } from "@/lib/seo";
 
 export const revalidate = 30;
 export const metadata = pageMeta({
-  title: "Boutique — grades, spawners, kits et packs",
+  live: true, title: "Boutique — grades, spawners, kits et packs",
   description: "La boutique officielle du serveur Minecraft VÆLORIA : grades, spawners, items, kits et packs. 1 € = 1 point, grades débloqués automatiquement, livraison en jeu.",
   path: "/boutique",
 });
