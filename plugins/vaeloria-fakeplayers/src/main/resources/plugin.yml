@@ -4,7 +4,7 @@ main: fr.vaeloria.fakeplayers.FakePlayersPlugin
 api-version: '1.21'
 description: Faux joueurs (TAB, compteur, chat, corps mannequin) pour animer et tester le serveur VÆLORIA.
 authors: [VÆLORIA]
-softdepend: [packetevents]
+softdepend: [packetevents, VaeloriaShop]
 commands:
   fakeplayers:
     description: Gestion des faux joueurs

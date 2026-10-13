@@ -68,6 +68,7 @@ final class AmbientChat implements Listener {
         File file = new File(plugin.getDataFolder(), "phrases.yml");
         if (!file.exists()) plugin.saveResource("phrases.yml", false);
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+        addMissingFromJar(yaml);
         Learner learner = new Learner(plugin.getConfig().getInt("chat.no-repeat", 100));
         YamlConfiguration saved = YamlConfiguration.loadConfiguration(brainFile());
         ConfigurationSection weights = saved.getConfigurationSection("weights");
@@ -92,6 +93,27 @@ final class AmbientChat implements Listener {
         plugin.getLogger().info("Chat : " + book.topics().size() + " sujets, " + book.intents().size() + " intentions, "
                 + book.threads().size() + " conversations, ~" + variants + " phrases spontanées possibles, "
                 + seen.size() + " déjà dites (jamais répétées).");
+    }
+
+    /**
+     * phrases.yml d'une ancienne version : les événements et le vocabulaire ajoutés depuis (hdv-offer…) sont pris
+     * dans le jar, sans toucher à ce que l'admin a modifié.
+     */
+    private void addMissingFromJar(YamlConfiguration yaml) {
+        try (var in = plugin.getResource("phrases.yml")) {
+            if (in == null) return;
+            YamlConfiguration jar = YamlConfiguration.loadConfiguration(
+                    new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+            for (String section : List.of("events", "vocab")) {
+                ConfigurationSection defaults = jar.getConfigurationSection(section);
+                if (defaults == null) continue;
+                for (String k : defaults.getKeys(false)) {
+                    if (!yaml.contains(section + "." + k)) yaml.set(section + "." + k, defaults.getStringList(k));
+                }
+            }
+        } catch (IOException e) {
+            plugin.getLogger().fine("phrases.yml du jar illisible : " + e.getMessage());
+        }
     }
 
     void save() {
@@ -281,6 +303,7 @@ final class AmbientChat implements Listener {
     private void handleReal(String player, String text) {
         long now = System.currentTimeMillis();
         rewardPending(now);
+        if (plugin.market() != null && plugin.market().onChat(player, text)) return; // demande d'objet : un vendeur répond
         ConfigurationSection replies = cfg("replies");
         if (replies == null || plugin.manager().count() == 0) return;
         Phrasebook.Intent intent = brain.book().detect(text);
@@ -376,6 +399,30 @@ final class AmbientChat implements Listener {
         engage(player, fake);
         pending = new Pending(line.templateId(), System.currentTimeMillis(), false);
         return line.text();
+    }
+
+    /**
+     * Le faux joueur dit une phrase de l'événement donné (phrases.yml), après le temps de la taper ; s'il répond à
+     * un vrai joueur, la conversation est engagée. Retourne le délai avant le message (ticks), ou -1 s'il n'a rien
+     * de neuf à dire.
+     */
+    long sayEvent(FakePlayer fake, String event, Map<String, String> vars, String engageWith) {
+        if (!present(fake)) return -1;
+        ChatBrain.Line line = brain.event(event, personality(fake), vars, random);
+        if (line == null) return -1;
+        if (engageWith != null) engage(engageWith, fake);
+        lastSpoke.put(fake.name(), System.currentTimeMillis() + 60_000);
+        long ticks = typingTicks(line.text());
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (present(fake)) say(fake, line, false);
+        }, ticks);
+        return ticks;
+    }
+
+    /** Texte d'un événement dans le style du faux joueur (pour un message privé), ou null. */
+    String eventText(FakePlayer fake, String event, Map<String, String> vars) {
+        ChatBrain.Line line = brain.event(event, personality(fake), vars, random);
+        return line == null ? null : line.text();
     }
 
     /** Délai de « frappe » d'un message, en ticks : ~0,15 s par caractère, entre 1,5 et 12 s. */

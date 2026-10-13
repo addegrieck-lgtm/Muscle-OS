@@ -50,6 +50,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     private long nextLeaveAt;
     private AmbientChat chat;
     private FakeInteractions interactions;
+    private MarketBots market;
     private fr.vaeloria.fakeplayers.spawn.SpawnBots spawnBots;
     /** Arrivées étalées de /fp add <nombre> <durée> (en secondes de fonctionnement). */
     private final PriorityQueue<Long> pendingArrivals = new PriorityQueue<>();
@@ -98,6 +99,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(chat, this);
         interactions = new FakeInteractions(this, chat);
         getServer().getPluginManager().registerEvents(interactions, this);
+        market = new MarketBots(this);
         FakeCommand command = new FakeCommand(this);
         getCommand("fakeplayers").setExecutor(command);
         getCommand("fakeplayers").setTabCompleter(command);
@@ -121,6 +123,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         manager.stopSkinPool();
         if (spawnBots != null) spawnBots.stop();
         if (chat != null) chat.save();
+        if (market != null) market.save();
         save();
         manager.removeAll(true);
         instance = null;
@@ -137,6 +140,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         loadSchedule();
         if (interactions != null) interactions.reloadRules();
         if (chat != null) chat.load();
+        if (market != null) market.reconnect();
         if (spawnBots != null) spawnBots.reload();
     }
 
@@ -226,6 +230,7 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
         manager.tick(seconds);
         ambient();
         chat.tick();
+        if (seconds % 20 == 0) market.tick();
         if (seconds % 600 == 0) chat.save(); // apprentissage sauvegardé toutes les 10 min
         if (seconds % 3600 == 0) manager.fillSkinPool();
     }
@@ -297,6 +302,11 @@ public final class FakePlayersPlugin extends JavaPlugin implements Listener {
     }
 
     AmbientChat chat() { return chat; }
+
+    FakeInteractions interactions() { return interactions; }
+
+    /** Faux joueurs à l'hôtel des ventes de VæloriaShop. */
+    MarketBots market() { return market; }
 
     /** Bots du spawn (null sans PacketEvents). */
     public fr.vaeloria.fakeplayers.spawn.SpawnBots spawnBots() { return spawnBots; }

@@ -17,7 +17,7 @@ import java.util.Locale;
 
 /** /fakeplayers (alias /fp) — gestion des faux joueurs. Permission : vaeloria.fakeplayers.admin. */
 final class FakeCommand implements TabExecutor {
-    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "schedule", "spawnzone", "reload");
+    private static final List<String> SUBS = List.of("spawn", "add", "remove", "list", "chat", "tphere", "auto", "schedule", "spawnzone", "market", "reload");
     private static final int MAX_BULK = 100;
 
     private final FakePlayersPlugin plugin;
@@ -154,6 +154,13 @@ final class FakeCommand implements TabExecutor {
                 for (String line : bots.describe()) sender.sendMessage(Component.text(line, NamedTextColor.GRAY));
                 return true;
             }
+            case "market" -> {
+                List<String> lines = args.length >= 3 && args[1].equalsIgnoreCase("prix")
+                        ? plugin.market().explain(String.join(" ", Arrays.copyOfRange(args, 2, args.length)))
+                        : plugin.market().describe();
+                for (String line : lines) sender.sendMessage(Component.text(line, NamedTextColor.GRAY));
+                return true;
+            }
             case "reload" -> {
                 plugin.reload();
                 return ok(sender, "Configuration rechargée.");
@@ -182,6 +189,7 @@ final class FakeCommand implements TabExecutor {
                 case "schedule" -> List.of();
                 case "spawnzone" -> filter(List.of("here", "info", "afk"), args[1]);
                 case "spawn" -> filter(List.of("body"), args[1]);
+                case "market" -> filter(List.of("prix"), args[1]);
                 default -> List.of();
             };
         }
@@ -247,6 +255,8 @@ final class FakeCommand implements TabExecutor {
                 "schedule — planning : cible actuelle et prévision des prochaines heures",
                 "spawnzone here|info — place les bots du spawn (debout sur le point d'apparition) / vérifie",
                 "spawnzone afk add <nom> [rayon] | remove <nom> — zone où les bots vont AFK (à ta position)",
+                "market — faux joueurs à l'hôtel des ventes : annonces, achats et budget du jour",
+                "market prix <message> — ce qu'un faux joueur comprend d'une demande et son prix",
                 "reload — recharge config.yml")) {
             sender.sendMessage(Component.text("/" + label + " " + line, NamedTextColor.GRAY));
         }

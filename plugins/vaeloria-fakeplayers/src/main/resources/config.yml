@@ -387,3 +387,38 @@ interactions:
       feedback: "<gray><target> a été déconnecté du serveur."
     - {commands: [tp, teleport, tpo, etp, s], action: teleport}
 
+
+# ── Hôtel des ventes de VæloriaShop (/hdv) ────────────────────────
+# Les faux joueurs commercent à l'HDV, toujours au PRIX CONSEILLÉ par l'HDV (médiane des ventes, sinon boutique
+# −10 %, sinon rachat +50 %). Objet enchanté sans historique : objet nu + livres enchantés du shop × enchant-factor.
+# Jamais d'objet unique (réservé aux boutiques de joueurs), jamais de points boutique, jamais entre faux joueurs.
+# /fp market : annonces en ligne, achats et budget du jour.
+market:
+  enabled: true
+  enchant-factor: 0.85
+  # Un vrai joueur écrit « je cherche casque protection IV », « qqn vend 16 perles ? »… Un faux joueur répond
+  # qu'il en a, puis le met à l'HDV. Les annonces non vendues disparaissent (jamais d'entrepôt).
+  demand:
+    chance: 0.55                  # chance qu'un faux joueur réponde à une demande
+    player-cooldown-minutes: 10   # une réponse au plus toutes les 10 min pour un même joueur
+    global-cooldown-seconds: 90
+    max-open-listings: 8          # annonces des faux joueurs en ligne en même temps
+    max-listings-per-day: 20
+    max-price: 60000              # au-delà, pas de réponse (gros objets : vrais vendeurs seulement)
+    price-margin: {min: 0.97, max: 1.08}   # × la valeur de l'HDV
+    reply-delay-seconds: {min: 6, max: 25}
+    list-delay-seconds: {min: 40, max: 150}
+    listing-hours: {min: 4, max: 12}
+    listed-whisper-chance: 0.6    # « c'est à l'hdv » en message privé une fois l'annonce posée
+    thanks-chance: 0.4            # « merci pour l'achat » en privé à l'acheteur
+    unique-reply-chance: 0.35     # demande d'un objet unique : « ça se vend qu'en pshop »
+  # Achats d'annonces de VRAIS joueurs. L'argent versé au vendeur est créé : d'où le budget plafonné.
+  buy:
+    enabled: true
+    scan-minutes: 4
+    chance: 0.05                  # par annonce éligible et par passage (×nombre de faux joueurs / 30, max ×1)
+    min-age-minutes: 8            # personne n'achète une annonce à la seconde où elle sort
+    price-band: {min: 0.7, max: 1.05}      # prix ÷ valeur de l'HDV : ni trop cher, ni bradé
+    max-price: 25000
+    daily-budget: 100000
+    per-seller-per-day: 2         # un vrai joueur ne peut pas vendre aux faux joueurs en boucle

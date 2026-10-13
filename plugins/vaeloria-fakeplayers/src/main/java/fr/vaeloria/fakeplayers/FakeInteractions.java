@@ -207,6 +207,14 @@ final class FakeInteractions implements Listener {
         return true;
     }
 
+    /** Message privé spontané d'un faux joueur à un vrai joueur (« c'est à l'hdv »), /r fonctionne ensuite. */
+    void whisperFrom(FakePlayer fake, Player to, String text) {
+        ConfigurationSection w = plugin.getConfig().getConfigurationSection("interactions.whisper");
+        if (w == null || !to.isOnline()) return;
+        lastPartner.put(key(to), fake.name());
+        send(to, w.getString("incoming", ""), fake, text);
+    }
+
     private boolean reply(CommandSender sender, String[] args) {
         String partner = lastPartner.get(key(sender));
         FakePlayer fake = partner == null ? null : plugin.manager().get(partner);

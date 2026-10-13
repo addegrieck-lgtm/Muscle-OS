@@ -457,6 +457,22 @@ events:
   # Suite d'une conversation déjà engagée avec un vrai joueur, sans intention reconnue.
   continue: ["ah ouais", "grave", "{laugh}", "ok", "jsp", "c'est vrai", "sérieux ?", "ah bon", "trop bien",
              "ouais", "bof", "pas faux", "ça marche", "jsuis d'accord", "nn quand même pas"]
+  # Hôtel des ventes (section market de config.yml). {item} = l'objet demandé, {price} = prix de l'annonce.
+  hdv-offer: ["{player} j'en ai un, je te le mets à l'hdv {price}", "{~o}j'ai ça {player}, je le mets à l'hdv{~c}",
+              "{player} jte mets ça à l'hdv, {price}", "{~o}j'en ai, hdv dans 2 min à {price}{~c}",
+              "{player} j'ai {item}, je le mets à l'hdv {price}", "{~o}{item} ? j'en ai un, {price} à l'hdv{~c}",
+              "{~o}moi j'ai, je te le mets à l'hdv {player}{~c}", "{player} {price} ça te va ? je le mets à l'hdv",
+              "{~o}j'en ai un en trop, hdv {price}{~c}", "{~o}{player} regarde l'hdv d'ici {n:1-3} min{~c}",
+              "{~o}je te fais {item} {price}, je le mets à l'hdv{~c}", "{player} j'en ai un qui traîne, hdv {price}",
+              "{~o}{price} à l'hdv {player}, c'est le prix du marché{~c}", "{~o}je le mets en vente {player}, {price}{~c}"]
+  hdv-listed: ["c'est à l'hdv", "voilà c'est en vente", "c bon il est à l'hdv", "mis à l'hdv {price}",
+               "{~o}c'est à l'hdv à {price}{~c}", "hdv c'est bon", "{~o}il est en vente, /hdv{~c}",
+               "{~o}je l'ai mis à l'hdv{~c}", "voilà, regarde l'hdv"]
+  hdv-thanks: ["merci pour l'achat", "ty pour l'achat", "merci {player}", "nickel merci", "merci, bon jeu avec",
+               "{~o}merci pour l'achat{~c}", "ty", "merci bien", "{~o}merci, profite bien{~c}"]
+  hdv-unique: ["{player} ça se vend qu'en pshop ça", "{~o}{item} c'est en pshop, pas à l'hdv{~c}",
+               "{~o}regarde les boutiques du spawn {player}, /pshop{~c}", "{player} ça c'est dans les pshop",
+               "{~o}{item} tu trouveras qu'en pshop{~c}"]
   # Messages privés reçus, sans intention reconnue.
   whisper: ["?", "oui ?", "c'est qui ?", "jsuis occupé là", "plus tard", "quoi ?", "ok", "nn dsl", "jsuis afk",
             "{laugh}", "tkt", "jsp", "pk ?", "ouais", "attends 2 sec", "jsuis en pvp là", "on se connaît ?",
