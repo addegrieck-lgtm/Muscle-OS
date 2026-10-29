@@ -10,7 +10,9 @@
     "backgroundColor": "#102820",
     "ios": {
       "supportsTablet": false,
-      "config": { "usesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +24,13 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "name": "CAP 52",
+      "shortName": "CAP 52",
+      "themeColor": "#102820",
+      "backgroundColor": "#102820",
+      "lang": "fr"
     },
     "plugins": [
       "expo-router",
@@ -31,11 +39,20 @@
       "expo-font",
       [
         "expo-splash-screen",
-        { "image": "./assets/splash-icon.png", "imageWidth": 160, "backgroundColor": "#102820" }
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#102820"
+        }
       ],
       "expo-localization",
       "expo-secure-store",
-      ["expo-notifications", { "color": "#D9F99D" }]
+      [
+        "expo-notifications",
+        {
+          "color": "#D9F99D"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

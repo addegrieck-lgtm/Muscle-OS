@@ -102,7 +102,8 @@ export default function WeekDetail() {
 
   return (
     <Screen edges={['bottom']}>
-      <Stack.Screen options={{ title: t.title(index) }} />
+      {/* Le titre est affiché dans la page (avec le statut) : barre de navigation sans titre. */}
+      <Stack.Screen options={{ title: '' }} />
 
       <View style={styles.titleRow}>
         <View style={styles.flex}>
