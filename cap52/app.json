@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "CAP 52",
+    "slug": "cap52",
+    "scheme": "cap52",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#102820",
+    "ios": {
+      "supportsTablet": false,
+      "config": { "usesNonExemptEncryption": false }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#102820",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-sharing",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        { "image": "./assets/splash-icon.png", "imageWidth": 160, "backgroundColor": "#102820" }
+      ],
+      "expo-localization",
+      "expo-secure-store",
+      ["expo-notifications", { "color": "#D9F99D" }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
