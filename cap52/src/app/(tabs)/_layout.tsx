@@ -1,4 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName } from '../../components/Icon';
 import { useAppData } from '../../features/data/AppDataProvider';
 import { strings } from '../../i18n';
@@ -10,6 +11,7 @@ const TAB_ICONS: Record<string, IconName> = { index: 'home', challenge: 'grid', 
 export default function TabsLayout() {
   const { prefs } = useAppData();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   if (!prefs.onboardingDone) return <Redirect href="/onboarding" />;
 
   return (
@@ -18,8 +20,15 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarLabelStyle: { fontFamily: FONTS.semibold, fontSize: 11 },
+        // Hauteur explicite (zone de sécurité incluse) : la hauteur par défaut coupe les libellés en Manrope.
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          height: 60 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
+        },
+        tabBarLabelStyle: { fontFamily: FONTS.semibold, fontSize: 11, lineHeight: 14, flexShrink: 0 },
         tabBarIcon: ({ color }) => <Icon name={TAB_ICONS[route.name] ?? 'home'} size={24} color={color} />,
       })}
     >

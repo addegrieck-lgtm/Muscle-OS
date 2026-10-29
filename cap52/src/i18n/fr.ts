@@ -78,6 +78,8 @@ export const fr = {
     saved: 'mis de côté',
     of: (target: string) => `sur ${target}`,
     thisWeek: 'Cette semaine',
+    nextStep: 'Prochaine étape',
+    seeDetail: 'Voir le détail',
     planned: 'Montant prévu',
     remaining: 'Reste à verser',
     validate: (amount: string) => `Valider ${amount}`,

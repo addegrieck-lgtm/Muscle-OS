@@ -12,6 +12,7 @@
 | `npx expo export --platform android --platform ios` | ✅ Les deux bundles Hermes se compilent (tous les écrans et toutes les dépendances se résolvent) |
 | `npm ci` depuis le lockfile | ✅ |
 | Types de l'appel au SDK Anthropic (coach) | ✅ Vérifiés avec `tsc` contre `@anthropic-ai/sdk@1.3.0` |
+| Aperçu web (29 oct., copie jetable avec `react-native-web`, Chromium 390×844) | ✅ Parcours complet sans erreur : onboarding, versements, grille, détail, statistiques, profil, partage, Premium. A permis de corriger la barre d'onglets (libellés coupés), des titres en double et des avertissements d'accessibilité des icônes. **Ce n'est pas un test sur iOS ou Android.** |
 
 ## Non vérifié (aucun appareil, simulateur, Deno ni projet distant dans cet environnement)
 

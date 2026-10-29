@@ -108,10 +108,10 @@ export default function Home() {
         <Card>
           <View style={styles.weekHeader}>
             <AppText variant="label" muted>
-              {isCurrentWeek ? t.thisWeek : strings.week.title(week.index)}
+              {isCurrentWeek ? t.thisWeek : t.nextStep}
             </AppText>
             <AppText variant="caption" muted>
-              {strings.common.week(week.index)}
+              {`${strings.common.week(week.index)} · ${date(week.startDate)}`}
             </AppText>
           </View>
           {week.plannedCents !== null && (
@@ -143,7 +143,7 @@ export default function Home() {
             loading={busy}
           />
           <Button
-            label={strings.week.title(week.index)}
+            label={t.seeDetail}
             variant="ghost"
             compact
             onPress={() => router.push({ pathname: '/week/[index]', params: { index: week.index } })}

@@ -1,4 +1,4 @@
-import type { ColorValue } from 'react-native';
+import { View, type ColorValue } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 /** Jeu d'icônes maison, au trait, dessiné pour CAP 52 (aucune dépendance externe). */
@@ -74,20 +74,21 @@ export function isIconName(value: string): value is IconName {
 }
 
 export function Icon({ name, size = 24, color, strokeWidth = 1.8 }: { name: IconName; size?: number; color: ColorValue; strokeWidth?: number }) {
+  // Décorative : masquée des lecteurs d'écran (le libellé est porté par l'élément parent).
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-    >
-      {ICONS[name]}
-    </Svg>
+    <View aria-hidden pointerEvents="none">
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {ICONS[name]}
+      </Svg>
+    </View>
   );
 }
