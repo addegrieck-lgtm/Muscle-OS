@@ -1,4 +1,5 @@
-# Aperçu statique du site sur GitHub Pages (https://addegrieck-lgtm.github.io/Muscle-OS/).
+# Aperçu statique sur GitHub Pages : site VÆLORIA (https://addegrieck-lgtm.github.io/Muscle-OS/)
+# et application CAP 52 (https://addegrieck-lgtm.github.io/Muscle-OS/cap52/).
 # Pas d'API ni de données en direct : version vitrine non indexée, en attendant l'hébergement réel.
 # Réglage requis une fois : Settings → Pages → Source : « GitHub Actions ».
 name: Aperçu GitHub Pages
@@ -54,6 +55,12 @@ jobs:
           PREVIEW_BASE_PATH: /Muscle-OS
           NEXT_PUBLIC_SITE_URL: https://addegrieck-lgtm.github.io/Muscle-OS
           API_URL: http://127.0.0.1:4000
+      # CAP 52 (application d'épargne, projet npm autonome) publiée dans le même site, sous /cap52/.
+      - name: CAP 52 — version web
+        working-directory: cap52
+        run: |
+          npm ci
+          EXPO_BASE_URL=/Muscle-OS/cap52 bash scripts/build-web.sh ../apps/web/out/cap52
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/out
