@@ -105,15 +105,18 @@ export function mapProduct(row: ProductRow, imageUrl: (path: string) => string):
         isPrimary: img.is_primary,
         position: img.position,
       })),
-    variants: (row.product_variants ?? []).map((v) => ({
-      id: v.id,
-      name: v.name,
-      sku: v.sku,
-      finish: v.finish,
-      priceAdjustment: Number(v.price_adjustment),
-      stockQuantity: v.stock_quantity,
-      active: v.active,
-    })),
+    // Ordre stable : du moins cher au plus cher, puis par nom (la base ne garantit aucun ordre).
+    variants: (row.product_variants ?? [])
+      .map((v) => ({
+        id: v.id,
+        name: v.name,
+        sku: v.sku,
+        finish: v.finish,
+        priceAdjustment: Number(v.price_adjustment),
+        stockQuantity: v.stock_quantity,
+        active: v.active,
+      }))
+      .sort((a, b) => a.priceAdjustment - b.priceAdjustment || a.name.localeCompare(b.name, "fr")),
     seoTitle: row.seo_title,
     seoDescription: row.seo_description,
     art: artForCategory(categorySlug),

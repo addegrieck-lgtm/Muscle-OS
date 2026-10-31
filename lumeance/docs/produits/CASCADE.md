@@ -1,6 +1,8 @@
 # Fiche produit — CASCADE
 
-Contenu prêt à saisir dans **/admin/produits → Nouveau produit**, champ par champ.
+**Création automatique** : exécuter `supabase/seed/products/cascade.sql` dans Supabase (SQL Editor).
+Le script crée la fiche en brouillon avec ses 17 variantes et leurs prix ; il peut être rejoué sans doublon.
+Sinon, contenu prêt à saisir dans **/admin/produits → Nouveau produit**, champ par champ.
 Statut conseillé : **Brouillon** tant que les variantes, les prix et les justificatifs
 de conformité (voir `docs/RGPD.md`) ne sont pas réunis.
 
@@ -141,8 +143,8 @@ Prix d'achat relevés sur AliExpress le 31/10/2026 (TTC, livraison comprise selo
 droits de douane éventuels **non inclus**). Le prix « promo 11.11 » n'est valable que pendant l'opération.
 
 **Règle de calcul proposée** — coefficient sur le prix d'achat **hors promo** (marge de sécurité) :
-× 2,5 jusqu'à 200 € d'achat, × 2,2 de 200 à 500 €, × 2 au-delà ; arrondi à la dizaine supérieure
-(à la cinquantaine au-delà de 1 000 €).
+× 2,5 jusqu'à 200 € d'achat, × 2,2 de 200 à 500 €, × 2 au-delà ; arrondi à la dizaine supérieure.
+Les modèles au-delà de 750 € sont ensuite positionnés **légèrement plus bas** (− 4 à − 9 %) pour rester attractifs.
 
 | # | Variante | Achat | Achat promo 11.11 | **Prix de vente LUMÉANCE** | Marge brute HT* | Ajustement admin |
 |---|---|---|---|---|---|---|
@@ -150,19 +152,19 @@ droits de douane éventuels **non inclus**). Le prix « promo 11.11 » n'est val
 | 2 | Rond 5 | 134,39 € | 118,99 € | **340 €** | 149 € | + 110 € |
 | 3 | Rond 7 | 186,99 € | 165,39 € | **470 €** | 205 € | + 240 € |
 | 4 | Rond 14 | 322,69 € | 285,69 € | **710 €** | 269 € | + 480 € |
-| 5 | Rond 26 | 578,99 € | 511,99 € | **1 200 €** | 421 € | + 970 € |
-| 6 | Rond 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 270 € |
-| 7 | Rond 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 520 € |
-| 8 | Carré 18 | 349,69 € | 309,39 € | **770 €** | 292 € | + 540 € |
-| 9 | Carré 26 | 578,99 € | 511,99 € | **1 200 €** | 421 € | + 970 € |
-| 10 | Carré 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 270 € |
-| 11 | Carré 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 520 € |
+| 5 | Rond 26 | 578,99 € | 511,99 € | **1 090 €** | 329 € | + 860 € |
+| 6 | Rond 36 | 732,99 € | 648,39 € | **1 390 €** | 425 € | + 1 160 € |
+| 7 | Rond 46 | 1 351,39 € | 1 195,39 € | **2 490 €** | 724 € | + 2 260 € |
+| 8 | Carré 18 | 349,69 € | 309,39 € | **740 €** | 267 € | + 510 € |
+| 9 | Carré 26 | 578,99 € | 511,99 € | **1 090 €** | 329 € | + 860 € |
+| 10 | Carré 36 | 732,99 € | 648,39 € | **1 390 €** | 425 € | + 1 160 € |
+| 11 | Carré 46 | 1 351,39 € | 1 195,39 € | **2 490 €** | 724 € | + 2 260 € |
 | 12 | Linéaire 5 | 157,69 € | 139,39 € | **400 €** | 176 € | + 170 € |
 | 13 | Linéaire 7 | 186,99 € | 165,39 € | **470 €** | 205 € | + 240 € |
 | 14 | Rectangle 14 | 322,69 € | 285,69 € | **710 €** | 269 € | + 480 € |
-| 15 | Rectangle 18 | 370,99 € | 328,39 € | **820 €** | 312 € | + 590 € |
-| 16 | Rectangle 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 270 € |
-| 17 | Rectangle 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 520 € |
+| 15 | Rectangle 18 | 370,99 € | 328,39 € | **780 €** | 279 € | + 550 € |
+| 16 | Rectangle 36 | 732,99 € | 648,39 € | **1 390 €** | 425 € | + 1 160 € |
+| 17 | Rectangle 46 | 1 351,39 € | 1 195,39 € | **2 490 €** | 724 € | + 2 260 € |
 
 \* Marge brute HT = prix de vente ÷ 1,2 (TVA 20 %) − prix d'achat hors promo. Avant frais de
 paiement, publicité, retours et casse ; la TVA payée sur AliExpress n'est récupérable qu'avec une facture conforme.

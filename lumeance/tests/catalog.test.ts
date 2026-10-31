@@ -42,3 +42,56 @@ describe("catalogue", () => {
     expect(jsonLdScript({ a: "</script><script>alert(1)</script>" })).not.toContain("</script>");
   });
 });
+
+describe("mapProduct — variantes", () => {
+  it("trie les variantes du moins cher au plus cher, puis par nom", async () => {
+    const { mapProduct } = await import("@/lib/services/mappers");
+    const v = (name: string, price_adjustment: number) => ({
+      id: name,
+      name,
+      sku: name,
+      finish: "Acier poli",
+      price_adjustment,
+      stock_quantity: 0,
+      active: true,
+    });
+    const product = mapProduct(
+      {
+        id: "p",
+        slug: "cascade",
+        name: "Cascade",
+        reference: "LUM-CASCADE",
+        short_description: null,
+        description: null,
+        price: 23000,
+        compare_at_price: null,
+        category_id: null,
+        status: "draft",
+        featured: false,
+        dimensions: null,
+        weight: null,
+        materials: null,
+        finishes: null,
+        technical_specifications: null,
+        delivery_information: null,
+        assembly_information: null,
+        stock_quantity: 0,
+        seo_title: null,
+        seo_description: null,
+        product_variants: [
+          v("Rond · 46", 226000),
+          v("Rond · 7", 24000),
+          v("Linéaire · 7", 24000),
+          v("Rond · 3", 0),
+        ],
+      },
+      (path) => path,
+    );
+    expect(product.variants.map((x) => x.name)).toEqual([
+      "Rond · 3",
+      "Linéaire · 7",
+      "Rond · 7",
+      "Rond · 46",
+    ]);
+  });
+});
