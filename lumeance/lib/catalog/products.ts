@@ -1,4 +1,66 @@
-import type { Product } from "@/types/catalog";
+import type { Product, ProductVariant } from "@/types/catalog";
+
+/** Prix de vente TTC en centimes depuis le prix d'achat fournisseur (en centimes) :
+ * ×1,8 sous 500 €, ×1,5 au-delà, arrondi à la dizaine d'euros supérieure. */
+export function salePrice(purchaseCents: number): number {
+  const k = purchaseCents < 50000 ? 1.8 : 1.5;
+  return Math.ceil((purchaseCents * k) / 1000) * 1000;
+}
+
+type Version = [
+  shape: string,
+  spheres: number,
+  canopy: string | null,
+  heightM: number | null,
+  area: string | null,
+  purchaseCents: number,
+];
+
+/** Versions du fabricant (fiches techniques fournisseur). null = information non communiquée. */
+const CELESTE_VERSIONS: Version[] = [
+  ["Rond", 3, "Ø15 cm", 1.5, "5 à 8", 8939],
+  ["Rond", 5, "Ø20 cm", 2, "5 à 8", 13439],
+  ["Rond", 7, "Ø30 cm", 2.5, "8 à 12", 18699],
+  ["Rond", 14, "Ø40 cm", 3, "10 à 15", 32269],
+  ["Rond", 26, "Ø50 cm", 4, "15 à 20", 57899],
+  ["Rond", 36, null, 5, "20 à 25", 73299],
+  ["Rond", 46, "Ø100 cm", 5, "25 à 40", 135139],
+  ["Carré", 18, "50 × 50 cm", 3.5, "15 à 20", 34969],
+  ["Carré", 26, "50 × 50 cm", 4, "15 à 20", 57899],
+  ["Carré", 36, "75 × 75 cm", 5, "20 à 25", 73299],
+  ["Carré", 46, "100 × 100 cm", 5, "25 à 40", 135139],
+  ["Rectangulaire", 5, "50 × 5 cm", 2, "5 à 8", 15769],
+  ["Rectangulaire", 7, "70 × 5 cm", 2.5, "8 à 12", 18699],
+  ["Rectangulaire", 14, "85 × 28 cm", 3, "10 à 15", 32269],
+  ["Rectangulaire", 18, "85 × 28 cm", null, null, 37099],
+  ["Rectangulaire", 36, "110 × 37 cm", 5, "20 à 25", 73299],
+];
+
+const CELESTE_BASE_PRICE = Math.min(...CELESTE_VERSIONS.map((v) => salePrice(v[5])));
+
+const fmtM = (m: number) => `${String(m).replace(".", ",")} m`;
+
+const CELESTE_VARIANTS: ProductVariant[] = CELESTE_VERSIONS.map(
+  ([shape, n, canopy, h, area, cost]) => {
+    const code = `${shape === "Rond" ? "R" : shape === "Carré" ? "C" : "L"}${n}`;
+    return {
+      id: `celeste-${code.toLowerCase()}`,
+      name: `${n} sphères`,
+      sku: `LUM-LUS-001-${code}`,
+      finish: `Pavillon ${shape.toLowerCase()}`,
+      priceAdjustment: salePrice(cost) - CELESTE_BASE_PRICE,
+      stockQuantity: 0,
+      active: true,
+      details: [
+        canopy ? `Pavillon ${canopy}` : "Dimensions du pavillon communiquées sur demande",
+        h ? `hauteur réglable jusqu’à ${fmtM(h)}` : null,
+        area ? `pièce de ${area} m²` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    };
+  },
+);
 
 /**
  * CATALOGUE RÉEL (provisoire, dans le code) — utilisé tant que Supabase n'est pas configuré.
@@ -20,9 +82,8 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Pensée pour les grandes hauteurs sous plafond — cages d’escalier, mezzanines, halls d’entrée et séjours en double hauteur — elle accompagne le regard d’un niveau à l’autre. La longueur de suspension est réglable pour ajuster la composition à votre volume.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    // Prix de vente TTC (centimes). Règle : ×1,5 le prix fournisseur au-delà de 500 €, ×1,8 en deçà,
-    // arrondi à la dizaine supérieure. Prix de base = plus petite version (14 sphères).
-    price: 59000,
+    // Prix de base = version la moins chère ; chaque version porte son écart (voir CELESTE_VARIANTS).
+    price: CELESTE_BASE_PRICE,
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
@@ -69,44 +130,8 @@ export const CATALOG_PRODUCTS: Product[] = [
         position: 1,
       },
     ],
-    variants: [
-      {
-        id: "celeste-14",
-        name: "14 sphères — Ø40 cm",
-        sku: "LUM-LUS-001-14",
-        finish: null,
-        priceAdjustment: 0,
-        stockQuantity: 0,
-        active: true,
-      },
-      {
-        id: "celeste-26",
-        name: "26 sphères — Ø50 cm",
-        sku: "LUM-LUS-001-26",
-        finish: null,
-        priceAdjustment: 28000,
-        stockQuantity: 0,
-        active: true,
-      },
-      {
-        id: "celeste-36",
-        name: "36 sphères",
-        sku: "LUM-LUS-001-36",
-        finish: null,
-        priceAdjustment: 51000,
-        stockQuantity: 0,
-        active: true,
-      },
-      {
-        id: "celeste-46",
-        name: "46 sphères — Ø100 cm",
-        sku: "LUM-LUS-001-46",
-        finish: null,
-        priceAdjustment: 144000,
-        stockQuantity: 0,
-        active: true,
-      },
-    ],
+    variants: CELESTE_VARIANTS,
+    optionLabels: { group: "Pavillon", variant: "Nombre de sphères" },
     seoTitle: "Céleste — lustre cascade en sphères de verre cristal",
     seoDescription:
       "Lustre en cascade de sphères de verre cristal pour cage d’escalier, mezzanine et grande hauteur sous plafond. LED G4, suspension réglable.",

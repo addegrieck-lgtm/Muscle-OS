@@ -74,7 +74,11 @@ export function priceCart(
       slug: p.slug,
       name: p.name,
       reference: variant?.sku ?? p.reference,
-      variantName: variant?.name ?? null,
+      variantName: variant
+        ? variant.finish && variant.finish !== variant.name
+          ? `${variant.name} — ${variant.finish}`
+          : variant.name
+        : null,
       unitPrice,
       quantity: l.quantity,
       total: unitPrice * l.quantity,

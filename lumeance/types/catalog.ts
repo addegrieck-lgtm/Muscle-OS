@@ -27,6 +27,8 @@ export interface ProductVariant {
   sku: string;
   finish: string | null;
   priceAdjustment: number; // centimes
+  /** Précisions affichées sous le sélecteur (dimensions, hauteur, surface conseillée). */
+  details?: string;
   stockQuantity: number;
   active: boolean;
 }
@@ -71,6 +73,8 @@ export interface Product {
   seoDescription: string | null;
   /** Illustration de substitution tant qu'aucune photographie réelle n'est disponible. */
   art: ArtForm;
+  /** Libellés du sélecteur à deux niveaux : groupe = champ `finish` des variantes. */
+  optionLabels?: { group: string; variant: string };
   /** true = fiche fictive du catalogue de démonstration (jamais en production). */
   isDemo: boolean;
 }

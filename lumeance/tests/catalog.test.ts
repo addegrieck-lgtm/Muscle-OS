@@ -58,3 +58,23 @@ describe("catalogue réel (code)", async () => {
     expect(new Set(CATALOG_PRODUCTS.map((p) => p.reference)).size).toBe(CATALOG_PRODUCTS.length);
   });
 });
+
+describe("grille de prix Céleste", async () => {
+  const { salePrice, CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  it("×1,8 sous 500 €, ×1,5 au-delà, dizaine supérieure", () => {
+    expect(salePrice(8939)).toBe(17000);
+    expect(salePrice(32269)).toBe(59000);
+    expect(salePrice(37099)).toBe(67000);
+    expect(salePrice(57899)).toBe(87000);
+    expect(salePrice(73299)).toBe(110000);
+    expect(salePrice(135139)).toBe(203000);
+  });
+  it("16 versions, identifiants et SKU uniques, aucun prix négatif", () => {
+    const c = CATALOG_PRODUCTS.find((p) => p.slug === "celeste")!;
+    expect(c.variants).toHaveLength(16);
+    expect(new Set(c.variants.map((v) => v.id)).size).toBe(16);
+    expect(new Set(c.variants.map((v) => v.sku)).size).toBe(16);
+    for (const v of c.variants) expect(v.priceAdjustment).toBeGreaterThanOrEqual(0);
+    expect(c.price).toBe(17000);
+  });
+});

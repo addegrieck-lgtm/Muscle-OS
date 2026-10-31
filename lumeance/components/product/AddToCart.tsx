@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
-import type { Product } from "@/types/catalog";
+import type { Product, ProductVariant } from "@/types/catalog";
 
 export function AddToCart({ product }: { product: Product }) {
   const { add } = useCart();
@@ -30,36 +30,39 @@ export function AddToCart({ product }: { product: Product }) {
         <span className="t-small ml-3 font-sans text-brun/50">TTC</span>
       </p>
 
-      {variants.length > 0 && (
-        <fieldset>
-          <legend className="t-eyebrow text-brun/60">
-            {variants.some((v) => v.finish) ? "Finition" : "Version"}
-          </legend>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {variants.map((v) => (
-              <label
-                key={v.id}
-                className={`t-small cursor-pointer border px-4 py-2.5 transition-colors ${v.id === variantId ? "border-brun bg-brun text-ivoire" : "border-brun/20 hover:border-brun/60"}`}
-              >
-                <input
-                  type="radio"
+      {variants.length > 0 && product.optionLabels ? (
+        <TwoLevelSelector
+          product={product}
+          variants={variants}
+          variantId={variantId}
+          onChange={setVariantId}
+        />
+      ) : (
+        variants.length > 0 && (
+          <fieldset>
+            <legend className="t-eyebrow text-brun/60">
+              {variants.some((v) => v.finish) ? "Finition" : "Version"}
+            </legend>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {variants.map((v) => (
+                <Chip
+                  key={v.id}
                   name="variant"
-                  value={v.id}
                   checked={v.id === variantId}
                   onChange={() => setVariantId(v.id)}
-                  className="sr-only"
-                />
-                {v.name}
-                {v.priceAdjustment !== 0 && (
-                  <span className="ml-2 opacity-70">
-                    {v.priceAdjustment > 0 ? "+" : "−"}
-                    {formatPrice(Math.abs(v.priceAdjustment))}
-                  </span>
-                )}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+                >
+                  {v.name}
+                  {v.priceAdjustment !== 0 && (
+                    <span className="ml-2 opacity-70">
+                      {v.priceAdjustment > 0 ? "+" : "−"}
+                      {formatPrice(Math.abs(v.priceAdjustment))}
+                    </span>
+                  )}
+                </Chip>
+              ))}
+            </div>
+          </fieldset>
+        )
       )}
 
       <div className="flex items-stretch gap-3">
@@ -117,6 +120,87 @@ export function AddToCart({ product }: { product: Product }) {
           </>
         )}
       </p>
+    </div>
+  );
+}
+
+function Chip({
+  name,
+  checked,
+  onChange,
+  children,
+}: {
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label
+      className={`t-small cursor-pointer border px-4 py-2.5 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-champagne ${checked ? "border-brun bg-brun text-ivoire" : "border-brun/20 hover:border-brun/60"}`}
+    >
+      <input type="radio" name={name} checked={checked} onChange={onChange} className="sr-only" />
+      {children}
+    </label>
+  );
+}
+
+/** Sélecteur à deux niveaux : groupe (ex. forme du pavillon) puis version, avec prix absolu. */
+function TwoLevelSelector({
+  product,
+  variants,
+  variantId,
+  onChange,
+}: {
+  product: Product;
+  variants: ProductVariant[];
+  variantId: string | null;
+  onChange: (id: string) => void;
+}) {
+  const groups = [...new Set(variants.map((v) => v.finish ?? ""))];
+  const current = variants.find((v) => v.id === variantId) ?? variants[0]!;
+  const group = current.finish ?? "";
+  const inGroup = variants.filter((v) => (v.finish ?? "") === group);
+  const label = (g: string) => g.replace(/^Pavillon\s+/i, "").replace(/^./, (c) => c.toUpperCase());
+
+  return (
+    <div className="space-y-5">
+      {groups.length > 1 && (
+        <fieldset>
+          <legend className="t-eyebrow text-brun/60">{product.optionLabels!.group}</legend>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {groups.map((g) => (
+              <Chip
+                key={g}
+                name="variant-group"
+                checked={g === group}
+                onChange={() => onChange(variants.find((v) => (v.finish ?? "") === g)!.id)}
+              >
+                {label(g)}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      <fieldset>
+        <legend className="t-eyebrow text-brun/60">{product.optionLabels!.variant}</legend>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {inGroup.map((v) => (
+            <Chip
+              key={v.id}
+              name="variant"
+              checked={v.id === current.id}
+              onChange={() => onChange(v.id)}
+            >
+              {v.name.replace(/\s*sphères?$/, "")}
+              <span className="ml-2 opacity-70">
+                {formatPrice(product.price + v.priceAdjustment)}
+              </span>
+            </Chip>
+          ))}
+        </div>
+        {current.details && <p className="t-small mt-3 text-brun/65">{current.details}</p>}
+      </fieldset>
     </div>
   );
 }
