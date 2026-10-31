@@ -75,7 +75,12 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <section className="container-luxe mt-8 grid gap-12 pb-24 lg:grid-cols-12 lg:gap-20">
-        <VariantProvider initial={product.variants.find((v) => v.active)?.id ?? null}>
+        <VariantProvider
+          initial={product.variants.find((v) => v.active)?.id ?? null}
+          initialOptions={Object.fromEntries(
+            (product.options ?? []).map((o) => [o.id, o.values[0]!.id]),
+          )}
+        >
           <div className="lg:col-span-7">
             <ProductGallery product={product} />
           </div>

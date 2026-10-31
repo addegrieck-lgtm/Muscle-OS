@@ -58,7 +58,13 @@ const CELESTE_VARIANTS: ProductVariant[] = CELESTE_VERSIONS.map(
       ]
         .filter(Boolean)
         .join(" · "),
-      imageUrl: `/products/celeste/rendu-${code.toLowerCase()}.webp`,
+      imageUrl: `/products/celeste/rendu-chaud-${code.toLowerCase()}.webp`,
+      imageUrls: Object.fromEntries(
+        ["chaud", "neutre", "froid"].map((t) => [
+          t,
+          `/products/celeste/rendu-${t}-${code.toLowerCase()}.webp`,
+        ]),
+      ),
     };
   },
 );
@@ -96,6 +102,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     finishes: [],
     specifications: [
       { label: "Sources lumineuses", value: "LED, culot G4" },
+      { label: "Couleur de lumière", value: "Blanc chaud, blanc neutre ou blanc froid, au choix" },
       { label: "Tension d’entrée", value: "AC 95–265 V" },
       { label: "Pavillon", value: "Rond — Ø40 cm (14 sphères), Ø50 cm (26), Ø100 cm (46)" },
       { label: "Hauteur réglable", value: "Jusqu’à 3 m (14 sphères), 4 m (26), 5 m (36 et 46)" },
@@ -133,6 +140,17 @@ export const CATALOG_PRODUCTS: Product[] = [
     ],
     variants: CELESTE_VARIANTS,
     optionLabels: { group: "Pavillon", variant: "Nombre de sphères" },
+    options: [
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "neutre", label: "Blanc neutre" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
     seoTitle: "Céleste — lustre cascade en sphères de verre cristal",
     seoDescription:
       "Lustre en cascade de sphères de verre cristal pour cage d’escalier, mezzanine et grande hauteur sous plafond. LED G4, suspension réglable.",

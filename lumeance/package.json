@@ -48,8 +48,11 @@
     "opentype.js": "^2.0.0",
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
+    "three-gpu-pathtracer": "^0.0.27",
+    "three-mesh-bvh": "^0.9.17",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
-    "wrangler": "^4.156.0"
+    "wrangler": "^4.156.0",
+    "xatlas-web": "^0.1.0"
   }
 }

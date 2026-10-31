@@ -15,6 +15,13 @@ export function AddToCart({ product }: { product: Product }) {
   const [localId, setLocalId] = useState<string | null>(variants[0]?.id ?? null);
   const variantId = shared ? shared.variantId : localId;
   const setVariantId = shared ? shared.setVariantId : setLocalId;
+  const [localOptions, setLocalOptions] = useState<Record<string, string>>(() =>
+    Object.fromEntries((product.options ?? []).map((o) => [o.id, o.values[0]!.id])),
+  );
+  const options = shared ? shared.options : localOptions;
+  const setOption = shared
+    ? shared.setOption
+    : (id: string, value: string) => setLocalOptions((o) => ({ ...o, [id]: value }));
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const variant = variants.find((v) => v.id === variantId) ?? null;
@@ -69,6 +76,24 @@ export function AddToCart({ product }: { product: Product }) {
         )
       )}
 
+      {(product.options ?? []).map((o) => (
+        <fieldset key={o.id}>
+          <legend className="t-eyebrow text-brun/60">{o.label}</legend>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {o.values.map((v) => (
+              <Chip
+                key={v.id}
+                name={`option-${o.id}`}
+                checked={options[o.id] === v.id}
+                onChange={() => setOption(o.id, v.id)}
+              >
+                {v.label}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+
       <div className="flex items-stretch gap-3">
         <div className="flex items-center border border-brun/20" role="group" aria-label="Quantité">
           <button
@@ -98,7 +123,12 @@ export function AddToCart({ product }: { product: Product }) {
           disabled={!available}
           className={buttonClass("solid", "flex-1")}
           onClick={() => {
-            add({ productId: product.id, variantId: variant?.id ?? null, quantity: qty });
+            add({
+              productId: product.id,
+              variantId: variant?.id ?? null,
+              quantity: qty,
+              ...(product.options?.length ? { options } : {}),
+            });
             setAdded(true);
           }}
         >

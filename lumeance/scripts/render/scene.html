@@ -11,6 +11,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 
 const q = new URLSearchParams(location.search);
 const shape = q.get("shape") || "round";            // round | square | rect
@@ -19,6 +20,12 @@ const W = Number(q.get("w") || 40) / 100;            // m
 const D = Number(q.get("d") || W * 100) / 100;       // m
 const H = Number(q.get("h") || 3);                   // longueur de suspension max (m)
 const seed = Number(q.get("seed") || 7);
+const TEMP = q.get("temp") || "chaud"; // chaud | neutre | froid
+// Teintes approximatives : blanc chaud ~2700-3000 K, neutre ~4000 K, froid ~6000 K.
+const LIGHT = { chaud: 0xffb865, neutre: 0xffe6c8, froid: 0xdce8ff }[TEMP];
+const LIGHT_CORE = { chaud: 0xfff8ec, neutre: 0xfffcf6, froid: 0xf4f8ff }[TEMP];
+const LIGHT_RIM = { chaud: "1.,.88,.7", neutre: "1.,.96,.9", froid: ".9,.95,1." }[TEMP];
+const SCALE = 2; // rendu en double résolution puis réduit (anticrénelage)
 const WIDTH = 1200, HEIGHT = 1500;
 
 let s = seed >>> 0;
@@ -26,7 +33,7 @@ const rand = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(WIDTH, HEIGHT);
-renderer.setPixelRatio(1);
+renderer.setPixelRatio(SCALE);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -69,8 +76,8 @@ const slab = new THREE.Mesh(new THREE.BoxGeometry(roomW * 2.2, 0.25, 0.9), new T
 slab.position.set(0, railY - 1.12, -roomW * 0.5 + 0.45); slab.material.color.set(0x6e5d4f); scene.add(slab);
 
 // ── Lumières : soirée, la lumière vient surtout du luminaire ──
-scene.add(new THREE.HemisphereLight(0xffe7c8, 0x2a221d, 0.18));
-const key = new THREE.SpotLight(0xffd29a, 6, 0, Math.PI / 5, 0.8, 1.2); key.position.set(0, ceilingY - 0.05, 0.4); key.target.position.set(0, floorY, -1); scene.add(key, key.target);
+scene.add(new THREE.HemisphereLight({ chaud: 0xffe7c8, neutre: 0xfff1e4, froid: 0xeef3ff }[TEMP], 0x2a221d, 0.18));
+const key = new THREE.SpotLight({ chaud: 0xffd29a, neutre: 0xffeedd, froid: 0xe8f0ff }[TEMP], 6, 0, Math.PI / 5, 0.8, 1.2); key.position.set(0, ceilingY - 0.05, 0.4); key.target.position.set(0, floorY, -1); scene.add(key, key.target);
 
 // ── Pavillon ──
 const chrome = new THREE.MeshStandardMaterial({ color: 0xdedede, metalness: 1, roughness: 0.12 });
@@ -102,10 +109,10 @@ const glint = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, 
 const rimMat = new THREE.ShaderMaterial({ // liseré de Fresnel : contour lumineux du verre
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   vertexShader: "varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }",
-  fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.-abs(dot(vN,vV)), 3.2); gl_FragColor = vec4(vec3(1.,.9,.74)*f*1.25, f); }",
+  fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.-abs(dot(vN,vV)), 3.2); gl_FragColor = vec4(vec3(" + LIGHT_RIM + ")*f*1.25, f); }",
 });
-const frost = new THREE.MeshStandardMaterial({ color: 0xfff1d8, emissive: 0xffb865, emissiveIntensity: 1.1, roughness: 0.6 });
-const core = new THREE.MeshBasicMaterial({ color: 0xfff8ec });
+const frost = new THREE.MeshStandardMaterial({ color: 0xfff1d8, emissive: LIGHT, emissiveIntensity: 1.1, roughness: 0.6 });
+const core = new THREE.MeshBasicMaterial({ color: LIGHT_CORE });
 const wireMat = new THREE.LineBasicMaterial({ color: 0xe8e0d4, transparent: true, opacity: 0.45 });
 const sphereGeo = new THREE.SphereGeometry(R, 48, 32);
 // Bulles prises dans le verre (aspect « verre cristal »)
@@ -120,10 +127,10 @@ order.forEach((p, k) => {
   g.add(new THREE.Mesh(sphereGeo, rimMat));
   const hl = new THREE.Mesh(new THREE.SphereGeometry(R * 0.11, 12, 8), glint); hl.scale.set(1.6, 0.7, 0.4);
   hl.position.set(-R * 0.45, R * 0.55, R * 0.62); hl.rotation.z = 0.6; g.add(hl);
-  const holder = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.26, R * 0.34, R * 0.8, 24), frost); holder.position.y = -R * 0.1; g.add(holder);
+  const holder = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.26, R * 0.34, R * 0.8, 10), frost); holder.position.y = -R * 0.1; g.add(holder);
   const led = new THREE.Mesh(new THREE.SphereGeometry(R * 0.14, 16, 12), core); led.position.y = -R * 0.35; g.add(led);
   for (let b = 0; b < 26; b++) { const m = new THREE.Mesh(bubbleGeo, bubbleMat); const v = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().multiplyScalar(R * (0.55 + rand() * 0.4)); m.position.copy(v); g.add(m); }
-  const pl = new THREE.PointLight(0xffc98a, Math.min(0.9, 9 / n), 3.5, 1.6); pl.position.y = -R * 0.3; g.add(pl);
+  const pl = new THREE.PointLight(LIGHT, Math.min(0.9, 9 / n), 3.5, 1.6); pl.position.y = -R * 0.3; g.add(pl);
   scene.add(g);
   const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, ceilingY - canopyT, p.z), new THREE.Vector3(p.x, y + R, p.z)]);
   scene.add(new THREE.Line(geo, wireMat));
@@ -139,8 +146,13 @@ camera.lookAt(0, midY + 0.05, 0);
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH, HEIGHT), 0.45, 0.35, 0.86));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.45, 0.35, 0.86));
 composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, seed: { value: seed * 0.37 } },
+  vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+  fragmentShader: "uniform sampler2D tDiffuse; uniform float seed; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + seed)*43758.5453); } void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = distance(vUv, vec2(.5,.45)); c.rgb *= mix(1., .7, smoothstep(.38,.9,d)); c.rgb += (h(vUv*1400.)-.5)*.016; gl_FragColor = c; }",
+}));
 composer.render();
 window.__done = true;
 </script></body></html>

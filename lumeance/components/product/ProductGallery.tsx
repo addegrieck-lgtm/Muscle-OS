@@ -18,7 +18,9 @@ export function ProductGallery({ product }: { product: Product }) {
           { key: "jour", kind: "art" as const, mood: "jour" as const, label: "Ambiance de jour" },
         ];
   // Visuel de la version choisie, ajouté en dernière vue et affiché dès qu'on change de version.
-  const slides = selected?.imageUrl
+  const optionValue = Object.values(selection?.options ?? {})[0];
+  const versionImage = (optionValue && selected?.imageUrls?.[optionValue]) || selected?.imageUrl;
+  const slides = versionImage
     ? [
         ...base,
         {
@@ -26,8 +28,8 @@ export function ProductGallery({ product }: { product: Product }) {
           kind: "image" as const,
           img: {
             id: "version",
-            url: selected.imageUrl,
-            alt: `Visualisation 3D de ${product.name}, ${selected.name}, ${(selected.finish ?? "").toLowerCase()}`,
+            url: versionImage,
+            alt: `Visualisation 3D de ${product.name}, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
             caption: "Visualisation 3D — non contractuelle",
             isPrimary: false,
             position: 99,
@@ -42,9 +44,9 @@ export function ProductGallery({ product }: { product: Product }) {
       firstRender.current = false;
       return;
     }
-    if (selected?.imageUrl) setActive(base.length);
+    if (versionImage) setActive(base.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selection?.variantId]);
+  }, [selection?.variantId, optionValue]);
   const current = slides[active] ?? slides[0]!;
 
   return (
