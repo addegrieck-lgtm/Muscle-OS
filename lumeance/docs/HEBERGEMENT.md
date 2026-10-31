@@ -34,7 +34,7 @@ Dans le tableau de bord Cloudflare : **Workers & Pages → Créer → Importer u
 | Nom du projet | `lumeance` (doit correspondre à `name` dans `wrangler.jsonc`) |
 | Branche de production | `main` (ou `claude/pensive-faraday-ywxdas` pour tester avant la fusion) |
 | Répertoire racine | `lumeance` |
-| Commande de build | `npx opennextjs-cloudflare build` |
+| Commande de build | `npm ci && npx opennextjs-cloudflare build` (le `npm ci` est indispensable : la racine du dépôt est un espace pnpm et Cloudflare n'y installe pas les dépendances de `lumeance/`) |
 | Commande de déploiement | `npx opennextjs-cloudflare deploy` |
 | Variables de **build** | `NEXT_PUBLIC_SITE_URL=https://lumeance.<votre-sous-domaine>.workers.dev` |
 

@@ -2,6 +2,7 @@
   "name": "lumeance",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.9.2",
   "description": "LUMÉANCE — maison française de luminaires design. Showroom, boutique et administration.",
   "engines": {
     "node": ">=22"
