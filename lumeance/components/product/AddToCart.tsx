@@ -32,7 +32,9 @@ export function AddToCart({ product }: { product: Product }) {
 
       {variants.length > 0 && (
         <fieldset>
-          <legend className="t-eyebrow text-brun/60">Finition</legend>
+          <legend className="t-eyebrow text-brun/60">
+            {variants.some((v) => v.finish) ? "Finition" : "Version"}
+          </legend>
           <div className="mt-3 flex flex-wrap gap-2">
             {variants.map((v) => (
               <label

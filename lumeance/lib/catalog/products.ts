@@ -20,21 +20,28 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Pensée pour les grandes hauteurs sous plafond — cages d’escalier, mezzanines, halls d’entrée et séjours en double hauteur — elle accompagne le regard d’un niveau à l’autre. La longueur de suspension est réglable pour ajuster la composition à votre volume.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    price: 0, // À COMPLÉTER : prix de vente TTC en centimes
+    // Prix de vente TTC (centimes). Règle : ×1,8 le prix fournisseur au-delà de 500 €, ×2,2 en deçà,
+    // arrondi à la dizaine supérieure. Prix de base = plus petite version (14 sphères).
+    price: 71000,
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
-    status: "draft", // passe à « published » une fois le prix et la configuration validés
+    status: "published",
     featured: true,
-    dimensions: {}, // À COMPLÉTER : diamètre du pavillon, nombre et diamètres des sphères
+    dimensions: {}, // propres à chaque version (voir variantes et fiche technique)
     weight: null,
     materials: ["Verre cristal", "Acier inoxydable"],
     finishes: [],
     specifications: [
       { label: "Sources lumineuses", value: "LED, culot G4" },
       { label: "Tension d’entrée", value: "AC 95–265 V" },
-      { label: "Suspension", value: "Câbles réglables, longueur de 3, 4 ou 5 m sur demande" },
-      { label: "Pavillon", value: "Rond (versions carrée et rectangulaire chez le fabricant)" },
+      { label: "Pavillon", value: "Rond — Ø40 cm (14 sphères), Ø50 cm (26), Ø100 cm (46)" },
+      { label: "Hauteur réglable", value: "Jusqu’à 3 m (14 sphères), 4 m (26), 5 m (36 et 46)" },
+      {
+        label: "Surface conseillée",
+        value: "10–15 m² (14) · 15–20 m² (26) · 20–25 m² (36) · 25–40 m² (46)",
+      },
+      { label: "Classe énergétique (sources)", value: "F, selon le fabricant" },
       {
         label: "Pièces conseillées",
         value: "Escalier, mezzanine, séjour, salle à manger, couloir",
@@ -62,7 +69,44 @@ export const CATALOG_PRODUCTS: Product[] = [
         position: 1,
       },
     ],
-    variants: [],
+    variants: [
+      {
+        id: "celeste-14",
+        name: "14 sphères — Ø40 cm",
+        sku: "LUM-LUS-001-14",
+        finish: null,
+        priceAdjustment: 0,
+        stockQuantity: 0,
+        active: true,
+      },
+      {
+        id: "celeste-26",
+        name: "26 sphères — Ø50 cm",
+        sku: "LUM-LUS-001-26",
+        finish: null,
+        priceAdjustment: 34000,
+        stockQuantity: 0,
+        active: true,
+      },
+      {
+        id: "celeste-36",
+        name: "36 sphères",
+        sku: "LUM-LUS-001-36",
+        finish: null,
+        priceAdjustment: 61000,
+        stockQuantity: 0,
+        active: true,
+      },
+      {
+        id: "celeste-46",
+        name: "46 sphères — Ø100 cm",
+        sku: "LUM-LUS-001-46",
+        finish: null,
+        priceAdjustment: 173000,
+        stockQuantity: 0,
+        active: true,
+      },
+    ],
     seoTitle: "Céleste — lustre cascade en sphères de verre cristal",
     seoDescription:
       "Lustre en cascade de sphères de verre cristal pour cage d’escalier, mezzanine et grande hauteur sous plafond. LED G4, suspension réglable.",
