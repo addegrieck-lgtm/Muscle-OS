@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
+import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
 import type { Product, ProductVariant } from "@/types/catalog";
@@ -10,7 +11,10 @@ import type { Product, ProductVariant } from "@/types/catalog";
 export function AddToCart({ product }: { product: Product }) {
   const { add } = useCart();
   const variants = product.variants.filter((v) => v.active);
-  const [variantId, setVariantId] = useState<string | null>(variants[0]?.id ?? null);
+  const shared = useSelectedVariant();
+  const [localId, setLocalId] = useState<string | null>(variants[0]?.id ?? null);
+  const variantId = shared ? shared.variantId : localId;
+  const setVariantId = shared ? shared.setVariantId : setLocalId;
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const variant = variants.find((v) => v.id === variantId) ?? null;

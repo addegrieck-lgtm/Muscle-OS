@@ -1,20 +1,50 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LuminaireArt } from "@/components/art/LuminaireArt";
+import { useSelectedVariant } from "@/components/product/VariantContext";
 import type { Product } from "@/types/catalog";
 
 /** Galerie produit : photographies réelles si disponibles, sinon deux ambiances d'illustration. */
 export function ProductGallery({ product }: { product: Product }) {
-  const slides =
+  const selection = useSelectedVariant();
+  const selected = product.variants.find((v) => v.id === selection?.variantId) ?? null;
+  const base =
     product.images.length > 0
       ? product.images.map((img) => ({ key: img.id, kind: "image" as const, img }))
       : [
           { key: "nuit", kind: "art" as const, mood: "nuit" as const, label: "Ambiance du soir" },
           { key: "jour", kind: "art" as const, mood: "jour" as const, label: "Ambiance de jour" },
         ];
+  // Visuel de la version choisie, ajouté en dernière vue et affiché dès qu'on change de version.
+  const slides = selected?.imageUrl
+    ? [
+        ...base,
+        {
+          key: "version",
+          kind: "image" as const,
+          img: {
+            id: "version",
+            url: selected.imageUrl,
+            alt: `Visualisation 3D de ${product.name}, ${selected.name}, ${(selected.finish ?? "").toLowerCase()}`,
+            caption: "Visualisation 3D — non contractuelle",
+            isPrimary: false,
+            position: 99,
+          },
+        },
+      ]
+    : base;
   const [active, setActive] = useState(0);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    if (selected?.imageUrl) setActive(base.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection?.variantId]);
   const current = slides[active] ?? slides[0]!;
 
   return (

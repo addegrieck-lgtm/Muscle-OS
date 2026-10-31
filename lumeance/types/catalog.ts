@@ -29,6 +29,8 @@ export interface ProductVariant {
   priceAdjustment: number; // centimes
   /** Précisions affichées sous le sélecteur (dimensions, hauteur, surface conseillée). */
   details?: string;
+  /** Visuel propre à la version (ex. visualisation 3D). */
+  imageUrl?: string;
   stockQuantity: number;
   active: boolean;
 }

@@ -58,6 +58,7 @@ const CELESTE_VARIANTS: ProductVariant[] = CELESTE_VERSIONS.map(
       ]
         .filter(Boolean)
         .join(" · "),
+      imageUrl: `/products/celeste/rendu-${code.toLowerCase()}.webp`,
     };
   },
 );
