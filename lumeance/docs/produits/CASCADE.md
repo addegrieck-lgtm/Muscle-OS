@@ -10,7 +10,7 @@ de conformité (voir `docs/RGPD.md`) ne sont pas réunis.
 ## Ce qui reste à compléter
 
 - [x] Variantes (17 modèles) : formes, nombre de sphères, pavillons, suspensions (voir plus bas)
-- [ ] **Prix de vente** de chaque variante
+- [x] Prix de vente proposés (à valider) — manque le Rond 3 sphères
 - [ ] Faire confirmer au fournisseur : Rond 36 (diamètre), Rond 46 (diamètre), Rectangle 18 (hauteur), Rectangle 46 (dimensions), puissance (W), température de couleur (K), diamètre des sphères, poids
 - [ ] Délai et frais de livraison
 - [ ] Justificatifs : marquage CE, déclaration UE de conformité, notice en français (voir `docs/RGPD.md`)
@@ -27,7 +27,7 @@ de conformité (voir `docs/RGPD.md`) ne sont pas réunis.
 | **Slug** | `cascade` |
 | **Catégorie** | Lustres |
 | **Mise en avant** | Oui |
-| **Prix** | *à définir (prix de la plus petite variante)* |
+| **Prix** | 340 € (prix de base = Rond 5 sphères) |
 | **Prix barré** | *facultatif* |
 
 ### Description courte (≤ 300 caractères)
@@ -135,30 +135,43 @@ Finition de toutes les variantes : **Acier poli**. Une source LED par sphère.
 - **Modèles 46 sphères** (pavillon jusqu'à 1 m) : très grands volumes — halls, escaliers sur plusieurs étages.
 - **Sphère seule** : n'est pas une « cascade » — à vendre plutôt comme produit séparé, ou à ne pas proposer.
 
-### Prix (à compléter)
+### Prix
 
-Dans l'admin : **prix du produit = prix de la plus petite variante** (Rond 3 sphères),
-puis pour chaque variante **ajustement = prix de vente − prix de base**.
+Prix d'achat relevés sur AliExpress le 31/10/2026 (TTC, livraison comprise selon l'annonce ;
+droits de douane éventuels **non inclus**). Le prix « promo 11.11 » n'est valable que pendant l'opération.
 
-| # | Variante | Prix d'achat fournisseur | Prix de vente LUMÉANCE | Ajustement |
-|---|---|---|---|---|
-| 1 | Rond 3 | | | 0 € |
-| 2 | Rond 5 | | | |
-| 3 | Rond 7 | | | |
-| 4 | Rond 14 | | | |
-| 5 | Rond 26 | | | |
-| 6 | Rond 36 | | | |
-| 7 | Rond 46 | | | |
-| 8 | Carré 18 | | | |
-| 9 | Carré 26 | | | |
-| 10 | Carré 36 | | | |
-| 11 | Carré 46 | | | |
-| 12 | Linéaire 5 | | | |
-| 13 | Linéaire 7 | | | |
-| 14 | Rectangle 14 | | | |
-| 15 | Rectangle 18 | | | |
-| 16 | Rectangle 36 | | | |
-| 17 | Rectangle 46 | | | |
+**Règle de calcul proposée** — coefficient sur le prix d'achat **hors promo** (marge de sécurité) :
+× 2,5 jusqu'à 200 € d'achat, × 2,2 de 200 à 500 €, × 2 au-delà ; arrondi à la dizaine supérieure
+(à la cinquantaine au-delà de 1 000 €).
+
+| # | Variante | Achat | Achat promo 11.11 | **Prix de vente LUMÉANCE** | Marge brute HT* | Ajustement admin |
+|---|---|---|---|---|---|---|
+| 1 | Rond 3 | ⚠️ *non relevé* | | *à définir* | | |
+| 2 | Rond 5 | 134,39 € | 118,99 € | **340 €** | 149 € | **0 €** (prix de base) |
+| 3 | Rond 7 | 186,99 € | 165,39 € | **470 €** | 205 € | + 130 € |
+| 4 | Rond 14 | 322,69 € | 285,69 € | **710 €** | 269 € | + 370 € |
+| 5 | Rond 26 | 578,99 € | 511,99 € | **1 200 €** | 421 € | + 860 € |
+| 6 | Rond 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 160 € |
+| 7 | Rond 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 410 € |
+| 8 | Carré 18 | 349,69 € | 309,39 € | **770 €** | 292 € | + 430 € |
+| 9 | Carré 26 | 578,99 € | 511,99 € | **1 200 €** | 421 € | + 860 € |
+| 10 | Carré 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 160 € |
+| 11 | Carré 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 410 € |
+| 12 | Linéaire 5 | 157,69 € | 139,39 € | **400 €** | 176 € | + 60 € |
+| 13 | Linéaire 7 | 186,99 € | 165,39 € | **470 €** | 205 € | + 130 € |
+| 14 | Rectangle 14 | 322,69 € | 285,69 € | **710 €** | 269 € | + 370 € |
+| 15 | Rectangle 18 | 370,99 € | 328,39 € | **820 €** | 312 € | + 480 € |
+| 16 | Rectangle 36 | 732,99 € | 648,39 € | **1 500 €** | 517 € | + 1 160 € |
+| 17 | Rectangle 46 | 1 351,39 € | 1 195,39 € | **2 750 €** | 940 € | + 2 410 € |
+
+\* Marge brute HT = prix de vente ÷ 1,2 (TVA 20 %) − prix d'achat hors promo. Avant frais de
+paiement, publicité, retours et casse ; la TVA payée sur AliExpress n'est récupérable qu'avec une facture conforme.
+
+**Saisie dans l'admin** : prix du produit = **340 €** (Rond 5), puis l'ajustement de chaque variante.
+Si le Rond 3 est conservé, il aura un ajustement négatif (prix de vente − 340 €).
+
+**Prix barré** : ne pas en indiquer. En France, un prix barré doit correspondre au prix le plus bas
+pratiqué par la boutique sur les 30 jours précédents ; sans historique de vente, ce serait une pratique trompeuse.
 
 ### Incohérences de la fiche fournisseur, à faire confirmer avant publication
 - **Rond 36 sphères** : diamètre du pavillon absent, et « LED*56 » indiqué pour 36 sphères.
