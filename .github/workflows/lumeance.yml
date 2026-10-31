@@ -1,0 +1,30 @@
+# LUMÉANCE (dossier lumeance/, projet autonome) : vérifications à chaque modification du dossier.
+name: LUMÉANCE
+
+on:
+  push:
+    branches: [main]
+    paths: ["lumeance/**", ".github/workflows/lumeance.yml"]
+  pull_request:
+    paths: ["lumeance/**", ".github/workflows/lumeance.yml"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lumeance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lumeance/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Migrations et RLS (PostgreSQL du runner)
+        run: npm run test:db
+      - run: npm run build
