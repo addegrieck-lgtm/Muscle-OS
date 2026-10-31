@@ -31,9 +31,13 @@ Chaque câble se règle indépendamment : spirale, chute verticale ou compositio
 Trois formes de pavillon — rond, carré ou rectangulaire — pour s'accorder à votre plafond et à la forme de la pièce.
 
 Quel modèle choisir ?
+
 — Jusqu'à 8 m² (au-dessus d'une table, d'un îlot, dans une entrée) : 3 à 5 sphères, suspension jusqu'à 2 m.
+
 — De 8 à 15 m² (salon, salle à manger) : 7 à 14 sphères, suspension jusqu'à 3 m.
+
 — De 15 à 25 m² (cage d'escalier, double hauteur) : 18 à 36 sphères, suspension de 3,5 à 5 m.
+
 — Au-delà de 25 m² (hall, escalier sur plusieurs étages) : 46 sphères, suspension jusqu'à 5 m.$txt$,
   23000,
   null,
