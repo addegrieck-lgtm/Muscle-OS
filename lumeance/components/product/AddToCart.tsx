@@ -93,9 +93,18 @@ export function AddToCart({ product }: { product: Product }) {
             setAdded(true);
           }}
         >
-          {available ? "Ajouter au panier" : "Indisponible actuellement"}
+          {available ? "Ajouter au panier" : "Disponibilité sur demande"}
         </button>
       </div>
+      {!available && (
+        <p className="t-small text-brun/70">
+          Cette pièce est disponible sur demande.{" "}
+          <Link href="/contact" className="underline underline-offset-4">
+            Nous contacter
+          </Link>{" "}
+          pour un conseil ou un devis.
+        </p>
+      )}
       <p className="t-small min-h-6 text-champagne" role="status">
         {added && (
           <>

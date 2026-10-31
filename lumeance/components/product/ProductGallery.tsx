@@ -27,14 +27,22 @@ export function ProductGallery({ product }: { product: Product }) {
             aria-hidden={i !== active}
           >
             {s.kind === "image" ? (
-              <Image
-                src={s.img.url}
-                alt={s.img.alt}
-                fill
-                priority={i === 0}
-                sizes="(min-width: 1024px) 55vw, 100vw"
-                className="object-cover"
-              />
+              <>
+                <Image
+                  src={s.img.url}
+                  alt={s.img.alt}
+                  fill
+                  priority={i === 0}
+                  unoptimized={s.img.url.startsWith("/")}
+                  sizes="(min-width: 1024px) 55vw, 100vw"
+                  className="object-cover"
+                />
+                {s.img.caption && (
+                  <p className="absolute bottom-4 left-4 bg-noir/45 px-2 py-1 text-[0.6rem] uppercase tracking-[0.25em] text-ivoire/85 backdrop-blur-sm">
+                    {s.img.caption}
+                  </p>
+                )}
+              </>
             ) : (
               <LuminaireArt
                 form={product.art}
@@ -67,7 +75,14 @@ export function ProductGallery({ product }: { product: Product }) {
               className={`relative aspect-square w-20 overflow-hidden bg-noir transition-opacity ${i === active ? "opacity-100 outline outline-1 outline-offset-2 outline-champagne" : "opacity-55 hover:opacity-90"}`}
             >
               {s.kind === "image" ? (
-                <Image src={s.img.url} alt="" fill sizes="80px" className="object-cover" />
+                <Image
+                  src={s.img.url}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  unoptimized={s.img.url.startsWith("/")}
+                  className="object-cover"
+                />
               ) : (
                 <LuminaireArt
                   form={product.art}

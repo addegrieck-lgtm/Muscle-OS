@@ -42,3 +42,19 @@ describe("catalogue", () => {
     expect(jsonLdScript({ a: "</script><script>alert(1)</script>" })).not.toContain("</script>");
   });
 });
+
+describe("catalogue réel (code)", async () => {
+  const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  it("aucune fiche publiée sans prix, image ni texte alternatif", () => {
+    for (const p of CATALOG_PRODUCTS.filter((x) => x.status === "published")) {
+      expect(p.price).toBeGreaterThan(0);
+      expect(p.images.length).toBeGreaterThan(0);
+      for (const i of p.images) expect(i.alt.length).toBeGreaterThan(10);
+      expect(p.isDemo).toBe(false);
+    }
+  });
+  it("références et slugs uniques", () => {
+    expect(new Set(CATALOG_PRODUCTS.map((p) => p.slug)).size).toBe(CATALOG_PRODUCTS.length);
+    expect(new Set(CATALOG_PRODUCTS.map((p) => p.reference)).size).toBe(CATALOG_PRODUCTS.length);
+  });
+});

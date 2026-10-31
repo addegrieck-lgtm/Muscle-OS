@@ -70,7 +70,14 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                 className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden bg-noir md:w-32"
               >
                 {l.imageUrl ? (
-                  <Image src={l.imageUrl} alt="" fill sizes="128px" className="object-cover" />
+                  <Image
+                    src={l.imageUrl}
+                    alt=""
+                    fill
+                    sizes="128px"
+                    unoptimized={l.imageUrl.startsWith("/")}
+                    className="object-cover"
+                  />
                 ) : (
                   <LuminaireArt form={l.art} seed={l.slug} className="h-full w-full" label="" />
                 )}

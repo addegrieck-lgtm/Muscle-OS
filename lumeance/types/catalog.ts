@@ -15,6 +15,8 @@ export interface ProductImage {
   id: string;
   url: string;
   alt: string;
+  /** Légende affichée sur la photo, ex. « Photographie d’ambiance du fabricant ». */
+  caption?: string;
   isPrimary: boolean;
   position: number;
 }

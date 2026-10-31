@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MotionRoot } from "@/components/motion/MotionRoot";
 import { isDemoCatalog } from "@/lib/services/catalog";
+import { paymentsEnabled } from "@/lib/env";
 import { organizationJsonLd, jsonLdScript } from "@/lib/seo/jsonld";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,15 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       >
         Aller au contenu
       </a>
-      <Header banner={isDemoCatalog() ? <DemoBanner /> : undefined} />
+      <Header
+        banner={
+          isDemoCatalog() ? (
+            <DemoBanner />
+          ) : !paymentsEnabled() ? (
+            <DemoBanner variant="preparation" />
+          ) : undefined
+        }
+      />
       <main id="contenu">{children}</main>
       <Footer />
       <CookieConsent />

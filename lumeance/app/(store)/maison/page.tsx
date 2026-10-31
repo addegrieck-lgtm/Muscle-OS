@@ -2,6 +2,7 @@ import { LogoSymbol } from "@/components/brand/Logo";
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { ButtonLink, Eyebrow } from "@/components/ui/Button";
 import { pageMetadata } from "@/lib/seo/metadata";
+import { isDemoCatalog } from "@/lib/services/catalog";
 
 export const metadata = pageMetadata({
   title: "La Maison",
@@ -103,9 +104,9 @@ export default function MaisonPage() {
           <h2 className="t-h2 mt-8 max-w-3xl">Une maison en préparation</h2>
           <div className="mt-8 max-w-2xl space-y-4 text-brun/80">
             <p>
-              Le showroom que vous parcourez est un aperçu. Les pièces présentées aujourd’hui sont
-              fictives et illustrées : elles servent à montrer l’esprit de la maison, pas à décrire
-              des produits disponibles.
+              {isDemoCatalog()
+                ? "Le showroom que vous parcourez est un aperçu. Les pièces présentées aujourd’hui sont fictives et illustrées : elles servent à montrer l’esprit de la maison, pas à décrire des produits disponibles."
+                : "Notre première sélection est en cours de constitution : de nouvelles pièces rejoindront le catalogue au fil des vérifications."}
             </p>
             <p>
               La boutique ouvrira lorsque la sélection définitive, les fiches techniques vérifiées,
