@@ -16,6 +16,7 @@ export const metadata = pageMetadata({
   title: "LUMÉANCE — L’art de révéler la lumière",
   description: DEFAULT_DESCRIPTION,
   path: "/",
+  absoluteTitle: true,
 });
 
 export default async function HomePage() {
