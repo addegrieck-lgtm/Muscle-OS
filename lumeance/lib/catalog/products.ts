@@ -155,8 +155,11 @@ const SILHOUETTE_VARIANTS: ProductVariant[] = SILHOUETTE_SIZES.map(([code, w, h,
 
 // ── Nébuleuse (LUM-LUS-002) ──────────────────────────────────────────────────
 // [sphères, puissance W, Ø pavillon cm, suspension max cm, surface m², prix fournisseur hors promotion (centimes)]
-// Prix hors promotion = prix promo + économie affichée. Versions 3, 5 et 6 sphères : prix non communiqué.
-const NEBULEUSE_VERSIONS: [number, number, number, number, string, number][] = [
+// Prix hors promotion = prix promo + économie affichée. Versions 3 et 5 : hauteur totale 120 cm (pas de surface conseillée communiquée).
+const NEBULEUSE_VERSIONS: [number, number, number, number, string | null, number][] = [
+  [3, 20, 30, 120, null, 8455],
+  [5, 20, 30, 120, null, 12927],
+  [6, 36, 35, 100, "10 à 15", 13870],
   [8, 48, 40, 180, "15 à 20", 15862],
   [10, 60, 50, 200, "20 à 25", 18309],
   [12, 60, 50, 220, "22 à 28", 21414],
@@ -175,7 +178,16 @@ const NEBULEUSE_VARIANTS: ProductVariant[] = NEBULEUSE_VERSIONS.map(
     priceAdjustment: salePrice(cost) - NEBULEUSE_BASE_PRICE,
     stockQuantity: 0,
     active: true,
-    details: `Pavillon Ø${canopy} cm · suspension réglable jusqu’à ${String(wire / 100).replace(".", ",")} m · ${watt} W · pièce de ${area} m²`,
+    details: [
+      `Pavillon Ø${canopy} cm`,
+      n <= 5
+        ? `hauteur totale ${String(wire / 100).replace(".", ",")} m · sphères Ø15 cm`
+        : `suspension réglable jusqu’à ${String(wire / 100).replace(".", ",")} m`,
+      `${watt} W`,
+      area ? `pièce de ${area} m²` : null,
+    ]
+      .filter(Boolean)
+      .join(" · "),
     imageUrl: `/products/nebuleuse/version-${n}.webp`,
     // Visualisations 3D : verre × pavillon × couleur de lumière.
     imageUrls: Object.fromEntries(
@@ -450,7 +462,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Une cascade de sphères de verre où scintillent des centaines de micro-lumières.",
     description: [
       "Nébuleuse suspend dans le vide des sphères de verre teinté, chacune habitée d’un nuage de micro-LED. Allumée, chaque globe devient une petite galaxie ; ensemble, elles composent une constellation qui descend le long d’une cage d’escalier ou d’un séjour en double hauteur.",
-      "Sept compositions, de 8 à 30 sphères, avec suspensions réglables jusqu’à 5 m. Verre cognac ou gris fumé, pavillon argenté, doré ou noir, et trois températures de lumière.",
+      "Dix compositions, de 3 à 30 sphères, avec suspensions réglables jusqu’à 5 m. Verre cognac ou gris fumé, pavillon argenté, doré ou noir, et trois températures de lumière.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
     price: NEBULEUSE_BASE_PRICE,
@@ -465,9 +477,9 @@ export const CATALOG_PRODUCTS: Product[] = [
     finishes: ["Argenté", "Doré", "Noir"],
     specifications: [
       { label: "Sources lumineuses", value: "Micro-LED intégrées dans chaque sphère" },
-      { label: "Puissance", value: "De 48 W (8 sphères) à 180 W (30 sphères)" },
+      { label: "Puissance", value: "De 20 W (3 sphères) à 180 W (30 sphères)" },
       { label: "Verre", value: "Cognac ou gris fumé" },
-      { label: "Pavillon", value: "Rond, Ø40 à Ø60 cm selon la version ; argenté, doré ou noir" },
+      { label: "Pavillon", value: "Rond, Ø30 à Ø60 cm selon la version ; argenté, doré ou noir" },
       { label: "Couleur de lumière", value: "Blanc chaud 3000 K, neutre 4000 K ou froid 5500 K" },
       { label: "Classe énergétique", value: "A, selon le fabricant" },
     ],
@@ -516,7 +528,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     ],
     seoTitle: "Nébuleuse — lustre cascade en sphères de verre à micro-LED",
     seoDescription:
-      "Lustre en cascade pour escalier et double hauteur : sphères de verre cognac ou gris fumé à micro-LED, de 8 à 30 sphères, suspension réglable jusqu’à 5 m.",
+      "Lustre en cascade pour escalier et double hauteur : sphères de verre cognac ou gris fumé à micro-LED, de 3 à 30 sphères, suspension réglable jusqu’à 5 m.",
     art: "cascade",
     isDemo: false,
   },
