@@ -191,6 +191,56 @@ const NEBULEUSE_VARIANTS: ProductVariant[] = NEBULEUSE_VERSIONS.map(
   }),
 );
 
+// ── Aigrette (LUM-SUS-002) ───────────────────────────────────────────────────
+// Fiche fournisseur relevée le 01/11/2026 (prix promotionnels, promotion jusqu'au 18/11/2026).
+// Le prix de vente part du coût le plus élevé du modèle (version « 3 teintes commutables »).
+// [forme, taille (cm), ampoules G9, éléments de cristal, prix fournisseur le plus élevé (centimes)]
+type AigretteVersion = ["Ronde" | "Linéaire", number, number, number, number];
+const AIGRETTE_VERSIONS: AigretteVersion[] = [
+  ["Ronde", 40, 8, 31, 5339],
+  ["Ronde", 50, 9, 60, 8169],
+  ["Ronde", 55, 12, 76, 10899],
+  ["Ronde", 60, 16, 140, 16239],
+  ["Ronde", 80, 16, 140, 20039],
+  ["Linéaire", 72, 9, 63, 10069],
+  ["Linéaire", 92, 12, 83, 11969],
+];
+const AIGRETTE_BASE_PRICE = Math.min(...AIGRETTE_VERSIONS.map((v) => salePrice(v[4])));
+const AIGRETTE_FINISHES = ["dore", "chrome"];
+const AIGRETTE_TEMPS = ["chaud", "neutre", "froid"];
+const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
+  ([shape, size, bulbs, crystals, cost]) => {
+    const code = `${shape === "Ronde" ? "r" : "l"}${size}`;
+    return {
+      id: `aigrette-${code}`,
+      name: shape === "Ronde" ? `Ø${size} cm` : `L ${size} cm`,
+      sku: `LUM-SUS-002-${code.toUpperCase()}`,
+      finish: shape,
+      priceAdjustment: salePrice(cost) - AIGRETTE_BASE_PRICE,
+      stockQuantity: 0,
+      active: true,
+      details: [
+        `${bulbs} ampoules G9 LED fournies`,
+        `${crystals} éléments de cristal`,
+        shape === "Linéaire" ? "hauteur 40 cm · pavillon 50 cm" : null,
+        "suspension réglable jusqu’à 1,5 m",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      imageUrl: `/products/aigrette/ambiance-${shape === "Ronde" ? "ronde" : "lineaire"}.webp`,
+      // Visualisations 3D : finition × couleur de lumière (« 3 teintes » = rendu blanc neutre).
+      imageUrls: Object.fromEntries(
+        AIGRETTE_FINISHES.flatMap((f) =>
+          [...AIGRETTE_TEMPS, "commutable"].map((t) => [
+            `${f}-${t}`,
+            `/products/aigrette/rendu-${code}-${f}-${t === "commutable" ? "neutre" : t}.webp`,
+          ]),
+        ),
+      ),
+    };
+  },
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -518,6 +568,98 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre en cascade pour escalier et double hauteur : sphères de verre cognac ou gris fumé à micro-LED, de 8 à 30 sphères, suspension réglable jusqu’à 5 m.",
     art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-sus-002",
+    slug: "aigrette",
+    name: "Aigrette",
+    reference: "LUM-SUS-002",
+    shortDescription:
+      "Une boule de lumière rayonnante, hérissée de fines tiges perlées de cristal.",
+    description: [
+      "Aigrette emprunte sa silhouette à la fleur de pissenlit montée en graine : depuis un cœur de métal, des centaines de tiges fines rayonnent dans toutes les directions, chacune terminée par une petite ramure perlée de cristal. Allumée, la lumière des ampoules se démultiplie dans les cristaux et dessine un halo scintillant ; éteinte, elle reste une sculpture aérienne.",
+      "La version ronde, de Ø40 à Ø80 cm, s’installe au centre d’un salon, d’une chambre ou d’une entrée ; la version linéaire, de 72 ou 92 cm, accompagne une table de salle à manger ou un îlot. Finition dorée ou chromée, lumière blanc chaud, neutre ou froid, ou trois teintes commutables à l’interrupteur.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: AIGRETTE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-suspensions",
+    categorySlug: "suspensions",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Cristal", "Métal"],
+    finishes: ["Doré", "Chromé"],
+    specifications: [
+      {
+        label: "Sources lumineuses",
+        value: "Ampoules LED fournies, culot G9 — de 8 à 16 selon la version",
+      },
+      { label: "Tension d’entrée", value: "AC 90–260 V" },
+      { label: "Flux lumineux", value: "De 249 à 2 000 lm selon la version" },
+      {
+        label: "Formes",
+        value: "Ronde (Ø40, 50, 55, 60 ou 80 cm) ou linéaire (72 ou 92 cm, hauteur 40 cm)",
+      },
+      { label: "Suspension", value: "Câble réglable jusqu’à 1,5 m" },
+      { label: "Finitions", value: "Doré ou chromé" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud, blanc neutre, blanc froid, ou trois teintes commutables",
+      },
+      { label: "Surface conseillée", value: "10 à 15 m², selon le fabricant" },
+      { label: "Garantie fabricant", value: "3 ans" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les tiges se mettent en place à la main lors du montage.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "aigrette-1",
+        url: "/products/aigrette/ambiance-ronde.webp",
+        alt: "Suspension Aigrette ronde dorée, boule de tiges perlées de cristal allumée dans un salon aux murs gris",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+      {
+        id: "aigrette-2",
+        url: "/products/aigrette/ambiance-lineaire.webp",
+        alt: "Suspension Aigrette linéaire dorée au-dessus d’une table de salle à manger en bois",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: false,
+        position: 1,
+      },
+    ],
+    variants: AIGRETTE_VARIANTS,
+    optionLabels: { group: "Forme", variant: "Taille" },
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "dore", label: "Doré" },
+          { id: "chrome", label: "Chromé" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "neutre", label: "Blanc neutre" },
+          { id: "froid", label: "Blanc froid" },
+          { id: "commutable", label: "3 teintes commutables" },
+        ],
+      },
+    ],
+    seoTitle: "Aigrette — suspension boule de cristal façon pissenlit",
+    seoDescription:
+      "Suspension design en boule de tiges perlées de cristal, ronde de Ø40 à Ø80 cm ou linéaire. Finition dorée ou chromée, ampoules LED G9, lumière blanc chaud, neutre ou froid.",
+    art: "globes",
     isDemo: false,
   },
 ];

@@ -66,15 +66,10 @@ export function AddToCart({ product }: { product: Product }) {
                   onChange={() => setVariantId(v.id)}
                 >
                   {v.name}
-                  {v.priceAdjustment !== 0 && (
-                    <span className="ml-2 whitespace-nowrap opacity-70">
-                      {v.priceAdjustment > 0 ? "+" : "−"}
-                      {formatPrice(Math.abs(v.priceAdjustment))}
-                    </span>
-                  )}
                 </Chip>
               ))}
             </div>
+            {variant?.details && <p className="t-small mt-3 text-brun/65">{variant.details}</p>}
           </fieldset>
         )
       )}
@@ -236,15 +231,7 @@ function TwoLevelSelector({
               checked={v.id === current.id}
               onChange={() => onChange(v.id)}
             >
-              {/* Nom complet + séparateur : « 26 sphères · 870 € » (et non « 26 870 € »,
-                  qui se lirait comme un seul montant). */}
-              {v.name}
-              <span aria-hidden className="mx-1.5 opacity-40">
-                ·
-              </span>
-              <span className="whitespace-nowrap opacity-70">
-                {formatPrice(product.price + v.priceAdjustment)}
-              </span>
+              {v.name.replace(/\s*sphères?$/, "")}
             </Chip>
           ))}
         </div>
