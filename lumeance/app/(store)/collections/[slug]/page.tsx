@@ -11,12 +11,6 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export const revalidate = 300;
-
-export async function generateStaticParams() {
-  return (await getCategories()).map((c) => ({ slug: c.slug }));
-}
-
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategory(slug);

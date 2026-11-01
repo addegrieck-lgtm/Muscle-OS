@@ -25,6 +25,7 @@ npm run dev                  # http://localhost:3100  (intro : une fois par sess
 | `npm test` | Tests Vitest (prix, panier, statuts, CSV, imports, formulaires, SEO) |
 | `npm run test:db` | Migrations + tests RLS/règles métier sur un PostgreSQL 16 jetable |
 | `npm run build` | Build de production |
+| `npm run cf:build` / `cf:preview` / `cf:deploy` | Build, aperçu local et publication Cloudflare Workers (voir `docs/HEBERGEMENT.md`) |
 | `npm run admin:init -- email@domaine.fr` | Crée le premier super administrateur (clé service_role requise) |
 | `npm run brand -- <dossier .woff>` | Régénère logos SVG et tracés du lettrage |
 | `npm run brand:raster` | Régénère apple-icon, image Open Graph, icônes PNG |

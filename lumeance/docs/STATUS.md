@@ -40,7 +40,7 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 ## Phase 8 — Préparation commerciale ⬜
 - [ ] Vérifier la disponibilité du nom (INPI) et du domaine lumeance.fr — aucun achat effectué.
 - [ ] Créer le projet Supabase, appliquer les migrations, `npm run admin:init`.
-- [ ] Choisir l’hébergement ([HEBERGEMENT.md](HEBERGEMENT.md)).
+- [x] Hébergement : Cloudflare Workers via OpenNext, configuration prête ([HEBERGEMENT.md](HEBERGEMENT.md)) ; reste à créer le Worker et renseigner les variables.
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
 - [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).

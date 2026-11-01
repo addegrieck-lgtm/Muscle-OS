@@ -10,8 +10,6 @@ import { getCategories, getFeaturedProducts } from "@/lib/services/catalog";
 import { getHomeContent } from "@/lib/services/content";
 import { DEFAULT_DESCRIPTION, pageMetadata } from "@/lib/seo/metadata";
 
-export const revalidate = 300;
-
 export const metadata = pageMetadata({
   title: "LUMÉANCE — L’art de révéler la lumière",
   description: DEFAULT_DESCRIPTION,
