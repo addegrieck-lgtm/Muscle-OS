@@ -277,11 +277,12 @@ const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
 
 // ── Constellation (LUM-SUS-003) ──────────────────────────────────────────────
 // Fiche fournisseur relevée le 01/11/2026. Prix fournisseur identique quelles que soient la forme,
-// la taille et la finition (confirmé par le propriétaire) : 93,69 € (fixe) / 115,99 € (variable,
-// télécommande) en promotion jusqu'au 18/11/2026 ; prix habituels 111,93 € / 138,55 €.
-// Le prix de vente part du coût le plus élevé (version variable) au prix HORS promotion, pour que
-// la marge ne baisse pas à la fin de la promotion.
-const CONSTELLATION_COST = 13855;
+// la taille et la finition : 93,69 € (lumière fixe) / 115,99 € (variable, télécommande) en
+// promotion jusqu'au 18/11/2026 ; prix habituels 111,93 € / 138,55 €.
+// Prix de vente : salePrice() sur le prix fixe HORS promotion ; télécommande : +10 € (choix du
+// propriétaire).
+const CONSTELLATION_COST = 11193;
+const CONSTELLATION_REMOTE_EXTRA = 1000;
 // [code, forme, têtes, longueur (cm), puissance (W)]
 const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number][] = [
   ["a6", "Arc", 6, 75, 36],
@@ -289,27 +290,34 @@ const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number]
   ["d6", "Droite", 6, 75, 36],
   ["d8", "Droite", 8, 100, 48],
 ];
-const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.map(
-  ([code, shape, heads, length, watts]) => ({
-    id: `constellation-${code}`,
-    name: `${heads} têtes · ${length} cm`,
-    sku: `LUM-SUS-003-${code.toUpperCase()}`,
-    finish: shape,
-    priceAdjustment: 0,
-    stockQuantity: 0,
-    active: true,
-    details: `${heads} globes de verre Ø10 à Ø15 cm · ${watts} W · longueur ${length} cm · suspension réglable jusqu’à 120 cm`,
-    imageUrl: `/products/constellation/rendu-${code}-dore-chaud.webp`,
-    // Visualisations 3D : finition × couleur de lumière (les versions « variables » reprennent la teinte).
-    imageUrls: Object.fromEntries(
-      ["dore", "noir"].flatMap((f) =>
-        ["chaud", "froid"].flatMap((t) => [
-          [`${f}-${t}`, `/products/constellation/rendu-${code}-${f}-${t}.webp`],
-          [`${f}-${t}-variable`, `/products/constellation/rendu-${code}-${f}-${t}.webp`],
-        ]),
+const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.flatMap(
+  ([code, shape, heads, length, watts]) =>
+    [false, true].map((remote) => ({
+      id: `constellation-${code}${remote ? "-tc" : ""}`,
+      name: `${heads} têtes · ${length} cm${remote ? " · télécommande" : ""}`,
+      sku: `LUM-SUS-003-${code.toUpperCase()}${remote ? "-TC" : ""}`,
+      finish: shape,
+      priceAdjustment: remote ? CONSTELLATION_REMOTE_EXTRA : 0,
+      stockQuantity: 0,
+      active: true,
+      details: [
+        `${heads} globes de verre Ø10 à Ø15 cm`,
+        `${watts} W`,
+        `longueur ${length} cm`,
+        "suspension réglable jusqu’à 120 cm",
+        remote ? "intensité variable à la télécommande" : "allumage à l’interrupteur",
+      ].join(" · "),
+      imageUrl: `/products/constellation/rendu-${code}-dore-chaud.webp`,
+      // Visualisations 3D : finition × couleur de lumière.
+      imageUrls: Object.fromEntries(
+        ["dore", "noir"].flatMap((f) =>
+          ["chaud", "froid"].map((t) => [
+            `${f}-${t}`,
+            `/products/constellation/rendu-${code}-${f}-${t}.webp`,
+          ]),
+        ),
       ),
-    ),
-  }),
+    })),
 );
 
 export const CATALOG_PRODUCTS: Product[] = [
@@ -821,7 +829,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Une fine branche de métal portant des globes de verre où scintille un ciel de micro-lumières.",
     description: [
       "Constellation pose sur une fine branche de métal une suite de globes de verre clair, de trois diamètres, placés au-dessus, au-dessous ou au fil de la ligne. Dans chacun, un fil de cuivre semé de micro-LED dessine un ciel étoilé ; au centre, une perle dorée marque l’axe de la composition.",
-      "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, fixe ou variable à la télécommande.",
+      "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, et une version à intensité variable, réglable à la télécommande.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
     price: salePrice(CONSTELLATION_COST),
@@ -848,7 +856,11 @@ export const CATALOG_PRODUCTS: Product[] = [
       { label: "Finitions", value: "Doré ou noir (perle centrale dorée)" },
       {
         label: "Couleur de lumière",
-        value: "Blanc chaud ou blanc froid ; fixe, ou intensité variable à la télécommande",
+        value: "Blanc chaud ou blanc froid",
+      },
+      {
+        label: "Commande",
+        value: "Interrupteur ; ou télécommande, intensité variable (versions « télécommande »)",
       },
       { label: "Matières", value: "Fer, verre" },
       { label: "Surface conseillée", value: "10 à 30 m², selon le fabricant" },
@@ -866,6 +878,14 @@ export const CATALOG_PRODUCTS: Product[] = [
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: true,
         position: 0,
+      },
+      {
+        id: "constellation-2",
+        url: "/products/constellation/ambiance-arc-noir.webp",
+        alt: "Suspension Constellation noire en arc, perle centrale dorée, huit globes de verre étoilés allumés devant un mur bleu nuit, bouquet de roses sur la table",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: false,
+        position: 1,
       },
     ],
     variants: CONSTELLATION_VARIANTS,
@@ -885,14 +905,12 @@ export const CATALOG_PRODUCTS: Product[] = [
         values: [
           { id: "chaud", label: "Blanc chaud" },
           { id: "froid", label: "Blanc froid" },
-          { id: "chaud-variable", label: "Blanc chaud, variable (télécommande)" },
-          { id: "froid-variable", label: "Blanc froid, variable (télécommande)" },
         ],
       },
     ],
     seoTitle: "Constellation — suspension globes de verre étoilés, dorée ou noire",
     seoDescription:
-      "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, variable à la télécommande.",
+      "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, version variable à la télécommande.",
     art: "globes",
     isDemo: false,
   },

@@ -63,11 +63,12 @@ pièce suit ce modèle, sauf demande contraire.
 - **Sélecteur à deux niveaux** : `optionLabels: { group: "Forme", variant: "Taille" }`. Les boutons
   de version **n'affichent pas de prix** ; le prix TTC de la version choisie s'affiche au-dessus.
 - **Options sans incidence sur le prix** (`options`) : finition (ex. Doré / Chromé / Noir), couleur
-  de lumière (ex. Blanc chaud / froid). Une version **variable / télécommande** est une valeur de
-  l'option lumière (« Blanc chaud, variable (télécommande) »), pas une version à part : le prix de
-  la pièce part alors du coût le plus élevé (comme Sylve et Constellation). Clé des visuels dans
-  `imageUrls` : valeurs des options dans l'ordre, ex. `dore-chaud`, `noir-froid-variable` (une
-  valeur « variable » réutilise le rendu de sa teinte).
+  de lumière (ex. Blanc chaud / froid). Clé des visuels dans `imageUrls` : valeurs des options dans
+  l'ordre, ex. `dore-chaud`.
+- **Télécommande / lumière variable** : règle du propriétaire (Constellation) : **+10 € sur le prix
+  de vente**, en version à part (« 6 têtes · 75 cm · télécommande », SKU suffixé `-TC`), puisqu'une
+  option ne peut pas changer le prix. Prix de base calculé sur la version fixe. (Sylve, plus
+  ancienne, la traite encore en option au prix le plus élevé.)
 - **Prix** : `salePrice(prix d'achat)` (×1,8 sous 500 €, ×1,5 au-delà, arrondi à la dizaine
   supérieure) ; prix de base = version la moins chère, chaque version porte son écart. Noter dans un
   commentaire la date du relevé fournisseur et toute promotion temporaire. **Calculer sur le prix

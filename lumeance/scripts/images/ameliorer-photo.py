@@ -53,15 +53,20 @@ def upscale(weights, img, scale=2, tile=256, pad=12):
     sd = sd.get("params_ema", sd.get("params", sd))
     m = RRDBNet(scale=scale); m.load_state_dict(sd, strict=True); m.eval()
     x = torch.from_numpy(np.asarray(img).astype(np.float32) / 255.0).permute(2, 0, 1)[None]
+    h0, w0 = x.shape[2], x.shape[3]
+    # Dimensions paires exigées par le modèle ×2 (pixel_unshuffle) : bordure miroir retirée après.
+    x = F.pad(x, (0, w0 % 2, 0, h0 % 2), mode="reflect")
     _, _, h, w = x.shape; out = torch.zeros(1, 3, h * scale, w * scale)
     with torch.no_grad():
         for y0 in range(0, h, tile):
             for x0 in range(0, w, tile):
                 ya, yb = max(0, y0 - pad), min(h, y0 + tile + pad); xa, xb = max(0, x0 - pad), min(w, x0 + tile + pad)
+                ya -= (yb - ya) % 2; xa -= (xb - xa) % 2  # tuiles de taille paire
                 o = m(x[:, :, ya:yb, xa:xb])
                 ty, tx = (y0 - ya) * scale, (x0 - xa) * scale
                 th, tw = (min(h, y0 + tile) - y0) * scale, (min(w, x0 + tile) - x0) * scale
                 out[:, :, y0 * scale:y0 * scale + th, x0 * scale:x0 * scale + tw] = o[:, :, ty:ty + th, tx:tx + tw]
+    out = out[:, :, : h0 * scale, : w0 * scale]
     return Image.fromarray((out[0].clamp(0, 1).permute(1, 2, 0).numpy() * 255).round().astype(np.uint8))
 
 def crop_4_5(img):
