@@ -13,7 +13,9 @@ export function createSupabasePublicClient() {
   );
 }
 
+/** URL publique d'une image : chemin du site (« /products/… ») tel quel, sinon fichier du bucket. */
 export function storagePublicUrl(path: string): string {
+  if (path.startsWith("/")) return path;
   return `${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/${path
     .split("/")
     .map(encodeURIComponent)

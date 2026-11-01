@@ -63,7 +63,12 @@ export function Signature({ products }: { products: Product[] }) {
                     </p>
                   )}
                   <div data-reveal className="mt-10 flex items-center gap-8">
-                    <span className="font-serif text-2xl">{formatPrice(p.price)}</span>
+                    <span className="font-serif text-2xl">
+                      {p.variants.some((v) => v.active && v.priceAdjustment > 0) && (
+                        <span className="mr-1 text-base text-brun/50">dès</span>
+                      )}
+                      {formatPrice(p.price)}
+                    </span>
                     <Link
                       href={`/produit/${p.slug}`}
                       className="t-eyebrow group inline-flex items-center gap-3 text-brun"

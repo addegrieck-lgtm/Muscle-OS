@@ -16,11 +16,13 @@ export function pageMetadata(opts: {
   path: string;
   image?: string;
   noindex?: boolean;
+  /** Titre complet, sans le suffixe « · LUMÉANCE » du gabarit. */
+  absoluteTitle?: boolean;
 }): Metadata {
   const url = absoluteUrl(opts.path);
   const image = opts.image ?? absoluteUrl("/og-default.png");
   return {
-    title: opts.title,
+    title: opts.absoluteTitle ? { absolute: opts.title } : opts.title,
     description: opts.description,
     alternates: { canonical: url },
     robots:

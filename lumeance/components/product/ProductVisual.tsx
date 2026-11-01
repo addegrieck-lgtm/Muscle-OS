@@ -28,6 +28,7 @@ export function ProductVisual({
           fill
           sizes={sizes}
           priority={priority}
+          unoptimized={img.url.startsWith("/")}
           className="object-cover"
         />
       ) : (

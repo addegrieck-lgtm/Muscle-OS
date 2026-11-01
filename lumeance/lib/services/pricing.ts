@@ -4,6 +4,7 @@ import type { CartLineInput } from "@/lib/validation/schemas";
 export interface PricedLine {
   productId: string;
   variantId: string | null;
+  options: Record<string, string> | null;
   slug: string;
   name: string;
   reference: string;
@@ -30,6 +31,15 @@ export interface CartQuote {
  * Recalcule le panier À PARTIR DU CATALOGUE SERVEUR : les prix envoyés par le navigateur ne sont
  * jamais utilisés. Fonction pure, testée.
  */
+/** Identifiant d'une ligne de panier : produit + version + options (triées). */
+export function lineKey(l: Pick<CartLineInput, "productId" | "variantId" | "options">): string {
+  const opts = Object.entries(l.options ?? {})
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join("&");
+  return `${l.productId}::${l.variantId ?? ""}::${opts}`;
+}
+
 export function priceCart(
   input: CartLineInput[],
   catalog: Product[],
@@ -38,7 +48,7 @@ export function priceCart(
   const byId = new Map(catalog.map((p) => [p.id, p]));
   const merged = new Map<string, CartLineInput>();
   for (const l of input) {
-    const key = `${l.productId}::${l.variantId ?? ""}`;
+    const key = lineKey(l);
     const prev = merged.get(key);
     merged.set(key, { ...l, quantity: Math.min(10, (prev?.quantity ?? 0) + l.quantity) });
   }
@@ -63,6 +73,19 @@ export function priceCart(
       removed.push({ productId: l.productId, reason: "Veuillez choisir une finition." });
       continue;
     }
+    // Options sans incidence sur le prix : chaque option du produit doit avoir une valeur connue.
+    const given = l.options ?? {};
+    const optionDefs = p.options ?? [];
+    const unknownKey = Object.keys(given).some((k) => !optionDefs.some((o) => o.id === k));
+    const missing = optionDefs.find((o) => !o.values.some((v) => v.id === given[o.id]));
+    if (unknownKey || missing) {
+      removed.push({
+        productId: l.productId,
+        reason: missing ? `Veuillez choisir : ${missing.label.toLowerCase()}.` : "Option invalide.",
+      });
+      continue;
+    }
+    const optionLabels = optionDefs.map((o) => o.values.find((v) => v.id === given[o.id])!.label);
     const unitPrice = p.price + (variant?.priceAdjustment ?? 0);
     if (unitPrice < 0) {
       removed.push({ productId: l.productId, reason: "Prix invalide." });
@@ -71,10 +94,23 @@ export function priceCart(
     lines.push({
       productId: p.id,
       variantId: variant?.id ?? null,
+      options: optionDefs.length
+        ? Object.fromEntries(optionDefs.map((o) => [o.id, given[o.id]!]))
+        : null,
       slug: p.slug,
       name: p.name,
       reference: variant?.sku ?? p.reference,
-      variantName: variant?.name ?? null,
+      variantName:
+        [
+          variant
+            ? variant.finish && variant.finish !== variant.name
+              ? `${variant.name} — ${variant.finish}`
+              : variant.name
+            : null,
+          ...optionLabels,
+        ]
+          .filter(Boolean)
+          .join(" · ") || null,
       unitPrice,
       quantity: l.quantity,
       total: unitPrice * l.quantity,

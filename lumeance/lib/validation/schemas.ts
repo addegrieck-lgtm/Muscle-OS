@@ -19,6 +19,11 @@ export const cartLineSchema = z.object({
   productId: z.string().min(1).max(64),
   variantId: z.string().min(1).max(64).nullable(),
   quantity: z.number().int().min(1).max(10),
+  /** Options sans incidence sur le prix, ex. { lumiere: "chaud" }. Validées côté serveur. */
+  options: z
+    .record(z.string().regex(/^[a-z0-9-]{1,30}$/), z.string().regex(/^[a-z0-9-]{1,30}$/))
+    .refine((o) => Object.keys(o).length <= 5)
+    .optional(),
 });
 export const cartSchema = z.array(cartLineSchema).max(30);
 export type CartLineInput = z.infer<typeof cartLineSchema>;
@@ -101,6 +106,7 @@ export const variantSchema = z.object({
   name: z.string().trim().min(1).max(80),
   sku: z.string().trim().min(1).max(60),
   finish: optionalText(60),
+  details: optionalText(300),
   price_adjustment: z.number().int().min(-100_000_000).max(100_000_000),
   stock_quantity: z.number().int().min(0).max(100000),
   active: z.boolean(),

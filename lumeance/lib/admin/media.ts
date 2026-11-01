@@ -24,15 +24,13 @@ export async function uploadImage(
     console.error("[media] upload:", error.message);
     return { error: "Échec de l’envoi du fichier." };
   }
-  const { error: dbErr } = await supabase
-    .from("media_assets")
-    .insert({
-      storage_path: path,
-      alt_text: alt.slice(0, 250),
-      folder,
-      mime_type: check.type,
-      size_bytes: file.size,
-    });
+  const { error: dbErr } = await supabase.from("media_assets").insert({
+    storage_path: path,
+    alt_text: alt.slice(0, 250),
+    folder,
+    mime_type: check.type,
+    size_bytes: file.size,
+  });
   if (dbErr) {
     await supabase.storage.from("media").remove([path]);
     console.error("[media] insert:", dbErr.message);

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { lineKey } from "@/lib/services/pricing";
 import type { CartLineInput } from "@/lib/validation/schemas";
 
 const KEY = "lumeance.cart.v1";
@@ -11,16 +12,16 @@ interface CartState {
   ready: boolean;
   count: number;
   add: (line: CartLineInput) => void;
-  setQuantity: (productId: string, variantId: string | null, quantity: number) => void;
-  remove: (productId: string, variantId: string | null) => void;
+  setQuantity: (line: LineRef, quantity: number) => void;
+  remove: (line: LineRef) => void;
   clear: () => void;
   lastAdded: number;
 }
 
 const CartContext = createContext<CartState | null>(null);
 
-const same = (l: CartLineInput, productId: string, variantId: string | null) =>
-  l.productId === productId && l.variantId === variantId;
+type LineRef = Pick<CartLineInput, "productId" | "variantId" | "options">;
+const same = (a: LineRef, b: LineRef) => lineKey(a) === lineKey(b);
 
 /** Le panier ne stocke que des identifiants et des quantités : les prix sont toujours
  * recalculés par le serveur (app/actions/cart.ts). */
@@ -51,33 +52,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((line: CartLineInput) => {
     setLines((prev) => {
-      const existing = prev.find((l) => same(l, line.productId, line.variantId));
+      const existing = prev.find((l) => same(l, line));
       if (existing)
         return prev.map((l) =>
-          same(l, line.productId, line.variantId)
-            ? { ...l, quantity: Math.min(10, l.quantity + line.quantity) }
-            : l,
+          same(l, line) ? { ...l, quantity: Math.min(10, l.quantity + line.quantity) } : l,
         );
       return [...prev, line].slice(0, 30);
     });
     setLastAdded(Date.now());
   }, []);
 
-  const setQuantity = useCallback(
-    (productId: string, variantId: string | null, quantity: number) => {
-      setLines((prev) =>
-        prev.map((l) =>
-          same(l, productId, variantId)
-            ? { ...l, quantity: Math.max(1, Math.min(10, quantity)) }
-            : l,
-        ),
-      );
-    },
-    [],
-  );
+  const setQuantity = useCallback((line: LineRef, quantity: number) => {
+    setLines((prev) =>
+      prev.map((l) =>
+        same(l, line) ? { ...l, quantity: Math.max(1, Math.min(10, quantity)) } : l,
+      ),
+    );
+  }, []);
 
-  const remove = useCallback((productId: string, variantId: string | null) => {
-    setLines((prev) => prev.filter((l) => !same(l, productId, variantId)));
+  const remove = useCallback((line: LineRef) => {
+    setLines((prev) => prev.filter((l) => !same(l, line)));
   }, []);
 
   const clear = useCallback(() => setLines([]), []);

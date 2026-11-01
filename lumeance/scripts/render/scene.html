@@ -1,0 +1,205 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#191817}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Visualisation 3D d'une version de Céleste : pavillon (rond/carré/rectangulaire), sphères de verre
+// cristal éclairées par une source LED, câbles de hauteurs différentes, intérieur chaleureux.
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+
+const q = new URLSearchParams(location.search);
+const shape = q.get("shape") || "round";            // round | square | rect
+const n = Number(q.get("n") || 14);
+const W = Number(q.get("w") || 40) / 100;            // m
+const D = Number(q.get("d") || W * 100) / 100;       // m
+const H = Number(q.get("h") || 3);                   // longueur de suspension max (m)
+const seed = Number(q.get("seed") || 7);
+const TEMP = q.get("temp") || "chaud";
+// Style « nebuleuse » : verre teinté (cognac | fume) rempli de micro-LED, pavillon dore | argente | noir.
+const STYLE = q.get("style") || "celeste";
+const NEB = STYLE === "nebuleuse";
+const GLASS = q.get("verre") || "cognac";
+const CANOPY = q.get("pavillon") || "argente"; // chaud | neutre | froid
+// Teintes approximatives : blanc chaud ~2700-3000 K, neutre ~4000 K, froid ~6000 K.
+const LIGHT = { chaud: 0xffb865, neutre: 0xffe6c8, froid: 0xdce8ff }[TEMP];
+const LIGHT_CORE = { chaud: 0xfff8ec, neutre: 0xfffcf6, froid: 0xf4f8ff }[TEMP];
+const LIGHT_RIM = { chaud: "1.,.88,.7", neutre: "1.,.96,.9", froid: ".9,.95,1." }[TEMP];
+const SCALE = 2; // rendu en double résolution puis réduit (anticrénelage)
+const WIDTH = 1200, HEIGHT = 1500;
+
+let s = seed >>> 0;
+const rand = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(WIDTH, HEIGHT);
+renderer.setPixelRatio(SCALE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.12;
+
+// ── Architecture : grand volume en pénombre, murs enduit chaud, parquet sombre ──
+const ceilingY = 0;
+const floorY = -(H + 1.4);
+const roomW = Math.max(3.5, H * 1.2 + W * 1.5);
+const wallTex = (() => { // enduit : léger bruit pour éviter un aplat
+  const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d");
+  x.fillStyle = "#8a7766"; x.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 9000; i++) { const v = 120 + rand() * 40; x.fillStyle = `rgba(${v},${v * 0.86},${v * 0.72},0.06)`; x.fillRect(rand() * 256, rand() * 256, 2, 2); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 4); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x9a8676, map: wallTex, roughness: 0.95 });
+const back = new THREE.Mesh(new THREE.PlaneGeometry(roomW * 3, H + 6), wallMat);
+back.position.set(0, (ceilingY + floorY) / 2, -roomW * 0.5); scene.add(back);
+const left = new THREE.Mesh(new THREE.PlaneGeometry(roomW * 3, H + 6), wallMat.clone());
+left.material.color.set(0x7c6b5d); left.rotation.y = Math.PI / 2; left.position.set(-roomW * 0.75, (ceilingY + floorY) / 2, 0); scene.add(left);
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(roomW * 4, roomW * 4), new THREE.MeshStandardMaterial({ color: 0xb8a796, roughness: 1 }));
+ceiling.rotation.x = Math.PI / 2; ceiling.position.y = ceilingY + 0.001; scene.add(ceiling);
+// Rainures verticales en bois (claustra) sur le mur du fond, à gauche.
+const wood = new THREE.MeshStandardMaterial({ color: 0x5a4130, roughness: 0.7 });
+for (let i = 0; i < 18; i++) { const slat = new THREE.Mesh(new THREE.BoxGeometry(0.035, H + 6, 0.04), wood); slat.position.set(-roomW * 0.7 + i * 0.075, (ceilingY + floorY) / 2, -roomW * 0.5 + 0.03); scene.add(slat); }
+// Main courante laiton (palier) et garde-corps verre en arrière-plan.
+const brass = new THREE.MeshStandardMaterial({ color: 0xb08d57, metalness: 1, roughness: 0.25 });
+const railY = ceilingY - H * 0.62;
+const hand = new THREE.Mesh(new THREE.BoxGeometry(roomW * 2.2, 0.045, 0.05), brass);
+hand.position.set(0, railY, -roomW * 0.5 + 0.9); scene.add(hand);
+const glassRail = new THREE.Mesh(new THREE.PlaneGeometry(roomW * 2.2, 1.0), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, roughness: 0.05, metalness: 0.2 }));
+glassRail.position.set(0, railY - 0.5, -roomW * 0.5 + 0.9); scene.add(glassRail);
+const slab = new THREE.Mesh(new THREE.BoxGeometry(roomW * 2.2, 0.25, 0.9), new THREE.MeshStandardMaterial({ color: 0xcdbfb0, roughness: 0.9 }));
+slab.position.set(0, railY - 1.12, -roomW * 0.5 + 0.45); slab.material.color.set(0x6e5d4f); scene.add(slab);
+
+// ── Lumières : soirée, la lumière vient surtout du luminaire ──
+scene.add(new THREE.HemisphereLight({ chaud: 0xffe7c8, neutre: 0xfff1e4, froid: 0xeef3ff }[TEMP], 0x2a221d, 0.18));
+const key = new THREE.SpotLight({ chaud: 0xffd29a, neutre: 0xffeedd, froid: 0xe8f0ff }[TEMP], 6, 0, Math.PI / 5, 0.8, 1.2); key.position.set(0, ceilingY - 0.05, 0.4); key.target.position.set(0, floorY, -1); scene.add(key, key.target);
+
+// ── Pavillon ──
+const chrome = new THREE.MeshStandardMaterial({ color: 0xdedede, metalness: 1, roughness: 0.12 });
+if (NEB) Object.assign(chrome, { dore: { color: new THREE.Color(0xe0b86e), roughness: 0.35, envMapIntensity: 3 }, argente: { color: new THREE.Color(0xe8e8e8), roughness: 0.3, envMapIntensity: 3 }, noir: { color: new THREE.Color(0x1d1c1b), metalness: 0.5, roughness: 0.4 } }[CANOPY]);
+if (shape === "rect") { chrome.roughness = 0.3; chrome.color.set(0x8c8c8c); } // évite le reflet blanc de face sur la barre
+const canopyT = 0.05;
+let canopy;
+if (shape === "round") canopy = new THREE.Mesh(new THREE.CylinderGeometry(W / 2, W / 2, canopyT, 96), chrome);
+else canopy = new THREE.Mesh(new THREE.BoxGeometry(W, canopyT, D), chrome);
+canopy.position.y = ceilingY - canopyT / 2; scene.add(canopy);
+
+// ── Positions des sphères dans l'empreinte du pavillon ──
+const margin = 0.04;
+const pts = [];
+const minDist = NEB ? 0.11 : Math.max(0.035, Math.sqrt((W * D) / Math.max(n, 1)) * 0.55);
+let guard = 0;
+// Barre étroite (rectangle 5 et 7 sphères) : sphères alignées, régulièrement espacées (schéma fabricant).
+const isBar = shape === "rect" && D <= 0.1;
+if (isBar) for (let i = 0; i < n; i++) pts.push({ x: -W / 2 + margin + (i * (W - 2 * margin)) / Math.max(n - 1, 1), z: 0 });
+while (!isBar && pts.length < n && guard++ < 20000) {
+  let x, z;
+  if (shape === "round") { const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * (W / 2 - margin); x = Math.cos(a) * r; z = Math.sin(a) * r; }
+  else { x = (rand() - 0.5) * (W - 2 * margin); z = (rand() - 0.5) * Math.max(D - 2 * margin, 0.001); }
+  if (pts.every((p) => Math.hypot(p.x - x, p.z - z) > minDist * (guard > 15000 ? 0.4 : 1))) pts.push({ x, z });
+}
+// Hauteurs : spirale descendante (rond) ou répartition aléatoire (autres), de 0,35 m à H.
+const order = pts.map((p, i) => ({ ...p, a: Math.atan2(p.z, p.x), i }));
+if (NEB) order.sort(() => rand() - 0.5);
+else if (shape === "round") order.sort((a, b) => a.a - b.a);
+else if (isBar) order.sort((a, b) => a.x - b.x);
+else order.sort(() => rand() - 0.5);
+// Sphères ≈ 15 cm ; réduites sur la barre étroite pour rester espacées (proportions du schéma fabricant).
+const R = NEB ? 0.1 : isBar ? Math.min(0.075, ((W - 0.08) / Math.max(n - 1, 1)) * 0.36) : 0.075;
+// Verre clair : quasi transparent (non éclairé de l'intérieur), lisible par son contour et ses reflets.
+const glass = new THREE.MeshBasicMaterial({ color: 0xffe6c4, transparent: true, opacity: 0.07, depthWrite: false });
+const glint = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+const rimMat = new THREE.ShaderMaterial({ // liseré de Fresnel : contour lumineux du verre
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  vertexShader: "varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }",
+  fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.-abs(dot(vN,vV)), 3.2); gl_FragColor = vec4(vec3(" + LIGHT_RIM + ")*f*1.25, f); }",
+});
+const frost = new THREE.MeshStandardMaterial({ color: 0xfff1d8, emissive: LIGHT, emissiveIntensity: 1.1, roughness: 0.6 });
+const core = new THREE.MeshBasicMaterial({ color: LIGHT_CORE });
+const wireMat = new THREE.LineBasicMaterial({ color: 0xe8e0d4, transparent: true, opacity: 0.45 });
+const sphereGeo = new THREE.SphereGeometry(R, 48, 32);
+// Bulles prises dans le verre (aspect « verre cristal »)
+const bubbleGeo = new THREE.SphereGeometry(0.003, 6, 4);
+const bubbleMat = new THREE.MeshBasicMaterial({ color: 0xfff3e0, transparent: true, opacity: 0.8 });
+// Matériaux Nébuleuse
+const nebGlass = new THREE.MeshBasicMaterial({ color: { cognac: 0xd79a52, fume: 0x8d8780 }[GLASS], transparent: true, opacity: GLASS === "cognac" ? 0.5 : 0.42, depthWrite: false });
+const sparkGeo = new THREE.SphereGeometry(0.0022, 6, 4);
+const sparkMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(LIGHT).lerp(new THREE.Color(0xffffff), 0.35).multiplyScalar(1.6) });
+const sparkHot = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffffff).multiplyScalar(2.2) });
+let maxDrop = 0;
+order.forEach((p, k) => {
+  const t = order.length > 1 ? k / (order.length - 1) : 0;
+  // Rond / carré : cascade sur toute la hauteur. Rectangle : sphères groupées dans une bande
+  // (zigzag régulier pour la barre), comme sur les schémas du fabricant.
+  const drop = shape === "rect"
+    ? isBar
+      ? H * (0.42 + (k % 2 ? 0.14 : 0) + (k % 3 === 2 ? 0.07 : 0)) + (rand() - 0.5) * 0.05
+      : H * (0.32 + rand() * 0.34)
+    : 0.35 + t * (H - 0.45) + (rand() - 0.5) * 0.12;
+  maxDrop = Math.max(maxDrop, drop);
+  const y = ceilingY - canopyT - drop;
+  const g = new THREE.Group(); g.position.set(p.x, y, p.z);
+  if (NEB) {
+    // Verre teinté légèrement lumineux + nuage de micro-LED (guirlande « fil de fée ») + capuchon métal.
+    g.add(new THREE.Mesh(sphereGeo, nebGlass));
+    g.add(new THREE.Mesh(sphereGeo, rimMat));
+    for (let b = 0; b < 110; b++) {
+      const m = new THREE.Mesh(sparkGeo, rand() < 0.35 ? sparkHot : sparkMat);
+      m.position.copy(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().multiplyScalar(R * Math.cbrt(rand()) * 0.85));
+      m.scale.setScalar(0.6 + rand() * 0.9); g.add(m);
+    }
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.16, R * 0.2, R * 0.16, 20), chrome); cap.position.y = R * 0.98; g.add(cap);
+    const hl2 = new THREE.Mesh(new THREE.SphereGeometry(R * 0.1, 12, 8), glint); hl2.scale.set(1.6, 0.7, 0.4);
+    hl2.position.set(-R * 0.45, R * 0.55, R * 0.62); hl2.rotation.z = 0.6; g.add(hl2);
+    const pl = new THREE.PointLight(LIGHT, Math.min(0.9, 9 / n), 3.5, 1.6); g.add(pl);
+    scene.add(g);
+    const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, ceilingY - canopyT, p.z), new THREE.Vector3(p.x, y + R * 1.06, p.z)]);
+    scene.add(new THREE.Line(geo, wireMat));
+    return;
+  }
+  const shell = new THREE.Mesh(sphereGeo, glass); g.add(shell);
+  g.add(new THREE.Mesh(sphereGeo, rimMat));
+  const hl = new THREE.Mesh(new THREE.SphereGeometry(R * 0.11, 12, 8), glint); hl.scale.set(1.6, 0.7, 0.4);
+  hl.position.set(-R * 0.45, R * 0.55, R * 0.62); hl.rotation.z = 0.6; g.add(hl);
+  const holder = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.26, R * 0.34, R * 0.8, 10), frost); holder.position.y = -R * 0.1; g.add(holder);
+  const led = new THREE.Mesh(new THREE.SphereGeometry(R * 0.14, 16, 12), core); led.position.y = -R * 0.35; g.add(led);
+  for (let b = 0; b < 26; b++) { const m = new THREE.Mesh(bubbleGeo, bubbleMat); const v = new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().multiplyScalar(R * (0.55 + rand() * 0.4)); m.position.copy(v); g.add(m); }
+  const pl = new THREE.PointLight(LIGHT, Math.min(0.9, 9 / n), 3.5, 1.6); pl.position.y = -R * 0.3; g.add(pl);
+  scene.add(g);
+  const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, ceilingY - canopyT, p.z), new THREE.Vector3(p.x, y + R, p.z)]);
+  scene.add(new THREE.Line(geo, wireMat));
+});
+
+// ── Caméra : contre-plongée légère, cadrage de toute la composition ──
+const camera = new THREE.PerspectiveCamera(34, WIDTH / HEIGHT, 0.05, 100);
+// Rond / carré : toute la cascade. Rectangle : cadrage serré sur le luminaire, presque de face.
+const rectFrame = shape === "rect";
+const visibleH = rectFrame ? maxDrop + R + 0.15 : H + 0.2;
+const midY = ceilingY - visibleH / 2;
+const span = rectFrame ? Math.max(visibleH + 0.35, (W + 0.4) * (HEIGHT / WIDTH)) : H + 0.55;
+const dist = span / (2 * Math.tan(THREE.MathUtils.degToRad(34 / 2))) * 1.02;
+camera.position.set(dist * (rectFrame ? 0.16 : 0.35), midY - span * (rectFrame ? 0.06 : 0.12), dist * (rectFrame ? 0.99 : 0.94));
+camera.lookAt(0, midY + 0.05, 0);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.45, 0.35, 0.86));
+composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, seed: { value: seed * 0.37 } },
+  vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+  fragmentShader: "uniform sampler2D tDiffuse; uniform float seed; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + seed)*43758.5453); } void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = distance(vUv, vec2(.5,.45)); c.rgb *= mix(1., .7, smoothstep(.38,.9,d)); c.rgb += (h(vUv*1400.)-.5)*.016; gl_FragColor = c; }",
+}));
+composer.render();
+window.__done = true;
+</script></body></html>

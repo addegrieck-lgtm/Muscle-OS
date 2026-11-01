@@ -1,5 +1,5 @@
-// Adaptateur Cloudflare. Pas de cache de pages persistant : les pages de la boutique sont
-// rendues à chaque requête (voir app/(store)/layout.tsx), aucun stockage R2 n'est nécessaire.
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-export default defineCloudflareConfig({});
+// Configuration minimale : pas de cache incrémental distant (R2/KV) pour démarrer gratuitement.
+// Les pages ISR sont régénérées à la demande. À enrichir (R2) si le trafic l'exige.
+export default defineCloudflareConfig();

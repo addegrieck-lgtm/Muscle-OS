@@ -39,14 +39,34 @@ export function productJsonLd(p: Product) {
     brand: { "@type": "Brand", name: SITE_NAME },
     image: p.images.map((i) => i.url),
     material: p.materials.join(", ") || undefined,
-    offers: {
-      "@type": "Offer",
-      url: absoluteUrl(`/produit/${p.slug}`),
-      priceCurrency: "EUR",
-      price: (p.price / 100).toFixed(2),
-      availability:
-        p.stockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    },
+    offers: (() => {
+      const prices = [
+        p.price,
+        ...p.variants.filter((v) => v.active).map((v) => p.price + v.priceAdjustment),
+      ];
+      const inStock =
+        p.stockQuantity > 0 || p.variants.some((v) => v.active && v.stockQuantity > 0);
+      const availability = inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
+      const low = Math.min(...prices);
+      const high = Math.max(...prices);
+      return low === high
+        ? {
+            "@type": "Offer",
+            url: absoluteUrl(`/produit/${p.slug}`),
+            priceCurrency: "EUR",
+            price: (low / 100).toFixed(2),
+            availability,
+          }
+        : {
+            "@type": "AggregateOffer",
+            url: absoluteUrl(`/produit/${p.slug}`),
+            priceCurrency: "EUR",
+            lowPrice: (low / 100).toFixed(2),
+            highPrice: (high / 100).toFixed(2),
+            offerCount: prices.length - 1,
+            availability,
+          };
+    })(),
   };
 }
 

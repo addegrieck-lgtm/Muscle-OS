@@ -1,15 +1,19 @@
-// LUMÉANCE sur Cloudflare Workers (adaptateur OpenNext : rendu serveur, actions, middleware, API).
-// Workers Builds : dossier racine « lumeance », build « npx opennextjs-cloudflare build »,
-// déploiement « npx opennextjs-cloudflare deploy ». Variables : voir docs/HEBERGEMENT.md.
+// LUMÉANCE sur Cloudflare Workers (adaptateur OpenNext pour Next.js).
+// Cloudflare Workers Builds : répertoire racine « lumeance », commande de build
+// « npx opennextjs-cloudflare build », commande de déploiement « npx opennextjs-cloudflare deploy ».
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "lumeance",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "lumeance" }],
-  // Optimisation des images (next/image) par Cloudflare Images.
-  "images": { "binding": "IMAGES" },
+  // Conserve les variables saisies dans le tableau de bord Cloudflare (sinon chaque déploiement
+  // les efface, puisqu'elles ne figurent pas dans ce fichier).
+  "keep_vars": true,
   "observability": { "enabled": true }
 }
