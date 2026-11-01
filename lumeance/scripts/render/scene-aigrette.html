@@ -14,6 +14,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { buildAigrette } from "/scripts/render/aigrette-model.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 
 const t0 = performance.now();
@@ -64,115 +65,9 @@ side.rotation.y = Math.PI / 2; side.position.set(-2.6, -3, 0); scene.add(side);
 scene.add(new THREE.HemisphereLight({ chaud: 0xffe6c6, neutre: 0xfff6ea, froid: 0xeef2ff }[TEMP], 0x2a2420, 0.25));
 const keyL = new THREE.DirectionalLight({ chaud: 0xffe2c0, neutre: 0xfff6ec, froid: 0xf2f5ff }[TEMP], 0.55); keyL.position.set(2, -1, 3); scene.add(keyL);
 
-// ── Luminaire ──
-const metal = new THREE.MeshStandardMaterial(METAL);
-const cableMat = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.8, roughness: 0.3 });
-const crystalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.02, transparent: true, opacity: 0.72, envMapIntensity: 3.2, emissive: GLOW, emissiveIntensity: 0.035, clearcoat: 1, side: THREE.DoubleSide });
-const bulbMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: GLOW, emissiveIntensity: Math.min(1, 9 / BULBS), roughness: 0.4 });
-const Y0 = form === "round" ? -0.55 - W / 2 : -0.7; // centre du luminaire sous le plafond
-const group = new THREE.Group(); scene.add(group);
-
-// Tiges et cristaux en instances (des milliers d'éléments).
-const rods = [], gems = [];
+// ── Luminaire (modèle partagé : aigrette-model.js) ──
+const { Y0 } = buildAigrette({ THREE, scene, rand, form, W, BULBS, METAL, LIGHT, GLOW, barY: -0.7 });
 const UP = new THREE.Vector3(0, 1, 0);
-function rodTo(a, b, r) { rods.push([a.clone(), b.clone(), r]); }
-function rod(a, b, r, mat) {
-  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), mat);
-  m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(UP, d.normalize()); group.add(m); return m;
-}
-const randDir = () => { const u = rand() * 2 - 1, a = rand() * Math.PI * 2, r = Math.sqrt(1 - u * u); return new THREE.Vector3(r * Math.cos(a), u, r * Math.sin(a)); };
-// Ramure terminale : 3 à 4 brindilles courtes, chacune avec 1 à 2 perles de cristal.
-function sprig(at, dir, size) {
-  const n = 3 + Math.floor(rand() * 2);
-  for (let i = 0; i < n; i++) {
-    const d = dir.clone().add(randDir().multiplyScalar(0.9)).normalize();
-    const e = at.clone().addScaledVector(d, size * (0.5 + rand() * 0.6));
-    rodTo(at, e, 0.0007);
-    gems.push([e, 0.0038 + rand() * 0.0025]);
-    if (rand() < 0.35) gems.push([at.clone().lerp(e, 0.55), 0.003 + rand() * 0.0015]);
-  }
-}
-
-let bulbAnchors = [];
-if (form === "round") {
-  const R = W / 2;
-  const center = new THREE.Vector3(0, Y0, 0);
-  const core = new THREE.Mesh(new THREE.SphereGeometry(Math.max(0.035, R * 0.12), 32, 24), metal);
-  core.position.copy(center); group.add(core);
-  // Tige de suspension, manchon, câble vers le pavillon.
-  const top = center.clone().add(new THREE.Vector3(0, R * 0.12 + 0.05, 0));
-  rod(center, top, 0.006, metal);
-  rod(top, new THREE.Vector3(0, -0.04, 0), 0.0012, cableMat);
-  const canopy = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.035, 48), metal);
-  canopy.position.y = -0.0175; group.add(canopy);
-  const n = Math.round(150 * R / 0.25);
-  for (let i = 0; i < n; i++) {
-    // Distribution de Fibonacci (couverture régulière) avec un léger aléa.
-    const k = (i + 0.5) / n, phi = Math.acos(1 - 2 * k), th = Math.PI * (1 + Math.sqrt(5)) * i;
-    const d = new THREE.Vector3(Math.sin(phi) * Math.cos(th), Math.cos(phi), Math.sin(phi) * Math.sin(th)).add(randDir().multiplyScalar(0.12)).normalize();
-    if (d.y > 0.9) continue; // la tige de suspension
-    const len = R * (0.78 + rand() * 0.18);
-    const end = center.clone().addScaledVector(d, len);
-    rodTo(center.clone().addScaledVector(d, R * 0.1), end, 0.0011);
-    sprig(end, d, R * 0.12);
-  }
-  for (let i = 0; i < BULBS; i++) {
-    const k = (i + 0.5) / BULBS, phi = Math.acos(1 - 2 * k), th = Math.PI * (1 + Math.sqrt(5)) * i + 0.3;
-    bulbAnchors.push([center, new THREE.Vector3(Math.sin(phi) * Math.cos(th), Math.cos(phi) * 0.85, Math.sin(phi) * Math.sin(th)).normalize(), R * 0.28]);
-  }
-} else {
-  const L = W, H = 0.4, D = 0.34;
-  const a = new THREE.Vector3(-L * 0.42, Y0, 0), b = new THREE.Vector3(L * 0.42, Y0, 0);
-  rod(a, b, 0.008, metal);
-  const plate = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.028, 0.07), metal);
-  plate.position.y = -0.014; group.add(plate);
-  [-0.2, 0.2].forEach((x) => rod(new THREE.Vector3(x * L / 0.72 * 0.6, Y0, 0), new THREE.Vector3(x, -0.03, 0), 0.0011, cableMat));
-  const n = Math.round(190 * L / 0.72);
-  for (let i = 0; i < n; i++) {
-    const x = (rand() - 0.5) * L * 0.84;
-    const origin = new THREE.Vector3(x, Y0, 0);
-    const d = randDir(); d.x *= 0.35; d.normalize();
-    // Enveloppe : ellipsoïde L × H × D (les tiges des extrémités s'allongent vers l'extérieur).
-    const len = Math.min(H / 2 / Math.max(Math.abs(d.y), 0.2), D / 2 / Math.max(Math.abs(d.z), 0.2), 0.24) * (0.75 + rand() * 0.25);
-    const end = origin.clone().addScaledVector(d, len);
-    if (Math.abs(end.x) > L / 2) continue;
-    rodTo(origin, end, 0.001);
-    sprig(end, d, 0.035);
-  }
-  for (let i = 0; i < BULBS; i++) {
-    const x = -L * 0.38 + (i / Math.max(1, BULBS - 1)) * L * 0.76;
-    bulbAnchors.push([new THREE.Vector3(x, Y0, 0), new THREE.Vector3(0, i % 2 ? 1 : -1, (i % 3 - 1) * 0.6).normalize(), 0.035]);
-  }
-}
-// Ampoules G9 LED en capsule, au bout d'une courte douille.
-for (const [c, d, r] of bulbAnchors) {
-  const base = c.clone().addScaledVector(d, r);
-  rod(c, base, 0.004, metal);
-  const sock = base.clone().addScaledVector(d, 0.012);
-  rod(base, sock, 0.007, metal);
-  const g = new THREE.Mesh(new THREE.CapsuleGeometry(0.0085, 0.03, 6, 16), bulbMat);
-  g.position.copy(sock).addScaledVector(d, 0.024); g.quaternion.setFromUnitVectors(UP, d); group.add(g);
-  const pl = new THREE.PointLight(LIGHT, 0.09, 4, 2); pl.position.copy(g.position); scene.add(pl);
-}
-// Instanciation des tiges et des cristaux.
-const rodGeo = new THREE.CylinderGeometry(1, 1, 1, 5);
-const rodsMesh = new THREE.InstancedMesh(rodGeo, metal, rods.length);
-const m4 = new THREE.Matrix4(), qt = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
-rods.forEach(([a, b, r], i) => {
-  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
-  qt.setFromUnitVectors(UP, d.normalize()); v.copy(a).lerp(b, 0.5); sc.set(r, len, r);
-  rodsMesh.setMatrixAt(i, m4.compose(v, qt, sc));
-});
-group.add(rodsMesh);
-const gemGeo = new THREE.OctahedronGeometry(1, 0);
-const gemsMesh = new THREE.InstancedMesh(gemGeo, crystalMat, gems.length);
-gems.forEach(([p, r], i) => {
-  qt.setFromEuler(new THREE.Euler(rand() * 3, rand() * 3, rand() * 3)); sc.set(r, r * 1.5, r);
-  gemsMesh.setMatrixAt(i, m4.compose(p, qt, sc));
-});
-group.add(gemsMesh);
-group.rotation.y = (rand() - 0.5) * 0.4;
 
 // ── Caméra : légère contre-plongée, comme les photos du fabricant ──
 const camera = new THREE.PerspectiveCamera(34, WIDTH / HEIGHT, 0.02, 50);

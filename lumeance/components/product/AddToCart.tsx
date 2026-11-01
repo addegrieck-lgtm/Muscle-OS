@@ -6,6 +6,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
+import { requestSubject } from "@/lib/catalog/request-subject";
 import type { Product, ProductVariant } from "@/types/catalog";
 
 export function AddToCart({ product }: { product: Product }) {
@@ -32,7 +33,9 @@ export function AddToCart({ product }: { product: Product }) {
   return (
     <div className="space-y-6">
       <p className="font-serif text-3xl" aria-live="polite">
-        {product.compareAtPrice && (
+        {/* Prix de référence affiché seulement s'il porte sur la version choisie (prix de base) :
+            sinon, une version plus chère afficherait un prix barré inférieur au prix réel. */}
+        {product.compareAtPrice && price === product.price && (
           <span className="mr-3 text-xl text-brun/40 line-through">
             {formatPrice(product.compareAtPrice)}
           </span>
@@ -113,30 +116,37 @@ export function AddToCart({ product }: { product: Product }) {
             +
           </button>
         </div>
-        <button
-          type="button"
-          disabled={!available}
-          className={buttonClass("solid", "flex-1")}
-          onClick={() => {
-            add({
-              productId: product.id,
-              variantId: variant?.id ?? null,
-              quantity: qty,
-              ...(product.options?.length ? { options } : {}),
-            });
-            setAdded(true);
-          }}
-        >
-          {available ? "Ajouter au panier" : "Disponibilité sur demande"}
-        </button>
+        {available ? (
+          <button
+            type="button"
+            className={buttonClass("solid", "flex-1")}
+            onClick={() => {
+              add({
+                productId: product.id,
+                variantId: variant?.id ?? null,
+                quantity: qty,
+                ...(product.options?.length ? { options } : {}),
+              });
+              setAdded(true);
+            }}
+          >
+            Ajouter au panier
+          </button>
+        ) : (
+          // Pièce non commandable en ligne : action utile plutôt qu'un bouton grisé. L'objet du
+          // message reprend la pièce, la version, les options et la quantité choisies.
+          <Link
+            href={`/contact?objet=${encodeURIComponent(requestSubject(product, variant, options, qty))}`}
+            className={buttonClass("solid", "flex-1 text-center")}
+          >
+            Demander cette pièce
+          </Link>
+        )}
       </div>
       {!available && (
         <p className="t-small text-brun/70">
-          Cette pièce est disponible sur demande.{" "}
-          <Link href="/contact" className="underline underline-offset-4">
-            Nous contacter
-          </Link>{" "}
-          pour un conseil ou un devis.
+          Cette pièce est disponible sur demande : écrivez-nous, nous vous répondons personnellement
+          avec un conseil, un délai et un devis.
         </p>
       )}
       <p className="t-small min-h-6 text-champagne" role="status">

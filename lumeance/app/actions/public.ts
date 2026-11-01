@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { getProducts } from "@/lib/services/catalog";
 import { getShippingSettings } from "@/lib/services/content";
 import { priceCart, type CartQuote } from "@/lib/services/pricing";
-import { rateLimit } from "@/lib/services/rate-limit";
+import { clientIp } from "@/lib/services/rate-limit";
+import { allowRequest } from "@/lib/services/request-guard";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { cartSchema, contactSchema, newsletterSchema } from "@/lib/validation/schemas";
 
@@ -15,9 +16,7 @@ export interface FormState {
 }
 
 async function clientKey(action: string) {
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
-  return `${action}:${ip}`;
+  return `${action}:${clientIp(await headers())}`;
 }
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
@@ -33,7 +32,7 @@ export async function quoteCart(input: unknown): Promise<CartQuote> {
 }
 
 export async function subscribeNewsletter(_: FormState, form: FormData): Promise<FormState> {
-  if (!rateLimit(await clientKey("newsletter"), 5, 10 * 60_000))
+  if (!(await allowRequest(await clientKey("newsletter"), 5, 10 * 60_000, "FORMS_LIMITER")))
     return { ok: false, message: "Trop de tentatives. Merci de réessayer dans quelques minutes." };
   const parsed = newsletterSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) {
@@ -68,7 +67,7 @@ export async function subscribeNewsletter(_: FormState, form: FormData): Promise
 }
 
 export async function sendContact(_: FormState, form: FormData): Promise<FormState> {
-  if (!rateLimit(await clientKey("contact"), 3, 10 * 60_000))
+  if (!(await allowRequest(await clientKey("contact"), 3, 10 * 60_000, "FORMS_LIMITER")))
     return { ok: false, message: "Trop de messages envoyés. Merci de réessayer plus tard." };
   const parsed = contactSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) {

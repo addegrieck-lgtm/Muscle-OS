@@ -14,7 +14,8 @@ export function useReducedMotion(): boolean {
   return reduced;
 }
 
-/** WebGL disponible et appareil suffisamment puissant pour une scène 3D. */
+/** WebGL disponible, appareil suffisamment puissant et connexion assez rapide pour une scène 3D
+ * (environ 1 Mo de JavaScript à télécharger) ; sinon, l'illustration vectorielle reste affichée. */
 export function canUseWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
@@ -22,9 +23,10 @@ export function canUseWebGL(): boolean {
     if (!gl) return false;
     const nav = navigator as Navigator & {
       deviceMemory?: number;
-      connection?: { saveData?: boolean };
+      connection?: { saveData?: boolean; effectiveType?: string };
     };
     if (nav.connection?.saveData) return false;
+    if (["slow-2g", "2g", "3g"].includes(nav.connection?.effectiveType ?? "")) return false;
     if (nav.deviceMemory !== undefined && nav.deviceMemory < 2) return false;
     return true;
   } catch {

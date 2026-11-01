@@ -7,7 +7,7 @@ import { buttonClass } from "@/components/ui/Button";
 const field =
   "mt-2 w-full border-b border-brun/25 bg-transparent py-3 outline-none transition-colors focus:border-champagne";
 
-export function ContactForm() {
+export function ContactForm({ defaultSubject = "" }: { defaultSubject?: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(sendContact, {
     ok: false,
     message: "",
@@ -55,6 +55,7 @@ export function ContactForm() {
         <input
           name="subject"
           required
+          defaultValue={defaultSubject}
           className={field}
           aria-invalid={Boolean(state.errors?.subject)}
           aria-describedby="err-subject"

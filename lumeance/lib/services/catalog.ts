@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
 import { PUBLISHED_CATALOG } from "@/lib/catalog/products";
+import { priceRange } from "@/lib/catalog/price-range";
 import { DEMO_CATEGORIES, DEMO_PRODUCTS } from "@/lib/demo/catalog";
 import { createSupabasePublicClient, storagePublicUrl } from "@/lib/supabase/public";
 import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "./mappers";
@@ -64,14 +65,15 @@ export function filterProducts(products: Product[], q: ProductQuery): Product[] 
     const m = q.material.toLowerCase();
     list = list.filter((p) => p.materials.some((x) => x.toLowerCase().includes(m)));
   }
-  if (q.maxPrice !== undefined) list = list.filter((p) => p.price <= q.maxPrice!);
+  // Budget : une pièce entre dans le filtre si au moins une de ses versions y entre.
+  if (q.maxPrice !== undefined) list = list.filter((p) => priceRange(p).min <= q.maxPrice!);
   const sorted = list.slice();
   switch (q.sort) {
     case "price-asc":
-      sorted.sort((a, b) => a.price - b.price);
+      sorted.sort((a, b) => priceRange(a).min - priceRange(b).min);
       break;
     case "price-desc":
-      sorted.sort((a, b) => b.price - a.price);
+      sorted.sort((a, b) => priceRange(b).min - priceRange(a).min);
       break;
     case "name":
       sorted.sort((a, b) => a.name.localeCompare(b.name, "fr"));

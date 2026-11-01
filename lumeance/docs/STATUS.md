@@ -45,7 +45,24 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
 - [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).
 
+## Audit du 1er novembre 2026 — corrections appliquées ✅
+- Sélecteur de versions : « 26 sphères · 870 € » au lieu de « 26 870 € » (lisible comme un seul montant).
+- Bandeau cookies masqué : seuls des éléments strictement nécessaires sont utilisés (exemptés de consentement, CNIL). Réactivation : `CONSENT_REQUIRED` dans `components/layout/CookieConsent.tsx`, le jour où un traceur soumis à consentement est ajouté.
+- Pièce non commandable : bouton « Demander cette pièce » (formulaire de contact prérempli avec pièce, version, options, quantité) au lieu d’un bouton grisé.
+- Fiche produit mobile : barre fixe prix + « Choisir » tant que le sélecteur est hors écran.
+- Prix : fourchette calculée sur les versions actives (`lib/catalog/price-range.ts`) pour les cartes (« dès »), le filtre budget, le tri et les données structurées ; prix barré affiché seulement s’il porte sur la version choisie.
+- Scènes 3D non chargées sur connexion lente (2G/3G), en plus du mode économie de données.
+- Sécurité : Content-Security-Policy ; limiteurs de débit partagés Cloudflare ; adresse IP non falsifiable.
+- Page 404 : titre « Page introuvable », non indexée.
+- **Vérifié** : typecheck, lint, 55 tests, build OpenNext, parcours complet dans workerd (aucune violation CSP, aucune erreur console).
+
+## Points ouverts — à traiter avec le propriétaire
+- Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).
+- Photos fabricant : obtenir une autorisation écrite d’utilisation, puis des visuels propres.
+- Cache des pages : toutes les pages sont rendues à chaque visite (`force-dynamic`) ; un cache OpenNext (R2 ou KV) avec revalidation à la publication accélérerait le site.
+- Adresses `/_next/static/chunks/app/(store)/…` : un proxy qui réécrit les parenthèses en `%28…%29` provoque une boucle de redirection (observé derrière un proxy d’entreprise). Tester depuis un téléphone en 4G et un Wi-Fi d’entreprise.
+- Messages de contact : enregistrés dans `/admin/messages`, sans notification e-mail (aucun service d’e-mail choisi).
+
 ## Points ouverts
 - Accents de Cormorant Garamond relativement hauts sur les minuscules : dessin d’origine de la police imposée.
-- Limitation de débit en mémoire (par instance) : à remplacer par un stockage partagé en production multi-instances.
 - Double opt-in de la lettre : nécessite un service d’e-mail (non choisi).

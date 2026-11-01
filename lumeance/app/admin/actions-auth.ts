@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isSupabaseConfigured } from "@/lib/env";
-import { rateLimit } from "@/lib/services/rate-limit";
+import { clientIp } from "@/lib/services/rate-limit";
+import { allowRequest } from "@/lib/services/request-guard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const loginSchema = z.object({
@@ -14,9 +15,8 @@ const loginSchema = z.object({
 
 export async function signIn(_: { error: string }, form: FormData): Promise<{ error: string }> {
   if (!isSupabaseConfigured()) return { error: "Supabase n’est pas configuré." };
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (!rateLimit(`login:${ip}`, 8, 15 * 60_000))
+  const ip = clientIp(await headers());
+  if (!(await allowRequest(`login:${ip}`, 8, 15 * 60_000, "LOGIN_LIMITER")))
     return { error: "Trop de tentatives. Réessayez dans 15 minutes." };
   const parsed = loginSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "Identifiants invalides." };

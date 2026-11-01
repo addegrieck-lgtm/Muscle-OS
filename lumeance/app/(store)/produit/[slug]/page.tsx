@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/catalog/ProductCard";
 import { AccordionItem } from "@/components/product/Accordion";
 import { AddToCart } from "@/components/product/AddToCart";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { VariantProvider } from "@/components/product/VariantContext";
 import { Breadcrumbs } from "@/components/ui/PageHeader";
 import { categoryLabel } from "@/lib/navigation";
@@ -93,7 +94,7 @@ export default async function ProductPage({ params }: Props) {
               </p>
             )}
 
-            <div className="mt-10">
+            <div id="achat" className="mt-10 scroll-mt-28">
               <AddToCart product={product} />
             </div>
 
@@ -174,6 +175,7 @@ export default async function ProductPage({ params }: Props) {
               </AccordionItem>
             </div>
           </div>
+          <StickyBuyBar product={product} targetId="achat" />
         </VariantProvider>
       </section>
 
