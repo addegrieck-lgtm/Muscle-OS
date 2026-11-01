@@ -8,7 +8,7 @@ import { chromium } from "playwright";
 import sharp from "sharp";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const types = { ".html": "text/html", ".js": "text/javascript" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript" };
 const server = createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
   const file = path === "/" ? join(root, `scripts/render/${process.env.SCENE || "scene"}.html`) : join(root, path);
