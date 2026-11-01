@@ -121,3 +121,64 @@ describe("options sans incidence sur le prix (couleur de lumière)", async () =>
     );
   });
 });
+
+describe("offre par lot (3 achetées, la 4ᵉ offerte)", () => {
+  const promo: Product = {
+    ...withVariants,
+    id: "promo",
+    price: 8000,
+    promotion: { buy: 3, free: 1 },
+    variants: [
+      { ...withVariants.variants[0]!, id: "petit", priceAdjustment: 0 },
+      { ...withVariants.variants[1]!, id: "grand", priceAdjustment: 2000 },
+    ],
+  };
+  const catalog = [...DEMO_PRODUCTS, promo];
+  const shipping = { standardAmount: 1500, freeThreshold: 30000 };
+
+  it("n'offre rien sous 4 exemplaires", () => {
+    const q = priceCart(
+      [{ productId: "promo", variantId: "grand", quantity: 3 }],
+      catalog,
+      noShipping,
+    );
+    expect(q.discount).toBe(0);
+    expect(q.total).toBe(30000);
+  });
+  it("offre le 4ᵉ exemplaire, le moins cher, toutes versions confondues", () => {
+    const q = priceCart(
+      [
+        { productId: "promo", variantId: "grand", quantity: 3 },
+        { productId: "promo", variantId: "petit", quantity: 1 },
+      ],
+      catalog,
+      noShipping,
+    );
+    expect(q.subtotal).toBe(38000);
+    expect(q.discount).toBe(8000);
+    expect(q.discounts[0]!.label).toMatch(/4ᵉ offerte/);
+    expect(q.total).toBe(30000);
+  });
+  it("offre 2 exemplaires sur 9, et ne touche pas aux autres pièces", () => {
+    const q = priceCart(
+      [
+        { productId: "promo", variantId: "petit", quantity: 9 },
+        { productId: base.id, variantId: null, quantity: 1 },
+      ],
+      catalog,
+      noShipping,
+    );
+    expect(q.discount).toBe(16000);
+    expect(q.total).toBe(9 * 8000 - 16000 + base.price);
+  });
+  it("calcule la livraison offerte sur le montant après remise", () => {
+    const q = priceCart(
+      [{ productId: "promo", variantId: "petit", quantity: 4 }],
+      catalog,
+      shipping,
+    );
+    expect(q.discount).toBe(8000);
+    expect(q.shipping).toBe(1500); // 24 000 < 30 000
+    expect(q.total).toBe(24000 + 1500);
+  });
+});

@@ -40,11 +40,26 @@ alter table public.product_images add column if not exists caption text;
 -- Note : storage_path et image_url commençant par « / » désignent des fichiers du site
 -- (dossier public/), les autres des fichiers du bucket « media » de Supabase Storage.
 
+-- LUMÉANCE — offre par lot sur une pièce (« 3 achetées, la 4ᵉ offerte »).
+-- Idempotent : peut être rejoué sans risque.
+-- { "buy": 3, "free": 1 } : pour 3 exemplaires achetés (toutes versions confondues), 1 offert,
+-- le moins cher. Calcul côté serveur (lib/services/pricing.ts). null = pas d'offre.
+alter table public.products add column if not exists promotion jsonb;
+alter table public.products drop constraint if exists products_promotion_shape;
+alter table public.products
+  add constraint products_promotion_shape check (
+    promotion is null or (
+      jsonb_typeof(promotion -> 'buy') = 'number' and jsonb_typeof(promotion -> 'free') = 'number'
+      and (promotion ->> 'buy')::int between 1 and 20
+      and (promotion ->> 'free')::int between 1 and 20
+    )
+  );
+
 -- ════ Céleste (LUM-LUS-001) ════
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('celeste', 'Céleste', 'LUM-LUS-001', 'Une cascade de sphères de verre cristal, suspendues à des hauteurs différentes.', 'Céleste compose une pluie de lumière verticale : des sphères de verre cristal, chacune abritant une source LED, descendent à des hauteurs différentes depuis un pavillon unique. Allumée, la composition se lit comme une seule constellation ; éteinte, elle reste une sculpture de verre.
 
 Pensée pour les grandes hauteurs sous plafond — cages d’escalier, mezzanines, halls d’entrée et séjours en double hauteur — elle accompagne le regard d’un niveau à l’autre. La longueur de suspension est réglable pour ajuster la composition à votre volume.
@@ -56,7 +71,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Verre cristal', 'Acier inoxydable']::text[], '{}'::text[], '[{"label":"Sources lumineuses","value":"LED, culot G4"},{"label":"Couleur de lumière","value":"Blanc chaud, blanc neutre ou blanc froid, au choix"},{"label":"Tension d’entrée","value":"AC 95–265 V"},{"label":"Pavillon","value":"Rond — Ø40 cm (14 sphères), Ø50 cm (26), Ø100 cm (46)"},{"label":"Hauteur réglable","value":"Jusqu’à 3 m (14 sphères), 4 m (26), 5 m (36 et 46)"},{"label":"Surface conseillée","value":"10–15 m² (14) · 15–20 m² (26) · 20–25 m² (36) · 25–40 m² (46)"},{"label":"Classe énergétique (sources)","value":"F, selon le fabricant"},{"label":"Pièces conseillées","value":"Escalier, mezzanine, séjour, salle à manger, couloir"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée pour une pièce de grande hauteur. Indiquez la hauteur disponible pour ajuster la longueur des câbles.', 0,
   'Céleste — lustre cascade en sphères de verre cristal', 'Lustre en cascade de sphères de verre cristal pour cage d’escalier, mezzanine et grande hauteur sous plafond. LED G4, suspension réglable.', '[{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc neutre"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
-  '{"group":"Pavillon","variant":"Nombre de sphères"}'::jsonb, 'cascade')
+  '{"group":"Pavillon","variant":"Nombre de sphères"}'::jsonb, 'cascade',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -155,7 +171,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('luciole', 'Luciole', 'LUM-SUS-001', 'Une constellation de petites lumières portées par de fines branches de métal.', 'Luciole déploie autour d’un anneau ou d’une barre de métal une ramure de tiges fines, chacune terminée par une petite source lumineuse sous un diffuseur en acrylique. Allumée, elle évoque un essaim de lucioles suspendu au-dessus de la pièce ; éteinte, un dessin graphique et végétal.
 
 La couronne s’installe au-dessus d’un salon ou au centre d’une pièce de vie ; la version linéaire accompagne une table de salle à manger ou un îlot. Sept tailles, de 30 à 162 lumières, pour s’accorder au volume.
@@ -167,7 +183,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Métal', 'Acrylique']::text[], '{}'::text[], '[{"label":"Sources lumineuses","value":"LED, de 30 à 162 selon la version ; sources remplaçables"},{"label":"Diffuseurs","value":"Acrylique"},{"label":"Hauteur du luminaire","value":"35 cm"},{"label":"Suspension","value":"Câbles réglables jusqu’à 1,5 m"},{"label":"Formes","value":"Couronne (Ø50 à Ø125 cm) ou linéaire (100 cm)"},{"label":"Couleurs de structure","value":"Or champagne, or rose, sable doré ou noir"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les branches se positionnent à la main lors de l’installation.', 0,
   'Luciole — suspension design à branches lumineuses', 'Suspension design en couronne ou linéaire : fines branches de métal et petites sources LED sous diffuseurs acryliques. Sept tailles, de 30 à 162 lumières.', '[{"id":"structure","label":"Couleur de la structure","values":[{"id":"or-champagne","label":"Or champagne"},{"id":"or-rose","label":"Or rose"},{"id":"sable-dore","label":"Sable doré"},{"id":"noir","label":"Noir"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
-  '{"group":"Forme","variant":"Taille"}'::jsonb, 'organic')
+  '{"group":"Forme","variant":"Taille"}'::jsonb, 'organic',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -221,7 +238,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('silhouette', 'Silhouette', 'LUM-APP-001', 'Un tableau lumineux : une sculpture en ombre portée, auréolée de lumière.', 'Silhouette tient à la fois de l’œuvre et du luminaire. Sur un fond texturé gris perle, une figure sculpturale se détache en noir profond ; un liseré de lumière LED court tout autour du cadre et dessine un halo doux sur le mur.
 
 Pensée pour une entrée, un couloir, une tête de lit ou un pan de mur de salon, elle installe une atmosphère de galerie. Trois formats, cinq motifs, un cadre noir ou doré, une lumière chaude ou froide.
@@ -233,7 +250,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   '{}'::text[], array['Cadre noir', 'Cadre doré']::text[], '[{"label":"Type","value":"Applique murale / tableau lumineux LED"},{"label":"Formats","value":"40 × 80, 30 × 120 ou 40 × 140 cm"},{"label":"Couleur de lumière","value":"Blanc chaud (2700–3500 K) ou blanc froid (5500–7000 K)"},{"label":"Cadre","value":"Noir ou doré"},{"label":"Classe énergétique","value":"F, selon le fabricant"}]'::jsonb,
   null, 'Fixation murale. Le raccordement électrique doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.', 0,
   'Silhouette — tableau lumineux LED, applique murale design', 'Tableau lumineux LED : figure sculpturale noire sur fond texturé, halo de lumière autour du cadre. Cinq motifs, cadre noir ou doré, lumière chaude ou froide.', '[{"id":"motif","label":"Motif","values":[{"id":"envol","label":"Envol"},{"id":"rendez-vous","label":"Rendez-vous"},{"id":"offrande","label":"Offrande"},{"id":"elan","label":"Élan"},{"id":"sous-la-pluie","label":"Sous la pluie"}]},{"id":"cadre","label":"Cadre","values":[{"id":"noir","label":"Noir"},{"id":"dore","label":"Doré"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
-  null, 'sconce')
+  null, 'sconce',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -267,7 +285,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('nebuleuse', 'Nébuleuse', 'LUM-LUS-002', 'Une cascade de sphères de verre où scintillent des centaines de micro-lumières.', 'Nébuleuse suspend dans le vide des sphères de verre teinté, chacune habitée d’un nuage de micro-LED. Allumée, chaque globe devient une petite galaxie ; ensemble, elles composent une constellation qui descend le long d’une cage d’escalier ou d’un séjour en double hauteur.
 
 Sept compositions, de 8 à 30 sphères, avec suspensions réglables jusqu’à 5 m. Verre cognac ou gris fumé, pavillon argenté, doré ou noir, et trois températures de lumière.
@@ -279,7 +297,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Verre', 'Métal']::text[], array['Argenté', 'Doré', 'Noir']::text[], '[{"label":"Sources lumineuses","value":"Micro-LED intégrées dans chaque sphère"},{"label":"Puissance","value":"De 48 W (8 sphères) à 180 W (30 sphères)"},{"label":"Verre","value":"Cognac ou gris fumé"},{"label":"Pavillon","value":"Rond, Ø40 à Ø60 cm selon la version ; argenté, doré ou noir"},{"label":"Couleur de lumière","value":"Blanc chaud 3000 K, neutre 4000 K ou froid 5500 K"},{"label":"Classe énergétique","value":"A, selon le fabricant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée pour une pièce de grande hauteur. La longueur de chaque câble se règle à l’installation.', 0,
   'Nébuleuse — lustre cascade en sphères de verre à micro-LED', 'Lustre en cascade pour escalier et double hauteur : sphères de verre cognac ou gris fumé à micro-LED, de 8 à 30 sphères, suspension réglable jusqu’à 5 m.', '[{"id":"verre","label":"Couleur du verre","values":[{"id":"cognac","label":"Cognac"},{"id":"fume","label":"Gris fumé"}]},{"id":"pavillon","label":"Pavillon","values":[{"id":"dore","label":"Doré"},{"id":"argente","label":"Argenté"},{"id":"noir","label":"Noir"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc neutre"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
-  null, 'cascade')
+  null, 'cascade',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -327,7 +346,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('aigrette', 'Aigrette', 'LUM-SUS-002', 'Une boule de lumière rayonnante, hérissée de fines tiges perlées de cristal.', 'Aigrette emprunte sa silhouette à la fleur de pissenlit montée en graine : depuis un cœur de métal, des centaines de tiges fines rayonnent dans toutes les directions, chacune terminée par une petite ramure perlée de cristal. Allumée, la lumière des ampoules se démultiplie dans les cristaux et dessine un halo scintillant ; éteinte, elle reste une sculpture aérienne.
 
 La version ronde, de Ø40 à Ø80 cm, s’installe au centre d’un salon, d’une chambre ou d’une entrée ; la version linéaire, de 72 ou 92 cm, accompagne une table de salle à manger ou un îlot. Finition dorée ou chromée, lumière blanc chaud, neutre ou froid, ou trois teintes commutables à l’interrupteur.
@@ -339,7 +358,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Cristal', 'Métal']::text[], array['Doré', 'Chromé']::text[], '[{"label":"Sources lumineuses","value":"Ampoules LED fournies, culot G9 — de 8 à 16 selon la version"},{"label":"Tension d’entrée","value":"AC 90–260 V"},{"label":"Flux lumineux","value":"De 249 à 2 000 lm selon la version"},{"label":"Formes","value":"Ronde (Ø40, 50, 55, 60 ou 80 cm) ou linéaire (72 ou 92 cm, hauteur 40 cm)"},{"label":"Suspension","value":"Câble réglable jusqu’à 1,5 m"},{"label":"Finitions","value":"Doré ou chromé"},{"label":"Couleur de lumière","value":"Blanc chaud, blanc neutre, blanc froid, ou trois teintes commutables"},{"label":"Surface conseillée","value":"10 à 15 m², selon le fabricant"},{"label":"Garantie fabricant","value":"3 ans"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les tiges se mettent en place à la main lors du montage.', 0,
   'Aigrette — suspension boule de cristal façon pissenlit', 'Suspension design en boule de tiges perlées de cristal, ronde de Ø40 à Ø80 cm ou linéaire. Finition dorée ou chromée, ampoules LED G9, lumière blanc chaud, neutre ou froid.', '[{"id":"finition","label":"Finition","values":[{"id":"dore","label":"Doré"},{"id":"chrome","label":"Chromé"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc neutre"},{"id":"froid","label":"Blanc froid"},{"id":"commutable","label":"3 teintes commutables"}]}]'::jsonb,
-  '{"group":"Forme","variant":"Taille"}'::jsonb, 'globes')
+  '{"group":"Forme","variant":"Taille"}'::jsonb, 'globes',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -393,7 +413,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('sylve', 'Sylve', 'LUM-LUS-003', 'Une ramure de métal noir, hérissée de pointes et ponctuée de lumières sous verre.', 'Sylve réinterprète la branche comme une architecture : un réseau organique de rameaux en métal noir mat, aux jonctions fondues comme celles d’un arbre, hérissé de tiges effilées et ponctué de petites ampoules LED sous tube de verre. Allumée, elle diffuse une lumière douce qui révèle ses ombres portées ; éteinte, elle reste une sculpture graphique.
 
 Pensée pour les grands volumes, elle se décline en six longueurs, de 120 cm (10 lumières) à 450 cm (45 lumières), toutes larges de 65 cm : au-dessus d’une table de salle à manger ou d’un îlot, dans un séjour, un hall d’entrée ou une cage d’escalier. Les câbles de suspension se règlent en hauteur.
@@ -405,7 +425,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Métal', 'Verre']::text[], array['Noir mat']::text[], '[{"label":"Sources lumineuses","value":"Ampoules LED fournies, culot E14 — de 10 à 45 selon la longueur"},{"label":"Diffuseurs","value":"Tubes de verre"},{"label":"Dimensions","value":"Longueur 120, 150, 185, 230, 310 ou 450 cm × largeur 65 cm"},{"label":"Suspension","value":"2 à 5 câbles réglables selon la longueur"},{"label":"Tension d’entrée","value":"AC 90–260 V"},{"label":"Finition","value":"Métal noir mat"},{"label":"Couleur de lumière","value":"Blanc chaud 3000 K ou blanc froid 6000 K, fixe ou variable"},{"label":"Garantie annoncée","value":"3 ans"}]'::jsonb,
   null, 'Installation au plafond, avec plusieurs points de fixation selon la longueur. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée. Indiquez la hauteur sous plafond pour régler la longueur des câbles.', 0,
   'Sylve — lustre branches en métal noir, grande longueur', 'Lustre design en ramure de métal noir mat et lumières LED sous verre, de 120 à 450 cm de long. Pour table de salle à manger, séjour et grands volumes.', '[{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"},{"id":"chaud-variable","label":"Blanc chaud, variable"},{"id":"froid-variable","label":"Blanc froid, variable"}]}]'::jsonb,
-  null, 'organic')
+  null, 'organic',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -454,7 +475,7 @@ where not exists (select 1 from public.product_images
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values ('constellation', 'Constellation', 'LUM-SUS-003', 'Une fine branche de métal portant des globes de verre où scintille un ciel de micro-lumières.', 'Constellation pose sur une fine branche de métal une suite de globes de verre clair, de trois diamètres, placés au-dessus, au-dessous ou au fil de la ligne. Dans chacun, un fil de cuivre semé de micro-LED dessine un ciel étoilé ; au centre, une perle dorée marque l’axe de la composition.
 
 La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, et une version à intensité variable, réglable à la télécommande.
@@ -466,7 +487,8 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   array['Verre', 'Métal']::text[], array['Doré', 'Noir']::text[], '[{"label":"Sources lumineuses","value":"Micro-LED intégrées sur fil de cuivre, dans chaque globe"},{"label":"Puissance","value":"36 W (6 têtes) · 48 W (8 têtes)"},{"label":"Tension d’entrée","value":"AC 90–265 V"},{"label":"Globes","value":"Verre clair, Ø10, Ø12 et Ø15 cm"},{"label":"Formes","value":"Branche en arc ou droite, 75 cm (6 têtes) ou 100 cm (8 têtes)"},{"label":"Pavillon","value":"50 × 8 × 3,5 cm"},{"label":"Suspension","value":"Câbles réglables, hauteur jusqu’à 120 cm"},{"label":"Finitions","value":"Doré ou noir (perle centrale dorée)"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"},{"label":"Commande","value":"Interrupteur ; ou télécommande, intensité variable (versions « télécommande »)"},{"label":"Matières","value":"Fer, verre"},{"label":"Surface conseillée","value":"10 à 30 m², selon le fabricant"},{"label":"Classe énergétique","value":"F, selon le fabricant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles, jusqu’à 120 cm.', 0,
   'Constellation — suspension globes de verre étoilés, dorée ou noire', 'Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, version variable à la télécommande.', '[{"id":"finition","label":"Finition","values":[{"id":"dore","label":"Doré"},{"id":"noir","label":"Noir"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
-  '{"group":"Forme","variant":"Taille"}'::jsonb, 'globes')
+  '{"group":"Forme","variant":"Taille"}'::jsonb, 'globes',
+  null)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
@@ -520,6 +542,42 @@ select (select id from public.products where reference = 'LUM-SUS-003'), '/produ
     where product_id = (select id from public.products where reference = 'LUM-SUS-003') and is_primary)
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-droite-doree.webp');
+
+-- ════ Volute (LUM-APP-002) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('volute', 'Volute', 'LUM-APP-002', 'Une feuille d’aluminium enroulée en spirale, qui laisse filer la lumière vers le haut et vers le bas.', 'Volute enroule une fine feuille d’aluminium autour de sa source de lumière, comme un ruban qui tourne sur lui-même. Le faisceau s’échappe par le haut et par le bas et dessine sur le mur deux éventails de lumière ; dans les versions bicolores, l’intérieur doré s’allume et répond à la teinte de la lumière.
+
+Étanche (IP65), elle se pose aussi bien dans une entrée, un couloir ou de part et d’autre d’un lit que sur une façade ou une terrasse. Deux formats, 28 ou 23 cm de haut ; noir ou blanc, uni ou doublé d’or ; lumière blanc chaud, naturel ou froid. Offre : pour trois appliques achetées, la quatrième est offerte.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  8000, null,
+  (select id from public.categories where slug = 'appliques'),
+  'draft', false, '{}'::jsonb, null,
+  array['Aluminium']::text[], array['Noir', 'Noir et or', 'Blanc', 'Blanc et or']::text[], '[{"label":"Type","value":"Applique murale LED, éclairage vers le haut et vers le bas"},{"label":"Puissance","value":"10 W, selon le fabricant"},{"label":"Étanchéité","value":"IP65 : intérieur et extérieur"},{"label":"Formats","value":"Grand : 28 × 10 cm · petit : 23 × 8 cm (hauteur × largeur)"},{"label":"Finitions","value":"Noir, noir et or, blanc, blanc et or (intérieur doré)"},{"label":"Couleur de lumière","value":"Blanc chaud (2700–3500 K), naturel (3500–5500 K) ou froid (5500–7000 K)"},{"label":"Lumière","value":"Sans scintillement, selon le fabricant"},{"label":"Matières","value":"Coque en aluminium"},{"label":"Offre","value":"3 achetées, la 4ᵉ offerte (toutes versions confondues)"}]'::jsonb,
+  null, 'Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée, en particulier en extérieur.', 0,
+  'Volute — applique murale LED spirale, noire ou blanche, intérieur doré', 'Applique murale LED en aluminium enroulé en spirale, lumière vers le haut et le bas, étanche IP65 pour l’intérieur et l’extérieur. 28 ou 23 cm, noir ou blanc, uni ou doré. 3 achetées, la 4ᵉ offerte.', '[{"id":"finition","label":"Finition","values":[{"id":"noir","label":"Noir"},{"id":"noir-or","label":"Noir et or"},{"id":"blanc","label":"Blanc"},{"id":"blanc-or","label":"Blanc et or"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc naturel"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  null, 'sconce',
+  '{"buy":3,"free":1}'::jsonb)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-APP-002'), 'Grand · 28 cm', 'LUM-APP-002-G', null, 2000,
+  0, true, 'Hauteur 28 cm · largeur 10 cm · éclairage vers le haut et vers le bas', '/products/volute/rendu-g-noir-or-chaud.webp', '{"noir-chaud":"/products/volute/rendu-g-noir-chaud.webp","noir-neutre":"/products/volute/rendu-g-noir-neutre.webp","noir-froid":"/products/volute/rendu-g-noir-froid.webp","noir-or-chaud":"/products/volute/rendu-g-noir-or-chaud.webp","noir-or-neutre":"/products/volute/rendu-g-noir-or-neutre.webp","noir-or-froid":"/products/volute/rendu-g-noir-or-froid.webp","blanc-chaud":"/products/volute/rendu-g-blanc-chaud.webp","blanc-neutre":"/products/volute/rendu-g-blanc-neutre.webp","blanc-froid":"/products/volute/rendu-g-blanc-froid.webp","blanc-or-chaud":"/products/volute/rendu-g-blanc-or-chaud.webp","blanc-or-neutre":"/products/volute/rendu-g-blanc-or-neutre.webp","blanc-or-froid":"/products/volute/rendu-g-blanc-or-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-APP-002'), 'Petit · 23 cm', 'LUM-APP-002-P', null, 0,
+  0, true, 'Hauteur 23 cm · largeur 8 cm · éclairage vers le haut et vers le bas', '/products/volute/rendu-p-noir-or-chaud.webp', '{"noir-chaud":"/products/volute/rendu-p-noir-chaud.webp","noir-neutre":"/products/volute/rendu-p-noir-neutre.webp","noir-froid":"/products/volute/rendu-p-noir-froid.webp","noir-or-chaud":"/products/volute/rendu-p-noir-or-chaud.webp","noir-or-neutre":"/products/volute/rendu-p-noir-or-neutre.webp","noir-or-froid":"/products/volute/rendu-p-noir-or-froid.webp","blanc-chaud":"/products/volute/rendu-p-blanc-chaud.webp","blanc-neutre":"/products/volute/rendu-p-blanc-neutre.webp","blanc-froid":"/products/volute/rendu-p-blanc-froid.webp","blanc-or-chaud":"/products/volute/rendu-p-blanc-or-chaud.webp","blanc-or-neutre":"/products/volute/rendu-p-blanc-or-neutre.webp","blanc-or-froid":"/products/volute/rendu-p-blanc-or-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-APP-002'), '/products/volute/ambiance-exterieur.webp', 'Deux appliques Volute noir et or allumées sur une façade enduite, lumière chaude projetée vers le haut et vers le bas, au crépuscule', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-APP-002') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-APP-002') and storage_path = '/products/volute/ambiance-exterieur.webp');
 
 commit;
 

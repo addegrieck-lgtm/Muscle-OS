@@ -29,6 +29,7 @@ export function productRow(p: Product, categoryId: string | null) {
     seo_description: p.seoDescription,
     options: p.options ?? [],
     option_labels: p.optionLabels ?? null,
+    promotion: p.promotion ?? null,
     art: p.art,
   };
 }

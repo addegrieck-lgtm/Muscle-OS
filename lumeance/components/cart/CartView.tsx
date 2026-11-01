@@ -174,6 +174,12 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
               <dt>Sous-total</dt>
               <dd>{formatPrice(quote.subtotal)}</dd>
             </div>
+            {quote.discounts.map((d) => (
+              <div key={d.productId} className="flex justify-between gap-4 text-champagne">
+                <dt>Offre {d.label}</dt>
+                <dd className="shrink-0">− {formatPrice(d.amount)}</dd>
+              </div>
+            ))}
             <div className="flex justify-between text-brun/70">
               <dt>Livraison</dt>
               <dd>
