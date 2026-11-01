@@ -480,12 +480,12 @@ values ((select id from public.products where reference = 'LUM-SUS-003'), '6 tê
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-A8', 'Arc', 0,
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-A8', 'Arc', 5000,
   0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-a8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a8-noir-froid.webp"}'::jsonb, 2)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-A8-TC', 'Arc', 1000,
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-A8-TC', 'Arc', 6000,
   0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-a8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a8-noir-froid.webp"}'::jsonb, 3)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
@@ -500,12 +500,12 @@ values ((select id from public.products where reference = 'LUM-SUS-003'), '6 tê
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-D8', 'Droite', 0,
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-D8', 'Droite', 5000,
   0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-d8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d8-noir-froid.webp"}'::jsonb, 6)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-D8-TC', 'Droite', 1000,
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-D8-TC', 'Droite', 6000,
   0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-d8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d8-noir-froid.webp"}'::jsonb, 7)
 on conflict (sku) do nothing;
 insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
@@ -515,11 +515,11 @@ select (select id from public.products where reference = 'LUM-SUS-003'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-doree.webp');
 insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
-select (select id from public.products where reference = 'LUM-SUS-003'), '/products/constellation/ambiance-arc-noir.webp', 'Suspension Constellation noire en arc, perle centrale dorée, huit globes de verre étoilés allumés devant un mur bleu nuit, bouquet de roses sur la table', 'Photographie d’ambiance du fabricant', 1,
+select (select id from public.products where reference = 'LUM-SUS-003'), '/products/constellation/ambiance-droite-doree.webp', 'Suspension Constellation dorée à branche droite, huit globes de verre étoilés allumés au-dessus d’une table de salle à manger en bois, devant un mur vert sombre', 'Photographie d’ambiance du fabricant', 1,
   false and not exists (select 1 from public.product_images
     where product_id = (select id from public.products where reference = 'LUM-SUS-003') and is_primary)
 where not exists (select 1 from public.product_images
-  where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-arc-noir.webp');
+  where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-droite-doree.webp');
 
 commit;
 
