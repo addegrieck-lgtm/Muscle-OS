@@ -67,10 +67,11 @@ pièce suit ce modèle, sauf demande contraire.
 - **Options sans incidence sur le prix** (`options`) : finition (ex. Doré / Chromé / Noir), couleur
   de lumière (ex. Blanc chaud / froid). Clé des visuels dans `imageUrls` : valeurs des options dans
   l'ordre, ex. `dore-chaud`.
-- **Télécommande / lumière variable** : règle du propriétaire (Constellation) : **+10 € sur le prix
-  de vente**, en version à part (« 6 têtes · 75 cm · télécommande », SKU suffixé `-TC`), puisqu'une
-  option ne peut pas changer le prix. Prix de base calculé sur la version fixe. (Sylve, plus
-  ancienne, la traite encore en option au prix le plus élevé.)
+- **Télécommande / lumière variable** : règle du propriétaire (1er novembre 2026) : quand le
+  fournisseur propose une télécommande, elle est **fournie avec toutes les versions**, sans choix à
+  faire. **+10 € inclus dans le prix de base** ; une seule version par taille ; la fiche l'indique
+  (`details` : « télécommande fournie, intensité variable », ligne « Commande » de la fiche
+  technique). (Sylve, plus ancienne, traite encore la lumière variable en option.)
 - **Offre par lot** (Volute) : `promotion: { buy: 3, free: 1 }` = « 3 achetées, la 4ᵉ offerte »,
   toutes versions et options confondues, l'exemplaire le moins cher offert. Calcul côté serveur
   (`lib/services/pricing.ts`), affiché sur la fiche et en remise dans le panier. Colonne
