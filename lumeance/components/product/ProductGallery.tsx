@@ -32,8 +32,10 @@ export function ProductGallery({ product }: { product: Product }) {
             img: {
               id: "version",
               url: versionImage,
-              alt: `Visualisation 3D de ${product.name}, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
-              caption: "Visualisation 3D — non contractuelle",
+              alt: `${versionImage.includes("/rendu-") ? "Visualisation 3D" : "Visuel"} de ${product.name}, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
+              caption: versionImage.includes("/rendu-")
+                ? "Visualisation 3D — non contractuelle"
+                : "Visuel du fabricant",
               isPrimary: false,
               position: 99,
             },

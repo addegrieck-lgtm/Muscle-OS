@@ -115,6 +115,41 @@ const LUCIOLE_VARIANTS: ProductVariant[] = LUCIOLE_VERSIONS.map(
   },
 );
 
+// ── Silhouette (LUM-APP-001) ─────────────────────────────────────────────────
+// Prix connu pour le format 40 × 80 cm uniquement (112,36 € hors promotion) ; les formats
+// 30 × 120 et 40 × 140 cm seront ajoutés quand leur prix fournisseur sera communiqué.
+const SILHOUETTE_MOTIFS = [
+  { id: "envol", label: "Envol", file: "a" },
+  { id: "rendez-vous", label: "Rendez-vous", file: "b" },
+  { id: "offrande", label: "Offrande", file: "c" },
+  { id: "elan", label: "Élan", file: "d" },
+  { id: "sous-la-pluie", label: "Sous la pluie", file: "e" },
+];
+const SILHOUETTE_VARIANTS: ProductVariant[] = [
+  {
+    id: "silhouette-40x80",
+    name: "40 × 80 cm",
+    sku: "LUM-APP-001-4080",
+    finish: null,
+    priceAdjustment: 0,
+    stockQuantity: 0,
+    active: true,
+    details: "Tableau lumineux 40 × 80 cm · éclairage LED en périphérie du cadre",
+    imageUrl: "/products/silhouette/motif-a.webp",
+    // Visuel du motif choisi, quels que soient le cadre et la couleur de lumière.
+    imageUrls: Object.fromEntries(
+      SILHOUETTE_MOTIFS.flatMap((m) =>
+        ["noir", "dore"].flatMap((c) =>
+          ["chaud", "froid"].map((t) => [
+            `${m.id}-${c}-${t}`,
+            `/products/silhouette/motif-${m.file}.webp`,
+          ]),
+        ),
+      ),
+    ),
+  },
+];
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -280,6 +315,81 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Suspension design en couronne ou linéaire : fines branches de métal et petites sources LED sous diffuseurs acryliques. Sept tailles, de 30 à 162 lumières.",
     art: "organic",
+    isDemo: false,
+  },
+  {
+    id: "lum-app-001",
+    slug: "silhouette",
+    name: "Silhouette",
+    reference: "LUM-APP-001",
+    shortDescription: "Un tableau lumineux : une sculpture en ombre portée, auréolée de lumière.",
+    description: [
+      "Silhouette tient à la fois de l’œuvre et du luminaire. Sur un fond texturé gris perle, une figure sculpturale se détache en noir profond ; un liseré de lumière LED court tout autour du cadre et dessine un halo doux sur le mur.",
+      "Pensée pour une entrée, un couloir, une tête de lit ou un pan de mur de salon, elle installe une atmosphère de galerie. Cinq motifs, un cadre noir ou doré, une lumière chaude ou froide.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: salePrice(11236),
+    compareAtPrice: null,
+    categoryId: "demo-cat-appliques",
+    categorySlug: "appliques",
+    status: "published",
+    featured: true,
+    dimensions: { height: 800, width: 400 },
+    weight: null,
+    materials: [],
+    finishes: ["Cadre noir", "Cadre doré"],
+    specifications: [
+      { label: "Type", value: "Applique murale / tableau lumineux LED" },
+      { label: "Format", value: "40 × 80 cm (30 × 120 et 40 × 140 cm sur demande)" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud (2700–3500 K) ou blanc froid (5500–7000 K)",
+      },
+      { label: "Cadre", value: "Noir ou doré" },
+      { label: "Classe énergétique", value: "F, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Fixation murale. Le raccordement électrique doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "silhouette-1",
+        url: "/products/silhouette/ambiance.webp",
+        alt: "Tableau lumineux Silhouette, figure sculpturale noire dans un cadre éclairé, au fond d’un couloir sombre",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: SILHOUETTE_VARIANTS,
+    options: [
+      {
+        id: "motif",
+        label: "Motif",
+        values: SILHOUETTE_MOTIFS.map(({ id, label }) => ({ id, label })),
+      },
+      {
+        id: "cadre",
+        label: "Cadre",
+        values: [
+          { id: "noir", label: "Noir" },
+          { id: "dore", label: "Doré" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Silhouette — tableau lumineux LED, applique murale design",
+    seoDescription:
+      "Tableau lumineux LED : figure sculpturale noire sur fond texturé, halo de lumière autour du cadre. Cinq motifs, cadre noir ou doré, lumière chaude ou froide.",
+    art: "sconce",
     isDemo: false,
   },
 ];
