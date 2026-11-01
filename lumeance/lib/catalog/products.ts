@@ -276,28 +276,31 @@ const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
 );
 
 // ── Constellation (LUM-SUS-003) ──────────────────────────────────────────────
-// Fiche fournisseur relevée le 01/11/2026. Prix fournisseur identique quelles que soient la forme,
-// la taille et la finition : 93,69 € (lumière fixe) / 115,99 € (variable, télécommande) en
-// promotion jusqu'au 18/11/2026 ; prix habituels 111,93 € / 138,55 €.
+// Fiche fournisseur relevée le 01/11/2026. Prix fournisseur (promotion −16 % jusqu'au 18/11/2026),
+// identiques pour l'arc et la droite, le doré et le noir :
+//   6 têtes : 93,69 € (lumière fixe), prix habituel 111,93 € ; variable 115,99 € / 138,55 €.
+//   8 têtes : 119,39 € (lumière fixe) ; prix habituel ESTIMÉ 142,63 € (même rapport que le
+//   6 têtes : 119,39 × 111,93 / 93,69), à confirmer avec le « prix le plus bas des 30 jours ».
 // Prix de vente : salePrice() sur le prix fixe HORS promotion ; télécommande : +10 € (choix du
 // propriétaire).
-const CONSTELLATION_COST = 11193;
 const CONSTELLATION_REMOTE_EXTRA = 1000;
-// [code, forme, têtes, longueur (cm), puissance (W)]
-const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number][] = [
-  ["a6", "Arc", 6, 75, 36],
-  ["a8", "Arc", 8, 100, 48],
-  ["d6", "Droite", 6, 75, 36],
-  ["d8", "Droite", 8, 100, 48],
+// [code, forme, têtes, longueur (cm), puissance (W), prix fournisseur fixe hors promotion (centimes)]
+const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number, number][] = [
+  ["a6", "Arc", 6, 75, 36, 11193],
+  ["a8", "Arc", 8, 100, 48, 14263],
+  ["d6", "Droite", 6, 75, 36, 11193],
+  ["d8", "Droite", 8, 100, 48, 14263],
 ];
+const CONSTELLATION_BASE_PRICE = Math.min(...CONSTELLATION_VERSIONS.map((v) => salePrice(v[5])));
 const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.flatMap(
-  ([code, shape, heads, length, watts]) =>
+  ([code, shape, heads, length, watts, cost]) =>
     [false, true].map((remote) => ({
       id: `constellation-${code}${remote ? "-tc" : ""}`,
       name: `${heads} têtes · ${length} cm${remote ? " · télécommande" : ""}`,
       sku: `LUM-SUS-003-${code.toUpperCase()}${remote ? "-TC" : ""}`,
       finish: shape,
-      priceAdjustment: remote ? CONSTELLATION_REMOTE_EXTRA : 0,
+      priceAdjustment:
+        salePrice(cost) - CONSTELLATION_BASE_PRICE + (remote ? CONSTELLATION_REMOTE_EXTRA : 0),
       stockQuantity: 0,
       active: true,
       details: [
@@ -832,7 +835,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, et une version à intensité variable, réglable à la télécommande.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    price: salePrice(CONSTELLATION_COST),
+    price: CONSTELLATION_BASE_PRICE,
     compareAtPrice: null,
     categoryId: "demo-cat-suspensions",
     categorySlug: "suspensions",
@@ -881,8 +884,8 @@ export const CATALOG_PRODUCTS: Product[] = [
       },
       {
         id: "constellation-2",
-        url: "/products/constellation/ambiance-arc-noir.webp",
-        alt: "Suspension Constellation noire en arc, perle centrale dorée, huit globes de verre étoilés allumés devant un mur bleu nuit, bouquet de roses sur la table",
+        url: "/products/constellation/ambiance-droite-doree.webp",
+        alt: "Suspension Constellation dorée à branche droite, huit globes de verre étoilés allumés au-dessus d’une table de salle à manger en bois, devant un mur vert sombre",
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: false,
         position: 1,
