@@ -361,6 +361,14 @@ export const CATALOG_PRODUCTS: Product[] = [
         isPrimary: true,
         position: 0,
       },
+      {
+        id: "silhouette-composition",
+        url: "/products/silhouette/composition.webp",
+        alt: "Vue éclatée de Silhouette : panneau arrière, cadre, œuvre imprimée et ruban lumineux LED",
+        caption: "Composition — visualisation 3D",
+        isPrimary: false,
+        position: 1,
+      },
     ],
     variants: SILHOUETTE_VARIANTS,
     options: [

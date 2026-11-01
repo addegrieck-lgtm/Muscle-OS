@@ -34,7 +34,7 @@ const browser = await chromium.launch({
   ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
   args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
 });
-const page = await browser.newPage({ viewport: { width: 1200, height: 1500 } });
+const page = await browser.newPage({ viewport: { width: 1500, height: 1500 } });
 page.on("pageerror", (e) => console.error("Erreur page :", e.message));
 for (const entry of versions) {
   // Entrée [code, requête] (scènes génériques) ou [code, forme, n, w, d, h] (Céleste).
@@ -48,7 +48,8 @@ for (const entry of versions) {
   const dataUrl = await page.evaluate(() => document.querySelector("canvas").toDataURL("image/png"));
   const png = Buffer.from(dataUrl.split(",")[1], "base64");
   const out = resolve(root, process.env.OUT_DIR || "public/products/celeste", `${process.env.PREFIX || "rendu-"}${code}.webp`);
-  await sharp(png).resize(1200, 1500, { kernel: "lanczos3" }).webp({ quality: 84 }).toFile(out);
+  const size = process.env.OUT_SIZE ? process.env.OUT_SIZE.split("x").map(Number) : [1200, 1500];
+  await sharp(png).resize(size[0], size[1], { kernel: "lanczos3" }).webp({ quality: 86 }).toFile(out);
   console.log("✔", out);
 }
 await browser.close();
