@@ -1,21 +1,31 @@
 import type { ArtForm } from "@/types/catalog";
+import { SEASON_ARTICLES } from "./journal-saison";
 
 export interface Article {
   slug: string;
+  /** Date et heure de mise en ligne (ISO 8601) : l'article reste invisible avant. */
+  publishedAt: string;
+  category: string;
   title: string;
   description: string;
   excerpt: string;
   art: ArtForm;
   readingMinutes: number;
   sections: { heading: string; paragraphs: string[] }[];
+  /** Questions fréquentes affichées en fin d'article. */
+  faq?: { q: string; a: string }[];
+  /** Pièces évoquées : seules celles publiées au catalogue sont affichées. */
+  productSlugs?: string[];
   related: { href: string; label: string }[];
 }
 
 /** Guides éditoriaux. Conseils généraux et repères usuels, présentés comme tels ;
  * ils ne remplacent pas l'avis d'un électricien ou d'un architecte d'intérieur. */
-export const ARTICLES: Article[] = [
+const GUIDES: Article[] = [
   {
     slug: "choisir-un-lustre-pour-un-grand-salon",
+    publishedAt: "2026-10-31T08:00:00+01:00",
+    category: "Guides d’achat",
     title: "Choisir un lustre pour un grand salon",
     description:
       "Dimensions, hauteur d’accroche, style et lumière : les repères pour choisir un lustre adapté à un grand salon.",
@@ -55,6 +65,8 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "installer-une-suspension-dans-une-cage-d-escalier",
+    publishedAt: "2026-10-31T08:00:00+01:00",
+    category: "Conseils éclairage",
     title: "Installer une suspension dans une cage d’escalier",
     description:
       "Hauteur, longueur de câble, sécurité et entretien : comment installer une suspension ou un lustre en cascade dans une cage d’escalier.",
@@ -91,6 +103,8 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "choisir-un-luminaire-en-verre",
+    publishedAt: "2026-10-31T08:00:00+01:00",
+    category: "Guides d’achat",
     title: "Choisir un luminaire en verre",
     description:
       "Verre transparent, opalin, ambré ou cristal : comprendre l’effet de chaque matière sur la lumière avant de choisir un luminaire.",
@@ -131,6 +145,8 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "les-luminaires-sculpturaux",
+    publishedAt: "2026-10-31T08:00:00+01:00",
+    category: "Inspiration lumineuse",
     title: "Les luminaires sculpturaux",
     description:
       "Pourquoi les luminaires sculpturaux s’imposent dans les intérieurs contemporains, et comment les mettre en scène.",
@@ -168,6 +184,8 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "tendances-de-l-eclairage-contemporain",
+    publishedAt: "2026-10-31T08:00:00+01:00",
+    category: "Tendances déco",
     title: "Les tendances de l’éclairage contemporain",
     description:
       "Lumière chaude, formes organiques, matières naturelles et éclairage en plusieurs plans : les grandes orientations de l’éclairage contemporain.",
@@ -205,4 +223,36 @@ export const ARTICLES: Article[] = [
   },
 ];
 
-export const getArticle = (slug: string) => ARTICLES.find((a) => a.slug === slug) ?? null;
+/** Tous les articles, y compris ceux programmés (à ne jamais afficher tels quels). */
+export const ALL_ARTICLES: Article[] = [...GUIDES, ...SEASON_ARTICLES];
+
+/** Articles en ligne à la date donnée, du plus récent au plus ancien. */
+export function publishedArticles(now: Date = new Date()): Article[] {
+  return ALL_ARTICLES.filter((a) => new Date(a.publishedAt).getTime() <= now.getTime()).sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  );
+}
+
+/** Article en ligne uniquement : un article programmé renvoie null (page 404). */
+export function getArticle(slug: string, now: Date = new Date()): Article | null {
+  return publishedArticles(now).find((a) => a.slug === slug) ?? null;
+}
+
+/** Prochain article programmé (pour l'administration et les tests). */
+export function nextScheduledArticle(now: Date = new Date()): Article | null {
+  return (
+    ALL_ARTICLES.filter((a) => new Date(a.publishedAt).getTime() > now.getTime()).sort(
+      (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime(),
+    )[0] ?? null
+  );
+}
+
+/** « 3 novembre 2026 », en heure de Paris. */
+export function formatArticleDate(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Paris",
+  }).format(new Date(iso));
+}
