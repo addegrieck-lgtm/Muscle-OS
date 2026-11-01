@@ -20,7 +20,12 @@ const W = Number(q.get("w") || 40) / 100;            // m
 const D = Number(q.get("d") || W * 100) / 100;       // m
 const H = Number(q.get("h") || 3);                   // longueur de suspension max (m)
 const seed = Number(q.get("seed") || 7);
-const TEMP = q.get("temp") || "chaud"; // chaud | neutre | froid
+const TEMP = q.get("temp") || "chaud";
+// Style « nebuleuse » : verre teinté (cognac | fume) rempli de micro-LED, pavillon dore | argente | noir.
+const STYLE = q.get("style") || "celeste";
+const NEB = STYLE === "nebuleuse";
+const GLASS = q.get("verre") || "cognac";
+const CANOPY = q.get("pavillon") || "argente"; // chaud | neutre | froid
 // Teintes approximatives : blanc chaud ~2700-3000 K, neutre ~4000 K, froid ~6000 K.
 const LIGHT = { chaud: 0xffb865, neutre: 0xffe6c8, froid: 0xdce8ff }[TEMP];
 const LIGHT_CORE = { chaud: 0xfff8ec, neutre: 0xfffcf6, froid: 0xf4f8ff }[TEMP];
@@ -81,6 +86,7 @@ const key = new THREE.SpotLight({ chaud: 0xffd29a, neutre: 0xffeedd, froid: 0xe8
 
 // ── Pavillon ──
 const chrome = new THREE.MeshStandardMaterial({ color: 0xdedede, metalness: 1, roughness: 0.12 });
+if (NEB) Object.assign(chrome, { dore: { color: new THREE.Color(0xe0b86e), roughness: 0.35, envMapIntensity: 3 }, argente: { color: new THREE.Color(0xe8e8e8), roughness: 0.3, envMapIntensity: 3 }, noir: { color: new THREE.Color(0x1d1c1b), metalness: 0.5, roughness: 0.4 } }[CANOPY]);
 if (shape === "rect") { chrome.roughness = 0.3; chrome.color.set(0x8c8c8c); } // évite le reflet blanc de face sur la barre
 const canopyT = 0.05;
 let canopy;
@@ -91,7 +97,7 @@ canopy.position.y = ceilingY - canopyT / 2; scene.add(canopy);
 // ── Positions des sphères dans l'empreinte du pavillon ──
 const margin = 0.04;
 const pts = [];
-const minDist = Math.max(0.035, Math.sqrt((W * D) / Math.max(n, 1)) * 0.55);
+const minDist = NEB ? 0.11 : Math.max(0.035, Math.sqrt((W * D) / Math.max(n, 1)) * 0.55);
 let guard = 0;
 // Barre étroite (rectangle 5 et 7 sphères) : sphères alignées, régulièrement espacées (schéma fabricant).
 const isBar = shape === "rect" && D <= 0.1;
@@ -104,11 +110,12 @@ while (!isBar && pts.length < n && guard++ < 20000) {
 }
 // Hauteurs : spirale descendante (rond) ou répartition aléatoire (autres), de 0,35 m à H.
 const order = pts.map((p, i) => ({ ...p, a: Math.atan2(p.z, p.x), i }));
-if (shape === "round") order.sort((a, b) => a.a - b.a);
+if (NEB) order.sort(() => rand() - 0.5);
+else if (shape === "round") order.sort((a, b) => a.a - b.a);
 else if (isBar) order.sort((a, b) => a.x - b.x);
 else order.sort(() => rand() - 0.5);
 // Sphères ≈ 15 cm ; réduites sur la barre étroite pour rester espacées (proportions du schéma fabricant).
-const R = isBar ? Math.min(0.075, ((W - 0.08) / Math.max(n - 1, 1)) * 0.36) : 0.075;
+const R = NEB ? 0.1 : isBar ? Math.min(0.075, ((W - 0.08) / Math.max(n - 1, 1)) * 0.36) : 0.075;
 // Verre clair : quasi transparent (non éclairé de l'intérieur), lisible par son contour et ses reflets.
 const glass = new THREE.MeshBasicMaterial({ color: 0xffe6c4, transparent: true, opacity: 0.07, depthWrite: false });
 const glint = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
@@ -124,6 +131,11 @@ const sphereGeo = new THREE.SphereGeometry(R, 48, 32);
 // Bulles prises dans le verre (aspect « verre cristal »)
 const bubbleGeo = new THREE.SphereGeometry(0.003, 6, 4);
 const bubbleMat = new THREE.MeshBasicMaterial({ color: 0xfff3e0, transparent: true, opacity: 0.8 });
+// Matériaux Nébuleuse
+const nebGlass = new THREE.MeshBasicMaterial({ color: { cognac: 0xd79a52, fume: 0x8d8780 }[GLASS], transparent: true, opacity: GLASS === "cognac" ? 0.5 : 0.42, depthWrite: false });
+const sparkGeo = new THREE.SphereGeometry(0.0022, 6, 4);
+const sparkMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(LIGHT).lerp(new THREE.Color(0xffffff), 0.35).multiplyScalar(1.6) });
+const sparkHot = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffffff).multiplyScalar(2.2) });
 let maxDrop = 0;
 order.forEach((p, k) => {
   const t = order.length > 1 ? k / (order.length - 1) : 0;
@@ -137,6 +149,24 @@ order.forEach((p, k) => {
   maxDrop = Math.max(maxDrop, drop);
   const y = ceilingY - canopyT - drop;
   const g = new THREE.Group(); g.position.set(p.x, y, p.z);
+  if (NEB) {
+    // Verre teinté légèrement lumineux + nuage de micro-LED (guirlande « fil de fée ») + capuchon métal.
+    g.add(new THREE.Mesh(sphereGeo, nebGlass));
+    g.add(new THREE.Mesh(sphereGeo, rimMat));
+    for (let b = 0; b < 110; b++) {
+      const m = new THREE.Mesh(sparkGeo, rand() < 0.35 ? sparkHot : sparkMat);
+      m.position.copy(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().multiplyScalar(R * Math.cbrt(rand()) * 0.85));
+      m.scale.setScalar(0.6 + rand() * 0.9); g.add(m);
+    }
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.16, R * 0.2, R * 0.16, 20), chrome); cap.position.y = R * 0.98; g.add(cap);
+    const hl2 = new THREE.Mesh(new THREE.SphereGeometry(R * 0.1, 12, 8), glint); hl2.scale.set(1.6, 0.7, 0.4);
+    hl2.position.set(-R * 0.45, R * 0.55, R * 0.62); hl2.rotation.z = 0.6; g.add(hl2);
+    const pl = new THREE.PointLight(LIGHT, Math.min(0.9, 9 / n), 3.5, 1.6); g.add(pl);
+    scene.add(g);
+    const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, ceilingY - canopyT, p.z), new THREE.Vector3(p.x, y + R * 1.06, p.z)]);
+    scene.add(new THREE.Line(geo, wireMat));
+    return;
+  }
   const shell = new THREE.Mesh(sphereGeo, glass); g.add(shell);
   g.add(new THREE.Mesh(sphereGeo, rimMat));
   const hl = new THREE.Mesh(new THREE.SphereGeometry(R * 0.11, 12, 8), glint); hl.scale.set(1.6, 0.7, 0.4);
