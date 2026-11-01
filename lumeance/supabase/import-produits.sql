@@ -377,17 +377,29 @@ values ((select id from public.products where reference = 'LUM-SUS-002'), 'L 92 
   0, true, '12 ampoules G9 LED fournies · 83 éléments de cristal · hauteur 40 cm · pavillon 50 cm · suspension réglable jusqu’à 1,5 m', '/products/aigrette/ambiance-lineaire.webp', '{"dore-chaud":"/products/aigrette/rendu-l92-dore-chaud.webp","dore-neutre":"/products/aigrette/rendu-l92-dore-neutre.webp","dore-froid":"/products/aigrette/rendu-l92-dore-froid.webp","dore-commutable":"/products/aigrette/rendu-l92-dore-neutre.webp","chrome-chaud":"/products/aigrette/rendu-l92-chrome-chaud.webp","chrome-neutre":"/products/aigrette/rendu-l92-chrome-neutre.webp","chrome-froid":"/products/aigrette/rendu-l92-chrome-froid.webp","chrome-commutable":"/products/aigrette/rendu-l92-chrome-neutre.webp"}'::jsonb, 6)
 on conflict (sku) do nothing;
 insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
-select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/ambiance-ronde.webp', 'Visualisation 3D de la suspension Aigrette ronde Ø60 cm dorée, allumée en blanc chaud dans un salon au mur anthracite, rideau de lin et tableau encadré', 'Visualisation 3D — mise en situation', 0,
+select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/ambiance-ronde.webp', 'Suspension Aigrette ronde dorée, boule de tiges perlées de cristal allumée dans un salon aux murs gris', 'Photographie d’ambiance du fabricant', 0,
   true and not exists (select 1 from public.product_images
     where product_id = (select id from public.products where reference = 'LUM-SUS-002') and is_primary)
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-002') and storage_path = '/products/aigrette/ambiance-ronde.webp');
 insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
-select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/ambiance-lineaire.webp', 'Visualisation 3D de la suspension Aigrette linéaire 92 cm dorée, allumée en blanc chaud au-dessus d’une table de salle à manger en chêne', 'Visualisation 3D — mise en situation', 1,
+select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/ambiance-lineaire.webp', 'Suspension Aigrette linéaire dorée au-dessus d’une table de salle à manger en bois', 'Photographie d’ambiance du fabricant', 1,
   false and not exists (select 1 from public.product_images
     where product_id = (select id from public.products where reference = 'LUM-SUS-002') and is_primary)
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-002') and storage_path = '/products/aigrette/ambiance-lineaire.webp');
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/mise-en-scene-ronde.webp', 'Visualisation 3D de la suspension Aigrette ronde Ø60 cm dorée, allumée en blanc chaud dans un salon au mur anthracite, rideau de lin et tableau encadré', 'Visualisation 3D — mise en situation', 2,
+  false and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-SUS-002') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-SUS-002') and storage_path = '/products/aigrette/mise-en-scene-ronde.webp');
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-SUS-002'), '/products/aigrette/mise-en-scene-lineaire.webp', 'Visualisation 3D de la suspension Aigrette linéaire 92 cm dorée, allumée en blanc chaud au-dessus d’une table en noyer, devant un mur anthracite et un tableau encadré', 'Visualisation 3D — mise en situation', 3,
+  false and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-SUS-002') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-SUS-002') and storage_path = '/products/aigrette/mise-en-scene-lineaire.webp');
 
 -- ════ Sylve (LUM-LUS-003) ════
 insert into public.products (slug, name, reference, short_description, description, price,
