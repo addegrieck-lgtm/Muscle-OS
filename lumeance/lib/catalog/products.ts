@@ -839,7 +839,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-suspensions",
     categorySlug: "suspensions",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,

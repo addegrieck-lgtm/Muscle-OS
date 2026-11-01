@@ -1,4 +1,4 @@
--- LUMÉANCE — Constellation : 2ᵉ photo du fabricant et prix du 8 têtes.
+-- LUMÉANCE — Constellation : 2ᵉ photo du fabricant, prix du 8 têtes et mise en ligne.
 -- À coller UNE fois dans Supabase → SQL Editor → Run, après la publication du site.
 -- Sans risque à rejouer.
 --  • La photo « arc noir » a été remplacée par la « barre droite dorée » et son fichier supprimé ;
@@ -35,3 +35,8 @@ select i.position, i.storage_path from public.product_images i
  where p.reference = 'LUM-SUS-003' order by i.position;
 select v.sku, v.price_adjustment from public.product_variants v
  where v.sku like 'LUM-SUS-003-%' order by v.position;
+
+-- Mise en ligne de Constellation (demande du propriétaire, 01/11/2026).
+update public.products set status = 'published'
+ where reference = 'LUM-SUS-003' and status <> 'published';
+select reference, status from public.products where reference = 'LUM-SUS-003';
