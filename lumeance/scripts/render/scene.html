@@ -81,6 +81,7 @@ const key = new THREE.SpotLight({ chaud: 0xffd29a, neutre: 0xffeedd, froid: 0xe8
 
 // ── Pavillon ──
 const chrome = new THREE.MeshStandardMaterial({ color: 0xdedede, metalness: 1, roughness: 0.12 });
+if (shape === "rect") { chrome.roughness = 0.3; chrome.color.set(0x8c8c8c); } // évite le reflet blanc de face sur la barre
 const canopyT = 0.05;
 let canopy;
 if (shape === "round") canopy = new THREE.Mesh(new THREE.CylinderGeometry(W / 2, W / 2, canopyT, 96), chrome);
@@ -92,7 +93,10 @@ const margin = 0.04;
 const pts = [];
 const minDist = Math.max(0.035, Math.sqrt((W * D) / Math.max(n, 1)) * 0.55);
 let guard = 0;
-while (pts.length < n && guard++ < 20000) {
+// Barre étroite (rectangle 5 et 7 sphères) : sphères alignées, régulièrement espacées (schéma fabricant).
+const isBar = shape === "rect" && D <= 0.1;
+if (isBar) for (let i = 0; i < n; i++) pts.push({ x: -W / 2 + margin + (i * (W - 2 * margin)) / Math.max(n - 1, 1), z: 0 });
+while (!isBar && pts.length < n && guard++ < 20000) {
   let x, z;
   if (shape === "round") { const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * (W / 2 - margin); x = Math.cos(a) * r; z = Math.sin(a) * r; }
   else { x = (rand() - 0.5) * (W - 2 * margin); z = (rand() - 0.5) * Math.max(D - 2 * margin, 0.001); }
@@ -101,8 +105,10 @@ while (pts.length < n && guard++ < 20000) {
 // Hauteurs : spirale descendante (rond) ou répartition aléatoire (autres), de 0,35 m à H.
 const order = pts.map((p, i) => ({ ...p, a: Math.atan2(p.z, p.x), i }));
 if (shape === "round") order.sort((a, b) => a.a - b.a);
+else if (isBar) order.sort((a, b) => a.x - b.x);
 else order.sort(() => rand() - 0.5);
-const R = 0.075; // rayon d'une sphère (≈ 15 cm de diamètre)
+// Sphères ≈ 15 cm ; réduites sur la barre étroite pour rester espacées (proportions du schéma fabricant).
+const R = isBar ? Math.min(0.075, ((W - 0.08) / Math.max(n - 1, 1)) * 0.36) : 0.075;
 // Verre clair : quasi transparent (non éclairé de l'intérieur), lisible par son contour et ses reflets.
 const glass = new THREE.MeshBasicMaterial({ color: 0xffe6c4, transparent: true, opacity: 0.07, depthWrite: false });
 const glint = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
@@ -118,9 +124,17 @@ const sphereGeo = new THREE.SphereGeometry(R, 48, 32);
 // Bulles prises dans le verre (aspect « verre cristal »)
 const bubbleGeo = new THREE.SphereGeometry(0.003, 6, 4);
 const bubbleMat = new THREE.MeshBasicMaterial({ color: 0xfff3e0, transparent: true, opacity: 0.8 });
+let maxDrop = 0;
 order.forEach((p, k) => {
   const t = order.length > 1 ? k / (order.length - 1) : 0;
-  const drop = 0.35 + (shape === "round" ? t : rand()) * (H - 0.45) + (rand() - 0.5) * 0.12;
+  // Rond / carré : cascade sur toute la hauteur. Rectangle : sphères groupées dans une bande
+  // (zigzag régulier pour la barre), comme sur les schémas du fabricant.
+  const drop = shape === "rect"
+    ? isBar
+      ? H * (0.42 + (k % 2 ? 0.14 : 0) + (k % 3 === 2 ? 0.07 : 0)) + (rand() - 0.5) * 0.05
+      : H * (0.32 + rand() * 0.34)
+    : 0.35 + t * (H - 0.45) + (rand() - 0.5) * 0.12;
+  maxDrop = Math.max(maxDrop, drop);
   const y = ceilingY - canopyT - drop;
   const g = new THREE.Group(); g.position.set(p.x, y, p.z);
   const shell = new THREE.Mesh(sphereGeo, glass); g.add(shell);
@@ -138,10 +152,13 @@ order.forEach((p, k) => {
 
 // ── Caméra : contre-plongée légère, cadrage de toute la composition ──
 const camera = new THREE.PerspectiveCamera(34, WIDTH / HEIGHT, 0.05, 100);
-const midY = ceilingY - (H + 0.2) / 2;
-const span = H + 0.55;
+// Rond / carré : toute la cascade. Rectangle : cadrage serré sur le luminaire, presque de face.
+const rectFrame = shape === "rect";
+const visibleH = rectFrame ? maxDrop + R + 0.15 : H + 0.2;
+const midY = ceilingY - visibleH / 2;
+const span = rectFrame ? Math.max(visibleH + 0.35, (W + 0.4) * (HEIGHT / WIDTH)) : H + 0.55;
 const dist = span / (2 * Math.tan(THREE.MathUtils.degToRad(34 / 2))) * 1.02;
-camera.position.set(dist * 0.35, midY - span * 0.12, dist * 0.94);
+camera.position.set(dist * (rectFrame ? 0.16 : 0.35), midY - span * (rectFrame ? 0.06 : 0.12), dist * (rectFrame ? 0.99 : 0.94));
 camera.lookAt(0, midY + 0.05, 0);
 
 const composer = new EffectComposer(renderer);
