@@ -69,11 +69,11 @@ const fill = new THREE.DirectionalLight(0xffffff, 0.22); fill.position.set(1.2, 
 // ── Luminaire, centré à hauteur d'œil ──
 buildVolute({ THREE, scene, size: SIZE, outer, inner, LIGHT, GLOW, wallZ: 0 });
 
-// ── Caméra : de face, légèrement à droite (comme les photos du fournisseur) ──
+// ── Caméra : de face, légèrement à gauche (comme la photo du fournisseur) ──
 const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.02, 20);
 const frameH = 0.78;
 const dist = frameH / (2 * Math.tan(THREE.MathUtils.degToRad(15)));
-camera.position.set(dist * 0.22, 0.02, dist);
+camera.position.set(-dist * 0.22, 0.02, dist);
 camera.lookAt(0, 0, 0.05);
 
 const composer = new EffectComposer(renderer);
