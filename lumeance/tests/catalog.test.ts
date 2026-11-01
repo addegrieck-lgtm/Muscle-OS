@@ -88,3 +88,34 @@ describe("grille de prix Luciole", async () => {
     expect(prices).toEqual([180, 470, 540, 690, 770, 1050, 470]);
   });
 });
+
+describe("options Luciole", async () => {
+  const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  const { priceCart } = await import("@/lib/services/pricing");
+  it("structure + lumière obligatoires, sans changement de prix", () => {
+    const l = CATALOG_PRODUCTS.find((p) => p.slug === "luciole")!;
+    const v = l.variants[2]!;
+    const ship = { standardAmount: 0, freeThreshold: 0 };
+    const ok = priceCart(
+      [
+        {
+          productId: l.id,
+          variantId: v.id,
+          quantity: 1,
+          options: { structure: "noir", lumiere: "chaud" },
+        },
+      ],
+      [l],
+      ship,
+    );
+    expect(ok.lines[0]!.unitPrice).toBe(l.price + v.priceAdjustment);
+    expect(ok.lines[0]!.variantName).toContain("Noir");
+    expect(ok.lines[0]!.variantName).toContain("Blanc chaud");
+    const ko = priceCart(
+      [{ productId: l.id, variantId: v.id, quantity: 1, options: { lumiere: "chaud" } }],
+      [l],
+      ship,
+    );
+    expect(ko.lines).toHaveLength(0);
+  });
+});

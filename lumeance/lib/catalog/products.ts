@@ -219,6 +219,8 @@ export const CATALOG_PRODUCTS: Product[] = [
       { label: "Hauteur du luminaire", value: "35 cm" },
       { label: "Suspension", value: "Câbles réglables jusqu’à 1,5 m" },
       { label: "Formes", value: "Couronne (Ø50 à Ø125 cm) ou linéaire (100 cm)" },
+      { label: "Couleurs de structure", value: "Or champagne, or rose, sable doré ou noir" },
+      { label: "Couleur de lumière", value: "Blanc chaud ou blanc froid" },
     ],
     deliveryInformation: null,
     assemblyInformation:
@@ -244,6 +246,27 @@ export const CATALOG_PRODUCTS: Product[] = [
     ],
     variants: LUCIOLE_VARIANTS,
     optionLabels: { group: "Forme", variant: "Taille" },
+    // Options du fabricant, sans incidence sur le prix (à confirmer si le fournisseur facture une teinte).
+    options: [
+      {
+        id: "structure",
+        label: "Couleur de la structure",
+        values: [
+          { id: "or-champagne", label: "Or champagne" },
+          { id: "or-rose", label: "Or rose" },
+          { id: "sable-dore", label: "Sable doré" },
+          { id: "noir", label: "Noir" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
     seoTitle: "Luciole — suspension design à branches lumineuses",
     seoDescription:
       "Suspension design en couronne ou linéaire : fines branches de métal et petites sources LED sous diffuseurs acryliques. Sept tailles, de 30 à 162 lumières.",
