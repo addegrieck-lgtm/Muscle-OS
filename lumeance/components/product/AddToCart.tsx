@@ -63,15 +63,10 @@ export function AddToCart({ product }: { product: Product }) {
                   onChange={() => setVariantId(v.id)}
                 >
                   {v.name}
-                  {v.priceAdjustment !== 0 && (
-                    <span className="ml-2 opacity-70">
-                      {v.priceAdjustment > 0 ? "+" : "−"}
-                      {formatPrice(Math.abs(v.priceAdjustment))}
-                    </span>
-                  )}
                 </Chip>
               ))}
             </div>
+            {variant?.details && <p className="t-small mt-3 text-brun/65">{variant.details}</p>}
           </fieldset>
         )
       )}
@@ -227,9 +222,6 @@ function TwoLevelSelector({
               onChange={() => onChange(v.id)}
             >
               {v.name.replace(/\s*sphères?$/, "")}
-              <span className="ml-2 opacity-70">
-                {formatPrice(product.price + v.priceAdjustment)}
-              </span>
             </Chip>
           ))}
         </div>
