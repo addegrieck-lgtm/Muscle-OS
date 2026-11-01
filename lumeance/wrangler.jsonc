@@ -12,6 +12,13 @@
     "binding": "ASSETS"
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "lumeance" }],
+  // Limiteurs de débit partagés (gratuits), en complément du limiteur en mémoire :
+  // formulaires publics (contact, lettre) et connexion à l'administration, par adresse IP.
+  // namespace_id : identifiant entier libre, unique par compte Cloudflare.
+  "ratelimits": [
+    { "name": "FORMS_LIMITER", "namespace_id": "4101", "simple": { "limit": 5, "period": 60 } },
+    { "name": "LOGIN_LIMITER", "namespace_id": "4102", "simple": { "limit": 5, "period": 60 } }
+  ],
   // Conserve les variables saisies dans le tableau de bord Cloudflare (sinon chaque déploiement
   // les efface, puisqu'elles ne figurent pas dans ce fichier).
   "keep_vars": true,

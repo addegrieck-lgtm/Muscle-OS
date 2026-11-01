@@ -10,7 +10,14 @@ export const metadata = pageMetadata({
   path: "/contact",
 });
 
-export default async function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ objet?: string | string[] }>;
+}) {
+  // Objet prérempli depuis une fiche produit (« Demander cette pièce ») : simple texte, borné.
+  const raw = (await searchParams).objet;
+  const subject = (typeof raw === "string" ? raw : "").replace(/\s+/g, " ").trim().slice(0, 160);
   const contact = await getContactSettings();
   return (
     <>
@@ -21,7 +28,7 @@ export default async function ContactPage() {
       />
       <div className="container-luxe grid gap-16 pb-32 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <ContactForm />
+          <ContactForm defaultSubject={subject} />
         </div>
         <aside className="space-y-6 lg:col-span-4 lg:col-start-9">
           <div className="bg-creme/70 p-8">

@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const KEY = "lumeance.consent.v1";
+
+/**
+ * Passer à true UNIQUEMENT le jour où un traceur soumis à consentement est ajouté (mesure
+ * d'audience non exemptée, publicité, réseaux sociaux). Tant que le site n'utilise que des
+ * éléments strictement nécessaires, la CNIL n'impose aucun bandeau : il reste masqué, ainsi que
+ * le lien « Gérer les cookies » du pied de page.
+ */
+export const CONSENT_REQUIRED = false;
 const OPEN_EVENT = "lumeance:cookies";
 
 export type Consent = { audience: boolean; at: string };
@@ -26,6 +34,7 @@ export function CookieConsent() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!CONSENT_REQUIRED) return;
     if (!readConsent()) setOpen(true);
     const onOpen = () => setOpen(true);
     window.addEventListener(OPEN_EVENT, onOpen);
@@ -74,6 +83,7 @@ export function CookieConsent() {
 }
 
 export function CookieSettingsButton() {
+  if (!CONSENT_REQUIRED) return null;
   return (
     <button
       type="button"

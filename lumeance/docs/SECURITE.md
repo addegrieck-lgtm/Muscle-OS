@@ -26,8 +26,8 @@ Refuse d’agir si un super administrateur existe. Mot de passe provisoire affic
 - « Payée » refusée par la base sans transactions confirmées couvrant le total ; création d’une commande déjà payée impossible.
 - Journal d’activité alimenté par déclencheurs, aucune politique d’écriture ni de suppression.
 - Imports : type réel lu dans les octets (JPEG, PNG, WebP, AVIF), 10 Mo, nom de fichier généré, bucket limité.
-- Formulaires publics : Zod, pot de miel, limitation de débit ; CSV protégés contre l’injection de formules.
-- En-têtes : HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy ; `/admin` en noindex.
+- Formulaires publics : Zod, pot de miel, limitation de débit à deux niveaux (mémoire de l’instance sur 10–15 min + limiteurs partagés Cloudflare `FORMS_LIMITER` / `LOGIN_LIMITER` sur 1 min, déclarés dans `wrangler.jsonc`) ; adresse IP lue dans `cf-connecting-ip` (non falsifiable), jamais dans le premier élément de `x-forwarded-for` ; CSV protégés contre l’injection de formules.
+- En-têtes : HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, Content-Security-Policy (production ; à étendre si un service tiers est ajouté : Stripe, mesure d’audience) ; `/admin` en noindex.
 
 ## Sauvegardes
 Supabase gratuit : pas de restauration à un instant donné. Prévoir un `pg_dump` planifié (ex. GitHub Action hebdomadaire chiffrée) ou l’offre payante avant l’ouverture.

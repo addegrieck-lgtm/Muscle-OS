@@ -59,16 +59,14 @@ export default function ConfidentialitePage() {
             consentement :
           </p>
           <ul>
-            <li>
-              votre panier et votre choix en matière de cookies, conservés sur votre appareil
-              (stockage local) ;
-            </li>
+            <li>votre panier, conservé sur votre appareil (stockage local) ;</li>
             <li>pour les administrateurs uniquement, un cookie de session d’authentification.</li>
           </ul>
           <p>
             Aucune mesure d’audience, aucun cookie publicitaire et aucun réseau social tiers ne sont
-            chargés. Si une mesure d’audience est ajoutée, elle ne sera activée qu’avec votre
-            accord, modifiable à tout moment via le lien « Gérer les cookies » en pied de page.
+            chargés : c’est pourquoi aucun bandeau de consentement ne vous est présenté. Si une
+            mesure d’audience soumise à consentement est ajoutée, elle ne sera activée qu’avec votre
+            accord, recueilli par un bandeau et modifiable à tout moment depuis le pied de page.
           </p>
         </Prose>
       </div>

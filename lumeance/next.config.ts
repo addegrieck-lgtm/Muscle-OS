@@ -17,6 +17,33 @@ const securityHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
+/**
+ * Politique de sécurité du contenu (production uniquement : le mode développement de Next a besoin
+ * d'eval). Tout est servi par le site lui-même, sauf les images et l'API Supabase.
+ * 'unsafe-inline' reste nécessaire pour les scripts : Next.js et le script d'intro sont injectés
+ * en ligne (passer à des nonces imposerait un middleware sur toutes les pages).
+ * À compléter si un service tiers est ajouté (mesure d'audience, paiement Stripe : js.stripe.com…).
+ */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "worker-src 'self' blob:",
+  "media-src 'self' https://*.supabase.co",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
+if (process.env.NODE_ENV === "production") {
+  securityHeaders.push({ key: "Content-Security-Policy", value: contentSecurityPolicy });
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Projet autonome dans le dépôt Muscle-OS : la racine de traçage est ce dossier.

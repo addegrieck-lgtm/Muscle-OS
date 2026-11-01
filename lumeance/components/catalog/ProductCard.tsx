@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductVisual } from "@/components/product/ProductVisual";
 import { formatPrice } from "@/lib/money";
+import { priceRange } from "@/lib/catalog/price-range";
 import { categoryLabel } from "@/lib/navigation";
 import type { Product } from "@/types/catalog";
 
@@ -13,12 +14,13 @@ export function ProductCard({
   index?: number;
   mood?: "nuit" | "jour";
 }) {
+  const range = priceRange(product);
   return (
     <article data-reveal data-reveal-delay={String((index % 3) * 0.12)} className="group">
       <Link
         href={`/produit/${product.slug}`}
         className="block"
-        aria-label={`${product.name} — ${formatPrice(product.price)}`}
+        aria-label={`${product.name} — ${range.varies ? "à partir de " : ""}${formatPrice(range.min)}`}
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-noir">
           <div className="absolute inset-0 transition-transform duration-[1800ms] ease-[var(--ease-luxe)] group-hover:scale-[1.045]">
@@ -40,15 +42,13 @@ export function ProductCard({
             )}
           </div>
           <p className="shrink-0 pt-6 font-serif text-xl">
-            {product.compareAtPrice && (
+            {product.compareAtPrice && !range.varies && (
               <span className="mr-2 text-base text-brun/40 line-through">
                 {formatPrice(product.compareAtPrice)}
               </span>
             )}
-            {product.variants.some((v) => v.active && v.priceAdjustment > 0) && (
-              <span className="mr-1 text-base text-brun/50">dès</span>
-            )}
-            {formatPrice(product.price)}
+            {range.varies && <span className="mr-1 text-base text-brun/50">dès</span>}
+            {formatPrice(range.min)}
           </p>
         </div>
       </Link>
