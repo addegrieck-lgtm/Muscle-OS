@@ -116,8 +116,6 @@ const LUCIOLE_VARIANTS: ProductVariant[] = LUCIOLE_VERSIONS.map(
 );
 
 // ── Silhouette (LUM-APP-001) ─────────────────────────────────────────────────
-// Prix connu pour le format 40 × 80 cm uniquement (112,36 € hors promotion) ; les formats
-// 30 × 120 et 40 × 140 cm seront ajoutés quand leur prix fournisseur sera communiqué.
 const SILHOUETTE_MOTIFS = [
   { id: "envol", label: "Envol", file: "a" },
   { id: "rendez-vous", label: "Rendez-vous", file: "b" },
@@ -125,30 +123,35 @@ const SILHOUETTE_MOTIFS = [
   { id: "elan", label: "Élan", file: "d" },
   { id: "sous-la-pluie", label: "Sous la pluie", file: "e" },
 ];
-const SILHOUETTE_VARIANTS: ProductVariant[] = [
-  {
-    id: "silhouette-40x80",
-    name: "40 × 80 cm",
-    sku: "LUM-APP-001-4080",
-    finish: null,
-    priceAdjustment: 0,
-    stockQuantity: 0,
-    active: true,
-    details: "Tableau lumineux 40 × 80 cm · éclairage LED en périphérie du cadre",
-    imageUrl: "/products/silhouette/motif-a.webp",
-    // Visuel du motif choisi, quels que soient le cadre et la couleur de lumière.
-    imageUrls: Object.fromEntries(
-      SILHOUETTE_MOTIFS.flatMap((m) =>
-        ["noir", "dore"].flatMap((c) =>
-          ["chaud", "froid"].map((t) => [
-            `${m.id}-${c}-${t}`,
-            `/products/silhouette/motif-${m.file}.webp`,
-          ]),
-        ),
+// [code, largeur cm, hauteur cm, prix fournisseur (centimes)]
+const SILHOUETTE_SIZES: [string, number, number, number][] = [
+  ["4080", 40, 80, 11236],
+  ["30120", 30, 120, 11339],
+  ["40140", 40, 140, 16299],
+];
+const SILHOUETTE_BASE_PRICE = Math.min(...SILHOUETTE_SIZES.map((v) => salePrice(v[3])));
+const SILHOUETTE_VARIANTS: ProductVariant[] = SILHOUETTE_SIZES.map(([code, w, h, cost]) => ({
+  id: `silhouette-${w}x${h}`,
+  name: `${w} × ${h} cm`,
+  sku: `LUM-APP-001-${code}`,
+  finish: null,
+  priceAdjustment: salePrice(cost) - SILHOUETTE_BASE_PRICE,
+  stockQuantity: 0,
+  active: true,
+  details: `Tableau lumineux ${w} × ${h} cm · éclairage LED en périphérie du cadre`,
+  imageUrl: "/products/silhouette/motif-a.webp",
+  // Visuel du motif choisi, quels que soient le cadre et la couleur de lumière.
+  imageUrls: Object.fromEntries(
+    SILHOUETTE_MOTIFS.flatMap((m) =>
+      ["noir", "dore"].flatMap((c) =>
+        ["chaud", "froid"].map((t) => [
+          `${m.id}-${c}-${t}`,
+          `/products/silhouette/motif-${m.file}.webp`,
+        ]),
       ),
     ),
-  },
-];
+  ),
+}));
 
 export const CATALOG_PRODUCTS: Product[] = [
   {
@@ -325,22 +328,22 @@ export const CATALOG_PRODUCTS: Product[] = [
     shortDescription: "Un tableau lumineux : une sculpture en ombre portée, auréolée de lumière.",
     description: [
       "Silhouette tient à la fois de l’œuvre et du luminaire. Sur un fond texturé gris perle, une figure sculpturale se détache en noir profond ; un liseré de lumière LED court tout autour du cadre et dessine un halo doux sur le mur.",
-      "Pensée pour une entrée, un couloir, une tête de lit ou un pan de mur de salon, elle installe une atmosphère de galerie. Cinq motifs, un cadre noir ou doré, une lumière chaude ou froide.",
+      "Pensée pour une entrée, un couloir, une tête de lit ou un pan de mur de salon, elle installe une atmosphère de galerie. Trois formats, cinq motifs, un cadre noir ou doré, une lumière chaude ou froide.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    price: salePrice(11236),
+    price: SILHOUETTE_BASE_PRICE,
     compareAtPrice: null,
     categoryId: "demo-cat-appliques",
     categorySlug: "appliques",
     status: "published",
     featured: true,
-    dimensions: { height: 800, width: 400 },
+    dimensions: {},
     weight: null,
     materials: [],
     finishes: ["Cadre noir", "Cadre doré"],
     specifications: [
       { label: "Type", value: "Applique murale / tableau lumineux LED" },
-      { label: "Format", value: "40 × 80 cm (30 × 120 et 40 × 140 cm sur demande)" },
+      { label: "Formats", value: "40 × 80, 30 × 120 ou 40 × 140 cm" },
       {
         label: "Couleur de lumière",
         value: "Blanc chaud (2700–3500 K) ou blanc froid (5500–7000 K)",
