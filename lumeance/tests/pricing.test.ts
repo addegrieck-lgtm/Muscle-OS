@@ -92,7 +92,11 @@ describe("options sans incidence sur le prix (couleur de lumière)", async () =>
     expect(q.lines[0]!.options).toEqual({ lumiere: "froid" });
   });
   it("refuse une couleur absente, inconnue ou une option inventée", () => {
-    const cases: (Record<string, string> | undefined)[] = [undefined, { lumiere: "rose" }, { lumiere: "chaud", autre: "x" }];
+    const cases: (Record<string, string> | undefined)[] = [
+      undefined,
+      { lumiere: "rose" },
+      { lumiere: "chaud", autre: "x" },
+    ];
     for (const options of cases) {
       const q = priceCart(
         [{ productId: celeste.id, variantId: v.id, quantity: 1, options }],

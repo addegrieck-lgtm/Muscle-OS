@@ -76,6 +76,36 @@ const CELESTE_VARIANTS: ProductVariant[] = CELESTE_VERSIONS.map(
  * Un champ inconnu reste vide (jamais deviné). Seules les fiches « published » sont visibles.
  * À la mise en place de Supabase, ces fiches seront importées dans la base.
  */
+// ── Luciole (LUM-SUS-001) ────────────────────────────────────────────────────
+// [forme, dimension (cm), nombre de lumières, surface conseillée, prix fournisseur hors promotion (centimes)]
+type LucioleVersion = ["Couronne" | "Linéaire", number, number, string, number];
+const LUCIOLE_VERSIONS: LucioleVersion[] = [
+  ["Couronne", 50, 30, "10 à 15", 9772],
+  ["Couronne", 60, 81, "18 à 20", 25641],
+  ["Couronne", 80, 108, "20 à 25", 29485],
+  ["Couronne", 98, 108, "20 à 25", 38213],
+  ["Couronne", 105, 135, "25 à 30", 42678],
+  ["Couronne", 125, 162, "30 à 35", 69418],
+  ["Linéaire", 100, 81, "18 à 20", 25832],
+];
+const LUCIOLE_BASE_PRICE = Math.min(...LUCIOLE_VERSIONS.map((v) => salePrice(v[4])));
+const LUCIOLE_VARIANTS: ProductVariant[] = LUCIOLE_VERSIONS.map(
+  ([shape, size, lights, area, cost]) => {
+    const code = `${shape === "Couronne" ? "C" : "L"}${size}`;
+    return {
+      id: `luciole-${code.toLowerCase()}`,
+      name: shape === "Couronne" ? `Ø${size} cm` : `L ${size} cm`,
+      sku: `LUM-SUS-001-${code}`,
+      finish: shape,
+      priceAdjustment: salePrice(cost) - LUCIOLE_BASE_PRICE,
+      stockQuantity: 0,
+      active: true,
+      details: `${lights} lumières · hauteur du luminaire 35 cm · suspension réglable jusqu’à 1,5 m · pièce de ${area} m²`,
+      imageUrl: `/products/luciole/ambiance-${shape === "Couronne" ? "couronne" : "lineaire"}.webp`,
+    };
+  },
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -155,6 +185,69 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre en cascade de sphères de verre cristal pour cage d’escalier, mezzanine et grande hauteur sous plafond. LED G4, suspension réglable.",
     art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-sus-001",
+    slug: "luciole",
+    name: "Luciole",
+    reference: "LUM-SUS-001",
+    shortDescription:
+      "Une constellation de petites lumières portées par de fines branches de métal.",
+    description: [
+      "Luciole déploie autour d’un anneau ou d’une barre de métal une ramure de tiges fines, chacune terminée par une petite source lumineuse sous un diffuseur en acrylique. Allumée, elle évoque un essaim de lucioles suspendu au-dessus de la pièce ; éteinte, un dessin graphique et végétal.",
+      "La couronne s’installe au-dessus d’un salon ou au centre d’une pièce de vie ; la version linéaire accompagne une table de salle à manger ou un îlot. Sept tailles, de 30 à 162 lumières, pour s’accorder au volume.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    // Prix de base = version la moins chère ; règle de prix : salePrice() sur le prix fournisseur hors promotion.
+    price: LUCIOLE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-suspensions",
+    categorySlug: "suspensions",
+    status: "published",
+    featured: true,
+    dimensions: {},
+    weight: null,
+    materials: ["Métal", "Acrylique"],
+    finishes: [],
+    specifications: [
+      {
+        label: "Sources lumineuses",
+        value: "LED, de 30 à 162 selon la version ; sources remplaçables",
+      },
+      { label: "Diffuseurs", value: "Acrylique" },
+      { label: "Hauteur du luminaire", value: "35 cm" },
+      { label: "Suspension", value: "Câbles réglables jusqu’à 1,5 m" },
+      { label: "Formes", value: "Couronne (Ø50 à Ø125 cm) ou linéaire (100 cm)" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les branches se positionnent à la main lors de l’installation.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "luciole-1",
+        url: "/products/luciole/ambiance-couronne.webp",
+        alt: "Suspension Luciole en couronne, lumières sur fines branches, au-dessus d’un salon avec cheminée",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+      {
+        id: "luciole-2",
+        url: "/products/luciole/ambiance-lineaire.webp",
+        alt: "Suspension Luciole linéaire au-dessus d’une table de salle à manger en marbre",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: false,
+        position: 1,
+      },
+    ],
+    variants: LUCIOLE_VARIANTS,
+    optionLabels: { group: "Forme", variant: "Taille" },
+    seoTitle: "Luciole — suspension design à branches lumineuses",
+    seoDescription:
+      "Suspension design en couronne ou linéaire : fines branches de métal et petites sources LED sous diffuseurs acryliques. Sept tailles, de 30 à 162 lumières.",
+    art: "organic",
     isDemo: false,
   },
 ];

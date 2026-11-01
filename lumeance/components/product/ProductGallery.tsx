@@ -20,23 +20,25 @@ export function ProductGallery({ product }: { product: Product }) {
   // Visuel de la version choisie, ajouté en dernière vue et affiché dès qu'on change de version.
   const optionValue = Object.values(selection?.options ?? {})[0];
   const versionImage = (optionValue && selected?.imageUrls?.[optionValue]) || selected?.imageUrl;
-  const slides = versionImage
-    ? [
-        ...base,
-        {
-          key: "version",
-          kind: "image" as const,
-          img: {
-            id: "version",
-            url: versionImage,
-            alt: `Visualisation 3D de ${product.name}, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
-            caption: "Visualisation 3D — non contractuelle",
-            isPrimary: false,
-            position: 99,
+  const existing = base.findIndex((b) => b.kind === "image" && b.img.url === versionImage);
+  const slides =
+    versionImage && existing === -1
+      ? [
+          ...base,
+          {
+            key: "version",
+            kind: "image" as const,
+            img: {
+              id: "version",
+              url: versionImage,
+              alt: `Visualisation 3D de ${product.name}, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
+              caption: "Visualisation 3D — non contractuelle",
+              isPrimary: false,
+              position: 99,
+            },
           },
-        },
-      ]
-    : base;
+        ]
+      : base;
   const [active, setActive] = useState(0);
   const firstRender = useRef(true);
   useEffect(() => {
@@ -44,7 +46,7 @@ export function ProductGallery({ product }: { product: Product }) {
       firstRender.current = false;
       return;
     }
-    if (versionImage) setActive(base.length);
+    if (versionImage) setActive(existing >= 0 ? existing : base.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection?.variantId, optionValue]);
   const current = slides[active] ?? slides[0]!;

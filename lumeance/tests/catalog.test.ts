@@ -78,3 +78,13 @@ describe("grille de prix Céleste", async () => {
     expect(c.price).toBe(17000);
   });
 });
+
+describe("grille de prix Luciole", async () => {
+  const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  it("7 versions, prix ×1,8 / ×1,5 sur le prix hors promotion", () => {
+    const l = CATALOG_PRODUCTS.find((p) => p.slug === "luciole")!;
+    expect(l.variants).toHaveLength(7);
+    const prices = l.variants.map((v) => (l.price + v.priceAdjustment) / 100);
+    expect(prices).toEqual([180, 470, 540, 690, 770, 1050, 470]);
+  });
+});
