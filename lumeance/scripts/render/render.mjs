@@ -36,9 +36,12 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: 1200, height: 1500 } });
 page.on("pageerror", (e) => console.error("Erreur page :", e.message));
-for (const [code, shape, n, w, d, h] of versions) {
+for (const entry of versions) {
+  // Entrée [code, requête] (scènes génériques) ou [code, forme, n, w, d, h] (Céleste).
+  const [code, shape, n, w, d, h] = entry;
   const extra = process.env.EXTRA || "";
-  await page.goto(`http://127.0.0.1:${port}/?shape=${shape}&n=${n}&w=${w}&d=${d}&h=${h}&seed=${n * 7 + w}${extra}`);
+  const query = entry.length === 2 ? shape : `shape=${shape}&n=${n}&w=${w}&d=${d}&h=${h}&seed=${n * 7 + w}`;
+  await page.goto(`http://127.0.0.1:${port}/?${query}${extra}`);
   await page.waitForFunction(() => window.__done === true, null, { timeout: 3_600_000, polling: 2000 });
   console.log(code, "rendu en", Math.round((await page.evaluate(() => window.__ms ?? 0)) / 1000), "s");
   // Lecture directe du canevas (rendu en 2×), puis réduction : anticrénelage par suréchantillonnage.

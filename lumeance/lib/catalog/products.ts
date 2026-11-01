@@ -102,6 +102,15 @@ const LUCIOLE_VARIANTS: ProductVariant[] = LUCIOLE_VERSIONS.map(
       active: true,
       details: `${lights} lumières · hauteur du luminaire 35 cm · suspension réglable jusqu’à 1,5 m · pièce de ${area} m²`,
       imageUrl: `/products/luciole/ambiance-${shape === "Couronne" ? "couronne" : "lineaire"}.webp`,
+      // Visualisations 3D pour chaque couleur de structure × couleur de lumière.
+      imageUrls: Object.fromEntries(
+        ["or-champagne", "or-rose", "sable-dore", "noir"].flatMap((f) =>
+          ["chaud", "froid"].map((t) => [
+            `${f}-${t}`,
+            `/products/luciole/rendu-${code.toLowerCase()}-${f}-${t}.webp`,
+          ]),
+        ),
+      ),
     };
   },
 );

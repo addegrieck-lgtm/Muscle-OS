@@ -119,3 +119,14 @@ describe("options Luciole", async () => {
     expect(ko.lines).toHaveLength(0);
   });
 });
+
+describe("visuels par combinaison", async () => {
+  const { existsSync } = await import("node:fs");
+  const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  it("chaque visuel référencé existe dans public/", () => {
+    for (const p of CATALOG_PRODUCTS)
+      for (const v of p.variants)
+        for (const url of [v.imageUrl, ...Object.values(v.imageUrls ?? {})].filter(Boolean))
+          expect(existsSync(`public${url}`), url).toBe(true);
+  });
+});

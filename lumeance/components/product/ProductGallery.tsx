@@ -18,7 +18,8 @@ export function ProductGallery({ product }: { product: Product }) {
           { key: "jour", kind: "art" as const, mood: "jour" as const, label: "Ambiance de jour" },
         ];
   // Visuel de la version choisie, ajouté en dernière vue et affiché dès qu'on change de version.
-  const optionValue = Object.values(selection?.options ?? {})[0];
+  // Clé des visuels : valeurs des options dans l'ordre du produit, ex. « or-rose-chaud ».
+  const optionValue = (product.options ?? []).map((o) => selection?.options[o.id] ?? "").join("-");
   const versionImage = (optionValue && selected?.imageUrls?.[optionValue]) || selected?.imageUrl;
   const existing = base.findIndex((b) => b.kind === "image" && b.img.url === versionImage);
   const slides =
