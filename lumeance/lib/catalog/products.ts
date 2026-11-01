@@ -281,8 +281,8 @@ const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
 //   6 têtes : 93,69 € (lumière fixe), prix habituel 111,93 € ; variable 115,99 € / 138,55 €.
 //   8 têtes : 119,39 € (lumière fixe) ; prix habituel ESTIMÉ 142,63 € (même rapport que le
 //   6 têtes : 119,39 × 111,93 / 93,69), à confirmer avec le « prix le plus bas des 30 jours ».
-// Prix de vente : salePrice() sur le prix fixe HORS promotion ; télécommande : +10 € (choix du
-// propriétaire).
+// Prix de vente : salePrice() sur le prix fixe HORS promotion, + 10 € : la télécommande (intensité
+// variable) est fournie avec chaque version, sans choix à faire (décision du propriétaire).
 const CONSTELLATION_REMOTE_EXTRA = 1000;
 // [code, forme, têtes, longueur (cm), puissance (W), prix fournisseur fixe hors promotion (centimes)]
 const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number, number][] = [
@@ -291,36 +291,36 @@ const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number,
   ["d6", "Droite", 6, 75, 36, 11193],
   ["d8", "Droite", 8, 100, 48, 14263],
 ];
-const CONSTELLATION_BASE_PRICE = Math.min(...CONSTELLATION_VERSIONS.map((v) => salePrice(v[5])));
-const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.flatMap(
-  ([code, shape, heads, length, watts, cost]) =>
-    [false, true].map((remote) => ({
-      id: `constellation-${code}${remote ? "-tc" : ""}`,
-      name: `${heads} têtes · ${length} cm${remote ? " · télécommande" : ""}`,
-      sku: `LUM-SUS-003-${code.toUpperCase()}${remote ? "-TC" : ""}`,
-      finish: shape,
-      priceAdjustment:
-        salePrice(cost) - CONSTELLATION_BASE_PRICE + (remote ? CONSTELLATION_REMOTE_EXTRA : 0),
-      stockQuantity: 0,
-      active: true,
-      details: [
-        `${heads} globes de verre Ø10 à Ø15 cm`,
-        `${watts} W`,
-        `longueur ${length} cm`,
-        "suspension réglable jusqu’à 120 cm",
-        remote ? "intensité variable à la télécommande" : "allumage à l’interrupteur",
-      ].join(" · "),
-      imageUrl: `/products/constellation/rendu-${code}-dore-chaud.webp`,
-      // Visualisations 3D : finition × couleur de lumière.
-      imageUrls: Object.fromEntries(
-        ["dore", "noir"].flatMap((f) =>
-          ["chaud", "froid"].map((t) => [
-            `${f}-${t}`,
-            `/products/constellation/rendu-${code}-${f}-${t}.webp`,
-          ]),
-        ),
+const CONSTELLATION_MIN_PRICE = Math.min(...CONSTELLATION_VERSIONS.map((v) => salePrice(v[5])));
+// Prix de base : version la moins chère, télécommande comprise.
+const CONSTELLATION_BASE_PRICE = CONSTELLATION_MIN_PRICE + CONSTELLATION_REMOTE_EXTRA;
+const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.map(
+  ([code, shape, heads, length, watts, cost]) => ({
+    id: `constellation-${code}`,
+    name: `${heads} têtes · ${length} cm`,
+    sku: `LUM-SUS-003-${code.toUpperCase()}`,
+    finish: shape,
+    priceAdjustment: salePrice(cost) - CONSTELLATION_MIN_PRICE,
+    stockQuantity: 0,
+    active: true,
+    details: [
+      `${heads} globes de verre Ø10 à Ø15 cm`,
+      `${watts} W`,
+      `longueur ${length} cm`,
+      "suspension réglable jusqu’à 120 cm",
+      "télécommande fournie, intensité variable",
+    ].join(" · "),
+    imageUrl: `/products/constellation/rendu-${code}-dore-chaud.webp`,
+    // Visualisations 3D : finition × couleur de lumière.
+    imageUrls: Object.fromEntries(
+      ["dore", "noir"].flatMap((f) =>
+        ["chaud", "froid"].map((t) => [
+          `${f}-${t}`,
+          `/products/constellation/rendu-${code}-${f}-${t}.webp`,
+        ]),
       ),
-    })),
+    ),
+  }),
 );
 
 // ── Volute (LUM-APP-002) ─────────────────────────────────────────────────────
@@ -361,8 +361,9 @@ const VOLUTE_VARIANTS: ProductVariant[] = VOLUTE_VERSIONS.map(([code, label, h, 
 // Fiches fournisseur relevées le 01/11/2026 (plaques d'acrylique W18 × H28 cm, LED 5 W par plaque).
 // Promotion −11 % jusqu'au 18/11/2026 ; prix de vente calculés sur le « prix le plus bas des
 // 30 derniers jours avant réduction ». Prix identique pour les finitions (doré, noir, argenté) ;
-// relevé sur le doré, lumière chaude. Télécommande (intensité variable) : +10 € (règle du
-// propriétaire) — prix fournisseur de l'option « dimmable » NON relevé, à vérifier.
+// relevé sur le doré, lumière chaude. Télécommande (intensité variable) fournie avec chaque version,
+// sans choix à faire : +10 € inclus (règle du propriétaire) — prix fournisseur de l'option
+// « dimmable » NON relevé, à vérifier.
 const ORGANZA_REMOTE_EXTRA = 1000;
 // [code, pavillon, plaques, pavillon (cm), surface conseillée (m²), câbles (cm) | null,
 //  prix fournisseur hors promotion (centimes)]
@@ -385,37 +386,38 @@ const ORGANZA_VERSIONS: [
   ["r18", "Rond", 18, "Ø70 cm", "18 à 25", 300, 67448],
   ["r28", "Rond", 28, "Ø80 cm", "25 à 30", 300, 100161],
 ];
-const ORGANZA_BASE_PRICE = Math.min(...ORGANZA_VERSIONS.map((v) => salePrice(v[6])));
-const ORGANZA_VARIANTS: ProductVariant[] = ORGANZA_VERSIONS.flatMap(
-  ([code, shape, n, canopy, area, cable, cost]) =>
-    [false, true].map((remote) => ({
-      id: `organza-${code}${remote ? "-tc" : ""}`,
-      name: `${n} plaque${n > 1 ? "s" : ""}${remote ? " · télécommande" : ""}`,
-      sku: `LUM-LUS-004-${code.toUpperCase()}${remote ? "-TC" : ""}`,
-      finish: `Pavillon ${shape.toLowerCase()}`,
-      priceAdjustment: salePrice(cost) - ORGANZA_BASE_PRICE + (remote ? ORGANZA_REMOTE_EXTRA : 0),
-      stockQuantity: 0,
-      active: true,
-      details: [
-        `Pavillon ${canopy}`,
-        `${n * 5} W`,
-        cable ? `câbles de ${cable} cm, réglables` : "longueur de câble sur demande",
-        area ? `pièce de ${area} m²` : null,
-        remote ? "intensité variable à la télécommande" : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-      imageUrl: `/products/organza/rendu-${code}-dore-chaud.webp`,
-      // Visualisations 3D : finition × couleur de lumière.
-      imageUrls: Object.fromEntries(
-        ["dore", "noir", "argent"].flatMap((f) =>
-          ["chaud", "froid"].map((t) => [
-            `${f}-${t}`,
-            `/products/organza/rendu-${code}-${f}-${t}.webp`,
-          ]),
-        ),
+const ORGANZA_MIN_PRICE = Math.min(...ORGANZA_VERSIONS.map((v) => salePrice(v[6])));
+// Prix de base : version la moins chère, télécommande comprise.
+const ORGANZA_BASE_PRICE = ORGANZA_MIN_PRICE + ORGANZA_REMOTE_EXTRA;
+const ORGANZA_VARIANTS: ProductVariant[] = ORGANZA_VERSIONS.map(
+  ([code, shape, n, canopy, area, cable, cost]) => ({
+    id: `organza-${code}`,
+    name: `${n} plaque${n > 1 ? "s" : ""}`,
+    sku: `LUM-LUS-004-${code.toUpperCase()}`,
+    finish: `Pavillon ${shape.toLowerCase()}`,
+    priceAdjustment: salePrice(cost) - ORGANZA_MIN_PRICE,
+    stockQuantity: 0,
+    active: true,
+    details: [
+      `Pavillon ${canopy}`,
+      `${n * 5} W`,
+      cable ? `câbles de ${cable} cm, réglables` : "longueur de câble sur demande",
+      area ? `pièce de ${area} m²` : null,
+      "télécommande fournie, intensité variable",
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    imageUrl: `/products/organza/rendu-${code}-dore-chaud.webp`,
+    // Visualisations 3D : finition × couleur de lumière.
+    imageUrls: Object.fromEntries(
+      ["dore", "noir", "argent"].flatMap((f) =>
+        ["chaud", "froid"].map((t) => [
+          `${f}-${t}`,
+          `/products/organza/rendu-${code}-${f}-${t}.webp`,
+        ]),
       ),
-    })),
+    ),
+  }),
 );
 
 export const CATALOG_PRODUCTS: Product[] = [
@@ -927,7 +929,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Une fine branche de métal portant des globes de verre où scintille un ciel de micro-lumières.",
     description: [
       "Constellation pose sur une fine branche de métal une suite de globes de verre clair, de trois diamètres, placés au-dessus, au-dessous ou au fil de la ligne. Dans chacun, un fil de cuivre semé de micro-LED dessine un ciel étoilé ; au centre, une perle dorée marque l’axe de la composition.",
-      "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, et une version à intensité variable, réglable à la télécommande.",
+      "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid ; la télécommande, fournie, règle l’intensité.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
     price: CONSTELLATION_BASE_PRICE,
@@ -958,7 +960,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       },
       {
         label: "Commande",
-        value: "Interrupteur ; ou télécommande, intensité variable (versions « télécommande »)",
+        value: "Télécommande fournie : allumage et intensité variable",
       },
       { label: "Matières", value: "Fer, verre" },
       { label: "Surface conseillée", value: "10 à 30 m², selon le fabricant" },
@@ -1008,7 +1010,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     ],
     seoTitle: "Constellation — suspension globes de verre étoilés, dorée ou noire",
     seoDescription:
-      "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, version variable à la télécommande.",
+      "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, télécommande fournie.",
     art: "globes",
     isDemo: false,
   },
@@ -1100,7 +1102,7 @@ export const CATALOG_PRODUCTS: Product[] = [
       "Des voiles d’acrylique ondulés, éclairés par la tranche, qui tombent en cascade comme une étoffe de lumière.",
     description: [
       "Organza suspend des plaques d’acrylique clair, ondulées comme un tissu léger et finement striées. Chacune est coiffée d’une réglette LED qui l’éclaire par la tranche : la lumière court dans la matière, s’accroche aux stries et souligne d’un trait vif le bord découpé de chaque voile.",
-      "Du pavillon rond, les plaques descendent en spirale, de six à vingt-huit, pour un séjour, une cage d’escalier ou un volume en double hauteur ; sur un pavillon rectangulaire, d’une à six plaques s’alignent au-dessus d’une table, d’un îlot ou d’un comptoir. Métal doré, noir ou argenté ; lumière blanc chaud ou blanc froid, ou intensité variable à la télécommande.",
+      "Du pavillon rond, les plaques descendent en spirale, de six à vingt-huit, pour un séjour, une cage d’escalier ou un volume en double hauteur ; sur un pavillon rectangulaire, d’une à six plaques s’alignent au-dessus d’une table, d’un îlot ou d’un comptoir. Métal doré, noir ou argenté ; lumière blanc chaud ou blanc froid ; la télécommande, fournie, règle l’intensité.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
     price: ORGANZA_BASE_PRICE,
@@ -1129,9 +1131,9 @@ export const CATALOG_PRODUCTS: Product[] = [
       { label: "Finitions", value: "Métal doré, noir ou argenté" },
       {
         label: "Couleur de lumière",
-        value:
-          "Blanc chaud ou blanc froid ; intensité variable à la télécommande (versions « télécommande »)",
+        value: "Blanc chaud ou blanc froid",
       },
+      { label: "Commande", value: "Télécommande fournie : allumage et intensité variable" },
       { label: "Matières", value: "Aluminium, acrylique, acier inoxydable" },
       { label: "Surface conseillée", value: "De 3 à 30 m² selon la version, selon le fabricant" },
     ],

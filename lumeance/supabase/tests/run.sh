@@ -22,7 +22,7 @@ echo "▶ import-produits.sql (×2)"
 "${PSQL[@]}" -f import-produits.sql >/dev/null 2>&1
 "${PSQL[@]}" -c "do \$\$ begin
   if (select count(*) from public.products where reference like 'LUM-%' and status = 'published') <> 7 or (select count(*) from public.products where reference like 'LUM-%') <> 9 then raise exception 'pièces : %', (select count(*) from public.products where reference like 'LUM-%'); end if;
-  if (select count(*) from public.product_variants where sku like 'LUM-%') <> 74 then raise exception 'versions : %', (select count(*) from public.product_variants where sku like 'LUM-%'); end if;
+  if (select count(*) from public.product_variants where sku like 'LUM-%') <> 61 then raise exception 'versions : %', (select count(*) from public.product_variants where sku like 'LUM-%'); end if;
   if (select count(*) from public.product_images where storage_path like '/products/%') <> 15 then raise exception 'images : %', (select count(*) from public.product_images where storage_path like '/products/%'); end if;
   if exists (select 1 from public.products where reference like 'LUM-%' and category_id is null) then raise exception 'catégorie manquante'; end if;
   if (select promotion from public.products where reference = 'LUM-APP-002') is distinct from jsonb_build_object('buy', 3, 'free', 1) then raise exception 'offre Volute absente'; end if;
