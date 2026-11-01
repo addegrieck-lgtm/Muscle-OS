@@ -579,6 +579,122 @@ select (select id from public.products where reference = 'LUM-APP-002'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-APP-002') and storage_path = '/products/volute/ambiance-exterieur.webp');
 
+-- ════ Organza (LUM-LUS-004) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('organza', 'Organza', 'LUM-LUS-004', 'Des voiles d’acrylique ondulés, éclairés par la tranche, qui tombent en cascade comme une étoffe de lumière.', 'Organza suspend des plaques d’acrylique clair, ondulées comme un tissu léger et finement striées. Chacune est coiffée d’une réglette LED qui l’éclaire par la tranche : la lumière court dans la matière, s’accroche aux stries et souligne d’un trait vif le bord découpé de chaque voile.
+
+Du pavillon rond, les plaques descendent en spirale, de six à vingt-huit, pour un séjour, une cage d’escalier ou un volume en double hauteur ; sur un pavillon rectangulaire, d’une à six plaques s’alignent au-dessus d’une table, d’un îlot ou d’un comptoir. Métal doré, noir ou argenté ; lumière blanc chaud ou blanc froid, ou intensité variable à la télécommande.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  16000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'published', true, '{}'::jsonb, null,
+  array['Aluminium', 'Acrylique', 'Acier inoxydable']::text[], array['Doré', 'Noir', 'Argenté']::text[], '[{"label":"Sources lumineuses","value":"LED intégrées, 5 W par plaque"},{"label":"Tension d’entrée","value":"110–240 V"},{"label":"Plaques","value":"Acrylique ondulé et strié, 18 × 28 cm chacune"},{"label":"Pavillons","value":"Rond : Ø40 (6 plaques), Ø50 (8), Ø60 (12), Ø70 (18), Ø80 cm (28) · rectangulaire : 20 × 5 (1), 55 × 12 (2), 70 × 10 (3), 76 × 24 cm (6)"},{"label":"Suspension","value":"Câbles réglables : 100 à 300 cm selon la version, longueur sur mesure sur demande"},{"label":"Finitions","value":"Métal doré, noir ou argenté"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid ; intensité variable à la télécommande (versions « télécommande »)"},{"label":"Matières","value":"Aluminium, acrylique, acier inoxydable"},{"label":"Surface conseillée","value":"De 3 à 30 m² selon la version, selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.', 0,
+  'Organza — lustre LED voiles d’acrylique en cascade, doré, noir ou argenté', 'Lustre design : voiles d’acrylique ondulés éclairés par la tranche, en cascade de 1 à 28 plaques. Pavillon rond ou rectangulaire, métal doré, noir ou argenté, pour séjour, escalier et double hauteur.', '[{"id":"finition","label":"Finition","values":[{"id":"dore","label":"Doré"},{"id":"noir","label":"Noir"},{"id":"argent","label":"Argenté"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  '{"group":"Pavillon","variant":"Nombre de plaques"}'::jsonb, 'cascade',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '1 plaque', 'LUM-LUS-004-L1', 'Pavillon rectangulaire', 0,
+  0, true, 'Pavillon 20 × 5 cm · 5 W · longueur de câble sur demande · pièce de 3 à 5 m²', '/products/organza/rendu-l1-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l1-dore-chaud.webp","dore-froid":"/products/organza/rendu-l1-dore-froid.webp","noir-chaud":"/products/organza/rendu-l1-noir-chaud.webp","noir-froid":"/products/organza/rendu-l1-noir-froid.webp","argent-chaud":"/products/organza/rendu-l1-argent-chaud.webp","argent-froid":"/products/organza/rendu-l1-argent-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '1 plaque · télécommande', 'LUM-LUS-004-L1-TC', 'Pavillon rectangulaire', 1000,
+  0, true, 'Pavillon 20 × 5 cm · 5 W · longueur de câble sur demande · pièce de 3 à 5 m² · intensité variable à la télécommande', '/products/organza/rendu-l1-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l1-dore-chaud.webp","dore-froid":"/products/organza/rendu-l1-dore-froid.webp","noir-chaud":"/products/organza/rendu-l1-noir-chaud.webp","noir-froid":"/products/organza/rendu-l1-noir-froid.webp","argent-chaud":"/products/organza/rendu-l1-argent-chaud.webp","argent-froid":"/products/organza/rendu-l1-argent-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '2 plaques', 'LUM-LUS-004-L2', 'Pavillon rectangulaire', 9000,
+  0, true, 'Pavillon 55 × 12 × 3,5 cm · 10 W · câbles de 100 cm, réglables', '/products/organza/rendu-l2-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l2-dore-chaud.webp","dore-froid":"/products/organza/rendu-l2-dore-froid.webp","noir-chaud":"/products/organza/rendu-l2-noir-chaud.webp","noir-froid":"/products/organza/rendu-l2-noir-froid.webp","argent-chaud":"/products/organza/rendu-l2-argent-chaud.webp","argent-froid":"/products/organza/rendu-l2-argent-froid.webp"}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '2 plaques · télécommande', 'LUM-LUS-004-L2-TC', 'Pavillon rectangulaire', 10000,
+  0, true, 'Pavillon 55 × 12 × 3,5 cm · 10 W · câbles de 100 cm, réglables · intensité variable à la télécommande', '/products/organza/rendu-l2-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l2-dore-chaud.webp","dore-froid":"/products/organza/rendu-l2-dore-froid.webp","noir-chaud":"/products/organza/rendu-l2-noir-chaud.webp","noir-froid":"/products/organza/rendu-l2-noir-froid.webp","argent-chaud":"/products/organza/rendu-l2-argent-chaud.webp","argent-froid":"/products/organza/rendu-l2-argent-froid.webp"}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '3 plaques', 'LUM-LUS-004-L3', 'Pavillon rectangulaire', 17000,
+  0, true, 'Pavillon 70 × 10 cm · 15 W · câbles de 150 cm, réglables · pièce de 5 à 10 m²', '/products/organza/rendu-l3-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l3-dore-chaud.webp","dore-froid":"/products/organza/rendu-l3-dore-froid.webp","noir-chaud":"/products/organza/rendu-l3-noir-chaud.webp","noir-froid":"/products/organza/rendu-l3-noir-froid.webp","argent-chaud":"/products/organza/rendu-l3-argent-chaud.webp","argent-froid":"/products/organza/rendu-l3-argent-froid.webp"}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '3 plaques · télécommande', 'LUM-LUS-004-L3-TC', 'Pavillon rectangulaire', 18000,
+  0, true, 'Pavillon 70 × 10 cm · 15 W · câbles de 150 cm, réglables · pièce de 5 à 10 m² · intensité variable à la télécommande', '/products/organza/rendu-l3-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l3-dore-chaud.webp","dore-froid":"/products/organza/rendu-l3-dore-froid.webp","noir-chaud":"/products/organza/rendu-l3-noir-chaud.webp","noir-froid":"/products/organza/rendu-l3-noir-froid.webp","argent-chaud":"/products/organza/rendu-l3-argent-chaud.webp","argent-froid":"/products/organza/rendu-l3-argent-froid.webp"}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '6 plaques', 'LUM-LUS-004-L6', 'Pavillon rectangulaire', 27000,
+  0, true, 'Pavillon 76 × 24 cm · 30 W · câbles de 150 cm, réglables · pièce de 8 à 12 m²', '/products/organza/rendu-l6-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l6-dore-chaud.webp","dore-froid":"/products/organza/rendu-l6-dore-froid.webp","noir-chaud":"/products/organza/rendu-l6-noir-chaud.webp","noir-froid":"/products/organza/rendu-l6-noir-froid.webp","argent-chaud":"/products/organza/rendu-l6-argent-chaud.webp","argent-froid":"/products/organza/rendu-l6-argent-froid.webp"}'::jsonb, 6)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '6 plaques · télécommande', 'LUM-LUS-004-L6-TC', 'Pavillon rectangulaire', 28000,
+  0, true, 'Pavillon 76 × 24 cm · 30 W · câbles de 150 cm, réglables · pièce de 8 à 12 m² · intensité variable à la télécommande', '/products/organza/rendu-l6-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-l6-dore-chaud.webp","dore-froid":"/products/organza/rendu-l6-dore-froid.webp","noir-chaud":"/products/organza/rendu-l6-noir-chaud.webp","noir-froid":"/products/organza/rendu-l6-noir-froid.webp","argent-chaud":"/products/organza/rendu-l6-argent-chaud.webp","argent-froid":"/products/organza/rendu-l6-argent-froid.webp"}'::jsonb, 7)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '6 plaques', 'LUM-LUS-004-R6', 'Pavillon rond', 27000,
+  0, true, 'Pavillon Ø40 cm · 30 W · câbles de 150 cm, réglables · pièce de 8 à 12 m²', '/products/organza/rendu-r6-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r6-dore-chaud.webp","dore-froid":"/products/organza/rendu-r6-dore-froid.webp","noir-chaud":"/products/organza/rendu-r6-noir-chaud.webp","noir-froid":"/products/organza/rendu-r6-noir-froid.webp","argent-chaud":"/products/organza/rendu-r6-argent-chaud.webp","argent-froid":"/products/organza/rendu-r6-argent-froid.webp"}'::jsonb, 8)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '6 plaques · télécommande', 'LUM-LUS-004-R6-TC', 'Pavillon rond', 28000,
+  0, true, 'Pavillon Ø40 cm · 30 W · câbles de 150 cm, réglables · pièce de 8 à 12 m² · intensité variable à la télécommande', '/products/organza/rendu-r6-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r6-dore-chaud.webp","dore-froid":"/products/organza/rendu-r6-dore-froid.webp","noir-chaud":"/products/organza/rendu-r6-noir-chaud.webp","noir-froid":"/products/organza/rendu-r6-noir-froid.webp","argent-chaud":"/products/organza/rendu-r6-argent-chaud.webp","argent-froid":"/products/organza/rendu-r6-argent-froid.webp"}'::jsonb, 9)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '8 plaques', 'LUM-LUS-004-R8', 'Pavillon rond', 39000,
+  0, true, 'Pavillon Ø50 cm · 40 W · câbles de 200 cm, réglables · pièce de 10 à 18 m²', '/products/organza/rendu-r8-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r8-dore-chaud.webp","dore-froid":"/products/organza/rendu-r8-dore-froid.webp","noir-chaud":"/products/organza/rendu-r8-noir-chaud.webp","noir-froid":"/products/organza/rendu-r8-noir-froid.webp","argent-chaud":"/products/organza/rendu-r8-argent-chaud.webp","argent-froid":"/products/organza/rendu-r8-argent-froid.webp"}'::jsonb, 10)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '8 plaques · télécommande', 'LUM-LUS-004-R8-TC', 'Pavillon rond', 40000,
+  0, true, 'Pavillon Ø50 cm · 40 W · câbles de 200 cm, réglables · pièce de 10 à 18 m² · intensité variable à la télécommande', '/products/organza/rendu-r8-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r8-dore-chaud.webp","dore-froid":"/products/organza/rendu-r8-dore-froid.webp","noir-chaud":"/products/organza/rendu-r8-noir-chaud.webp","noir-froid":"/products/organza/rendu-r8-noir-froid.webp","argent-chaud":"/products/organza/rendu-r8-argent-chaud.webp","argent-froid":"/products/organza/rendu-r8-argent-froid.webp"}'::jsonb, 11)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '12 plaques', 'LUM-LUS-004-R12', 'Pavillon rond', 66000,
+  0, true, 'Pavillon Ø60 cm · 60 W · câbles de 300 cm, réglables · pièce de 10 à 20 m²', '/products/organza/rendu-r12-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r12-dore-chaud.webp","dore-froid":"/products/organza/rendu-r12-dore-froid.webp","noir-chaud":"/products/organza/rendu-r12-noir-chaud.webp","noir-froid":"/products/organza/rendu-r12-noir-froid.webp","argent-chaud":"/products/organza/rendu-r12-argent-chaud.webp","argent-froid":"/products/organza/rendu-r12-argent-froid.webp"}'::jsonb, 12)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '12 plaques · télécommande', 'LUM-LUS-004-R12-TC', 'Pavillon rond', 67000,
+  0, true, 'Pavillon Ø60 cm · 60 W · câbles de 300 cm, réglables · pièce de 10 à 20 m² · intensité variable à la télécommande', '/products/organza/rendu-r12-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r12-dore-chaud.webp","dore-froid":"/products/organza/rendu-r12-dore-froid.webp","noir-chaud":"/products/organza/rendu-r12-noir-chaud.webp","noir-froid":"/products/organza/rendu-r12-noir-froid.webp","argent-chaud":"/products/organza/rendu-r12-argent-chaud.webp","argent-froid":"/products/organza/rendu-r12-argent-froid.webp"}'::jsonb, 13)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '18 plaques', 'LUM-LUS-004-R18', 'Pavillon rond', 86000,
+  0, true, 'Pavillon Ø70 cm · 90 W · câbles de 300 cm, réglables · pièce de 18 à 25 m²', '/products/organza/rendu-r18-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r18-dore-chaud.webp","dore-froid":"/products/organza/rendu-r18-dore-froid.webp","noir-chaud":"/products/organza/rendu-r18-noir-chaud.webp","noir-froid":"/products/organza/rendu-r18-noir-froid.webp","argent-chaud":"/products/organza/rendu-r18-argent-chaud.webp","argent-froid":"/products/organza/rendu-r18-argent-froid.webp"}'::jsonb, 14)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '18 plaques · télécommande', 'LUM-LUS-004-R18-TC', 'Pavillon rond', 87000,
+  0, true, 'Pavillon Ø70 cm · 90 W · câbles de 300 cm, réglables · pièce de 18 à 25 m² · intensité variable à la télécommande', '/products/organza/rendu-r18-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r18-dore-chaud.webp","dore-froid":"/products/organza/rendu-r18-dore-froid.webp","noir-chaud":"/products/organza/rendu-r18-noir-chaud.webp","noir-froid":"/products/organza/rendu-r18-noir-froid.webp","argent-chaud":"/products/organza/rendu-r18-argent-chaud.webp","argent-froid":"/products/organza/rendu-r18-argent-froid.webp"}'::jsonb, 15)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '28 plaques', 'LUM-LUS-004-R28', 'Pavillon rond', 135000,
+  0, true, 'Pavillon Ø80 cm · 140 W · câbles de 300 cm, réglables · pièce de 25 à 30 m²', '/products/organza/rendu-r28-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r28-dore-chaud.webp","dore-froid":"/products/organza/rendu-r28-dore-froid.webp","noir-chaud":"/products/organza/rendu-r28-noir-chaud.webp","noir-froid":"/products/organza/rendu-r28-noir-froid.webp","argent-chaud":"/products/organza/rendu-r28-argent-chaud.webp","argent-froid":"/products/organza/rendu-r28-argent-froid.webp"}'::jsonb, 16)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-004'), '28 plaques · télécommande', 'LUM-LUS-004-R28-TC', 'Pavillon rond', 136000,
+  0, true, 'Pavillon Ø80 cm · 140 W · câbles de 300 cm, réglables · pièce de 25 à 30 m² · intensité variable à la télécommande', '/products/organza/rendu-r28-dore-chaud.webp', '{"dore-chaud":"/products/organza/rendu-r28-dore-chaud.webp","dore-froid":"/products/organza/rendu-r28-dore-froid.webp","noir-chaud":"/products/organza/rendu-r28-noir-chaud.webp","noir-froid":"/products/organza/rendu-r28-noir-froid.webp","argent-chaud":"/products/organza/rendu-r28-argent-chaud.webp","argent-froid":"/products/organza/rendu-r28-argent-froid.webp"}'::jsonb, 17)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-004'), '/products/organza/ambiance-salon.webp', 'Lustre Organza doré à pavillon rond, cascade de voiles d’acrylique lumineux au-dessus d’un salon en double hauteur, devant un mur anthracite', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-004') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-004') and storage_path = '/products/organza/ambiance-salon.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.

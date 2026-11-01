@@ -357,6 +357,67 @@ const VOLUTE_VARIANTS: ProductVariant[] = VOLUTE_VERSIONS.map(([code, label, h, 
   ),
 }));
 
+// ── Organza (LUM-LUS-004) ────────────────────────────────────────────────────
+// Fiches fournisseur relevées le 01/11/2026 (plaques d'acrylique W18 × H28 cm, LED 5 W par plaque).
+// Promotion −11 % jusqu'au 18/11/2026 ; prix de vente calculés sur le « prix le plus bas des
+// 30 derniers jours avant réduction ». Prix identique pour les finitions (doré, noir, argenté) ;
+// relevé sur le doré, lumière chaude. Télécommande (intensité variable) : +10 € (règle du
+// propriétaire) — prix fournisseur de l'option « dimmable » NON relevé, à vérifier.
+const ORGANZA_REMOTE_EXTRA = 1000;
+// [code, pavillon, plaques, pavillon (cm), surface conseillée (m²), câbles (cm) | null,
+//  prix fournisseur hors promotion (centimes)]
+const ORGANZA_VERSIONS: [
+  string,
+  "Rond" | "Rectangulaire",
+  number,
+  string,
+  string | null,
+  number | null,
+  number,
+][] = [
+  ["l1", "Rectangulaire", 1, "20 × 5 cm", "3 à 5", null, 8838],
+  ["l2", "Rectangulaire", 2, "55 × 12 × 3,5 cm", null, 100, 13790],
+  ["l3", "Rectangulaire", 3, "70 × 10 cm", "5 à 10", 150, 17880],
+  ["l6", "Rectangulaire", 6, "76 × 24 cm", "8 à 12", 150, 23530],
+  ["r6", "Rond", 6, "Ø40 cm", "8 à 12", 150, 23530],
+  ["r8", "Rond", 8, "Ø50 cm", "10 à 18", 200, 30135],
+  ["r12", "Rond", 12, "Ø60 cm", "10 à 20", 300, 45146],
+  ["r18", "Rond", 18, "Ø70 cm", "18 à 25", 300, 67448],
+  ["r28", "Rond", 28, "Ø80 cm", "25 à 30", 300, 100161],
+];
+const ORGANZA_BASE_PRICE = Math.min(...ORGANZA_VERSIONS.map((v) => salePrice(v[6])));
+const ORGANZA_VARIANTS: ProductVariant[] = ORGANZA_VERSIONS.flatMap(
+  ([code, shape, n, canopy, area, cable, cost]) =>
+    [false, true].map((remote) => ({
+      id: `organza-${code}${remote ? "-tc" : ""}`,
+      name: `${n} plaque${n > 1 ? "s" : ""}${remote ? " · télécommande" : ""}`,
+      sku: `LUM-LUS-004-${code.toUpperCase()}${remote ? "-TC" : ""}`,
+      finish: `Pavillon ${shape.toLowerCase()}`,
+      priceAdjustment: salePrice(cost) - ORGANZA_BASE_PRICE + (remote ? ORGANZA_REMOTE_EXTRA : 0),
+      stockQuantity: 0,
+      active: true,
+      details: [
+        `Pavillon ${canopy}`,
+        `${n * 5} W`,
+        cable ? `câbles de ${cable} cm, réglables` : "longueur de câble sur demande",
+        area ? `pièce de ${area} m²` : null,
+        remote ? "intensité variable à la télécommande" : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      imageUrl: `/products/organza/rendu-${code}-dore-chaud.webp`,
+      // Visualisations 3D : finition × couleur de lumière.
+      imageUrls: Object.fromEntries(
+        ["dore", "noir", "argent"].flatMap((f) =>
+          ["chaud", "froid"].map((t) => [
+            `${f}-${t}`,
+            `/products/organza/rendu-${code}-${f}-${t}.webp`,
+          ]),
+        ),
+      ),
+    })),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1028,6 +1089,91 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Applique murale LED en aluminium enroulé en spirale, lumière vers le haut et le bas, étanche IP65 pour l’intérieur et l’extérieur. 28 ou 23 cm, noir ou blanc, uni ou doré. 3 achetées, la 4ᵉ offerte.",
     art: "sconce",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-004",
+    slug: "organza",
+    name: "Organza",
+    reference: "LUM-LUS-004",
+    shortDescription:
+      "Des voiles d’acrylique ondulés, éclairés par la tranche, qui tombent en cascade comme une étoffe de lumière.",
+    description: [
+      "Organza suspend des plaques d’acrylique clair, ondulées comme un tissu léger et finement striées. Chacune est coiffée d’une réglette LED qui l’éclaire par la tranche : la lumière court dans la matière, s’accroche aux stries et souligne d’un trait vif le bord découpé de chaque voile.",
+      "Du pavillon rond, les plaques descendent en spirale, de six à vingt-huit, pour un séjour, une cage d’escalier ou un volume en double hauteur ; sur un pavillon rectangulaire, d’une à six plaques s’alignent au-dessus d’une table, d’un îlot ou d’un comptoir. Métal doré, noir ou argenté ; lumière blanc chaud ou blanc froid, ou intensité variable à la télécommande.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: ORGANZA_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "published",
+    featured: true,
+    dimensions: {},
+    weight: null,
+    materials: ["Aluminium", "Acrylique", "Acier inoxydable"],
+    finishes: ["Doré", "Noir", "Argenté"],
+    specifications: [
+      { label: "Sources lumineuses", value: "LED intégrées, 5 W par plaque" },
+      { label: "Tension d’entrée", value: "110–240 V" },
+      { label: "Plaques", value: "Acrylique ondulé et strié, 18 × 28 cm chacune" },
+      {
+        label: "Pavillons",
+        value:
+          "Rond : Ø40 (6 plaques), Ø50 (8), Ø60 (12), Ø70 (18), Ø80 cm (28) · rectangulaire : 20 × 5 (1), 55 × 12 (2), 70 × 10 (3), 76 × 24 cm (6)",
+      },
+      {
+        label: "Suspension",
+        value: "Câbles réglables : 100 à 300 cm selon la version, longueur sur mesure sur demande",
+      },
+      { label: "Finitions", value: "Métal doré, noir ou argenté" },
+      {
+        label: "Couleur de lumière",
+        value:
+          "Blanc chaud ou blanc froid ; intensité variable à la télécommande (versions « télécommande »)",
+      },
+      { label: "Matières", value: "Aluminium, acrylique, acier inoxydable" },
+      { label: "Surface conseillée", value: "De 3 à 30 m² selon la version, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "organza-1",
+        url: "/products/organza/ambiance-salon.webp",
+        alt: "Lustre Organza doré à pavillon rond, cascade de voiles d’acrylique lumineux au-dessus d’un salon en double hauteur, devant un mur anthracite",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: ORGANZA_VARIANTS,
+    optionLabels: { group: "Pavillon", variant: "Nombre de plaques" },
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "dore", label: "Doré" },
+          { id: "noir", label: "Noir" },
+          { id: "argent", label: "Argenté" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Organza — lustre LED voiles d’acrylique en cascade, doré, noir ou argenté",
+    seoDescription:
+      "Lustre design : voiles d’acrylique ondulés éclairés par la tranche, en cascade de 1 à 28 plaques. Pavillon rond ou rectangulaire, métal doré, noir ou argenté, pour séjour, escalier et double hauteur.",
+    art: "cascade",
     isDemo: false,
   },
 ];

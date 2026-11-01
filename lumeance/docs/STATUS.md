@@ -57,7 +57,7 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - **Vérifié** : typecheck, lint, 55 tests, build OpenNext, parcours complet dans workerd (aucune violation CSP, aucune erreur console).
 
 ## Catalogue au 1er novembre 2026
-- En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »).
+- En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »), Organza (lustre phare : voiles d'acrylique, 1 à 28 plaques).
 - Brouillons : Aigrette, Sylve.
 
 ## Points ouverts — à traiter avec le propriétaire
