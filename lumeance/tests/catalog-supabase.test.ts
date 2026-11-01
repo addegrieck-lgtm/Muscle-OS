@@ -75,3 +75,27 @@ describe("catalogue importé dans Supabase", () => {
     expect(mapped.variants[0]!.imageUrl).toMatch(/^\/products\//);
   });
 });
+
+describe("import depuis l'administration", () => {
+  it("ne propose que les pièces absentes, quelle que soit la casse de la référence", async () => {
+    const { missingProducts } = await import("@/lib/admin/catalog-import");
+    const refs = CATALOG_PRODUCTS.slice(0, 2).map((p) => p.reference.toLowerCase());
+    expect(missingProducts(CATALOG_PRODUCTS, refs).map((p) => p.reference)).toEqual(
+      CATALOG_PRODUCTS.slice(2).map((p) => p.reference),
+    );
+  });
+
+  it("produit les mêmes lignes que l'import SQL relu par le site", async () => {
+    const { productRow, variantRows, imageRows } = await import("@/lib/admin/catalog-import");
+    for (const p of CATALOG_PRODUCTS) {
+      const row = {
+        ...productRow(p, "uuid-cat"),
+        id: "x",
+        categories: { slug: p.categorySlug! },
+        product_variants: variantRows(p, "x").map((v, i) => ({ ...v, id: p.variants[i]!.id })),
+        product_images: imageRows(p, "x").map((im, i) => ({ ...im, id: p.images[i]!.id })),
+      } as unknown as ProductRow;
+      expect({ ...mapProduct(row, (u) => u), id: p.id, categoryId: p.categoryId }).toEqual(p);
+    }
+  });
+});

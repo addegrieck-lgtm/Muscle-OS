@@ -1,0 +1,167 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Visualisation de Sylve d'après les schémas du fabricant : bande horizontale (longueur L, largeur
+// 65 cm) formée d'un réseau organique de branches tubulaires noires mates, hérissée de pointes
+// effilées et ponctuée d'ampoules E14 sous tube de verre dépoli au bout de courtes branches ;
+// 2 à 5 câbles vers des pavillons ronds.
+// Paramètres : l (cm), bulbs, cables, temp (chaud | froid), seed.
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+
+const t0 = performance.now();
+const q = new URLSearchParams(location.search);
+const L = Number(q.get("l") || 150) / 100;
+const BULBS = Number(q.get("bulbs") || 12);
+const CABLES = Number(q.get("cables") || 2);
+const TEMP = q.get("temp") || "chaud";
+const seed = Number(q.get("seed") || 3);
+const SCALE = 2, WIDTH = 1200, HEIGHT = 1500;
+const DEPTH = 0.65;
+
+const LIGHT = { chaud: 0xffc283, froid: 0xe4eeff }[TEMP];
+const GLOW = { chaud: 0xffe0b0, froid: 0xf2f7ff }[TEMP];
+
+let s = seed >>> 0;
+const rand = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(WIDTH, HEIGHT); renderer.setPixelRatio(SCALE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+
+// ── Pièce : mur gris anthracite à moulures douces, plafond clair (photos du fabricant) ──
+function canvasTex(size, draw, rx = 1, ry = 1) {
+  const c = document.createElement("canvas"); c.width = c.height = size; draw(c.getContext("2d"), size);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const plaster = (base) => canvasTex(512, (x, S) => {
+  x.fillStyle = base; x.fillRect(0, 0, S, S);
+  for (let i = 0; i < 30000; i++) { const v = 110 + rand() * 90; x.fillStyle = `rgba(${v},${v},${v * 0.97},0.05)`; const r = rand() * 4; x.fillRect(rand() * S, rand() * S, r, r); }
+}, 4, 4);
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(14, 10), new THREE.MeshStandardMaterial({ map: plaster("#d8d5cf"), roughness: 0.95 }));
+ceil.rotation.x = Math.PI / 2; scene.add(ceil);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), new THREE.MeshStandardMaterial({ map: plaster("#4f5153"), roughness: 0.95 }));
+wall.position.set(0, -3, -2.2); scene.add(wall);
+// Table en marbre clair sous le luminaire (comme sur les photos), à peine visible en bas d'image.
+const table = new THREE.Mesh(new THREE.BoxGeometry(L + 0.6, 0.04, 1.0), new THREE.MeshStandardMaterial({ color: 0xe9e6e1, roughness: 0.25 }));
+table.position.set(0, -2.45, 0); // (table retirée : elle sortait du cadre)
+scene.add(new THREE.HemisphereLight({ chaud: 0xffe6c6, froid: 0xeef2ff }[TEMP], 0x24221f, 0.3));
+const keyL = new THREE.DirectionalLight({ chaud: 0xffe6c8, froid: 0xf2f5ff }[TEMP], 0.6); keyL.position.set(2, -0.5, 3); scene.add(keyL);
+
+// ── Luminaire ──
+const metal = new THREE.MeshStandardMaterial({ color: 0x1b1b1c, metalness: 0.55, roughness: 0.48 });
+const cableMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, transparent: true, opacity: 0.55, emissive: GLOW, emissiveIntensity: 0.55, clearcoat: 1 });
+const filMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: GLOW, emissiveIntensity: 2.4 });
+const Y0 = -1.05; // plan du luminaire sous le plafond
+const group = new THREE.Group(); scene.add(group);
+const UP = new THREE.Vector3(0, 1, 0);
+
+function tube(a, b, r0, r1 = r0) {
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 10), metal);
+  m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(UP, d.normalize()); group.add(m); return m;
+}
+function joint(p, r) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), metal); m.position.copy(p); group.add(m); }
+
+// Réseau : nœuds répartis dans la bande, reliés à leurs voisins proches (cellules organiques).
+const nodes = [];
+const nNodes = Math.round(34 * L);
+for (let i = 0; i < nNodes; i++) {
+  nodes.push(new THREE.Vector3(
+    -L / 2 + 0.06 + rand() * (L - 0.12),
+    Y0 + (rand() - 0.5) * 0.1,
+    (rand() - 0.5) * DEPTH * 0.5,
+  ));
+}
+const edges = new Set();
+nodes.forEach((a, i) => {
+  const near = nodes.map((b, j) => [a.distanceTo(b), j]).filter(([, j]) => j !== i).sort((x, y) => x[0] - y[0]).slice(0, 3);
+  near.forEach(([d, j]) => { if (d < 0.26) edges.add(i < j ? `${i}-${j}` : `${j}-${i}`); });
+});
+for (const e of edges) { const [i, j] = e.split("-").map(Number); tube(nodes[i], nodes[j], 0.013, 0.013); }
+nodes.forEach((p) => joint(p, 0.019));
+
+// Pointes effilées vers l'extérieur.
+const spikes = Math.round(16 * L);
+for (let i = 0; i < spikes; i++) {
+  const p = nodes[Math.floor(rand() * nodes.length)];
+  const dir = new THREE.Vector3((rand() - 0.5) * 1.2, (rand() - 0.4) * 1.6, (rand() - 0.5) * 2).normalize();
+  const len = 0.14 + rand() * 0.2;
+  tube(p, p.clone().addScaledVector(dir, len), 0.012, 0.0008);
+}
+// Ampoules E14 sous tube de verre : courte branche, douille noire, tube dépoli lumineux.
+const lights = [];
+for (let i = 0; i < BULBS; i++) {
+  const x = -L / 2 + 0.1 + ((i + 0.5) / BULBS) * (L - 0.2);
+  const p = nodes.reduce((best, n) => (Math.abs(n.x - x) < Math.abs(best.x - x) ? n : best), nodes[0]);
+  const dir = new THREE.Vector3((rand() - 0.5) * 0.8, rand() < 0.35 ? 0.6 : -0.7 - rand() * 0.3, (rand() < 0.5 ? -1 : 1) * (0.4 + rand() * 0.5)).normalize();
+  const a = p.clone().addScaledVector(dir, 0.07 + rand() * 0.05);
+  tube(p, a, 0.011, 0.01);
+  const sock = a.clone().addScaledVector(dir, 0.035);
+  tube(a, sock, 0.016, 0.016);
+  const g = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.075, 20, 1, false), glassMat);
+  g.position.copy(sock).addScaledVector(dir, 0.0375); g.quaternion.setFromUnitVectors(UP, dir); group.add(g);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), glassMat);
+  cap.position.copy(sock).addScaledVector(dir, 0.075); cap.quaternion.setFromUnitVectors(UP, dir); group.add(cap);
+  const f = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.05, 8), filMat);
+  f.position.copy(g.position); f.quaternion.copy(g.quaternion); group.add(f);
+  lights.push(g.position.clone());
+}
+for (const p of lights) { const pl = new THREE.PointLight(LIGHT, 0.12 * Math.min(1, 14 / BULBS) * 1.4, 5, 2); pl.position.copy(p); scene.add(pl); }
+// Câbles et pavillons.
+for (let k = 0; k < CABLES; k++) {
+  const x = CABLES === 1 ? 0 : -L * 0.36 + (k / (CABLES - 1)) * L * 0.72;
+  const p = nodes.reduce((best, n) => (Math.abs(n.x - x) + Math.abs(n.z) < Math.abs(best.x - x) + Math.abs(best.z) ? n : best), nodes[0]);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0012, 0.0012, -p.y - 0.02, 6), cableMat);
+  m.position.set(p.x, p.y / 2 - 0.01, p.z); group.add(m);
+  const can = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 32), metal);
+  can.position.set(p.x, -0.015, p.z); group.add(can);
+}
+const LONG = Math.min(1, (L - 1.2) / 3.3);
+group.rotation.y = -(0.35 + LONG * 0.4);
+
+// ── Caméra : trois-quarts légèrement en contre-plongée ──
+// Cadrage automatique : la sphère englobant le luminaire et ses pavillons tient dans l'image.
+const camera = new THREE.PerspectiveCamera(32, WIDTH / HEIGHT, 0.02, 60);
+group.updateMatrixWorld(true);
+const body = new THREE.Box3();
+nodes.forEach((n) => body.expandByPoint(n.clone().applyMatrix4(group.matrixWorld)));
+body.expandByScalar(0.16);
+const sphere = body.getBoundingSphere(new THREE.Sphere());
+const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(16)) * (WIDTH / HEIGHT));
+const dist = (sphere.radius * (0.95 - LONG * 0.22)) / Math.sin(hfov / 2);
+const dir = new THREE.Vector3(0.18, -0.2, 1).normalize();
+camera.position.copy(sphere.center).addScaledVector(dir, dist);
+camera.lookAt(sphere.center.x, sphere.center.y + sphere.radius * 0.18, sphere.center.z);
+// Le mur du fond recule avec la caméra pour rester derrière le luminaire.
+wall.position.z = Math.min(-2.2, sphere.center.z - sphere.radius - 0.8);
+wall.scale.set(3, 2, 1); ceil.scale.set(3, 3, 1);
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(SCALE); composer.setSize(WIDTH, HEIGHT);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.32, 0.25, 0.9));
+composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, seed: { value: seed * 0.37 } },
+  vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+  fragmentShader: "uniform sampler2D tDiffuse; uniform float seed; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + seed)*43758.5453); } void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = distance(vUv, vec2(.5,.45)); c.rgb *= mix(1., .74, smoothstep(.42,.95,d)); c.rgb += (h(vUv*1400.)-.5)*.016; gl_FragColor = c; }",
+}));
+composer.render();
+window.__ms = performance.now() - t0;
+window.__done = true;
+</script></body></html>

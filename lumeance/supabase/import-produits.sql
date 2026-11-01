@@ -389,6 +389,67 @@ select (select id from public.products where reference = 'LUM-SUS-002'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-002') and storage_path = '/products/aigrette/ambiance-lineaire.webp');
 
+-- ════ Sylve (LUM-LUS-003) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art)
+values ('sylve', 'Sylve', 'LUM-LUS-003', 'Une ramure de métal noir, hérissée de pointes et ponctuée de lumières sous verre.', 'Sylve réinterprète la branche comme une architecture : un réseau organique de rameaux en métal noir mat, aux jonctions fondues comme celles d’un arbre, hérissé de tiges effilées et ponctué de petites ampoules LED sous tube de verre. Allumée, elle diffuse une lumière douce qui révèle ses ombres portées ; éteinte, elle reste une sculpture graphique.
+
+Pensée pour les grands volumes, elle se décline en six longueurs, de 120 cm (10 lumières) à 450 cm (45 lumières), toutes larges de 65 cm : au-dessus d’une table de salle à manger ou d’un îlot, dans un séjour, un hall d’entrée ou une cage d’escalier. Les câbles de suspension se règlent en hauteur.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  69000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'draft', false, '{}'::jsonb, null,
+  array['Métal', 'Verre']::text[], array['Noir mat']::text[], '[{"label":"Sources lumineuses","value":"Ampoules LED fournies, culot E14 — de 10 à 45 selon la longueur"},{"label":"Diffuseurs","value":"Tubes de verre"},{"label":"Dimensions","value":"Longueur 120, 150, 185, 230, 310 ou 450 cm × largeur 65 cm"},{"label":"Suspension","value":"2 à 5 câbles réglables selon la longueur"},{"label":"Tension d’entrée","value":"AC 90–260 V"},{"label":"Finition","value":"Métal noir mat"},{"label":"Couleur de lumière","value":"Blanc chaud 3000 K ou blanc froid 6000 K, fixe ou variable"},{"label":"Garantie annoncée","value":"3 ans"}]'::jsonb,
+  null, 'Installation au plafond, avec plusieurs points de fixation selon la longueur. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée. Indiquez la hauteur sous plafond pour régler la longueur des câbles.', 0,
+  'Sylve — lustre branches en métal noir, grande longueur', 'Lustre design en ramure de métal noir mat et lumières LED sous verre, de 120 à 450 cm de long. Pour table de salle à manger, séjour et grands volumes.', '[{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"},{"id":"chaud-variable","label":"Blanc chaud, variable"},{"id":"froid-variable","label":"Blanc froid, variable"}]}]'::jsonb,
+  null, 'organic')
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 120 cm', 'LUM-LUS-003-L120', null, 0,
+  0, true, '10 ampoules LED E14 fournies · 120 × 65 cm · 2 câbles de suspension réglables · pièce de 10 à 15 m²', '/products/sylve/rendu-l120-chaud.webp', '{"chaud":"/products/sylve/rendu-l120-chaud.webp","chaud-variable":"/products/sylve/rendu-l120-chaud.webp","froid":"/products/sylve/rendu-l120-froid.webp","froid-variable":"/products/sylve/rendu-l120-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 150 cm', 'LUM-LUS-003-L150', null, 13000,
+  0, true, '12 ampoules LED E14 fournies · 150 × 65 cm · 2 câbles de suspension réglables · pièce de 12 à 18 m²', '/products/sylve/rendu-l150-chaud.webp', '{"chaud":"/products/sylve/rendu-l150-chaud.webp","chaud-variable":"/products/sylve/rendu-l150-chaud.webp","froid":"/products/sylve/rendu-l150-froid.webp","froid-variable":"/products/sylve/rendu-l150-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 185 cm', 'LUM-LUS-003-L185', null, 23000,
+  0, true, '18 ampoules LED E14 fournies · 185 × 65 cm · 2 câbles de suspension réglables · pièce de 15 à 20 m²', '/products/sylve/rendu-l185-chaud.webp', '{"chaud":"/products/sylve/rendu-l185-chaud.webp","chaud-variable":"/products/sylve/rendu-l185-chaud.webp","froid":"/products/sylve/rendu-l185-froid.webp","froid-variable":"/products/sylve/rendu-l185-froid.webp"}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 230 cm', 'LUM-LUS-003-L230', null, 40000,
+  0, true, '22 ampoules LED E14 fournies · 230 × 65 cm · 3 câbles de suspension réglables · pièce de 18 à 22 m²', '/products/sylve/rendu-l230-chaud.webp', '{"chaud":"/products/sylve/rendu-l230-chaud.webp","chaud-variable":"/products/sylve/rendu-l230-chaud.webp","froid":"/products/sylve/rendu-l230-froid.webp","froid-variable":"/products/sylve/rendu-l230-froid.webp"}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 310 cm', 'LUM-LUS-003-L310', null, 70000,
+  0, true, '30 ampoules LED E14 fournies · 310 × 65 cm · 3 câbles de suspension réglables · pièce de 20 à 25 m²', '/products/sylve/rendu-l310-chaud.webp', '{"chaud":"/products/sylve/rendu-l310-chaud.webp","chaud-variable":"/products/sylve/rendu-l310-chaud.webp","froid":"/products/sylve/rendu-l310-froid.webp","froid-variable":"/products/sylve/rendu-l310-froid.webp"}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-003'), 'L 450 cm', 'LUM-LUS-003-L450', null, 133000,
+  0, true, '45 ampoules LED E14 fournies · 450 × 65 cm · 5 câbles de suspension réglables · pièce de 22 à 28 m²', '/products/sylve/rendu-l450-chaud.webp', '{"chaud":"/products/sylve/rendu-l450-chaud.webp","chaud-variable":"/products/sylve/rendu-l450-chaud.webp","froid":"/products/sylve/rendu-l450-froid.webp","froid-variable":"/products/sylve/rendu-l450-froid.webp"}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-003'), '/products/sylve/ambiance-table.webp', 'Lustre Sylve, ramure de métal noir et lumières sous verre, au-dessus d’une table en marbre', 'Visuel d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-003') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-003') and storage_path = '/products/sylve/ambiance-table.webp');
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-003'), '/products/sylve/ambiance-fenetres.webp', 'Lustre Sylve vu de près devant des fenêtres en arcade, branches noires hérissées de pointes', 'Visuel d’ambiance du fabricant', 1,
+  false and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-003') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-003') and storage_path = '/products/sylve/ambiance-fenetres.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.

@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
+import { imageRows, missingProducts, productRow, variantRows } from "@/lib/admin/catalog-import";
 import { firstError, productFromForm } from "@/lib/admin/forms";
 import { uploadImage } from "@/lib/admin/media";
 import { back, dbError } from "@/lib/admin/redirect";
+import { CATALOG_PRODUCTS } from "@/lib/catalog/products";
 import { parseEuroInput } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { variantSchema } from "@/lib/validation/schemas";
@@ -111,15 +113,13 @@ export async function addProductImage(form: FormData) {
     .from("product_images")
     .select("id", { count: "exact", head: true })
     .eq("product_id", pid);
-  const { error } = await supabase
-    .from("product_images")
-    .insert({
-      product_id: pid,
-      storage_path: path,
-      alt_text: alt,
-      position: count ?? 0,
-      is_primary: !count,
-    });
+  const { error } = await supabase.from("product_images").insert({
+    product_id: pid,
+    storage_path: path,
+    alt_text: alt,
+    position: count ?? 0,
+    is_primary: !count,
+  });
   if (error) back(`/admin/products/${pid}`, { erreur: dbError("addProductImage", error) });
   refreshStore();
   back(`/admin/products/${pid}`, { ok: "Image ajoutée." });
@@ -182,4 +182,50 @@ export async function saveVariant(form: FormData) {
   if (error) back(`/admin/products/${pid}`, { erreur: dbError("saveVariant", error) });
   refreshStore();
   back(`/admin/products/${pid}`, { ok: "Variante enregistrée." });
+}
+
+/**
+ * Ajoute à la base les pièces préparées dans le code (lib/catalog/products.ts) qui n'y sont pas
+ * encore. Une pièce déjà présente (même référence) n'est jamais modifiée.
+ */
+export async function importCatalogProducts() {
+  await requireAdmin(CATALOG_ROLES);
+  const supabase = await createSupabaseServerClient();
+  const [{ data: existing, error: e1 }, { data: categories, error: e2 }] = await Promise.all([
+    supabase.from("products").select("reference"),
+    supabase.from("categories").select("id, slug"),
+  ]);
+  if (e1 || e2) back("/admin/products", { erreur: dbError("importCatalog", (e1 ?? e2)!) });
+  const todo = missingProducts(
+    CATALOG_PRODUCTS,
+    (existing ?? []).map((r) => r.reference),
+  );
+  if (!todo.length) back("/admin/products", { ok: "Aucune nouvelle pièce à importer." });
+  const categoryId = new Map((categories ?? []).map((c) => [c.slug, c.id]));
+  const done: string[] = [];
+  for (const p of todo) {
+    const { data: row, error } = await supabase
+      .from("products")
+      .insert(productRow(p, categoryId.get(p.categorySlug ?? "") ?? null))
+      .select("id")
+      .single();
+    if (error)
+      back("/admin/products", { erreur: `${p.name} : ${dbError("importCatalog", error)}` });
+    const [{ error: ev }, { error: ei }] = await Promise.all([
+      p.variants.length
+        ? supabase.from("product_variants").insert(variantRows(p, row.id))
+        : Promise.resolve({ error: null }),
+      p.images.length
+        ? supabase.from("product_images").insert(imageRows(p, row.id))
+        : Promise.resolve({ error: null }),
+    ]);
+    if (ev || ei) {
+      // Pas de pièce à moitié importée : on retire la fiche (versions et images en cascade).
+      await supabase.from("products").delete().eq("id", row.id);
+      back("/admin/products", { erreur: `${p.name} : ${dbError("importCatalog", (ev ?? ei)!)}` });
+    }
+    done.push(p.name);
+  }
+  refreshStore();
+  back("/admin/products", { ok: `Importé : ${done.join(", ")}. À relire avant publication.` });
 }

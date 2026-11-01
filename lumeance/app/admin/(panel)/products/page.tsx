@@ -8,9 +8,13 @@ import {
   flashFrom,
   inputClass,
 } from "@/components/admin/ui";
+import { SubmitButton } from "@/components/admin/SubmitButton";
+import { missingProducts } from "@/lib/admin/catalog-import";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
+import { CATALOG_PRODUCTS } from "@/lib/catalog/products";
 import { formatPrice } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { importCatalogProducts } from "./actions";
 
 export const metadata = { title: "Produits" };
 const STATUS_LABELS: Record<string, string> = {
@@ -43,7 +47,14 @@ export default async function ProductsPage({
       .slice(0, 60);
     q = q.or(`name.ilike.%${term}%,reference.ilike.%${term}%`);
   }
-  const { data } = await q;
+  const [{ data }, { data: refs }] = await Promise.all([
+    q,
+    supabase.from("products").select("reference"),
+  ]);
+  const pending = missingProducts(
+    CATALOG_PRODUCTS,
+    (refs ?? []).map((r) => r.reference),
+  );
   return (
     <>
       <PageTitle
@@ -56,6 +67,19 @@ export default async function ProductsPage({
         }
       />
       <Flash {...flashFrom(sp)} />
+      {pending.length > 0 && (
+        <form
+          action={importCatalogProducts}
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-champagne/40 bg-champagne/10 px-4 py-3 text-sm"
+        >
+          <p>
+            {pending.length === 1 ? "Nouvelle pièce prête" : "Nouvelles pièces prêtes"} à importer :{" "}
+            <strong>{pending.map((p) => p.name).join(", ")}</strong>. Elles arrivent avec leurs
+            versions, options et visuels ; les pièces déjà présentes ne sont pas modifiées.
+          </p>
+          <SubmitButton variant="primary">Importer les nouvelles pièces</SubmitButton>
+        </form>
+      )}
       <form className="mb-4 flex flex-wrap gap-2">
         <input
           name="q"
