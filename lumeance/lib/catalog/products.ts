@@ -220,7 +220,7 @@ const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
       stockQuantity: 0,
       active: true,
       details: [
-        `${bulbs} ampoules G9 LED`,
+        `${bulbs} ampoules G9 LED fournies`,
         `${crystals} éléments de cristal`,
         shape === "Linéaire" ? "hauteur 40 cm · pavillon 50 cm" : null,
         "suspension réglable jusqu’à 1,5 m",
@@ -593,7 +593,10 @@ export const CATALOG_PRODUCTS: Product[] = [
     materials: ["Cristal", "Métal"],
     finishes: ["Doré", "Chromé"],
     specifications: [
-      { label: "Sources lumineuses", value: "Ampoules LED, culot G9 — de 8 à 16 selon la version" },
+      {
+        label: "Sources lumineuses",
+        value: "Ampoules LED fournies, culot G9 — de 8 à 16 selon la version",
+      },
       { label: "Tension d’entrée", value: "AC 90–260 V" },
       { label: "Flux lumineux", value: "De 249 à 2 000 lm selon la version" },
       {
