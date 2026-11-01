@@ -7,6 +7,9 @@ import { LoginForm } from "./LoginForm";
 
 export const metadata = { title: "Connexion" };
 
+// Rendue à chaque requête : la configuration Supabase est lue à l'exécution, jamais figée au build.
+export const dynamic = "force-dynamic";
+
 export default async function LoginPage() {
   if (!isSupabaseConfigured()) return <NotConfigured />;
   if (await getAdminSession()) redirect("/admin/dashboard");
