@@ -88,7 +88,7 @@ function tip(at, dir) {
   rod(at, h, 0.0042, holderMat);
   const c = h.clone().addScaledVector(dir, 0.019);
   const m = new THREE.Mesh(diffGeo, diffMat);
-  m.position.copy(c); m.scale.set(0.017, 0.022, 0.0075);
+  m.position.copy(c); m.scale.set(form === "stem" ? 0.021 : 0.017, form === "stem" ? 0.023 : 0.022, 0.0075);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
   m.rotateY(rand() * Math.PI);
   group.add(m);
@@ -130,15 +130,34 @@ if (form === "ring") {
     cluster(o, out, reach);
   }
 } else if (form === "stem") {
-  const hub = new THREE.Vector3(0, Y0 + 0.05, 0);
-  const top = sleeve(hub.clone().add(new THREE.Vector3(0, 0.02, 0)));
-  rod(hub.clone().add(new THREE.Vector3(0, -0.12, 0)), hub, 0.006, metal);
-  cable(top, new THREE.Vector3(0, -0.055, 0));
-  for (let i = 0; i < clusters; i++) {
-    const u = 1 - (2 * (i + 0.5)) / clusters, a = i * 2.39996 + rand() * 0.3;
-    const out = new THREE.Vector3(Math.sqrt(1 - u * u) * Math.cos(a), u * 0.75 - 0.1, Math.sqrt(1 - u * u) * Math.sin(a)).normalize();
-    cluster(hub.clone().add(new THREE.Vector3(0, -rand() * 0.1, 0)), out, W * 0.42);
+  // Ø50 (photo fabricant « 30 lights ») : câble unique → manchon → courte tige → nœud central ;
+  // 6 branches maîtresses (2 montantes, 2 latérales, 2 descendantes) ramifiées en Y comme un arbre,
+  // 5 diffuseurs ronds chacune (30 au total) ; silhouette en boule d'environ 50 cm.
+  const hub = new THREE.Vector3(0, Y0, 0);
+  const slBottom = hub.clone().add(new THREE.Vector3(0, 0.045, 0));
+  const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.075, 12), metal);
+  sl.position.copy(slBottom).add(new THREE.Vector3(0, 0.0375, 0)); group.add(sl);
+  rod(hub, slBottom, 0.003, metal);
+  cable(slBottom.clone().add(new THREE.Vector3(0, 0.075, 0)), new THREE.Vector3(0, -0.055, 0));
+  const deg = Math.PI / 180;
+  const dirOf = (az, el) => new THREE.Vector3(Math.cos(el * deg) * Math.cos(az * deg), Math.sin(el * deg), Math.cos(el * deg) * Math.sin(az * deg));
+  // Fourche en Y : les deux branches s'ouvrent symétriquement autour de la direction, dans un plan
+  // qui alterne (horizontal / vertical) à chaque niveau, avec un léger écart aléatoire.
+  function limb(origin, d, len, tips, depth = 0) {
+    const end = origin.clone().addScaledVector(d, len);
+    rod(origin, end, tips > 2 ? 0.0024 : 0.0018, metal);
+    if (tips === 1) { tip(end, d); return; }
+    const ref = depth % 2 === 0 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(-d.z, 0, d.x);
+    let axis = new THREE.Vector3().crossVectors(d, ref);
+    if (axis.lengthSq() < 1e-4) axis = new THREE.Vector3(1, 0, 0);
+    axis.normalize().applyAxisAngle(d, (rand() - 0.5) * 0.6);
+    const sp = (32 + rand() * 10) * deg;
+    const a = Math.ceil(tips / 2), b2 = tips - a;
+    limb(end, d.clone().applyAxisAngle(axis, sp).normalize(), len * 0.8, a, depth + 1);
+    limb(end, d.clone().applyAxisAngle(axis, -sp).normalize(), len * 0.8, b2, depth + 1);
   }
+  const limbs = [[0, 30], [180, 26], [60, 4], [240, -2], [120, -24], [300, -38]];
+  limbs.forEach(([az, el]) => limb(hub, dirOf(az + (rand() - 0.5) * 20, el + (rand() - 0.5) * 10), 0.072, Math.round(LIGHTS / limbs.length)));
 } else {
   const L = W - 0.2;
   rod(new THREE.Vector3(-L / 2, Y0, 0), new THREE.Vector3(L / 2, Y0, 0), 0.0085, metal);
@@ -150,11 +169,11 @@ if (form === "ring") {
   }
 }
 // Quelques sources réelles pour éclairer la pièce (la lueur des diffuseurs est rendue par le bloom).
-for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; const pl = new THREE.PointLight(LIGHT, 0.14, 5, 2); pl.position.set(Math.cos(a) * W * 0.35, Y0 - 0.08, Math.sin(a) * W * 0.25); scene.add(pl); }
+for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; const pl = new THREE.PointLight(LIGHT, 0.14, 5, 2); const rr = Math.max(W * 0.35, 0.45); pl.position.set(Math.cos(a) * rr, Y0 - 0.08, Math.sin(a) * rr * 0.7 - 0.2); scene.add(pl); }
 
 // ── Caméra : légère contre-plongée, comme les photos du fabricant ──
 const camera = new THREE.PerspectiveCamera(34, WIDTH / HEIGHT, 0.02, 50);
-const span = Math.max(1.15, (W + 0.5) * (HEIGHT / WIDTH) * 0.9);
+const span = form === "stem" ? 0.95 : Math.max(1.15, (W + 0.5) * (HEIGHT / WIDTH) * 0.9);
 const dist = span / (2 * Math.tan(THREE.MathUtils.degToRad(17)));
 camera.position.set(dist * 0.1, Y0 - span * 0.32, dist * 0.98);
 camera.lookAt(0, Y0 + 0.1, 0);
