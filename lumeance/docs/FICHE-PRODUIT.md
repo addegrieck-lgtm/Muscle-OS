@@ -90,9 +90,10 @@ pièce suit ce modèle, sauf demande contraire.
 - **Description** : 3 paragraphes (silhouette et matière ; usages et versions ; « Caractéristiques
   techniques communiquées par le fabricant. Les documents de conformité sont en cours de
   vérification avant la mise en vente. »).
-- `stockQuantity: 0` → bouton « Demander cette pièce » (contact prérempli) tant que la vente en
-  ligne n'est pas ouverte. `status: "draft"` tant que la conformité (CE, notice, DEEE) n'est pas
-  vérifiée.
+- `stockQuantity: 5` sur la pièce et sur chaque version (décision du propriétaire, 1er novembre
+  2026). Le stock n'est jamais affiché au client : il rend la pièce commandable (« Ajouter au
+  panier »). À 0, le bouton devient « Demander cette pièce » (contact prérempli).
+  `status: "draft"` tant que la conformité (CE, notice, DEEE) n'est pas vérifiée.
 - SEO : `seoTitle` et `seoDescription` propres à la pièce.
 
 ## 5. Base Supabase (site en ligne)
