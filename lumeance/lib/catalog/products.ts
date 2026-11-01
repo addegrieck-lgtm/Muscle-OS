@@ -49,7 +49,7 @@ const CELESTE_VARIANTS: ProductVariant[] = CELESTE_VERSIONS.map(
       sku: `LUM-LUS-001-${code}`,
       finish: `Pavillon ${shape.toLowerCase()}`,
       priceAdjustment: salePrice(cost) - CELESTE_BASE_PRICE,
-      stockQuantity: 0,
+      stockQuantity: 5,
       active: true,
       details: [
         canopy ? `Pavillon ${canopy}` : "Dimensions du pavillon communiquées sur demande",
@@ -98,7 +98,7 @@ const LUCIOLE_VARIANTS: ProductVariant[] = LUCIOLE_VERSIONS.map(
       sku: `LUM-SUS-001-${code}`,
       finish: shape,
       priceAdjustment: salePrice(cost) - LUCIOLE_BASE_PRICE,
-      stockQuantity: 0,
+      stockQuantity: 5,
       active: true,
       details: `${lights} lumières · hauteur du luminaire 35 cm · suspension réglable jusqu’à 1,5 m · pièce de ${area} m²`,
       imageUrl: `/products/luciole/ambiance-${shape === "Couronne" ? "couronne" : "lineaire"}.webp`,
@@ -136,7 +136,7 @@ const SILHOUETTE_VARIANTS: ProductVariant[] = SILHOUETTE_SIZES.map(([code, w, h,
   sku: `LUM-APP-001-${code}`,
   finish: null,
   priceAdjustment: salePrice(cost) - SILHOUETTE_BASE_PRICE,
-  stockQuantity: 0,
+  stockQuantity: 5,
   active: true,
   details: `Tableau lumineux ${w} × ${h} cm · éclairage LED en périphérie du cadre`,
   imageUrl: "/products/silhouette/motif-a.webp",
@@ -173,7 +173,7 @@ const NEBULEUSE_VARIANTS: ProductVariant[] = NEBULEUSE_VERSIONS.map(
     sku: `LUM-LUS-002-${n}`,
     finish: null,
     priceAdjustment: salePrice(cost) - NEBULEUSE_BASE_PRICE,
-    stockQuantity: 0,
+    stockQuantity: 5,
     active: true,
     details: `Pavillon Ø${canopy} cm · suspension réglable jusqu’à ${String(wire / 100).replace(".", ",")} m · ${watt} W · pièce de ${area} m²`,
     imageUrl: `/products/nebuleuse/version-${n}.webp`,
@@ -217,7 +217,7 @@ const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
       sku: `LUM-SUS-002-${code.toUpperCase()}`,
       finish: shape,
       priceAdjustment: salePrice(cost) - AIGRETTE_BASE_PRICE,
-      stockQuantity: 0,
+      stockQuantity: 5,
       active: true,
       details: [
         `${bulbs} ampoules G9 LED fournies`,
@@ -261,7 +261,7 @@ const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
     sku: `LUM-LUS-003-L${length}`,
     finish: null,
     priceAdjustment: salePrice(cost) - SYLVE_BASE_PRICE,
-    stockQuantity: 0,
+    stockQuantity: 5,
     active: true,
     details: `${bulbs} ampoules LED E14 fournies · ${length} × 65 cm · ${cables} câbles de suspension réglables · pièce de ${area} m²`,
     imageUrl: `/products/sylve/rendu-l${length}-chaud.webp`,
@@ -301,7 +301,7 @@ const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.map(
     sku: `LUM-SUS-003-${code.toUpperCase()}`,
     finish: shape,
     priceAdjustment: salePrice(cost) - CONSTELLATION_MIN_PRICE,
-    stockQuantity: 0,
+    stockQuantity: 5,
     active: true,
     details: [
       `${heads} globes de verre Ø10 à Ø15 cm`,
@@ -342,7 +342,7 @@ const VOLUTE_VARIANTS: ProductVariant[] = VOLUTE_VERSIONS.map(([code, label, h, 
   sku: `LUM-APP-002-${code.toUpperCase()}`,
   finish: null,
   priceAdjustment: salePrice(cost) - VOLUTE_BASE_PRICE,
-  stockQuantity: 0,
+  stockQuantity: 5,
   active: true,
   details: `Hauteur ${h} cm · largeur ${w} cm · éclairage vers le haut et vers le bas`,
   imageUrl: `/products/volute/rendu-${code}-noir-or-chaud.webp`,
@@ -396,7 +396,7 @@ const ORGANZA_VARIANTS: ProductVariant[] = ORGANZA_VERSIONS.map(
     sku: `LUM-LUS-004-${code.toUpperCase()}`,
     finish: `Pavillon ${shape.toLowerCase()}`,
     priceAdjustment: salePrice(cost) - ORGANZA_MIN_PRICE,
-    stockQuantity: 0,
+    stockQuantity: 5,
     active: true,
     details: [
       `Pavillon ${canopy}`,
@@ -463,7 +463,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée pour une pièce de grande hauteur. Indiquez la hauteur disponible pour ajuster la longueur des câbles.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "celeste-1",
@@ -539,7 +539,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les branches se positionnent à la main lors de l’installation.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "luciole-1",
@@ -621,7 +621,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Fixation murale. Le raccordement électrique doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "silhouette-1",
@@ -703,7 +703,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée pour une pièce de grande hauteur. La longueur de chaque câble se règle à l’installation.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "nebuleuse-1",
@@ -794,7 +794,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les tiges se mettent en place à la main lors du montage.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "aigrette-1",
@@ -882,7 +882,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond, avec plusieurs points de fixation selon la longueur. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée. Indiquez la hauteur sous plafond pour régler la longueur des câbles.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "sylve-1",
@@ -969,7 +969,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles, jusqu’à 120 cm.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "constellation-1",
@@ -1053,7 +1053,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée, en particulier en extérieur.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "volute-1",
@@ -1140,7 +1140,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     deliveryInformation: null,
     assemblyInformation:
       "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.",
-    stockQuantity: 0,
+    stockQuantity: 5,
     images: [
       {
         id: "organza-1",
