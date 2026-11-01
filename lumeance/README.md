@@ -46,4 +46,4 @@ docs             plan, avancement, sécurité, paiement, RGPD et conformité, h�
 
 ## Documentation
 
-[Plan d’exécution](docs/PLAN.md) · [Avancement par phase](docs/STATUS.md) · [Identité](docs/IDENTITE.md) · [Sécurité](docs/SECURITE.md) · [Paiement](docs/PAIEMENT.md) · [RGPD et conformité produits](docs/RGPD.md) · [Hébergement et domaine](docs/HEBERGEMENT.md)
+[Plan d’exécution](docs/PLAN.md) · [Avancement par phase](docs/STATUS.md) · [Identité](docs/IDENTITE.md) · [Sécurité](docs/SECURITE.md) · [Paiement](docs/PAIEMENT.md) · [RGPD et conformité produits](docs/RGPD.md) · [Hébergement et domaine](docs/HEBERGEMENT.md) · [Modèle de fiche produit](docs/FICHE-PRODUIT.md)
