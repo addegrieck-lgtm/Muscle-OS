@@ -14,12 +14,6 @@ import type { Dimensions } from "@/types/catalog";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const revalidate = 300;
-
-export async function generateStaticParams() {
-  return (await getProducts()).map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = await getProductBySlug((await params).slug);
   if (!p) return {};

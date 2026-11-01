@@ -3,7 +3,7 @@ import { ARTICLES } from "@/lib/content/journal";
 import { getCategories, getProducts } from "@/lib/services/catalog";
 import { absoluteUrl } from "@/lib/seo/metadata";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, products] = await Promise.all([getCategories(), getProducts()]);

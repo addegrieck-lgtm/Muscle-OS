@@ -18,7 +18,10 @@
     "check": "npm run typecheck && npm run lint && npm test",
     "admin:init": "node scripts/init-admin.mjs",
     "brand": "node scripts/build-brand.mjs",
-    "brand:raster": "node scripts/render-raster.mjs"
+    "brand:raster": "node scripts/render-raster.mjs",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.2",
@@ -34,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
+    "@opennextjs/cloudflare": "^1.20.15",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
@@ -45,6 +49,7 @@
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.156.0"
   }
 }
