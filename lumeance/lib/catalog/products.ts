@@ -153,6 +153,32 @@ const SILHOUETTE_VARIANTS: ProductVariant[] = SILHOUETTE_SIZES.map(([code, w, h,
   ),
 }));
 
+// ── Nébuleuse (LUM-LUS-002) ──────────────────────────────────────────────────
+// [sphères, puissance W, Ø pavillon cm, suspension max cm, surface m², prix fournisseur hors promotion (centimes)]
+// Prix hors promotion = prix promo + économie affichée. Versions 3, 5, 6 et 30 sphères : prix non communiqué.
+const NEBULEUSE_VERSIONS: [number, number, number, number, string, number][] = [
+  [8, 48, 40, 180, "15 à 20", 15862],
+  [10, 60, 50, 200, "20 à 25", 18309],
+  [12, 60, 50, 220, "22 à 28", 21414],
+  [15, 90, 60, 250, "25 à 30", 24920],
+  [18, 110, 60, 300, "30 à 35", 28077],
+  [24, 140, 60, 400, "35 à 40", 36132],
+];
+const NEBULEUSE_BASE_PRICE = Math.min(...NEBULEUSE_VERSIONS.map((v) => salePrice(v[5])));
+const NEBULEUSE_VARIANTS: ProductVariant[] = NEBULEUSE_VERSIONS.map(
+  ([n, watt, canopy, wire, area, cost]) => ({
+    id: `nebuleuse-${n}`,
+    name: `${n} sphères`,
+    sku: `LUM-LUS-002-${n}`,
+    finish: null,
+    priceAdjustment: salePrice(cost) - NEBULEUSE_BASE_PRICE,
+    stockQuantity: 0,
+    active: true,
+    details: `Pavillon Ø${canopy} cm · suspension réglable jusqu’à ${String(wire / 100).replace(".", ",")} m · ${watt} W · pièce de ${area} m²`,
+    imageUrl: `/products/nebuleuse/version-${n}.webp`,
+  }),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -401,6 +427,85 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Tableau lumineux LED : figure sculpturale noire sur fond texturé, halo de lumière autour du cadre. Cinq motifs, cadre noir ou doré, lumière chaude ou froide.",
     art: "sconce",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-002",
+    slug: "nebuleuse",
+    name: "Nébuleuse",
+    reference: "LUM-LUS-002",
+    shortDescription:
+      "Une cascade de sphères de verre où scintillent des centaines de micro-lumières.",
+    description: [
+      "Nébuleuse suspend dans le vide des sphères de verre teinté, chacune habitée d’un nuage de micro-LED. Allumée, chaque globe devient une petite galaxie ; ensemble, elles composent une constellation qui descend le long d’une cage d’escalier ou d’un séjour en double hauteur.",
+      "Six compositions, de 8 à 24 sphères, avec suspensions réglables jusqu’à 4 m. Verre cognac ou gris fumé, pavillon argenté, doré ou noir, et trois températures de lumière.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: NEBULEUSE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "published",
+    featured: true,
+    dimensions: {},
+    weight: null,
+    materials: ["Verre", "Métal"],
+    finishes: ["Argenté", "Doré", "Noir"],
+    specifications: [
+      { label: "Sources lumineuses", value: "Micro-LED intégrées dans chaque sphère" },
+      { label: "Puissance", value: "De 48 W (8 sphères) à 140 W (24 sphères)" },
+      { label: "Verre", value: "Cognac ou gris fumé" },
+      { label: "Pavillon", value: "Rond, Ø40 à Ø60 cm selon la version ; argenté, doré ou noir" },
+      { label: "Couleur de lumière", value: "Blanc chaud 3000 K, neutre 4000 K ou froid 5500 K" },
+      { label: "Classe énergétique", value: "A, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée pour une pièce de grande hauteur. La longueur de chaque câble se règle à l’installation.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "nebuleuse-1",
+        url: "/products/nebuleuse/ambiance-escalier.webp",
+        alt: "Lustre Nébuleuse, cascade de sphères de verre fumé lumineuses dans un escalier hélicoïdal en double hauteur",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: NEBULEUSE_VARIANTS,
+    options: [
+      {
+        id: "verre",
+        label: "Couleur du verre",
+        values: [
+          { id: "cognac", label: "Cognac" },
+          { id: "fume", label: "Gris fumé" },
+        ],
+      },
+      {
+        id: "pavillon",
+        label: "Pavillon",
+        values: [
+          { id: "dore", label: "Doré" },
+          { id: "argente", label: "Argenté" },
+          { id: "noir", label: "Noir" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "neutre", label: "Blanc neutre" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Nébuleuse — lustre cascade en sphères de verre à micro-LED",
+    seoDescription:
+      "Lustre en cascade pour escalier et double hauteur : sphères de verre cognac ou gris fumé à micro-LED, de 8 à 24 sphères, suspension réglable jusqu’à 4 m.",
+    art: "cascade",
     isDemo: false,
   },
 ];
