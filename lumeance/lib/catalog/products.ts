@@ -241,6 +241,40 @@ const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
   },
 );
 
+// ── Sylve (LUM-LUS-003) ──────────────────────────────────────────────────────
+// Fiche fournisseur relevée le 01/11/2026 (modèle 2532 ; prix promotionnels jusqu'au 18/11/2026).
+// Le prix de vente part du coût le plus élevé de la taille (version « variable »).
+// [longueur (cm), ampoules E14, câbles, surface conseillée, prix fournisseur le plus élevé (centimes)]
+const SYLVE_VERSIONS: [number, number, number, string, number][] = [
+  [120, 10, 2, "10 à 15", 38299],
+  [150, 12, 2, "12 à 18", 45169],
+  [185, 18, 2, "15 à 20", 60999],
+  [230, 22, 3, "18 à 22", 72439],
+  [310, 30, 3, "20 à 25", 92299],
+  [450, 45, 5, "22 à 28", 134469],
+];
+const SYLVE_BASE_PRICE = Math.min(...SYLVE_VERSIONS.map((v) => salePrice(v[4])));
+const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
+  ([length, bulbs, cables, area, cost]) => ({
+    id: `sylve-l${length}`,
+    name: `L ${length} cm`,
+    sku: `LUM-LUS-003-L${length}`,
+    finish: null,
+    priceAdjustment: salePrice(cost) - SYLVE_BASE_PRICE,
+    stockQuantity: 0,
+    active: true,
+    details: `${bulbs} ampoules LED E14 fournies · ${length} × 65 cm · ${cables} câbles de suspension réglables · pièce de ${area} m²`,
+    imageUrl: `/products/sylve/rendu-l${length}-chaud.webp`,
+    // Visualisations 3D selon la lumière (les versions « variables » reprennent la même teinte).
+    imageUrls: Object.fromEntries(
+      ["chaud", "froid"].flatMap((t) => [
+        [t, `/products/sylve/rendu-l${length}-${t}.webp`],
+        [`${t}-variable`, `/products/sylve/rendu-l${length}-${t}.webp`],
+      ]),
+    ),
+  }),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -660,6 +694,85 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Suspension design en boule de tiges perlées de cristal, ronde de Ø40 à Ø80 cm ou linéaire. Finition dorée ou chromée, ampoules LED G9, lumière blanc chaud, neutre ou froid.",
     art: "globes",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-003",
+    slug: "sylve",
+    name: "Sylve",
+    reference: "LUM-LUS-003",
+    shortDescription:
+      "Une ramure de métal noir, hérissée de pointes et ponctuée de lumières sous verre.",
+    description: [
+      "Sylve réinterprète la branche comme une architecture : un réseau organique de rameaux en métal noir mat, aux jonctions fondues comme celles d’un arbre, hérissé de tiges effilées et ponctué de petites ampoules LED sous tube de verre. Allumée, elle diffuse une lumière douce qui révèle ses ombres portées ; éteinte, elle reste une sculpture graphique.",
+      "Pensée pour les grands volumes, elle se décline en six longueurs, de 120 cm (10 lumières) à 450 cm (45 lumières), toutes larges de 65 cm : au-dessus d’une table de salle à manger ou d’un îlot, dans un séjour, un hall d’entrée ou une cage d’escalier. Les câbles de suspension se règlent en hauteur.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: SYLVE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Métal", "Verre"],
+    finishes: ["Noir mat"],
+    specifications: [
+      {
+        label: "Sources lumineuses",
+        value: "Ampoules LED fournies, culot E14 — de 10 à 45 selon la longueur",
+      },
+      { label: "Diffuseurs", value: "Tubes de verre" },
+      { label: "Dimensions", value: "Longueur 120, 150, 185, 230, 310 ou 450 cm × largeur 65 cm" },
+      { label: "Suspension", value: "2 à 5 câbles réglables selon la longueur" },
+      { label: "Tension d’entrée", value: "AC 90–260 V" },
+      { label: "Finition", value: "Métal noir mat" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud 3000 K ou blanc froid 6000 K, fixe ou variable",
+      },
+      { label: "Garantie annoncée", value: "3 ans" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond, avec plusieurs points de fixation selon la longueur. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est vivement recommandée. Indiquez la hauteur sous plafond pour régler la longueur des câbles.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "sylve-1",
+        url: "/products/sylve/ambiance-table.webp",
+        alt: "Lustre Sylve, ramure de métal noir et lumières sous verre, au-dessus d’une table en marbre",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+      {
+        id: "sylve-2",
+        url: "/products/sylve/ambiance-fenetres.webp",
+        alt: "Lustre Sylve vu de près devant des fenêtres en arcade, branches noires hérissées de pointes",
+        caption: "Visuel d’ambiance du fabricant",
+        isPrimary: false,
+        position: 1,
+      },
+    ],
+    variants: SYLVE_VARIANTS,
+    options: [
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+          { id: "chaud-variable", label: "Blanc chaud, variable" },
+          { id: "froid-variable", label: "Blanc froid, variable" },
+        ],
+      },
+    ],
+    seoTitle: "Sylve — lustre branches en métal noir, grande longueur",
+    seoDescription:
+      "Lustre design en ramure de métal noir mat et lumières LED sous verre, de 120 à 450 cm de long. Pour table de salle à manger, séjour et grands volumes.",
+    art: "organic",
     isDemo: false,
   },
 ];
