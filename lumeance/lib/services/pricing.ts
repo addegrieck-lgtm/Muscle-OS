@@ -1,5 +1,6 @@
 import type { Product, ShippingSettings } from "@/types/catalog";
 import type { CartLineInput } from "@/lib/validation/schemas";
+import { promotionDiscount, promotionLabel } from "@/lib/catalog/promotion";
 
 export interface PricedLine {
   productId: string;
@@ -17,8 +18,18 @@ export interface PricedLine {
   isDemo: boolean;
 }
 
+export interface CartDiscount {
+  productId: string;
+  label: string; // ex. « Aube — 3 achetées, la 4ᵉ offerte »
+  amount: number; // centimes, positif
+}
+
 export interface CartQuote {
   lines: PricedLine[];
+  /** Offres par lot appliquées (calculées par le serveur). */
+  discounts: CartDiscount[];
+  /** Total des remises, déduit du sous-total. */
+  discount: number;
   /** Lignes retirées (produit dépublié, variante inactive…) avec la raison. */
   removed: { productId: string; reason: string }[];
   subtotal: number;
@@ -121,19 +132,38 @@ export function priceCart(
   }
 
   const subtotal = lines.reduce((s, l) => s + l.total, 0);
+
+  // Offres par lot : par pièce, toutes versions et options confondues.
+  const discounts: CartDiscount[] = [];
+  for (const p of catalog) {
+    if (!p.promotion) continue;
+    const units = lines
+      .filter((l) => l.productId === p.id)
+      .flatMap((l) => Array<number>(l.quantity).fill(l.unitPrice));
+    const amount = promotionDiscount(units, p.promotion);
+    if (amount > 0)
+      discounts.push({
+        productId: p.id,
+        label: `${p.name} — ${promotionLabel(p.promotion)}`,
+        amount,
+      });
+  }
+  const discount = discounts.reduce((s, d) => s + d.amount, 0);
+  const net = subtotal - discount;
+
   let shippingAmount: number | null = null;
   if (shipping.standardAmount > 0) {
     shippingAmount =
-      shipping.freeThreshold > 0 && subtotal >= shipping.freeThreshold
-        ? 0
-        : shipping.standardAmount;
+      shipping.freeThreshold > 0 && net >= shipping.freeThreshold ? 0 : shipping.standardAmount;
   }
   return {
     lines,
     removed,
     subtotal,
+    discounts,
+    discount,
     shipping: shippingAmount,
-    total: subtotal + (shippingAmount ?? 0),
+    total: net + (shippingAmount ?? 0),
     itemCount: lines.reduce((s, l) => s + l.quantity, 0),
   };
 }

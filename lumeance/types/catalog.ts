@@ -43,6 +43,11 @@ export interface ProductOption {
   values: { id: string; label: string }[];
 }
 
+export interface ProductPromotion {
+  buy: number;
+  free: number;
+}
+
 export interface SpecLine {
   label: string;
   value: string;
@@ -87,6 +92,8 @@ export interface Product {
   options?: ProductOption[];
   /** Libellés du sélecteur à deux niveaux : groupe = champ `finish` des variantes. */
   optionLabels?: { group: string; variant: string };
+  /** Offre par lot : pour `buy` exemplaires achetés, `free` offerts (toutes versions confondues). */
+  promotion?: ProductPromotion;
   /** true = fiche fictive du catalogue de démonstration (jamais en production). */
   isDemo: boolean;
 }

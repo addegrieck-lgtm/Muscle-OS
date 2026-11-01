@@ -323,6 +323,40 @@ const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.flatMap(
     })),
 );
 
+// ── Volute (LUM-APP-002) ─────────────────────────────────────────────────────
+// Fiche fournisseur relevée le 01/11/2026 (« LED wall light 10W », IP65). Prix identique quelle que
+// soit la finition et la couleur de lumière ; seul le format change le prix. Promotion −11/−12 %
+// jusqu'au 18/11/2026 : grand 47,99 € (prix le plus bas des 30 jours : 54,50 €), petit 38,39 €
+// (43,68 €). Prix de vente : salePrice() sur le prix HORS promotion.
+// Offre du propriétaire : 3 achetées, la 4ᵉ offerte (toutes versions confondues).
+// [code, format, hauteur (cm), largeur (cm), prix fournisseur hors promotion (centimes)]
+const VOLUTE_VERSIONS: [string, string, number, number, number][] = [
+  ["g", "Grand", 28, 10, 5450],
+  ["p", "Petit", 23, 8, 4368],
+];
+const VOLUTE_FINISHES = ["noir", "noir-or", "blanc", "blanc-or"];
+const VOLUTE_BASE_PRICE = Math.min(...VOLUTE_VERSIONS.map((v) => salePrice(v[4])));
+const VOLUTE_VARIANTS: ProductVariant[] = VOLUTE_VERSIONS.map(([code, label, h, w, cost]) => ({
+  id: `volute-${code}`,
+  name: `${label} · ${h} cm`,
+  sku: `LUM-APP-002-${code.toUpperCase()}`,
+  finish: null,
+  priceAdjustment: salePrice(cost) - VOLUTE_BASE_PRICE,
+  stockQuantity: 0,
+  active: true,
+  details: `Hauteur ${h} cm · largeur ${w} cm · éclairage vers le haut et vers le bas`,
+  imageUrl: `/products/volute/rendu-${code}-noir-or-chaud.webp`,
+  // Visualisations 3D : finition × couleur de lumière.
+  imageUrls: Object.fromEntries(
+    VOLUTE_FINISHES.flatMap((f) =>
+      ["chaud", "neutre", "froid"].map((t) => [
+        `${f}-${t}`,
+        `/products/volute/rendu-${code}-${f}-${t}.webp`,
+      ]),
+    ),
+  ),
+}));
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -839,7 +873,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-suspensions",
     categorySlug: "suspensions",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
@@ -915,6 +949,85 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, version variable à la télécommande.",
     art: "globes",
+    isDemo: false,
+  },
+  {
+    id: "lum-app-002",
+    slug: "volute",
+    name: "Volute",
+    reference: "LUM-APP-002",
+    shortDescription:
+      "Une feuille d’aluminium enroulée en spirale, qui laisse filer la lumière vers le haut et vers le bas.",
+    description: [
+      "Volute enroule une fine feuille d’aluminium autour de sa source de lumière, comme un ruban qui tourne sur lui-même. Le faisceau s’échappe par le haut et par le bas et dessine sur le mur deux éventails de lumière ; dans les versions bicolores, l’intérieur doré s’allume et répond à la teinte de la lumière.",
+      "Étanche (IP65), elle se pose aussi bien dans une entrée, un couloir ou de part et d’autre d’un lit que sur une façade ou une terrasse. Deux formats, 28 ou 23 cm de haut ; noir ou blanc, uni ou doublé d’or ; lumière blanc chaud, naturel ou froid. Offre : pour trois appliques achetées, la quatrième est offerte.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: VOLUTE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-appliques",
+    categorySlug: "appliques",
+    status: "published",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Aluminium"],
+    finishes: ["Noir", "Noir et or", "Blanc", "Blanc et or"],
+    specifications: [
+      { label: "Type", value: "Applique murale LED, éclairage vers le haut et vers le bas" },
+      { label: "Puissance", value: "10 W, selon le fabricant" },
+      { label: "Étanchéité", value: "IP65 : intérieur et extérieur" },
+      { label: "Formats", value: "Grand : 28 × 10 cm · petit : 23 × 8 cm (hauteur × largeur)" },
+      { label: "Finitions", value: "Noir, noir et or, blanc, blanc et or (intérieur doré)" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud (2700–3500 K), naturel (3500–5500 K) ou froid (5500–7000 K)",
+      },
+      { label: "Lumière", value: "Sans scintillement, selon le fabricant" },
+      { label: "Matières", value: "Coque en aluminium" },
+      { label: "Offre", value: "3 achetées, la 4ᵉ offerte (toutes versions confondues)" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée, en particulier en extérieur.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "volute-1",
+        url: "/products/volute/ambiance-exterieur.webp",
+        alt: "Deux appliques Volute noir et or allumées sur une façade enduite, lumière chaude projetée vers le haut et vers le bas, au crépuscule",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: VOLUTE_VARIANTS,
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "noir", label: "Noir" },
+          { id: "noir-or", label: "Noir et or" },
+          { id: "blanc", label: "Blanc" },
+          { id: "blanc-or", label: "Blanc et or" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "neutre", label: "Blanc naturel" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    promotion: { buy: 3, free: 1 },
+    seoTitle: "Volute — applique murale LED spirale, noire ou blanche, intérieur doré",
+    seoDescription:
+      "Applique murale LED en aluminium enroulé en spirale, lumière vers le haut et le bas, étanche IP65 pour l’intérieur et l’extérieur. 28 ou 23 cm, noir ou blanc, uni ou doré. 3 achetées, la 4ᵉ offerte.",
+    art: "sconce",
     isDemo: false,
   },
 ];

@@ -30,6 +30,7 @@ function asRow(p: Product): ProductRow {
     options: p.options ?? [],
     option_labels: p.optionLabels ?? null,
     art: p.art,
+    promotion: p.promotion ?? null,
     categories: { slug: p.categorySlug! },
     product_images: p.images.map((i) => ({
       id: i.id,

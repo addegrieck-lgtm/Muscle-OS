@@ -1,0 +1,92 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Visualisation de l'applique Volute (LUM-APP-002) — modèle : volute-model.js.
+// Paramètres : size (grand | petit), finish (noir | noir-or | blanc | blanc-or),
+// temp (chaud | neutre | froid). Cadrage fixe en mètres : le petit modèle paraît plus petit.
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { buildVolute } from "/scripts/render/volute-model.js";
+
+const t0 = performance.now();
+const q = new URLSearchParams(location.search);
+const SIZE = q.get("size") || "grand";
+const FINISH = q.get("finish") || "noir-or";
+const TEMP = q.get("temp") || "chaud";
+const SCALE = 2, WIDTH = 1200, HEIGHT = 1500;
+
+let s = 11;
+const rand = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+
+// Aluminium thermolaqué (mat) ; doublure dorée brillante pour les finitions « + or ».
+const COAT = {
+  noir: { color: 0x161514, metalness: 0.25, roughness: 0.55 },
+  blanc: { color: 0xe6e2dc, metalness: 0.05, roughness: 0.62 },
+};
+const GOLD = { color: 0xd6a650, metalness: 1, roughness: 0.3 };
+const base = FINISH.startsWith("noir") ? "noir" : "blanc";
+const outer = COAT[base];
+const inner = FINISH.endsWith("-or") ? GOLD : COAT[base];
+// Blanc chaud 2700–3500 K, naturel 3500–5500 K, froid 5500–7000 K (fournisseur).
+const LIGHT = { chaud: 0xffbe7a, neutre: 0xfff0dc, froid: 0xdfeaff }[TEMP];
+const GLOW = { chaud: 0xffe6c4, neutre: 0xfff8ee, froid: 0xf2f7ff }[TEMP];
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(WIDTH, HEIGHT); renderer.setPixelRatio(SCALE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.16;
+
+// ── Mur : enduit à la chaux greige, éclairage d'ambiance du soir ──
+const c = document.createElement("canvas"); c.width = c.height = 1024;
+const x = c.getContext("2d");
+x.fillStyle = "#cfc6ba"; x.fillRect(0, 0, 1024, 1024);
+for (let i = 0; i < 180; i++) {
+  const cx = rand() * 1024, cy = rand() * 1024, r = 40 + rand() * 170, k = (rand() - 0.5) * 0.1;
+  const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0, k > 0 ? `rgba(240,234,226,${k})` : `rgba(150,140,128,${-k})`); g.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2);
+}
+for (let i = 0; i < 70000; i++) { const v = rand() < 0.5 ? 255 : 0; x.fillStyle = `rgba(${v},${v},${v},0.025)`; x.fillRect(rand() * 1024, rand() * 1024, 1.4, 1.4); }
+const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(1.5, 1.5);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
+wall.receiveShadow = true; scene.add(wall);
+scene.add(new THREE.HemisphereLight({ chaud: 0xe8dccb, neutre: 0xe6e2da, froid: 0xdfe3ea }[TEMP], 0x3a332c, 0.32));
+const fill = new THREE.DirectionalLight(0xffffff, 0.22); fill.position.set(1.2, 0.3, 2); scene.add(fill);
+
+// ── Luminaire, centré à hauteur d'œil ──
+buildVolute({ THREE, scene, size: SIZE, outer, inner, LIGHT, GLOW, wallZ: 0 });
+
+// ── Caméra : de face, légèrement à droite (comme les photos du fournisseur) ──
+const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.02, 20);
+const frameH = 0.78;
+const dist = frameH / (2 * Math.tan(THREE.MathUtils.degToRad(15)));
+camera.position.set(dist * 0.22, 0.02, dist);
+camera.lookAt(0, 0, 0.05);
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(SCALE); composer.setSize(WIDTH, HEIGHT);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.25, 0.3, 0.9));
+composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+  fragmentShader: "uniform sampler2D tDiffuse; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); } void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = distance(vUv, vec2(.5,.5)); c.rgb *= mix(1., .7, smoothstep(.4,.9,d)); c.rgb += (h(vUv*1400.)-.5)*.014; gl_FragColor = c; }",
+}));
+composer.render();
+window.__ms = performance.now() - t0;
+window.__done = true;
+</script></body></html>

@@ -1,3 +1,4 @@
+import { isValidPromotion } from "@/lib/catalog/promotion";
 import type { ArtForm, Category, Product, ProductOption, SpecLine } from "@/types/catalog";
 
 export interface ProductRow {
@@ -24,6 +25,7 @@ export interface ProductRow {
   seo_description: string | null;
   options?: ProductOption[] | null;
   option_labels?: Product["optionLabels"] | null;
+  promotion?: unknown;
   art?: string | null;
   categories?: { slug: string } | null;
   product_images?: {
@@ -151,6 +153,9 @@ export function mapProduct(row: ProductRow, imageUrl: (path: string) => string):
     art: row.art && ART_FORMS.has(row.art) ? (row.art as ArtForm) : artForCategory(categorySlug),
     ...(Array.isArray(row.options) && row.options.length ? { options: row.options } : {}),
     ...(row.option_labels ? { optionLabels: row.option_labels } : {}),
+    ...(isValidPromotion(row.promotion)
+      ? { promotion: { buy: row.promotion.buy, free: row.promotion.free } }
+      : {}),
     isDemo: false,
   };
 }

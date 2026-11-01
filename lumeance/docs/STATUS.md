@@ -39,8 +39,8 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 
 ## Phase 8 — Préparation commerciale ⬜
 - [ ] Vérifier la disponibilité du nom (INPI) et du domaine lumeance.fr — aucun achat effectué.
-- [ ] Créer le projet Supabase, appliquer les migrations, `npm run admin:init`.
-- [x] Hébergement : Cloudflare Workers via OpenNext, configuration prête ([HEBERGEMENT.md](HEBERGEMENT.md)) ; reste à créer le Worker et renseigner les variables.
+- [x] Projet Supabase créé ; catalogue importé et géré dans l'administration.
+- [x] Hébergement : site publié sur Cloudflare Workers via OpenNext ([HEBERGEMENT.md](HEBERGEMENT.md)).
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
 - [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).
@@ -55,6 +55,10 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - Sécurité : Content-Security-Policy ; limiteurs de débit partagés Cloudflare ; adresse IP non falsifiable.
 - Page 404 : titre « Page introuvable », non indexée.
 - **Vérifié** : typecheck, lint, 55 tests, build OpenNext, parcours complet dans workerd (aucune violation CSP, aucune erreur console).
+
+## Catalogue au 1er novembre 2026
+- En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »).
+- Brouillons : Aigrette, Sylve.
 
 ## Points ouverts — à traiter avec le propriétaire
 - Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).

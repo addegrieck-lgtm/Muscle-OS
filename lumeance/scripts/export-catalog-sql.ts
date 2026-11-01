@@ -19,10 +19,12 @@ const arr = (v: string[]) => (v.length ? `array[${v.map(q).join(", ")}]::text[]`
 const productId = (reference: string) =>
   `(select id from public.products where reference = ${q(reference)})`;
 
-const migration = readFileSync(
-  join(root, "supabase/migrations/20261101000100_product_presentation.sql"),
-  "utf8",
-);
+const migration = [
+  "supabase/migrations/20261101000100_product_presentation.sql",
+  "supabase/migrations/20261102000100_product_promotion.sql",
+]
+  .map((f) => readFileSync(join(root, f), "utf8").trim())
+  .join("\n\n");
 
 const parts: string[] = [
   "-- LUMÉANCE — import des pièces du catalogue dans Supabase.",
@@ -43,7 +45,7 @@ for (const p of CATALOG_PRODUCTS) {
     `insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
   technical_specifications, delivery_information, assembly_information, stock_quantity,
-  seo_title, seo_description, options, option_labels, art)
+  seo_title, seo_description, options, option_labels, art, promotion)
 values (${q(p.slug)}, ${q(p.name)}, ${q(p.reference)}, ${q(p.shortDescription)}, ${q(p.description)},
   ${p.price}, ${p.compareAtPrice ?? "null"},
   (select id from public.categories where slug = ${q(p.categorySlug)}),
@@ -51,7 +53,8 @@ values (${q(p.slug)}, ${q(p.name)}, ${q(p.reference)}, ${q(p.shortDescription)},
   ${arr(p.materials)}, ${arr(p.finishes)}, ${json(p.specifications)},
   ${q(p.deliveryInformation)}, ${q(p.assemblyInformation)}, ${p.stockQuantity},
   ${q(p.seoTitle)}, ${q(p.seoDescription)}, ${json(p.options ?? [])},
-  ${p.optionLabels ? json(p.optionLabels) : "null"}, ${q(p.art)})
+  ${p.optionLabels ? json(p.optionLabels) : "null"}, ${q(p.art)},
+  ${p.promotion ? json(p.promotion) : "null"})
 on conflict (reference) do nothing;`,
   );
   p.variants.forEach((v, i) => {

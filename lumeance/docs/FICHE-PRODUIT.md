@@ -22,6 +22,8 @@ pièce suit ce modèle, sauf demande contraire.
 
 - Script : `scripts/images/ameliorer-photo.py` (installation et usage en tête du fichier).
   Real-ESRGAN ×2 sur l'image entière, recadrage 4:5, 1600 × 2000, WebP qualité 88.
+  Si PyTorch ou Hugging Face sont inaccessibles : `scripts/images/ameliorer-photo-onnx.py`, même
+  modèle (poids `RealESRGAN_x2plus.pth` publiés sur GitHub), exécuté avec onnxruntime.
 - Réglages écartés après comparaison : ×4 (cristaux « peints »), mélange avec l'original
   (dédoublements). Toujours comparer avant/après sur un zoom du produit.
 - **Ne jamais effacer un filigrane** ni modifier le produit (forme, nombre d'éléments, couleur).
@@ -69,6 +71,11 @@ pièce suit ce modèle, sauf demande contraire.
   de vente**, en version à part (« 6 têtes · 75 cm · télécommande », SKU suffixé `-TC`), puisqu'une
   option ne peut pas changer le prix. Prix de base calculé sur la version fixe. (Sylve, plus
   ancienne, la traite encore en option au prix le plus élevé.)
+- **Offre par lot** (Volute) : `promotion: { buy: 3, free: 1 }` = « 3 achetées, la 4ᵉ offerte »,
+  toutes versions et options confondues, l'exemplaire le moins cher offert. Calcul côté serveur
+  (`lib/services/pricing.ts`), affiché sur la fiche et en remise dans le panier. Colonne
+  `products.promotion` (migration `20261102000100_product_promotion.sql`) ; pas encore modifiable
+  dans l'administration : passer par le code ou un correctif SQL.
 - **Prix** : `salePrice(prix d'achat)` (×1,8 sous 500 €, ×1,5 au-delà, arrondi à la dizaine
   supérieure) ; prix de base = version la moins chère, chaque version porte son écart. Noter dans un
   commentaire la date du relevé fournisseur et toute promotion temporaire. **Calculer sur le prix

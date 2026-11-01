@@ -7,6 +7,7 @@ import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
 import { requestSubject } from "@/lib/catalog/request-subject";
+import { promotionLabel } from "@/lib/catalog/promotion";
 import type { Product, ProductVariant } from "@/types/catalog";
 
 export function AddToCart({ product }: { product: Product }) {
@@ -43,6 +44,14 @@ export function AddToCart({ product }: { product: Product }) {
         {formatPrice(price)}
         <span className="t-small ml-3 font-sans text-brun/50">TTC</span>
       </p>
+      {product.promotion && (
+        <p className="t-eyebrow -mt-3 text-champagne">
+          Offre : {promotionLabel(product.promotion)}
+          <span className="block font-sans text-[0.8rem] normal-case tracking-normal text-brun/60">
+            Toutes versions et finitions confondues ; la moins chère est offerte.
+          </span>
+        </p>
+      )}
 
       {variants.length > 0 && product.optionLabels ? (
         <TwoLevelSelector
