@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
+import { PUBLISHED_CATALOG } from "@/lib/catalog/products";
 import { DEMO_CATEGORIES, DEMO_PRODUCTS } from "@/lib/demo/catalog";
 import { createSupabasePublicClient, storagePublicUrl } from "@/lib/supabase/public";
 import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "./mappers";
@@ -9,13 +10,19 @@ import type { Category, Product } from "@/types/catalog";
 export const PRODUCT_SELECT =
   "*, categories(slug), product_images(id, storage_path, alt_text, position, is_primary), product_variants(id, name, sku, finish, price_adjustment, stock_quantity, active)";
 
-/** true quand le site tourne sur le catalogue fictif (Supabase non configuré). */
+/** Catalogue réel dans le code (provisoire) : actif dès qu'une fiche y est publiée. */
+function usesCodeCatalog(): boolean {
+  return !isSupabaseConfigured() && PUBLISHED_CATALOG.length > 0;
+}
+
+/** true quand le site tourne sur le catalogue fictif (ni Supabase, ni fiche réelle publiée). */
 export function isDemoCatalog(): boolean {
-  return !isSupabaseConfigured();
+  return !isSupabaseConfigured() && PUBLISHED_CATALOG.length === 0;
 }
 
 export const getCategories = cache(async (): Promise<Category[]> => {
-  if (isDemoCatalog()) return DEMO_CATEGORIES;
+  // Les textes des catégories sont des descriptions générales, communes aux deux catalogues.
+  if (!isSupabaseConfigured()) return DEMO_CATEGORIES;
   const { data, error } = await createSupabasePublicClient()
     .from("categories")
     .select("id, name, slug, description, image_path, position")
@@ -37,6 +44,7 @@ export interface ProductQuery {
 }
 
 export const getProducts = cache(async (): Promise<Product[]> => {
+  if (usesCodeCatalog()) return PUBLISHED_CATALOG;
   if (isDemoCatalog()) return DEMO_PRODUCTS;
   const { data, error } = await createSupabasePublicClient()
     .from("products")

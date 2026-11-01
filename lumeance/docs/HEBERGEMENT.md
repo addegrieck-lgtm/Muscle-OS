@@ -23,28 +23,19 @@ Base et fichiers : **Supabase** (offre gratuite pour le développement ; mise en
 3. Supabase : URL du site et URL de redirection d’authentification sur le domaine final.
 4. Environnements distincts développement / production (deux projets Supabase).
 
-## Cloudflare Workers (configuration retenue)
-Le projet est prêt : adaptateur OpenNext (`@opennextjs/cloudflare`), `wrangler.jsonc` (Worker `lumeance`), `open-next.config.ts`.
-Les pages de la boutique sont rendues à chaque requête : un produit publié dans l’administration apparaît aussitôt, sans cache R2.
+## Déploiement Cloudflare Workers (prêt)
 
-**Création du Worker** — Cloudflare → *Workers & Pages* → *Create* → *Import a repository* → dépôt `Muscle-OS` :
-| Champ | Valeur |
+Le projet est configuré avec l'adaptateur OpenNext (`wrangler.jsonc`, `open-next.config.ts`). Vérifié localement dans workerd (`npm run cf:preview`).
+
+Dans le tableau de bord Cloudflare : **Workers & Pages → Créer → Importer un dépôt Git** → `addegrieck-lgtm/Muscle-OS` :
+
+| Réglage | Valeur |
 |---|---|
-| Project name | `lumeance` (doit correspondre à `name` dans `wrangler.jsonc`) |
-| Production branch | `main` |
-| Root directory | `lumeance` |
-| Build command | `npx opennextjs-cloudflare build` |
-| Deploy command | `npx opennextjs-cloudflare deploy` |
+| Nom du projet | `lumeance` (doit correspondre à `name` dans `wrangler.jsonc`) |
+| Branche de production | `main` (ou `claude/pensive-faraday-ywxdas` pour tester avant la fusion) |
+| Répertoire racine | `lumeance` |
+| Commande de build | `npm ci && npx opennextjs-cloudflare build` (le `npm ci` est indispensable : la racine du dépôt est un espace pnpm et Cloudflare n'y installe pas les dépendances de `lumeance/`) |
+| Commande de déploiement | `npx opennextjs-cloudflare deploy` |
+| Variables de **build** | `NEXT_PUBLIC_SITE_URL=https://lumeance.<votre-sous-domaine>.workers.dev` |
 
-**Variables** — les `NEXT_PUBLIC_*` sont figées dans le code au moment du build ET relues par le serveur : les mettre aux deux endroits.
-| Nom | Build variables | Variables and Secrets (exécution) |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✔ | ✔ (texte) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✔ | ✔ (texte) |
-| `NEXT_PUBLIC_SITE_URL` (`https://lumeance.<compte>.workers.dev`, puis le domaine) | ✔ | ✔ (texte) |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✘ | ✔ (**Secret**) |
-
-Après tout changement de variable : relancer un déploiement (*Deployments* → *Retry*, ou nouveau push).
-Supabase → *Authentication* → *URL Configuration* : *Site URL* = l’adresse du Worker (puis le domaine final).
-
-Vérification locale du rendu Workers : `npm run cf:preview` (http://localhost:8787).
+Plus tard : ajouter `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (build + exécution) et `SUPABASE_SERVICE_ROLE_KEY` (exécution, en secret). Domaine personnalisé : Workers → lumeance → Paramètres → Domaines et routes.

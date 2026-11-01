@@ -74,3 +74,50 @@ describe("recalcul serveur du panier", () => {
     ).toBe(0);
   });
 });
+
+describe("options sans incidence sur le prix (couleur de lumière)", async () => {
+  const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+  const { lineKey } = await import("@/lib/services/pricing");
+  const celeste = CATALOG_PRODUCTS.find((p) => p.slug === "celeste")!;
+  const v = celeste.variants[3]!;
+  const ship = { standardAmount: 0, freeThreshold: 0 };
+  it("accepte une couleur connue sans changer le prix, et l'affiche", () => {
+    const q = priceCart(
+      [{ productId: celeste.id, variantId: v.id, quantity: 1, options: { lumiere: "froid" } }],
+      [celeste],
+      ship,
+    );
+    expect(q.lines[0]!.unitPrice).toBe(celeste.price + v.priceAdjustment);
+    expect(q.lines[0]!.variantName).toContain("Blanc froid");
+    expect(q.lines[0]!.options).toEqual({ lumiere: "froid" });
+  });
+  it("refuse une couleur absente, inconnue ou une option inventée", () => {
+    const cases: (Record<string, string> | undefined)[] = [
+      undefined,
+      { lumiere: "rose" },
+      { lumiere: "chaud", autre: "x" },
+    ];
+    for (const options of cases) {
+      const q = priceCart(
+        [{ productId: celeste.id, variantId: v.id, quantity: 1, options }],
+        [celeste],
+        ship,
+      );
+      expect(q.lines).toHaveLength(0);
+    }
+  });
+  it("deux couleurs = deux lignes distinctes", () => {
+    const q = priceCart(
+      [
+        { productId: celeste.id, variantId: v.id, quantity: 1, options: { lumiere: "chaud" } },
+        { productId: celeste.id, variantId: v.id, quantity: 2, options: { lumiere: "neutre" } },
+      ],
+      [celeste],
+      ship,
+    );
+    expect(q.lines).toHaveLength(2);
+    expect(lineKey({ productId: "a", variantId: null, options: { b: "1", a: "2" } })).toBe(
+      lineKey({ productId: "a", variantId: null, options: { a: "2", b: "1" } }),
+    );
+  });
+});

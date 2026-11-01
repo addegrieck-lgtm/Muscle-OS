@@ -64,13 +64,23 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
         )}
         <ul className="divide-y divide-brun/10 border-y border-brun/10">
           {quote.lines.map((l) => (
-            <li key={`${l.productId}-${l.variantId}`} className="flex gap-5 py-7 md:gap-8">
+            <li
+              key={`${l.productId}-${l.variantId}-${JSON.stringify(l.options)}`}
+              className="flex gap-5 py-7 md:gap-8"
+            >
               <Link
                 href={`/produit/${l.slug}`}
                 className="relative aspect-[4/5] w-24 shrink-0 overflow-hidden bg-noir md:w-32"
               >
                 {l.imageUrl ? (
-                  <Image src={l.imageUrl} alt="" fill sizes="128px" className="object-cover" />
+                  <Image
+                    src={l.imageUrl}
+                    alt=""
+                    fill
+                    sizes="128px"
+                    unoptimized={l.imageUrl.startsWith("/")}
+                    className="object-cover"
+                  />
                 ) : (
                   <LuminaireArt form={l.art} seed={l.slug} className="h-full w-full" label="" />
                 )}
@@ -84,9 +94,7 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                     >
                       {l.name}
                     </Link>
-                    {l.variantName && (
-                      <p className="t-small mt-1 text-brun/60">Finition : {l.variantName}</p>
-                    )}
+                    {l.variantName && <p className="t-small mt-1 text-brun/60">{l.variantName}</p>}
                     <p className="t-small mt-1 text-brun/40">Réf. {l.reference}</p>
                     {l.isDemo && (
                       <p className="t-small mt-1 text-champagne">Pièce fictive (aperçu)</p>
@@ -104,7 +112,16 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                       type="button"
                       className="px-3 py-1.5 disabled:opacity-30"
                       disabled={l.quantity <= 1}
-                      onClick={() => setQuantity(l.productId, l.variantId, l.quantity - 1)}
+                      onClick={() =>
+                        setQuantity(
+                          {
+                            productId: l.productId,
+                            variantId: l.variantId,
+                            options: l.options ?? undefined,
+                          },
+                          l.quantity - 1,
+                        )
+                      }
                       aria-label="Diminuer"
                     >
                       −
@@ -114,7 +131,16 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                       type="button"
                       className="px-3 py-1.5 disabled:opacity-30"
                       disabled={l.quantity >= 10}
-                      onClick={() => setQuantity(l.productId, l.variantId, l.quantity + 1)}
+                      onClick={() =>
+                        setQuantity(
+                          {
+                            productId: l.productId,
+                            variantId: l.variantId,
+                            options: l.options ?? undefined,
+                          },
+                          l.quantity + 1,
+                        )
+                      }
                       aria-label="Augmenter"
                     >
                       +
@@ -122,7 +148,13 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => remove(l.productId, l.variantId)}
+                    onClick={() =>
+                      remove({
+                        productId: l.productId,
+                        variantId: l.variantId,
+                        options: l.options ?? undefined,
+                      })
+                    }
                     className="t-small text-brun/60 underline-offset-4 hover:text-brun hover:underline"
                   >
                     Retirer

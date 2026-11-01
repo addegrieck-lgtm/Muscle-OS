@@ -45,6 +45,9 @@ export function ProductCard({
                 {formatPrice(product.compareAtPrice)}
               </span>
             )}
+            {product.variants.some((v) => v.active && v.priceAdjustment > 0) && (
+              <span className="mr-1 text-base text-brun/50">dès</span>
+            )}
             {formatPrice(product.price)}
           </p>
         </div>

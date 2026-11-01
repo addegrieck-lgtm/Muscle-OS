@@ -1,0 +1,92 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Vue éclatée de Silhouette (d'après le schéma « Mounting » du fabricant) :
+// 1 panneau arrière, 2 cadre, 3 œuvre imprimée, 4 ruban lumineux LED. Paramètre : cadre (noir | dore).
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+const q = new URLSearchParams(location.search);
+const FRAME = q.get("cadre") || "dore";
+const SCALE = 2, WIDTH = 1500, HEIGHT = 1200;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(WIDTH, HEIGHT); renderer.setPixelRatio(SCALE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.5;
+
+// Fond studio : dégradé ivoire → sable (palette LUMÉANCE), sol qui reçoit les ombres.
+const bg = document.createElement("canvas"); bg.width = 4; bg.height = 256;
+const g = bg.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 256);
+gr.addColorStop(0, "#f6f1ea"); gr.addColorStop(0.65, "#e9dccb"); gr.addColorStop(1, "#d8c5ad");
+g.fillStyle = gr; g.fillRect(0, 0, 4, 256);
+const bgTex = new THREE.CanvasTexture(bg); bgTex.colorSpace = THREE.SRGBColorSpace; scene.background = bgTex;
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.12 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -0.62; floor.receiveShadow = true; scene.add(floor);
+scene.add(new THREE.HemisphereLight(0xfff6ea, 0xd9c7b0, 0.9));
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(-2, 4, 5); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8; Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3 }); scene.add(key);
+
+const Wd = 0.4, Ht = 1.0; // proportions d'un panneau 40 × 100 environ (affichage)
+const gap = 0.42, tilt = -0.55;
+const layers = new THREE.Group(); layers.rotation.y = tilt; scene.add(layers);
+const at = (i) => new THREE.Vector3(-1.5 * gap + i * gap, 0, 0);
+
+// 1 — panneau arrière
+const back = new THREE.Mesh(new THREE.BoxGeometry(Wd, Ht, 0.02), new THREE.MeshStandardMaterial({ color: 0x2b2a29, roughness: 0.7 }));
+back.position.copy(at(0)); back.castShadow = true; layers.add(back);
+// 2 — cadre
+const frameMat = FRAME === "noir"
+  ? new THREE.MeshStandardMaterial({ color: 0x1d1c1b, metalness: 0.6, roughness: 0.35 })
+  : new THREE.MeshStandardMaterial({ color: 0xe2b96a, metalness: 1, roughness: 0.18, envMapIntensity: 2.2 });
+const fr = new THREE.Group(); fr.position.copy(at(1)); layers.add(fr);
+const t = 0.014, dpt = 0.03;
+[[0, Ht / 2, Wd, t], [0, -Ht / 2, Wd, t], [-Wd / 2, 0, t, Ht + t], [Wd / 2, 0, t, Ht + t]].forEach(([x, y, w, h]) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, dpt), frameMat); m.position.set(x, y, 0); m.castShadow = true; fr.add(m);
+});
+// 3 — œuvre imprimée
+const art = await new THREE.TextureLoader().loadAsync("/scripts/render/assets/silhouette-panneau.png");
+art.colorSpace = THREE.SRGBColorSpace; art.anisotropy = 8;
+const panel = new THREE.Mesh(new THREE.BoxGeometry(Wd - 0.02, Ht - 0.02, 0.006),
+  [0, 0, 0, 0].map(() => new THREE.MeshStandardMaterial({ color: 0xdedad4 })).concat([
+    new THREE.MeshStandardMaterial({ map: art, roughness: 0.75, color: 0xe2e2e2 }), new THREE.MeshStandardMaterial({ color: 0xdedad4 })]));
+panel.position.copy(at(2)); panel.castShadow = true; layers.add(panel);
+// 4 — ruban lumineux LED (contour diffusant)
+const led = new THREE.Group(); led.position.copy(at(3)); layers.add(led);
+const ledMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffe6b8).multiplyScalar(3) });
+const lt = 0.01;
+[[0, Ht / 2 - 0.01, Wd - 0.02, lt], [0, -Ht / 2 + 0.01, Wd - 0.02, lt], [-Wd / 2 + 0.01, 0, lt, Ht - 0.02], [Wd / 2 - 0.01, 0, lt, Ht - 0.02]].forEach(([x, y, w, h]) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, lt), ledMat); m.position.set(x, y, 0); led.add(m);
+});
+const glass = new THREE.Mesh(new THREE.PlaneGeometry(Wd - 0.02, Ht - 0.02), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, depthWrite: false }));
+led.add(glass);
+
+// Pastilles numérotées (style du schéma fabricant)
+function badge(n, pos) {
+  const c = document.createElement("canvas"); c.width = c.height = 128; const x = c.getContext("2d");
+  x.fillStyle = "#c39a6b"; x.beginPath(); x.arc(64, 64, 56, 0, Math.PI * 2); x.fill();
+  x.fillStyle = "#fff"; x.font = "600 64px Manrope, Arial, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(n), 64, 68);
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tx, depthTest: false })); s.scale.setScalar(0.07); s.position.copy(pos); layers.add(s);
+}
+[0, 1, 2, 3].forEach((i) => badge(i + 1, at(i).clone().add(new THREE.Vector3(-Wd / 4, Ht / 2 + 0.035, 0.03))));
+
+const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.05, 50);
+camera.position.set(0.2, 0.18, 3.35); camera.lookAt(0.05, -0.02, 0);
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(SCALE); composer.setSize(WIDTH, HEIGHT);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.9, 0.5, 0.985));
+composer.addPass(new OutputPass());
+composer.render();
+window.__done = true;
+</script></body></html>
