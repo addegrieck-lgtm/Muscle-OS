@@ -1,7 +1,8 @@
 # Fiche produit — modèle de référence
 
-Modèle **validé par le propriétaire le 1er novembre 2026** sur la fiche **Aigrette** (`LUM-SUS-002`,
-`lib/catalog/products.ts`). Toute nouvelle pièce suit ce modèle, sauf demande contraire.
+Modèle **validé par le propriétaire le 1er novembre 2026** sur la fiche **Aigrette** (`LUM-SUS-002`),
+appliqué ensuite à **Constellation** (`LUM-SUS-003`) — voir `lib/catalog/products.ts`. Toute nouvelle
+pièce suit ce modèle, sauf demande contraire.
 
 ## 1. Galerie : dans cet ordre, rien de plus
 
@@ -26,6 +27,9 @@ Modèle **validé par le propriétaire le 1er novembre 2026** sur la fiche **Aig
 - **Ne jamais effacer un filigrane** ni modifier le produit (forme, nombre d'éléments, couleur).
 - Signaler au propriétaire tout filigrane d'un tiers : l'autorisation écrite du fabricant reste à
   obtenir pour la mise en vente.
+- Les captures d'écran de l'application (barre de recherche, étiquette énergie, boutons) ne
+  donnent pas une image 4:5 propre : demander les images enregistrées par appui long dans
+  AliExpress (« Enregistrer l'image »). À défaut, une seule photo réelle suffit.
 
 ## 3. Visualisations 3D des versions
 
@@ -33,7 +37,11 @@ Modèle **validé par le propriétaire le 1er novembre 2026** sur la fiche **Aig
   de cristaux, forme du pavillon, câbles), pas d'après une photo d'ambiance seule. Demander au
   propriétaire les fiches techniques (images « L92cm | 12 Bulbs | Gold »…) si elles manquent.
 - Avant de générer toutes les versions, **comparer côte à côte** un rendu avec la fiche du
-  fournisseur et corriger les écarts.
+  fournisseur et corriger les écarts. Une disposition sans schéma fournisseur (ex. Constellation
+  6 têtes) est une estimation : l'écrire dans le modèle et le signaler au propriétaire.
+- Pièges déjà rencontrés : pavillon métallique saturé en blanc vu d'en dessous (le rendre plus
+  mat que la barre) ; verre « laiteux » (verre clair en face extérieure seulement) ; finition noire
+  invisible sur un mur sombre (décor « salon » clair).
 - Organisation (exemple Aigrette) :
   - `scripts/render/aigrette-model.js` : le luminaire, partagé entre les scènes ;
   - `scripts/render/scene-aigrette.html` : la scène de rendu des versions ;
@@ -54,15 +62,22 @@ Modèle **validé par le propriétaire le 1er novembre 2026** sur la fiche **Aig
   fournies, éléments, suspension).
 - **Sélecteur à deux niveaux** : `optionLabels: { group: "Forme", variant: "Taille" }`. Les boutons
   de version **n'affichent pas de prix** ; le prix TTC de la version choisie s'affiche au-dessus.
-- **Options sans incidence sur le prix** (`options`) : finition (Doré / Chromé), couleur de lumière
-  (Blanc chaud / neutre / froid / 3 teintes commutables). Clé des visuels dans `imageUrls` :
-  valeurs des options dans l'ordre, ex. `dore-chaud`.
+- **Options sans incidence sur le prix** (`options`) : finition (ex. Doré / Chromé / Noir), couleur
+  de lumière (ex. Blanc chaud / froid). Une version **variable / télécommande** est une valeur de
+  l'option lumière (« Blanc chaud, variable (télécommande) »), pas une version à part : le prix de
+  la pièce part alors du coût le plus élevé (comme Sylve et Constellation). Clé des visuels dans
+  `imageUrls` : valeurs des options dans l'ordre, ex. `dore-chaud`, `noir-froid-variable` (une
+  valeur « variable » réutilise le rendu de sa teinte).
 - **Prix** : `salePrice(prix d'achat)` (×1,8 sous 500 €, ×1,5 au-delà, arrondi à la dizaine
   supérieure) ; prix de base = version la moins chère, chaque version porte son écart. Noter dans un
-  commentaire la date du relevé fournisseur et toute promotion temporaire (fin de promotion =
-  marge à revoir).
+  commentaire la date du relevé fournisseur et toute promotion temporaire. **Calculer sur le prix
+  hors promotion** (« prix le plus bas des 30 derniers jours avant réduction ») quand il est
+  affiché : sinon la marge baisse à la fin de la promotion. Demander au propriétaire si le prix
+  varie selon la taille, la forme ou la finition.
 - **Fiche technique** (`specifications`) : uniquement des données confirmées par le fournisseur
   (tension, culot, flux, formes, suspension, finitions, lumière, surface conseillée, garantie).
+- **Matières** : reprendre exactement celles du fournisseur (« fer », « verre »…) ; ne pas écrire
+  « laiton » pour un métal doré, ni « cristal » pour du verre.
 - **Description** : 3 paragraphes (silhouette et matière ; usages et versions ; « Caractéristiques
   techniques communiquées par le fabricant. Les documents de conformité sont en cours de
   vérification avant la mise en vente. »).

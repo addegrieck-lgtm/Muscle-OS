@@ -275,6 +275,43 @@ const SYLVE_VARIANTS: ProductVariant[] = SYLVE_VERSIONS.map(
   }),
 );
 
+// ── Constellation (LUM-SUS-003) ──────────────────────────────────────────────
+// Fiche fournisseur relevée le 01/11/2026. Prix fournisseur identique quelles que soient la forme,
+// la taille et la finition (confirmé par le propriétaire) : 93,69 € (fixe) / 115,99 € (variable,
+// télécommande) en promotion jusqu'au 18/11/2026 ; prix habituels 111,93 € / 138,55 €.
+// Le prix de vente part du coût le plus élevé (version variable) au prix HORS promotion, pour que
+// la marge ne baisse pas à la fin de la promotion.
+const CONSTELLATION_COST = 13855;
+// [code, forme, têtes, longueur (cm), puissance (W)]
+const CONSTELLATION_VERSIONS: [string, "Arc" | "Droite", number, number, number][] = [
+  ["a6", "Arc", 6, 75, 36],
+  ["a8", "Arc", 8, 100, 48],
+  ["d6", "Droite", 6, 75, 36],
+  ["d8", "Droite", 8, 100, 48],
+];
+const CONSTELLATION_VARIANTS: ProductVariant[] = CONSTELLATION_VERSIONS.map(
+  ([code, shape, heads, length, watts]) => ({
+    id: `constellation-${code}`,
+    name: `${heads} têtes · ${length} cm`,
+    sku: `LUM-SUS-003-${code.toUpperCase()}`,
+    finish: shape,
+    priceAdjustment: 0,
+    stockQuantity: 0,
+    active: true,
+    details: `${heads} globes de verre Ø10 à Ø15 cm · ${watts} W · longueur ${length} cm · suspension réglable jusqu’à 120 cm`,
+    imageUrl: `/products/constellation/rendu-${code}-dore-chaud.webp`,
+    // Visualisations 3D : finition × couleur de lumière (les versions « variables » reprennent la teinte).
+    imageUrls: Object.fromEntries(
+      ["dore", "noir"].flatMap((f) =>
+        ["chaud", "froid"].flatMap((t) => [
+          [`${f}-${t}`, `/products/constellation/rendu-${code}-${f}-${t}.webp`],
+          [`${f}-${t}-variable`, `/products/constellation/rendu-${code}-${f}-${t}.webp`],
+        ]),
+      ),
+    ),
+  }),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -773,6 +810,90 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre design en ramure de métal noir mat et lumières LED sous verre, de 120 à 450 cm de long. Pour table de salle à manger, séjour et grands volumes.",
     art: "organic",
+    isDemo: false,
+  },
+  {
+    id: "lum-sus-003",
+    slug: "constellation",
+    name: "Constellation",
+    reference: "LUM-SUS-003",
+    shortDescription:
+      "Une fine branche de métal portant des globes de verre où scintille un ciel de micro-lumières.",
+    description: [
+      "Constellation pose sur une fine branche de métal une suite de globes de verre clair, de trois diamètres, placés au-dessus, au-dessous ou au fil de la ligne. Dans chacun, un fil de cuivre semé de micro-LED dessine un ciel étoilé ; au centre, une perle dorée marque l’axe de la composition.",
+      "La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, fixe ou variable à la télécommande.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: salePrice(CONSTELLATION_COST),
+    compareAtPrice: null,
+    categoryId: "demo-cat-suspensions",
+    categorySlug: "suspensions",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Verre", "Métal"],
+    finishes: ["Doré", "Noir"],
+    specifications: [
+      {
+        label: "Sources lumineuses",
+        value: "Micro-LED intégrées sur fil de cuivre, dans chaque globe",
+      },
+      { label: "Puissance", value: "36 W (6 têtes) · 48 W (8 têtes)" },
+      { label: "Tension d’entrée", value: "AC 90–265 V" },
+      { label: "Globes", value: "Verre clair, Ø10, Ø12 et Ø15 cm" },
+      { label: "Formes", value: "Branche en arc ou droite, 75 cm (6 têtes) ou 100 cm (8 têtes)" },
+      { label: "Pavillon", value: "50 × 8 × 3,5 cm" },
+      { label: "Suspension", value: "Câbles réglables, hauteur jusqu’à 120 cm" },
+      { label: "Finitions", value: "Doré ou noir (perle centrale dorée)" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud ou blanc froid ; fixe, ou intensité variable à la télécommande",
+      },
+      { label: "Matières", value: "Fer, verre" },
+      { label: "Surface conseillée", value: "10 à 30 m², selon le fabricant" },
+      { label: "Classe énergétique", value: "F, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles, jusqu’à 120 cm.",
+    stockQuantity: 0,
+    images: [
+      {
+        id: "constellation-1",
+        url: "/products/constellation/ambiance-doree.webp",
+        alt: "Suspension Constellation dorée en arc, huit globes de verre étoilés allumés au-dessus d’une table de salle à manger, devant un mur bleu nuit",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: CONSTELLATION_VARIANTS,
+    optionLabels: { group: "Forme", variant: "Taille" },
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "dore", label: "Doré" },
+          { id: "noir", label: "Noir" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+          { id: "chaud-variable", label: "Blanc chaud, variable (télécommande)" },
+          { id: "froid-variable", label: "Blanc froid, variable (télécommande)" },
+        ],
+      },
+    ],
+    seoTitle: "Constellation — suspension globes de verre étoilés, dorée ou noire",
+    seoDescription:
+      "Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, variable à la télécommande.",
+    art: "globes",
     isDemo: false,
   },
 ];
