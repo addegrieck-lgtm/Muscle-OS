@@ -57,8 +57,8 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - **Vérifié** : typecheck, lint, 55 tests, build OpenNext, parcours complet dans workerd (aucune violation CSP, aucune erreur console).
 
 ## Catalogue au 1er novembre 2026
-- En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation.
-- Brouillons : Aigrette, Sylve, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »).
+- En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »).
+- Brouillons : Aigrette, Sylve.
 
 ## Points ouverts — à traiter avec le propriétaire
 - Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).

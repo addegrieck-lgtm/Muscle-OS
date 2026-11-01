@@ -967,7 +967,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-appliques",
     categorySlug: "appliques",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
