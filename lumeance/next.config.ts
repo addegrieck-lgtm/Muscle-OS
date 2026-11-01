@@ -2,9 +2,11 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
+// Hôte des images : celui du projet si connu au build, sinon tout projet Supabase hébergé
+// (les variables peuvent n'être fournies qu'à l'exécution, par exemple sur Cloudflare).
 const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-  : undefined;
+  : "*.supabase.co";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -24,9 +26,9 @@ const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "12mb" } },
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: supabaseHost
-      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
-      : [],
+    remotePatterns: [
+      { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" },
+    ],
   },
   async headers() {
     return [
