@@ -229,14 +229,19 @@ const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
         .join(" · "),
       imageUrl: `/products/aigrette/ambiance-${shape === "Ronde" ? "ronde" : "lineaire"}.webp`,
       // Visualisations 3D : finition × couleur de lumière (« 3 teintes » = rendu blanc neutre).
-      imageUrls: Object.fromEntries(
-        AIGRETTE_FINISHES.flatMap((f) =>
+      // « scene » : mise en situation 3D de la forme (une vue de la galerie, qui suit la version).
+      imageUrls: Object.fromEntries([
+        [
+          "scene",
+          `/products/aigrette/mise-en-scene-${shape === "Ronde" ? "ronde" : "lineaire"}.webp`,
+        ],
+        ...AIGRETTE_FINISHES.flatMap((f) =>
           [...AIGRETTE_TEMPS, "commutable"].map((t) => [
             `${f}-${t}`,
             `/products/aigrette/rendu-${code}-${f}-${t === "commutable" ? "neutre" : t}.webp`,
           ]),
         ),
-      ),
+      ]),
     };
   },
 );
@@ -666,22 +671,6 @@ export const CATALOG_PRODUCTS: Product[] = [
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: false,
         position: 1,
-      },
-      {
-        id: "aigrette-3",
-        url: "/products/aigrette/mise-en-scene-ronde.webp",
-        alt: "Visualisation 3D de la suspension Aigrette ronde Ø60 cm dorée, allumée en blanc chaud dans un salon au mur anthracite, rideau de lin et tableau encadré",
-        caption: "Visualisation 3D — mise en situation",
-        isPrimary: false,
-        position: 2,
-      },
-      {
-        id: "aigrette-4",
-        url: "/products/aigrette/mise-en-scene-lineaire.webp",
-        alt: "Visualisation 3D de la suspension Aigrette linéaire 92 cm dorée, allumée en blanc chaud au-dessus d’une table en noyer, devant un mur anthracite et un tableau encadré",
-        caption: "Visualisation 3D — mise en situation",
-        isPrimary: false,
-        position: 3,
       },
     ],
     variants: AIGRETTE_VARIANTS,

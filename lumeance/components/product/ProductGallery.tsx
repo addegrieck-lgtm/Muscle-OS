@@ -21,11 +21,32 @@ export function ProductGallery({ product }: { product: Product }) {
   // Clé des visuels : valeurs des options dans l'ordre du produit, ex. « or-rose-chaud ».
   const optionValue = (product.options ?? []).map((o) => selection?.options[o.id] ?? "").join("-");
   const versionImage = (optionValue && selected?.imageUrls?.[optionValue]) || selected?.imageUrl;
-  const existing = base.findIndex((b) => b.kind === "image" && b.img.url === versionImage);
+  // Mise en situation propre à la version (clé « scene » des visuels, ex. forme ronde ou
+  // linéaire) : une seule vue, qui suit la version choisie, placée après les photographies.
+  const sceneImage = selected?.imageUrls?.scene;
+  const withScene =
+    sceneImage && !base.some((b) => b.kind === "image" && b.img.url === sceneImage)
+      ? [
+          ...base,
+          {
+            key: "scene",
+            kind: "image" as const,
+            img: {
+              id: "scene",
+              url: sceneImage,
+              alt: `Visualisation 3D de ${product.name} en situation, ${selected!.name}, ${(selected!.finish ?? "").toLowerCase()}`,
+              caption: "Visualisation 3D — mise en situation",
+              isPrimary: false,
+              position: 98,
+            },
+          },
+        ]
+      : base;
+  const existing = withScene.findIndex((b) => b.kind === "image" && b.img.url === versionImage);
   const slides =
     versionImage && existing === -1
       ? [
-          ...base,
+          ...withScene,
           {
             key: "version",
             kind: "image" as const,
@@ -41,7 +62,7 @@ export function ProductGallery({ product }: { product: Product }) {
             },
           },
         ]
-      : base;
+      : withScene;
   const [active, setActive] = useState(0);
   const firstRender = useRef(true);
   useEffect(() => {
@@ -49,7 +70,7 @@ export function ProductGallery({ product }: { product: Product }) {
       firstRender.current = false;
       return;
     }
-    if (versionImage) setActive(existing >= 0 ? existing : base.length);
+    if (versionImage) setActive(existing >= 0 ? existing : withScene.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection?.variantId, optionValue]);
   const current = slides[active] ?? slides[0]!;
