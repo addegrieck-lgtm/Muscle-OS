@@ -450,6 +450,77 @@ select (select id from public.products where reference = 'LUM-LUS-003'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-LUS-003') and storage_path = '/products/sylve/ambiance-fenetres.webp');
 
+-- ════ Constellation (LUM-SUS-003) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art)
+values ('constellation', 'Constellation', 'LUM-SUS-003', 'Une fine branche de métal portant des globes de verre où scintille un ciel de micro-lumières.', 'Constellation pose sur une fine branche de métal une suite de globes de verre clair, de trois diamètres, placés au-dessus, au-dessous ou au fil de la ligne. Dans chacun, un fil de cuivre semé de micro-LED dessine un ciel étoilé ; au centre, une perle dorée marque l’axe de la composition.
+
+La branche se décline en arc, qui s’élève doucement vers son centre, ou en ligne droite, avec six globes sur 75 cm ou huit globes sur 100 cm. Elle accompagne une table de salle à manger, un îlot ou un séjour. Finition dorée ou noire, lumière blanc chaud ou blanc froid, et une version à intensité variable, réglable à la télécommande.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  21000, null,
+  (select id from public.categories where slug = 'suspensions'),
+  'draft', false, '{}'::jsonb, null,
+  array['Verre', 'Métal']::text[], array['Doré', 'Noir']::text[], '[{"label":"Sources lumineuses","value":"Micro-LED intégrées sur fil de cuivre, dans chaque globe"},{"label":"Puissance","value":"36 W (6 têtes) · 48 W (8 têtes)"},{"label":"Tension d’entrée","value":"AC 90–265 V"},{"label":"Globes","value":"Verre clair, Ø10, Ø12 et Ø15 cm"},{"label":"Formes","value":"Branche en arc ou droite, 75 cm (6 têtes) ou 100 cm (8 têtes)"},{"label":"Pavillon","value":"50 × 8 × 3,5 cm"},{"label":"Suspension","value":"Câbles réglables, hauteur jusqu’à 120 cm"},{"label":"Finitions","value":"Doré ou noir (perle centrale dorée)"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"},{"label":"Commande","value":"Interrupteur ; ou télécommande, intensité variable (versions « télécommande »)"},{"label":"Matières","value":"Fer, verre"},{"label":"Surface conseillée","value":"10 à 30 m², selon le fabricant"},{"label":"Classe énergétique","value":"F, selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles, jusqu’à 120 cm.', 0,
+  'Constellation — suspension globes de verre étoilés, dorée ou noire', 'Suspension design : globes de verre clair à micro-LED étoilées sur une branche en arc ou droite, 75 ou 100 cm. Finition dorée ou noire, lumière chaude ou froide, version variable à la télécommande.', '[{"id":"finition","label":"Finition","values":[{"id":"dore","label":"Doré"},{"id":"noir","label":"Noir"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  '{"group":"Forme","variant":"Taille"}'::jsonb, 'globes')
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '6 têtes · 75 cm', 'LUM-SUS-003-A6', 'Arc', 0,
+  0, true, '6 globes de verre Ø10 à Ø15 cm · 36 W · longueur 75 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-a6-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a6-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a6-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a6-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a6-noir-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '6 têtes · 75 cm · télécommande', 'LUM-SUS-003-A6-TC', 'Arc', 1000,
+  0, true, '6 globes de verre Ø10 à Ø15 cm · 36 W · longueur 75 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-a6-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a6-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a6-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a6-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a6-noir-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-A8', 'Arc', 0,
+  0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-a8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a8-noir-froid.webp"}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-A8-TC', 'Arc', 1000,
+  0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-a8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-a8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-a8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-a8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-a8-noir-froid.webp"}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '6 têtes · 75 cm', 'LUM-SUS-003-D6', 'Droite', 0,
+  0, true, '6 globes de verre Ø10 à Ø15 cm · 36 W · longueur 75 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-d6-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d6-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d6-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d6-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d6-noir-froid.webp"}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '6 têtes · 75 cm · télécommande', 'LUM-SUS-003-D6-TC', 'Droite', 1000,
+  0, true, '6 globes de verre Ø10 à Ø15 cm · 36 W · longueur 75 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-d6-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d6-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d6-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d6-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d6-noir-froid.webp"}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm', 'LUM-SUS-003-D8', 'Droite', 0,
+  0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · allumage à l’interrupteur', '/products/constellation/rendu-d8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d8-noir-froid.webp"}'::jsonb, 6)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-003'), '8 têtes · 100 cm · télécommande', 'LUM-SUS-003-D8-TC', 'Droite', 1000,
+  0, true, '8 globes de verre Ø10 à Ø15 cm · 48 W · longueur 100 cm · suspension réglable jusqu’à 120 cm · intensité variable à la télécommande', '/products/constellation/rendu-d8-dore-chaud.webp', '{"dore-chaud":"/products/constellation/rendu-d8-dore-chaud.webp","dore-froid":"/products/constellation/rendu-d8-dore-froid.webp","noir-chaud":"/products/constellation/rendu-d8-noir-chaud.webp","noir-froid":"/products/constellation/rendu-d8-noir-froid.webp"}'::jsonb, 7)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-SUS-003'), '/products/constellation/ambiance-doree.webp', 'Suspension Constellation dorée en arc, huit globes de verre étoilés allumés au-dessus d’une table de salle à manger, devant un mur bleu nuit', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-SUS-003') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-doree.webp');
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-SUS-003'), '/products/constellation/ambiance-arc-noir.webp', 'Suspension Constellation noire en arc, perle centrale dorée, huit globes de verre étoilés allumés devant un mur bleu nuit, bouquet de roses sur la table', 'Photographie d’ambiance du fabricant', 1,
+  false and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-SUS-003') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-SUS-003') and storage_path = '/products/constellation/ambiance-arc-noir.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.
