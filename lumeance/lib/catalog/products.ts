@@ -229,19 +229,14 @@ const AIGRETTE_VARIANTS: ProductVariant[] = AIGRETTE_VERSIONS.map(
         .join(" · "),
       imageUrl: `/products/aigrette/ambiance-${shape === "Ronde" ? "ronde" : "lineaire"}.webp`,
       // Visualisations 3D : finition × couleur de lumière (« 3 teintes » = rendu blanc neutre).
-      // « scene » : mise en situation 3D de la forme (une vue de la galerie, qui suit la version).
-      imageUrls: Object.fromEntries([
-        [
-          "scene",
-          `/products/aigrette/mise-en-scene-${shape === "Ronde" ? "ronde" : "lineaire"}.webp`,
-        ],
-        ...AIGRETTE_FINISHES.flatMap((f) =>
+      imageUrls: Object.fromEntries(
+        AIGRETTE_FINISHES.flatMap((f) =>
           [...AIGRETTE_TEMPS, "commutable"].map((t) => [
             `${f}-${t}`,
             `/products/aigrette/rendu-${code}-${f}-${t === "commutable" ? "neutre" : t}.webp`,
           ]),
         ),
-      ]),
+      ),
     };
   },
 );
