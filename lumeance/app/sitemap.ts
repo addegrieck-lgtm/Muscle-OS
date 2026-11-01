@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { ARTICLES } from "@/lib/content/journal";
+import { publishedArticles } from "@/lib/content/journal";
 import { getCategories, getProducts } from "@/lib/services/catalog";
 import { absoluteUrl } from "@/lib/seo/metadata";
 
@@ -38,8 +38,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         priority: 0.7,
       })),
-    ...ARTICLES.map((a) => ({
+    // Seuls les articles déjà en ligne : les articles programmés apparaissent à leur date.
+    ...publishedArticles().map((a) => ({
       url: absoluteUrl(`/journal/${a.slug}`),
+      lastModified: new Date(a.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.5,
     })),

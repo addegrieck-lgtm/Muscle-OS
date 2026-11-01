@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ARTICLES } from "@/lib/content/journal";
+import { formatArticleDate, publishedArticles } from "@/lib/content/journal";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
   title: "Journal — conseils d’éclairage",
   description:
-    "Guides LUMÉANCE : choisir un lustre, éclairer une cage d’escalier, choisir un luminaire en verre, les luminaires sculpturaux et les tendances.",
+    "Le journal LUMÉANCE : guides d’achat, conseils d’éclairage pièce par pièce, ambiances et entretien des luminaires.",
   path: "/journal",
 });
 
 export default function JournalPage() {
-  const [first, ...rest] = ARTICLES;
+  const [first, ...rest] = publishedArticles();
   return (
     <>
       <PageHeader
@@ -35,7 +35,10 @@ export default function JournalPage() {
               />
             </div>
             <div className="md:col-span-5">
-              <p className="t-eyebrow text-champagne">Guide · {first.readingMinutes} min</p>
+              <p className="t-eyebrow text-champagne">
+                {first.category} · {first.readingMinutes} min
+              </p>
+              <p className="t-small mt-2 text-brun/50">{formatArticleDate(first.publishedAt)}</p>
               <h2 className="t-h2 mt-4">{first.title}</h2>
               <p className="mt-5 text-brun/75">{first.excerpt}</p>
             </div>
@@ -59,7 +62,9 @@ export default function JournalPage() {
                   label=""
                 />
               </div>
-              <p className="t-eyebrow mt-6 text-champagne">Guide · {a.readingMinutes} min</p>
+              <p className="t-eyebrow mt-6 text-champagne">
+                {a.category} · {a.readingMinutes} min · {formatArticleDate(a.publishedAt)}
+              </p>
               <h2 className="t-h3 mt-3">{a.title}</h2>
               <p className="t-small mt-3 text-brun/70">{a.excerpt}</p>
             </Link>
