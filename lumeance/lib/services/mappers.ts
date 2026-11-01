@@ -1,4 +1,4 @@
-import type { ArtForm, Category, Product, SpecLine } from "@/types/catalog";
+import type { ArtForm, Category, Product, ProductOption, SpecLine } from "@/types/catalog";
 
 export interface ProductRow {
   id: string;
@@ -22,6 +22,9 @@ export interface ProductRow {
   stock_quantity: number;
   seo_title: string | null;
   seo_description: string | null;
+  options?: ProductOption[] | null;
+  option_labels?: Product["optionLabels"] | null;
+  art?: string | null;
   categories?: { slug: string } | null;
   product_images?: {
     id: string;
@@ -29,6 +32,7 @@ export interface ProductRow {
     alt_text: string;
     position: number;
     is_primary: boolean;
+    caption?: string | null;
   }[];
   product_variants?: {
     id: string;
@@ -38,6 +42,10 @@ export interface ProductRow {
     price_adjustment: number;
     stock_quantity: number;
     active: boolean;
+    details?: string | null;
+    image_url?: string | null;
+    image_urls?: Record<string, string> | null;
+    position?: number | null;
   }[];
 }
 
@@ -49,6 +57,17 @@ export interface CategoryRow {
   image_path: string | null;
   position: number;
 }
+
+const ART_FORMS = new Set<string>([
+  "cascade",
+  "globes",
+  "halo",
+  "organic",
+  "tiers",
+  "dome",
+  "sconce",
+  "floor",
+]);
 
 const ART_BY_CATEGORY: Record<string, ArtForm> = {
   lustres: "cascade",
@@ -102,21 +121,36 @@ export function mapProduct(row: ProductRow, imageUrl: (path: string) => string):
         id: img.id,
         url: imageUrl(img.storage_path),
         alt: img.alt_text || row.name,
+        ...(img.caption ? { caption: img.caption } : {}),
         isPrimary: img.is_primary,
         position: img.position,
       })),
-    variants: (row.product_variants ?? []).map((v) => ({
-      id: v.id,
-      name: v.name,
-      sku: v.sku,
-      finish: v.finish,
-      priceAdjustment: Number(v.price_adjustment),
-      stockQuantity: v.stock_quantity,
-      active: v.active,
-    })),
+    variants: (row.product_variants ?? [])
+      .slice()
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+      .map((v) => ({
+        id: v.id,
+        name: v.name,
+        sku: v.sku,
+        finish: v.finish,
+        priceAdjustment: Number(v.price_adjustment),
+        stockQuantity: v.stock_quantity,
+        active: v.active,
+        ...(v.details ? { details: v.details } : {}),
+        ...(v.image_url ? { imageUrl: imageUrl(v.image_url) } : {}),
+        ...(v.image_urls && Object.keys(v.image_urls).length
+          ? {
+              imageUrls: Object.fromEntries(
+                Object.entries(v.image_urls).map(([k, path]) => [k, imageUrl(path)]),
+              ),
+            }
+          : {}),
+      })),
     seoTitle: row.seo_title,
     seoDescription: row.seo_description,
-    art: artForCategory(categorySlug),
+    art: row.art && ART_FORMS.has(row.art) ? (row.art as ArtForm) : artForCategory(categorySlug),
+    ...(Array.isArray(row.options) && row.options.length ? { options: row.options } : {}),
+    ...(row.option_labels ? { optionLabels: row.option_labels } : {}),
     isDemo: false,
   };
 }

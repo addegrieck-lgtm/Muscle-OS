@@ -32,10 +32,20 @@ Dans le tableau de bord Cloudflare : **Workers & Pages → Créer → Importer u
 | Réglage | Valeur |
 |---|---|
 | Nom du projet | `lumeance` (doit correspondre à `name` dans `wrangler.jsonc`) |
-| Branche de production | `main` (ou `claude/pensive-faraday-ywxdas` pour tester avant la fusion) |
+| Branche de production | `main` |
 | Répertoire racine | `lumeance` |
 | Commande de build | `npm ci && npx opennextjs-cloudflare build` (le `npm ci` est indispensable : la racine du dépôt est un espace pnpm et Cloudflare n'y installe pas les dépendances de `lumeance/`) |
 | Commande de déploiement | `npx opennextjs-cloudflare deploy` |
-| Variables de **build** | `NEXT_PUBLIC_SITE_URL=https://lumeance.<votre-sous-domaine>.workers.dev` |
+| Variable de **build** | `SKIP_DEPENDENCY_INSTALL=1` (évite l'installation pnpm automatique, qui échoue ; `npm ci` s'en charge) |
 
-Plus tard : ajouter `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (build + exécution) et `SUPABASE_SERVICE_ROLE_KEY` (exécution, en secret). Domaine personnalisé : Workers → lumeance → Paramètres → Domaines et routes.
+Variables d'**exécution** (Settings → Variables and Secrets) : `NEXT_PUBLIC_SUPABASE_URL` (sans `/rest/v1`), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (clé publishable), `SUPABASE_SERVICE_ROLE_KEY` (type **Secret**). `NEXT_PUBLIC_SITE_URL` est fournie par `.env.production`. Les pages lisent la configuration à l'exécution : aucune variable Supabase n'est nécessaire au build. `keep_vars` (dans `wrangler.jsonc`) empêche chaque déploiement d'effacer ces variables.
+
+Domaine personnalisé : Workers → lumeance → Paramètres → Domaines et routes.
+
+## Supabase : installation et produits
+1. SQL Editor : coller `supabase/setup.sql` (schéma, sécurité, stockage, catégories) — une fois.
+2. Authentication → Users → Add user, puis `supabase/first-admin.sql` (premier super administrateur).
+3. SQL Editor : coller `supabase/import-produits.sql` — importe les pièces du catalogue écrit dans le code (`lib/catalog/products.ts`) avec leurs versions, options et visuels. Sans risque à rejouer : rien d'existant n'est modifié.
+4. Ensuite, les pièces se gèrent dans `/admin/products`. Après l'ajout d'une pièce dans le code : `npm run catalog:sql`, puis recoller le fichier.
+
+Tant que Supabase n'est pas configuré, le site affiche le catalogue du code ; une fois configuré, il lit la base (vide tant que l'import n'est pas fait).

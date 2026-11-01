@@ -106,6 +106,7 @@ export const variantSchema = z.object({
   name: z.string().trim().min(1).max(80),
   sku: z.string().trim().min(1).max(60),
   finish: optionalText(60),
+  details: optionalText(300),
   price_adjustment: z.number().int().min(-100_000_000).max(100_000_000),
   stock_quantity: z.number().int().min(0).max(100000),
   active: z.boolean(),

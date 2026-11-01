@@ -8,7 +8,7 @@ import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "./ma
 import type { Category, Product } from "@/types/catalog";
 
 export const PRODUCT_SELECT =
-  "*, categories(slug), product_images(id, storage_path, alt_text, position, is_primary), product_variants(id, name, sku, finish, price_adjustment, stock_quantity, active)";
+  "*, categories(slug), product_images(id, storage_path, alt_text, caption, position, is_primary), product_variants(id, name, sku, finish, price_adjustment, stock_quantity, active, details, image_url, image_urls, position)";
 
 /** Catalogue réel dans le code (provisoire) : actif dès qu'une fiche y est publiée. */
 function usesCodeCatalog(): boolean {

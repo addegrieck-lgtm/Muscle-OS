@@ -44,7 +44,12 @@ export default async function EditProduct({ params, searchParams }: Props) {
     supabase.from("products").select("*").eq("id", id).maybeSingle(),
     supabase.from("categories").select("id, name").order("position"),
     supabase.from("product_images").select("*").eq("product_id", id).order("position"),
-    supabase.from("product_variants").select("*").eq("product_id", id).order("created_at"),
+    supabase
+      .from("product_variants")
+      .select("*")
+      .eq("product_id", id)
+      .order("position")
+      .order("created_at"),
     supabase
       .from("media_assets")
       .select("storage_path, alt_text")
@@ -234,6 +239,13 @@ export default async function EditProduct({ params, searchParams }: Props) {
                   defaultValue={v?.stock_quantity ?? 0}
                   className={inputClass}
                   aria-label="Stock"
+                />
+                <input
+                  name="details"
+                  placeholder="Précisions affichées (dimensions, hauteur, surface conseillée…)"
+                  defaultValue={v?.details ?? ""}
+                  className={`${inputClass} col-span-2 md:col-span-6`}
+                  aria-label="Précisions"
                 />
                 <label className="flex items-center gap-2 text-xs md:col-span-2">
                   <input

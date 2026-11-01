@@ -170,6 +170,7 @@ export async function saveVariant(form: FormData) {
     name: form.get("name"),
     sku: form.get("sku"),
     finish: form.get("finish") ?? "",
+    details: form.get("details") ?? "",
     price_adjustment: cents === null ? NaN : negative ? -cents : cents,
     stock_quantity: Number(form.get("stock_quantity") ?? 0),
     active: form.get("active") === "on",
