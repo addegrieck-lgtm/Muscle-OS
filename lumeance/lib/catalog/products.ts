@@ -655,6 +655,36 @@ const MEANDRE_VARIANTS: ProductVariant[] = [
   },
 ];
 
+// ── Cristalline (LUM-LUS-009) ────────────────────────────────────────────────
+// Fiches fournisseur relevées le 02/11/2026 : cristal K9, acier inoxydable poli miroir doré,
+// LED 6 W par spot, 90–265 V, sans scintillement, IRC ≥ 98. Promotion −16 % jusqu'au 18/11/2026 ;
+// prix hors promotion = « prix le plus bas des 30 jours » (50 cm) ou prix promotionnel + économie
+// affichée. Prix identique en blanc chaud ou blanc froid. Pas de télécommande proposée.
+// [diamètre (cm), hauteur (cm), spots LED, surface (m²), prix fournisseur hors promotion (centimes)]
+const CRISTALLINE_VERSIONS: [number, number, number, string, number][] = [
+  [50, 160, 7, "10 à 15", 107274],
+  [60, 210, 10, "12 à 18", 152992],
+  [80, 280, 15, "15 à 20", 214228],
+  [100, 350, 20, "20 à 25", 266135],
+];
+const CRISTALLINE_BASE_PRICE = Math.min(...CRISTALLINE_VERSIONS.map((v) => salePrice(v[4])));
+const CRISTALLINE_VARIANTS: ProductVariant[] = CRISTALLINE_VERSIONS.map(
+  ([d, h, n, area, cost]) => ({
+    id: `cristalline-d${d}`,
+    name: `Ø${d} cm · H ${h} cm`,
+    sku: `LUM-LUS-009-D${d}`,
+    finish: null,
+    priceAdjustment: salePrice(cost) - CRISTALLINE_BASE_PRICE,
+    stockQuantity: 5,
+    active: true,
+    details: `Pavillon Ø${d} cm · hauteur ${h} cm · ${n} spots LED, ${n * 6} W · pièce de ${area} m²`,
+    imageUrl: `/products/cristalline/rendu-d${d}-chaud.webp`,
+    imageUrls: Object.fromEntries(
+      ["chaud", "froid"].map((t) => [t, `/products/cristalline/rendu-d${d}-${t}.webp`]),
+    ),
+  }),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1804,6 +1834,72 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Au-dessus d’une table, d’un îlot ou d’un comptoir.",
     art: "tiers",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-009",
+    slug: "cristalline",
+    name: "Cristalline",
+    reference: "LUM-LUS-009",
+    shortDescription:
+      "Une pluie de cristal K9 taillé qui s’enroule en spirale sous un pavillon doré poli miroir.",
+    description: [
+      "Cristalline suspend des centaines de boules de cristal K9 taillées à facettes et de fines perles en losange, enfilées sur des fils presque invisibles. Elles s’enroulent en spirale et s’affinent vers le bas ; sous le pavillon doré poli miroir, les spots allument chaque facette et projettent sur les murs et le plafond une constellation de reflets.",
+      "Pensée pour les cages d’escalier, les duplex et les halls en double hauteur, elle se décline en quatre tailles, de 1,60 m à 3,50 m de hauteur. Lumière blanc chaud ou blanc froid, à fort rendu des couleurs.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: CRISTALLINE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Cristal K9", "Acier inoxydable"],
+    finishes: ["Doré poli miroir"],
+    specifications: [
+      { label: "Sources lumineuses", value: "Spots LED intégrés, 6 W chacun" },
+      { label: "Tension d’entrée", value: "90–265 V" },
+      { label: "Cristal", value: "K9 taillé à facettes, boules et perles en losange" },
+      { label: "Pavillon", value: "Acier inoxydable poli miroir doré" },
+      {
+        label: "Versions",
+        value: "Ø50 × H160, Ø60 × H210, Ø80 × H280 ou Ø100 × H350 cm",
+      },
+      { label: "Couleur de lumière", value: "Blanc chaud ou blanc froid" },
+      { label: "Rendu des couleurs", value: "IRC ≥ 98, sans scintillement, selon le fabricant" },
+      { label: "Surface conseillée", value: "De 10 à 25 m² selon la version, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les fils de cristal s’accrochent un à un au pavillon.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "cristalline-1",
+        url: "/products/cristalline/ambiance-escalier.webp",
+        alt: "Lustre Cristalline allumé dans une cage d’escalier, cascade de boules de cristal en spirale sous un pavillon doré, reflets lumineux sur les murs",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: CRISTALLINE_VARIANTS,
+    options: [
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Cristalline — lustre cristal K9 en spirale",
+    seoDescription:
+      "Lustre Cristalline : boules de cristal K9 taillé en spirale sous un pavillon doré poli miroir, de 1,60 à 3,50 m. Pour escalier et double hauteur.",
+    art: "cascade",
     isDemo: false,
   },
 ];
