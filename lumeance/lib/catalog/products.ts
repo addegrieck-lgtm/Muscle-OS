@@ -420,6 +420,35 @@ const ORGANZA_VARIANTS: ProductVariant[] = ORGANZA_VERSIONS.map(
   }),
 );
 
+// ── Aiguille (LUM-APP-003) ───────────────────────────────────────────────────
+// Fiche fournisseur relevée le 02/11/2026 : corps H 21 cm, câble 30 cm réglable, rosace Ø5,6 cm,
+// LED 5 W. Prix identique pour les finitions et les couleurs de lumière : 39,59 € en promotion,
+// 43,25 € (prix le plus bas des 30 jours avant réduction) ; prix de vente sur ce dernier.
+const AIGUILLE_COST = 4325;
+const AIGUILLE_VARIANTS: ProductVariant[] = [
+  {
+    id: "aiguille-h21",
+    name: "H 21 cm",
+    sku: "LUM-APP-003-H21",
+    finish: null,
+    priceAdjustment: 0,
+    stockQuantity: 5,
+    active: true,
+    details:
+      "Corps 21 cm · câble 30 cm, réglable · rosace murale Ø5,6 cm · LED 5 W · pièce de 3 à 8 m²",
+    imageUrl: "/products/aiguille/rendu-noir-chaud.webp",
+    // Visualisations 3D : finition × couleur de lumière.
+    imageUrls: Object.fromEntries(
+      ["noir", "dore"].flatMap((f) =>
+        ["chaud", "neutre", "froid"].map((t) => [
+          `${f}-${t}`,
+          `/products/aiguille/rendu-${f}-${t}.webp`,
+        ]),
+      ),
+    ),
+  },
+];
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1176,6 +1205,79 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre design : voiles d’acrylique ondulés éclairés par la tranche, en cascade de 1 à 28 plaques. Pavillon rond ou rectangulaire, métal doré, noir ou argenté, pour séjour, escalier et double hauteur.",
     art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-app-003",
+    slug: "aiguille",
+    name: "Aiguille",
+    reference: "LUM-APP-003",
+    shortDescription:
+      "Une fine tige de métal et son disque de lumière, prolongés d’un câble qui file jusqu’à une petite rosace.",
+    description: [
+      "Aiguille trace sur le mur une ligne nette : une tige de métal de 21 cm, coiffée d’un disque lumineux qui éclaire en douceur vers le bas, puis un câble fin qui descend jusqu’à une rosace ronde de 5,6 cm. Le dessin est minimal, presque graphique, allumé comme éteint.",
+      "Elle accompagne une tête de lit, un bureau, une liseuse ou un couloir. Métal noir ou doré ; lumière blanc chaud, naturel ou froid.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: salePrice(AIGUILLE_COST),
+    compareAtPrice: null,
+    categoryId: "demo-cat-appliques",
+    categorySlug: "appliques",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: [],
+    finishes: ["Noir", "Doré"],
+    specifications: [
+      { label: "Type", value: "Applique murale LED" },
+      { label: "Sources lumineuses", value: "LED, 5 W" },
+      { label: "Dimensions", value: "Corps H 21 cm · câble 30 cm, réglable · rosace Ø5,6 cm" },
+      { label: "Finitions", value: "Noir ou doré" },
+      {
+        label: "Couleur de lumière",
+        value: "Blanc chaud (2700–3500 K), naturel (3500–5500 K) ou froid (5500–7000 K)",
+      },
+      { label: "Surface conseillée", value: "3 à 8 m², selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "aiguille-1",
+        url: "/products/aiguille/ambiance-chambre.webp",
+        alt: "Applique Aiguille noire allumée dans une chambre, disque lumineux incliné éclairant le mur au-dessus d’une table de chevet",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: AIGUILLE_VARIANTS,
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "noir", label: "Noir" },
+          { id: "dore", label: "Doré" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "neutre", label: "Blanc naturel" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Aiguille — applique murale LED minimaliste, tige et disque lumineux, noire ou dorée",
+    seoDescription:
+      "Applique murale LED au dessin graphique : tige de 21 cm, disque lumineux, câble jusqu’à une rosace ronde. Noire ou dorée, lumière chaude, naturelle ou froide. Tête de lit, bureau, couloir.",
+    art: "sconce",
     isDemo: false,
   },
 ];

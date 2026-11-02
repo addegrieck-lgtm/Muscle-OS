@@ -630,6 +630,37 @@ select (select id from public.products where reference = 'LUM-LUS-004'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-LUS-004') and storage_path = '/products/organza/ambiance-salon.webp');
 
+-- ════ Aiguille (LUM-APP-003) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('aiguille', 'Aiguille', 'LUM-APP-003', 'Une fine tige de métal et son disque de lumière, prolongés d’un câble qui file jusqu’à une petite rosace.', 'Aiguille trace sur le mur une ligne nette : une tige de métal de 21 cm, coiffée d’un disque lumineux qui éclaire en douceur vers le bas, puis un câble fin qui descend jusqu’à une rosace ronde de 5,6 cm. Le dessin est minimal, presque graphique, allumé comme éteint.
+
+Elle accompagne une tête de lit, un bureau, une liseuse ou un couloir. Métal noir ou doré ; lumière blanc chaud, naturel ou froid.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  8000, null,
+  (select id from public.categories where slug = 'appliques'),
+  'draft', false, '{}'::jsonb, null,
+  '{}'::text[], array['Noir', 'Doré']::text[], '[{"label":"Type","value":"Applique murale LED"},{"label":"Sources lumineuses","value":"LED, 5 W"},{"label":"Dimensions","value":"Corps H 21 cm · câble 30 cm, réglable · rosace Ø5,6 cm"},{"label":"Finitions","value":"Noir ou doré"},{"label":"Couleur de lumière","value":"Blanc chaud (2700–3500 K), naturel (3500–5500 K) ou froid (5500–7000 K)"},{"label":"Surface conseillée","value":"3 à 8 m², selon le fabricant"}]'::jsonb,
+  null, 'Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.', 5,
+  'Aiguille — applique murale LED minimaliste, tige et disque lumineux, noire ou dorée', 'Applique murale LED au dessin graphique : tige de 21 cm, disque lumineux, câble jusqu’à une rosace ronde. Noire ou dorée, lumière chaude, naturelle ou froide. Tête de lit, bureau, couloir.', '[{"id":"finition","label":"Finition","values":[{"id":"noir","label":"Noir"},{"id":"dore","label":"Doré"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc naturel"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  null, 'sconce',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-APP-003'), 'H 21 cm', 'LUM-APP-003-H21', null, 0,
+  5, true, 'Corps 21 cm · câble 30 cm, réglable · rosace murale Ø5,6 cm · LED 5 W · pièce de 3 à 8 m²', '/products/aiguille/rendu-noir-chaud.webp', '{"noir-chaud":"/products/aiguille/rendu-noir-chaud.webp","noir-neutre":"/products/aiguille/rendu-noir-neutre.webp","noir-froid":"/products/aiguille/rendu-noir-froid.webp","dore-chaud":"/products/aiguille/rendu-dore-chaud.webp","dore-neutre":"/products/aiguille/rendu-dore-neutre.webp","dore-froid":"/products/aiguille/rendu-dore-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-APP-003'), '/products/aiguille/ambiance-chambre.webp', 'Applique Aiguille noire allumée dans une chambre, disque lumineux incliné éclairant le mur au-dessus d’une table de chevet', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-APP-003') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-APP-003') and storage_path = '/products/aiguille/ambiance-chambre.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.
