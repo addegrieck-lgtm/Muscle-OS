@@ -680,6 +680,107 @@ select (select id from public.products where reference = 'LUM-APP-003'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-APP-003') and storage_path = '/products/aiguille/ambiance-chambre.webp');
 
+-- ════ Halo (LUM-LUS-005) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('halo', 'Halo', 'LUM-LUS-005', 'Des anneaux d’acrylique fumé, cerclés d’un croissant de lumière, qui descendent en spirale.', 'Halo suspend des anneaux de 17 cm en acrylique fumé, presque noir, tenus chacun par une petite boule dorée. Sur la tranche, un croissant de LED s’allume et dessine un arc lumineux qui change d’angle d’un anneau à l’autre ; la matière translucide capte la lumière et les reflets de la pièce.
+
+Les anneaux descendent en spirale sous un pavillon rond noir, de trois anneaux au-dessus d’une table ou d’un îlot jusqu’à quarante-huit pour une cage d’escalier, une mezzanine ou un volume en double hauteur. La hauteur se règle par les câbles.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  21000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'draft', false, '{}'::jsonb, null,
+  array['Aluminium', 'Acrylique', 'Acier inoxydable']::text[], array['Noir et or']::text[], '[{"label":"Sources lumineuses","value":"LED intégrées"},{"label":"Anneaux","value":"Ø17 cm, acrylique fumé, boule d’attache dorée"},{"label":"Versions","value":"De 3 à 48 anneaux, pavillon rond Ø30 à Ø80 cm"},{"label":"Suspension","value":"Câbles réglables : de 120 à 800 cm selon la version"},{"label":"Finition","value":"Noir et or"},{"label":"Matières","value":"Aluminium et acrylique ; acier inoxydable en plus à partir de 32 anneaux"},{"label":"Usages","value":"Escalier, duplex, mezzanine, séjour, restaurant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.', 5,
+  'Halo — lustre LED anneaux en cascade pour escalier et double hauteur', 'Lustre design : anneaux d’acrylique fumé cerclés de LED, en spirale de 3 à 48 anneaux sous un pavillon rond noir. Pour escalier, duplex, mezzanine et grands volumes.', '[]'::jsonb,
+  null, 'halo',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '3 anneaux', 'LUM-LUS-005-A3', null, 0,
+  5, true, 'Pavillon Ø30 cm · hauteur 120 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a3.webp', '{}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '5 anneaux', 'LUM-LUS-005-A5', null, 10000,
+  5, true, 'Pavillon Ø35 cm · hauteur 120 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a5.webp', '{}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '6 anneaux', 'LUM-LUS-005-A6', null, 11000,
+  5, true, 'Pavillon Ø40 cm · hauteur 180 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a6.webp', '{}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '8 anneaux', 'LUM-LUS-005-A8', null, 24000,
+  5, true, 'Pavillon Ø40 cm · hauteur 210 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a8.webp', '{}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '10 anneaux', 'LUM-LUS-005-A10', null, 34000,
+  5, true, 'Pavillon Ø45 cm · hauteur 280 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a10.webp', '{}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '12 anneaux', 'LUM-LUS-005-A12', null, 44000,
+  5, true, 'Pavillon Ø50 cm · hauteur 320 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a12.webp', '{}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '15 anneaux', 'LUM-LUS-005-A15', null, 55000,
+  5, true, 'Pavillon Ø50 cm · hauteur 350 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a15.webp', '{}'::jsonb, 6)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '18 anneaux', 'LUM-LUS-005-A18', null, 61000,
+  5, true, 'Pavillon Ø60 cm · hauteur 450 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a18.webp', '{}'::jsonb, 7)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '21 anneaux', 'LUM-LUS-005-A21', null, 71000,
+  5, true, 'Pavillon Ø60 cm · hauteur 500 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a21.webp', '{}'::jsonb, 8)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '24 anneaux', 'LUM-LUS-005-A24', null, 81000,
+  5, true, 'Pavillon Ø60 cm · hauteur 550 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a24.webp', '{}'::jsonb, 9)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '28 anneaux', 'LUM-LUS-005-A28', null, 92000,
+  5, true, 'Pavillon Ø70 cm · hauteur sur demande · anneaux Ø17 cm', '/products/halo/rendu-a28.webp', '{}'::jsonb, 10)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '32 anneaux', 'LUM-LUS-005-A32', null, 104000,
+  5, true, 'Pavillon Ø70 cm · hauteur 650 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a32.webp', '{}'::jsonb, 11)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '36 anneaux', 'LUM-LUS-005-A36', null, 128000,
+  5, true, 'Pavillon Ø80 cm · hauteur 700 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a36.webp', '{}'::jsonb, 12)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '42 anneaux', 'LUM-LUS-005-A42', null, 150000,
+  5, true, 'Pavillon Ø80 cm · hauteur 750 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a42.webp', '{}'::jsonb, 13)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-005'), '48 anneaux', 'LUM-LUS-005-A48', null, 171000,
+  5, true, 'Pavillon Ø80 cm · hauteur 800 cm, réglable · anneaux Ø17 cm', '/products/halo/rendu-a48.webp', '{}'::jsonb, 14)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-005'), '/products/halo/ambiance-escalier.webp', 'Lustre Halo allumé dans une cage d’escalier en double hauteur, anneaux d’acrylique fumé cerclés de lumière descendant en spirale', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-005') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-005') and storage_path = '/products/halo/ambiance-escalier.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.

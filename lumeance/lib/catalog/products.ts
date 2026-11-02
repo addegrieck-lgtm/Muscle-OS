@@ -449,6 +449,48 @@ const AIGUILLE_VARIANTS: ProductVariant[] = [
   },
 ];
 
+// ── Halo (LUM-LUS-005) ───────────────────────────────────────────────────────
+// Fiches fournisseur relevées le 02/11/2026 : anneaux Ø17 cm, acrylique fumé (« pearl black ») et
+// aluminium, accents dorés ; acier inoxydable en plus à partir de 32 anneaux. Promotion −10/−11 %
+// jusqu'au 18/11/2026 ; prix hors promotion = prix promotionnel + économie affichée (égal au « prix
+// le plus bas des 30 jours » quand celui-ci est cohérent). Puissances annoncées incohérentes entre
+// versions (ex. 108 W pour 12, 15 et 18 anneaux) : non reprises par version. Couleur de lumière
+// non précisée par le fournisseur : aucune option proposée. Version 60 anneaux : prix non relevé.
+// [anneaux, pavillon Ø (cm), hauteur réglable (cm) | null, prix fournisseur hors promotion (centimes)]
+const HALO_VERSIONS: [number, number, number | null, number][] = [
+  [3, 30, 120, 11219],
+  [5, 35, 120, 16827],
+  [6, 40, 180, 17407],
+  [8, 40, 210, 24519],
+  [10, 45, 280, 30111],
+  [12, 50, 320, 36060],
+  [15, 50, 350, 42209],
+  [18, 60, 450, 54474],
+  [21, 60, 500, 61152],
+  [24, 60, 550, 67849],
+  [28, 70, null, 74942],
+  [32, 70, 650, 83235],
+  [36, 80, 700, 99255],
+  [42, 80, 750, 113572],
+  [48, 80, 800, 127580],
+];
+const HALO_BASE_PRICE = Math.min(...HALO_VERSIONS.map((v) => salePrice(v[3])));
+const HALO_VARIANTS: ProductVariant[] = HALO_VERSIONS.map(([n, canopy, height, cost]) => ({
+  id: `halo-a${n}`,
+  name: `${n} anneaux`,
+  sku: `LUM-LUS-005-A${n}`,
+  finish: null,
+  priceAdjustment: salePrice(cost) - HALO_BASE_PRICE,
+  stockQuantity: 5,
+  active: true,
+  details: [
+    `Pavillon Ø${canopy} cm`,
+    height ? `hauteur ${height} cm, réglable` : "hauteur sur demande",
+    "anneaux Ø17 cm",
+  ].join(" · "),
+  imageUrl: `/products/halo/rendu-a${n}.webp`,
+}));
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1281,6 +1323,61 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Applique murale LED au dessin graphique : tige de 21 cm, disque lumineux, câble jusqu’à une rosace ronde. Noire ou dorée, lumière chaude, naturelle ou froide. Tête de lit, bureau, couloir.",
     art: "sconce",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-005",
+    slug: "halo",
+    name: "Halo",
+    reference: "LUM-LUS-005",
+    shortDescription:
+      "Des anneaux d’acrylique fumé, cerclés d’un croissant de lumière, qui descendent en spirale.",
+    description: [
+      "Halo suspend des anneaux de 17 cm en acrylique fumé, presque noir, tenus chacun par une petite boule dorée. Sur la tranche, un croissant de LED s’allume et dessine un arc lumineux qui change d’angle d’un anneau à l’autre ; la matière translucide capte la lumière et les reflets de la pièce.",
+      "Les anneaux descendent en spirale sous un pavillon rond noir, de trois anneaux au-dessus d’une table ou d’un îlot jusqu’à quarante-huit pour une cage d’escalier, une mezzanine ou un volume en double hauteur. La hauteur se règle par les câbles.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: HALO_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Aluminium", "Acrylique", "Acier inoxydable"],
+    finishes: ["Noir et or"],
+    specifications: [
+      { label: "Sources lumineuses", value: "LED intégrées" },
+      { label: "Anneaux", value: "Ø17 cm, acrylique fumé, boule d’attache dorée" },
+      { label: "Versions", value: "De 3 à 48 anneaux, pavillon rond Ø30 à Ø80 cm" },
+      { label: "Suspension", value: "Câbles réglables : de 120 à 800 cm selon la version" },
+      { label: "Finition", value: "Noir et or" },
+      {
+        label: "Matières",
+        value: "Aluminium et acrylique ; acier inoxydable en plus à partir de 32 anneaux",
+      },
+      { label: "Usages", value: "Escalier, duplex, mezzanine, séjour, restaurant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "halo-1",
+        url: "/products/halo/ambiance-escalier.webp",
+        alt: "Lustre Halo allumé dans une cage d’escalier en double hauteur, anneaux d’acrylique fumé cerclés de lumière descendant en spirale",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: HALO_VARIANTS,
+    seoTitle: "Halo — lustre LED anneaux en cascade pour escalier et double hauteur",
+    seoDescription:
+      "Lustre design : anneaux d’acrylique fumé cerclés de LED, en spirale de 3 à 48 anneaux sous un pavillon rond noir. Pour escalier, duplex, mezzanine et grands volumes.",
+    art: "halo",
     isDemo: false,
   },
 ];
