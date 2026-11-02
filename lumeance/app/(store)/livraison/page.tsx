@@ -33,8 +33,9 @@ export default async function LivraisonPage() {
           </p>
           <h2>Frais</h2>
           <p>
-            Les frais de livraison seront affichés dans le panier avant toute validation. Aucun
-            frais caché ne sera ajouté après coup.
+            La livraison standard est offerte sur toutes les pièces. Si une livraison plus rapide
+            est proposée pour une pièce, son supplément est affiché dans le panier avant toute
+            validation. Aucun frais caché ne sera ajouté après coup.
           </p>
           <h2>Réception</h2>
           <ul>

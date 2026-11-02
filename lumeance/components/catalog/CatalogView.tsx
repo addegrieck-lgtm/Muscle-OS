@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { roomById } from "@/lib/content/home";
 import { filterProducts, materialFacets, type ProductQuery } from "@/lib/services/catalog";
 import type { Category, Product } from "@/types/catalog";
 
@@ -20,6 +21,7 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): P
     material: one("matiere")?.slice(0, 40),
     maxPrice: Number.isInteger(max) && max > 0 ? max * 100 : undefined,
     sort: SORTS.some((s) => s.value === sort) ? sort : "featured",
+    room: roomById(one("piece"))?.id,
   };
 }
 
@@ -49,6 +51,7 @@ export function CatalogView({
       matiere: query.material,
       prix: query.maxPrice ? String(query.maxPrice / 100) : undefined,
       tri: query.sort && query.sort !== "featured" ? query.sort : undefined,
+      piece: query.room,
       ...patch,
     };
     Object.entries(cur).forEach(([k, v]) => v && params.set(k, v));
@@ -59,8 +62,22 @@ export function CatalogView({
   const chip = (active: boolean) =>
     `t-eyebrow whitespace-nowrap border px-4 py-2.5 transition-colors ${active ? "border-brun bg-brun text-ivoire" : "border-brun/15 hover:border-brun/50"}`;
 
+  const room = roomById(query.room);
   return (
     <div className="container-luxe pb-32">
+      {room && (
+        <p className="mb-6 flex flex-wrap items-center gap-4 text-sm text-brun/75">
+          <span>
+            Pour : <strong className="font-serif text-lg text-brun">{room.label}</strong>
+          </span>
+          <Link
+            href={href({ piece: undefined })}
+            className="t-eyebrow underline underline-offset-4"
+          >
+            Voir toutes les pièces
+          </Link>
+        </p>
+      )}
       <nav aria-label="Univers" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none]">
         <ul className="flex gap-2 border-b border-brun/10 pb-6">
           <li>
