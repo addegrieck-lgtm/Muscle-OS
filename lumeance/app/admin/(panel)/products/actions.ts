@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { imageRows, missingProducts, productRow, variantRows } from "@/lib/admin/catalog-import";
+import { catalogHash } from "@/lib/admin/catalog-sync";
 import { catalogSyncPlans } from "@/lib/admin/catalog-sync-plans";
 import { firstError, productFromForm } from "@/lib/admin/forms";
 import { uploadImage } from "@/lib/admin/media";
@@ -207,7 +208,10 @@ export async function importCatalogProducts() {
   for (const p of todo) {
     const { data: row, error } = await supabase
       .from("products")
-      .insert(productRow(p, categoryId.get(p.categorySlug ?? "") ?? null))
+      .insert({
+        ...productRow(p, categoryId.get(p.categorySlug ?? "") ?? null),
+        catalog_hash: catalogHash(p),
+      })
       .select("id")
       .single();
     if (error)
@@ -245,15 +249,21 @@ export async function syncCatalogProducts(form: FormData) {
   if (!todo.length) back("/admin/products", { ok: "Tout est déjà à jour." });
   const supabase = await createSupabaseServerClient();
   const done: string[] = [];
-  for (const { product, db, plan } of todo) {
+  for (const { product, db, plan, hash } of todo) {
     const fail = (e: { message: string; code?: string }) =>
       back("/admin/products", { erreur: `${product.name} : ${dbError("catalogSync", e)}` });
-    if (Object.keys(plan.product).length) {
-      const { error: e } = await supabase.from("products").update(plan.product).eq("id", db.id);
+    {
+      const { error: e } = await supabase
+        .from("products")
+        .update({ ...plan.product, catalog_hash: hash })
+        .eq("id", db.id);
       if (e) fail(e);
     }
     if (plan.variantsDelete.length) {
-      const { error: e } = await supabase.from("product_variants").delete().in("id", plan.variantsDelete);
+      const { error: e } = await supabase
+        .from("product_variants")
+        .delete()
+        .in("id", plan.variantsDelete);
       if (e) fail(e);
     }
     for (const { id: vid, patch } of plan.variantsUpdate) {
@@ -267,7 +277,10 @@ export async function syncCatalogProducts(form: FormData) {
     // Images : suppressions, puis retrait de l'ancienne image principale avant d'en désigner une
     // nouvelle (une seule image principale par pièce, contrainte en base).
     if (plan.imagesDelete.length) {
-      const { error: e } = await supabase.from("product_images").delete().in("id", plan.imagesDelete);
+      const { error: e } = await supabase
+        .from("product_images")
+        .delete()
+        .in("id", plan.imagesDelete);
       if (e) fail(e);
     }
     const newPrimary =

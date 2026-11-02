@@ -95,7 +95,10 @@ export default async function ProductsPage({
           </div>
           <ul className="mt-3 space-y-2">
             {syncs.map(({ product, plan }) => (
-              <li key={product.reference} className="flex flex-wrap items-center justify-between gap-2">
+              <li
+                key={product.reference}
+                className="flex flex-wrap items-center justify-between gap-2"
+              >
                 <span>
                   <strong>{product.name}</strong> — {plan.changes.join(" · ")}
                 </span>

@@ -1,5 +1,5 @@
 import "server-only";
-import { planIsEmpty, syncPlan, type DbProduct } from "@/lib/admin/catalog-sync";
+import { catalogHash, planIsEmpty, syncPlan, type DbProduct } from "@/lib/admin/catalog-sync";
 import { dbError } from "@/lib/admin/redirect";
 import { CATALOG_PRODUCTS } from "@/lib/catalog/products";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -17,9 +17,12 @@ export async function catalogSyncPlans() {
   const plans = CATALOG_PRODUCTS.flatMap((p) => {
     const db = byRef.get(p.reference.toUpperCase()) as DbProduct | undefined;
     if (!db) return [];
+    // Catalogue inchangé depuis la dernière importation ou mise à jour : les écarts éventuels
+    // viennent de l'administration et sont conservés.
+    const hash = catalogHash(p);
+    if (db.catalog_hash === hash) return [];
     const plan = syncPlan(p, db, categoryId.get(p.categorySlug ?? "") ?? null);
-    return planIsEmpty(plan) ? [] : [{ product: p, db, plan }];
+    return planIsEmpty(plan) ? [] : [{ product: p, db, plan, hash }];
   });
   return { error: null, plans };
 }
-

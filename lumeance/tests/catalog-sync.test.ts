@@ -65,3 +65,14 @@ describe("mise à jour depuis le catalogue", () => {
     expect(plan.imagesInsert.every((i) => i.is_primary === false)).toBe(true);
   });
 });
+
+describe("empreinte du catalogue", () => {
+  it("est stable et change avec la pièce, pas avec le stock", async () => {
+    const { catalogHash } = await import("@/lib/admin/catalog-sync");
+    const p = constellation;
+    expect(catalogHash(p)).toBe(catalogHash({ ...p }));
+    expect(catalogHash({ ...p, stockQuantity: 99 })).toBe(catalogHash(p));
+    expect(catalogHash({ ...p, price: p.price + 1000 })).not.toBe(catalogHash(p));
+    expect(new Set(CATALOG_PRODUCTS.map(catalogHash)).size).toBe(CATALOG_PRODUCTS.length);
+  });
+});

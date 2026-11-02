@@ -74,6 +74,12 @@ alter table public.products
     )
   );
 
+-- LUMÉANCE — empreinte de la version du catalogue (code) appliquée à chaque pièce.
+-- Idempotent. Le bandeau « changements préparés » de l'administration ne propose une mise à jour
+-- que si le catalogue a changé depuis la dernière importation ou mise à jour : les modifications
+-- faites ensuite dans l'administration ne sont pas signalées comme des écarts.
+alter table public.products add column if not exists catalog_hash text;
+
 -- ════ Céleste (LUM-LUS-001) ════
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,

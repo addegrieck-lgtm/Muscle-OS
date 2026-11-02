@@ -90,7 +90,11 @@ function stable(v: unknown): string {
   return JSON.stringify(v);
 }
 
-function diff(target: Record<string, unknown>, current: Record<string, unknown>, skip: Set<string>) {
+function diff(
+  target: Record<string, unknown>,
+  current: Record<string, unknown>,
+  skip: Set<string>,
+) {
   const patch: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(target)) {
     if (skip.has(k)) continue;
@@ -172,3 +176,23 @@ export function syncPlan(code: Product, db: DbProduct, categoryId: string | null
 }
 
 export const planIsEmpty = (p: SyncPlan) => p.changes.length === 0;
+
+/** Empreinte de la pièce telle qu'écrite dans le code (hors stock) : FNV-1a 32 bits. */
+export function catalogHash(p: Product): string {
+  const strip = (r: Record<string, unknown>) =>
+    Object.fromEntries(
+      Object.entries(r).filter(([k]) => k !== "product_id" && k !== "stock_quantity"),
+    );
+  const text = stable({
+    product: strip(productRow(p, null)),
+    category: p.categorySlug,
+    variants: variantRows(p, "").map(strip),
+    images: imageRows(p, "").map(strip),
+  });
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}

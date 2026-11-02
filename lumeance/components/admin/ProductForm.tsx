@@ -1,7 +1,7 @@
 import { Card, Field, inputClass } from "./ui";
 import { SubmitButton } from "./SubmitButton";
 import { centsToInput } from "@/lib/money";
-import { specsToText } from "@/lib/admin/forms";
+import { optionsToText, specsToText } from "@/lib/admin/forms";
 
 export interface ProductRecord {
   id?: string;
@@ -25,6 +25,8 @@ export interface ProductRecord {
   stock_quantity?: number;
   seo_title?: string | null;
   seo_description?: string | null;
+  options?: { id: string; label: string; values: { id: string; label: string }[] }[];
+  promotion?: { buy: number; free: number; percent?: number } | null;
 }
 
 const DIMS: [string, string][] = [
@@ -168,6 +170,53 @@ export function ProductForm({
                 name="assembly_information"
                 rows={3}
                 defaultValue={product.assembly_information ?? ""}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Options et offre">
+          <Field
+            label="Options sans incidence sur le prix"
+            hint="Une ligne par option : « Finition : Doré (dore), Noir (noir) ». Gardez les identifiants entre parenthèses : ils relient l'option aux visualisations 3D des versions."
+          >
+            <textarea
+              name="options"
+              rows={3}
+              defaultValue={optionsToText(product.options ?? [])}
+              className={inputClass}
+            />
+          </Field>
+          <p className="mt-4 text-sm">Offre par lot (laisser vide pour aucune offre)</p>
+          <div className="mt-2 grid gap-4 md:grid-cols-3">
+            <Field label="Pièces achetées">
+              <input
+                name="promo_buy"
+                type="number"
+                min={1}
+                max={20}
+                defaultValue={product.promotion?.buy ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Pièces remisées">
+              <input
+                name="promo_free"
+                type="number"
+                min={1}
+                max={20}
+                defaultValue={product.promotion?.free ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Remise (%)" hint="100 ou vide = offertes">
+              <input
+                name="promo_percent"
+                type="number"
+                min={1}
+                max={100}
+                defaultValue={product.promotion?.percent ?? ""}
                 className={inputClass}
               />
             </Field>
