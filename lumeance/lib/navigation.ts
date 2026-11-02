@@ -4,6 +4,7 @@ export const MAIN_NAV = [
   { href: "/collections/suspensions", label: "Suspensions" },
   { href: "/collections/appliques", label: "Appliques" },
   { href: "/collections/lampadaires", label: "Lampadaires" },
+  { href: "/restauration", label: "Restauration" },
   { href: "/maison", label: "La Maison" },
   { href: "/journal", label: "Journal" },
 ] as const;
@@ -11,6 +12,7 @@ export const MAIN_NAV = [
 export const FOOTER_NAV = {
   maison: [
     { href: "/maison", label: "La Maison" },
+    { href: "/restauration", label: "Restaurants, bars et hôtels" },
     { href: "/journal", label: "Journal" },
     { href: "/contact", label: "Contact" },
   ],
