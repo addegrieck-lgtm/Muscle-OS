@@ -1,6 +1,6 @@
 # Hébergement et domaine
 
-**Domaine acheté : `maisonlumeance.fr`** (le 2 novembre 2026 ; `lumeance.fr` était déjà pris). À relier au Worker Cloudflare, puis à déclarer dans `NEXT_PUBLIC_SITE_URL`.
+**Domaine acheté : `maisonlumeance.fr`** (le 2 novembre 2026 ; `lumeance.fr` était déjà pris). Relié au Worker `lumeance` (DNS chez Cloudflare, domaine enregistré chez OVH) ; `NEXT_PUBLIC_SITE_URL=https://maisonlumeance.fr` ; `www` redirigé vers le domaine nu (next.config.ts).
 
 ## Contraintes
 Next.js avec rendu serveur, actions serveur, middleware et routes API : un hébergement statique (GitHub Pages) **ne convient pas**.
