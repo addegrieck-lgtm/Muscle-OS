@@ -7,7 +7,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { VariantProvider } from "@/components/product/VariantContext";
 import { Breadcrumbs } from "@/components/ui/PageHeader";
-import { PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
+import { PRO_DISCOUNT_MIN_LABEL, PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
 import { proUse } from "@/lib/content/restauration";
 import { categoryLabel } from "@/lib/navigation";
 import { getProductBySlug, getProducts, relatedProducts } from "@/lib/services/catalog";
@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: Props) {
                 <span className="mt-1 block">
                   {isOnPromotion(product)
                     ? "Pièce déjà en promotion : la remise professionnelle ne s’y ajoute pas."
-                    : `−${PRO_DISCOUNT_PERCENT} % pour les professionnels, sur devis.`}
+                    : `−${PRO_DISCOUNT_PERCENT} % pour les professionnels dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, sur devis.`}
                 </span>
                 <a href="/restauration" className="mt-1 inline-block underline underline-offset-4">
                   Équiper un établissement

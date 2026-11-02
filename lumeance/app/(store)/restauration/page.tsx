@@ -1,7 +1,7 @@
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { ButtonLink, Eyebrow } from "@/components/ui/Button";
-import { PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
+import { PRO_DISCOUNT_MIN_LABEL, PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
 import { PRO_CONTACT_HREF, PRO_SPACES, proUse } from "@/lib/content/restauration";
 import { getProducts } from "@/lib/services/catalog";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -20,7 +20,7 @@ const SERVICE = [
   },
   {
     title: `−${PRO_DISCOUNT_PERCENT} % pour les professionnels`,
-    text: `Restaurants, bars et hôtels bénéficient de ${PRO_DISCOUNT_PERCENT} % de remise sur le prix des pièces, accordée sur devis. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
+    text: `Restaurants, bars et hôtels bénéficient de ${PRO_DISCOUNT_PERCENT} % de remise sur le prix des pièces dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, accordée sur devis. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
   },
   {
     title: "Une lumière cohérente",
@@ -52,7 +52,8 @@ export default async function RestaurationPage() {
             La lumière fait la moitié de l’ambiance.
           </h1>
           <p data-reveal="fade" className="t-eyebrow mt-6 text-champagne">
-            −{PRO_DISCOUNT_PERCENT} % pour les professionnels, sur devis
+            −{PRO_DISCOUNT_PERCENT} % pour les professionnels dès {PRO_DISCOUNT_MIN_LABEL}, sur
+            devis
           </p>
           <p data-reveal data-reveal-delay="0.2" className="t-lead mt-8 max-w-2xl text-ivoire/75">
             On revient dans une salle autant pour sa lumière que pour sa carte. Nos suspensions,
@@ -119,8 +120,9 @@ export default async function RestaurationPage() {
             ))}
           </div>
           <p className="t-small mt-16 max-w-3xl text-brun/70">
-            Remise professionnelle de {PRO_DISCOUNT_PERCENT} % sur le prix de vente des pièces, hors
-            frais de livraison, non cumulable avec les pièces déjà en promotion
+            Remise professionnelle de {PRO_DISCOUNT_PERCENT} % sur le prix de vente des pièces, dès{" "}
+            {PRO_DISCOUNT_MIN_LABEL} de pièces commandées (pièces en promotion comprises dans ce
+            montant), hors frais de livraison, non cumulable avec les pièces déjà en promotion
             {promoNames.length > 0 ? ` (aujourd’hui : ${promoNames.join(", ")})` : ""}.
           </p>
           <p className="t-small mt-6 max-w-3xl border-l border-champagne pl-4 text-brun/70">

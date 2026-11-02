@@ -1,5 +1,5 @@
 import { ButtonLink, Eyebrow } from "@/components/ui/Button";
-import { PRO_DISCOUNT_PERCENT } from "@/lib/catalog/pro";
+import { PRO_DISCOUNT_MIN_LABEL, PRO_DISCOUNT_PERCENT } from "@/lib/catalog/pro";
 import { PRO_SPACES } from "@/lib/content/restauration";
 
 /** Accueil : mise en avant des pièces pour restaurants, bars et hôtels. */
@@ -16,7 +16,8 @@ export function Professionals() {
             Au-dessus des tables, le long d’un comptoir, dans un hall ou en terrasse : une grande
             partie de nos luminaires trouvent naturellement leur place en restauration et en
             hôtellerie. Nous vous aidons à composer la lumière de votre établissement, avec{" "}
-            {PRO_DISCOUNT_PERCENT} % de remise professionnelle sur devis.
+            {PRO_DISCOUNT_PERCENT} % de remise professionnelle dès {PRO_DISCOUNT_MIN_LABEL} d’achat,
+            sur devis.
           </p>
           <div data-reveal className="mt-10">
             <ButtonLink href="/restauration" variant="outline">

@@ -24,14 +24,26 @@ describe("Restaurants, bars et hôtels", () => {
 });
 
 describe("Remise professionnelle", () => {
+  it("ne s'applique pas sous 500 € de pièces, promotions comprises", async () => {
+    const { proDiscount } = await import("@/lib/catalog/pro");
+    expect(proDiscount([{ total: 49999, onPromotion: false }])).toBe(0);
+    expect(proDiscount([{ total: 50000, onPromotion: false }])).toBe(10000);
+    // 400 € hors promotion + 160 € en promotion = 560 € : remise sur les 400 €.
+    expect(
+      proDiscount([
+        { total: 40000, onPromotion: false },
+        { total: 16000, onPromotion: true },
+      ]),
+    ).toBe(8000);
+  });
   it("retire 20 % hors pièces en promotion", async () => {
     const { proDiscount, isOnPromotion } = await import("@/lib/catalog/pro");
     expect(
       proDiscount([
-        { total: 30000, onPromotion: false },
+        { total: 36000, onPromotion: false },
         { total: 16000, onPromotion: true },
       ]),
-    ).toBe(6000);
+    ).toBe(7200);
     expect(isOnPromotion({ promotion: { buy: 3, free: 1 }, price: 8000 })).toBe(true);
     expect(isOnPromotion({ price: 8000, compareAtPrice: 10000 })).toBe(true);
     expect(isOnPromotion({ price: 8000, compareAtPrice: null })).toBe(false);
