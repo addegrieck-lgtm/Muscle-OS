@@ -6,6 +6,8 @@ import type { AdminRole } from "@/lib/auth/admin";
 
 const ITEMS: { href: string; label: string; roles?: AdminRole[] }[] = [
   { href: "/admin/dashboard", label: "Tableau de bord" },
+  { href: "/admin/stats", label: "Statistiques" },
+  { href: "/admin/seo", label: "Référencement" },
   { href: "/admin/orders", label: "Commandes" },
   { href: "/admin/customers", label: "Clients" },
   { href: "/admin/products", label: "Produits", roles: ["super_admin", "admin"] },

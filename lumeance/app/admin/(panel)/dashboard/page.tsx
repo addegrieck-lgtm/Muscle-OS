@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { Badge, Card, Flash, PageTitle, Stat, Table } from "@/components/admin/ui";
+import { AreaChart, KpiCard, Rise, ScoreRing } from "@/components/admin/motion";
+import { Badge, Card, Flash, PageTitle, Table } from "@/components/admin/ui";
+import { auditSite } from "@/lib/seo/audit";
+import { sitePages } from "@/lib/seo/site-pages";
+import { getCategories, getProducts } from "@/lib/services/catalog";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatPrice } from "@/lib/money";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/services/orders";
@@ -27,7 +31,14 @@ export default async function Dashboard({
   await requireAdmin();
   const sp = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const [{ data: stats, error }, { data: latest }, { data: low }] = await Promise.all([
+  const [
+    { data: stats, error },
+    { data: latest },
+    { data: low },
+    { data: traffic },
+    products,
+    categories,
+  ] = await Promise.all([
     supabase.rpc("admin_dashboard_stats"),
     supabase
       .from("orders")
@@ -42,7 +53,18 @@ export default async function Dashboard({
       .lte("stock_quantity", 2)
       .order("stock_quantity")
       .limit(8),
+    supabase.rpc("admin_traffic_stats", { p_days: 7 }),
+    getProducts(),
+    getCategories(),
   ]);
+  const seo = auditSite(sitePages(products, categories));
+  const t = traffic as {
+    views: number;
+    visitors: number;
+    prev_views: number;
+    prev_visitors: number;
+    daily: { day: string; views: number; visitors: number }[];
+  } | null;
   const s = (stats ?? {}) as Stats;
   // Panier moyen calculé uniquement sur les commandes au paiement confirmé.
   const avg = s.paid_orders ? Math.round(Number(s.revenue_collected) / s.paid_orders) : 0;
@@ -59,23 +81,77 @@ export default async function Dashboard({
               : undefined
         }
       />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Commandes" value={s.orders_total ?? 0} hint="Hors brouillons" />
-        <Stat label="En attente de paiement" value={s.orders_pending ?? 0} />
-        <Stat label="En préparation" value={s.orders_preparing ?? 0} />
-        <Stat label="Expédiées" value={s.orders_shipped ?? 0} />
-        <Stat
+      <div className="grid gap-6 xl:grid-cols-[1fr_auto]">
+        <Rise>
+          <Card
+            title="Fréquentation — 7 derniers jours"
+            actions={
+              <Link href="/admin/stats" className="text-xs underline underline-offset-4">
+                Statistiques détaillées
+              </Link>
+            }
+          >
+            {t ? (
+              <>
+                <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                  <KpiCard label="Pages vues" value={t.views} previous={t.prev_views} />
+                  <KpiCard
+                    label="Visiteurs"
+                    value={t.visitors}
+                    previous={t.prev_visitors}
+                    delay={120}
+                  />
+                </div>
+                <AreaChart
+                  points={t.daily.map((d) => ({
+                    label: new Date(`${d.day}T12:00:00`).toLocaleDateString("fr-FR", {
+                      weekday: "short",
+                      day: "numeric",
+                    }),
+                    value: d.views,
+                    secondary: d.visitors,
+                  }))}
+                />
+              </>
+            ) : (
+              <p className="text-sm text-brun/60">
+                Mesure d’audience à activer : collez la migration{" "}
+                <code>20261105000100_page_views.sql</code> dans Supabase.
+              </p>
+            )}
+          </Card>
+        </Rise>
+        <Rise delay={150}>
+          <Card title="Référencement" className="flex h-full flex-col items-center text-center">
+            <ScoreRing score={seo.score} size={150} label="Score SEO" />
+            <p className="mt-3 text-sm text-brun/65">
+              {seo.errors} erreur(s) · {seo.issues.length - seo.errors} amélioration(s)
+            </p>
+            <Link href="/admin/seo" className="mt-3 text-xs underline underline-offset-4">
+              Voir l’audit
+            </Link>
+          </Card>
+        </Rise>
+      </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard label="Commandes (hors brouillons)" value={Number(s.orders_total ?? 0)} />
+        <KpiCard label="En attente de paiement" value={Number(s.orders_pending ?? 0)} delay={80} />
+        <KpiCard label="En préparation" value={Number(s.orders_preparing ?? 0)} delay={160} />
+        <KpiCard label="Expédiées" value={Number(s.orders_shipped ?? 0)} delay={240} />
+        <KpiCard
           label="Chiffre d’affaires encaissé"
-          value={formatPrice(Number(s.revenue_collected ?? 0))}
-          hint="Paiements confirmés uniquement, remboursements déduits"
+          value={Number(s.revenue_collected ?? 0)}
+          format="euro"
+          delay={320}
         />
-        <Stat label="Panier moyen" value={formatPrice(avg)} hint="Sur les commandes payées" />
-        <Stat
+        <KpiCard label="Panier moyen (commandes payées)" value={avg} format="euro" delay={400} />
+        <KpiCard
           label="Produits disponibles"
-          value={s.products_available ?? 0}
-          hint="Publiés et en stock"
+          value={Number(s.products_available ?? 0)}
+          delay={480}
         />
-        <Stat label="Stocks faibles" value={s.low_stock ?? 0} hint="≤ 2 unités" />
+        <KpiCard label="Stocks faibles (≤ 2)" value={Number(s.low_stock ?? 0)} delay={560} />
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-3">
