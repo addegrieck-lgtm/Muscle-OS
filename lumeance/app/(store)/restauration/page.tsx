@@ -1,6 +1,7 @@
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { ButtonLink, Eyebrow } from "@/components/ui/Button";
+import { PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
 import { PRO_CONTACT_HREF, PRO_SPACES, proUse } from "@/lib/content/restauration";
 import { getProducts } from "@/lib/services/catalog";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -18,8 +19,8 @@ const SERVICE = [
     text: "Envoyez-nous le plan, quelques photos et l’ambiance recherchée : nous vous proposons les pièces, les formats et le nombre de points lumineux adaptés.",
   },
   {
-    title: "Un devis pour plusieurs pièces",
-    text: "Pour équiper une salle entière, nous établissons un devis et vérifions auprès du fabricant les quantités et les délais avant de nous engager.",
+    title: `−${PRO_DISCOUNT_PERCENT} % pour les professionnels`,
+    text: `Restaurants, bars et hôtels bénéficient de ${PRO_DISCOUNT_PERCENT} % de remise sur le prix des pièces, accordée sur devis. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
   },
   {
     title: "Une lumière cohérente",
@@ -29,6 +30,7 @@ const SERVICE = [
 
 export default async function RestaurationPage() {
   const products = (await getProducts()).filter((p) => proUse(p.slug));
+  const promoNames = products.filter(isOnPromotion).map((p) => p.name);
   return (
     <>
       <section className="grain relative isolate flex min-h-[80svh] items-end overflow-hidden bg-noir pb-20 text-ivoire md:items-center md:pb-0">
@@ -49,6 +51,9 @@ export default async function RestaurationPage() {
           <h1 data-reveal className="t-h1 mt-6 max-w-3xl">
             La lumière fait la moitié de l’ambiance.
           </h1>
+          <p data-reveal="fade" className="t-eyebrow mt-6 text-champagne">
+            −{PRO_DISCOUNT_PERCENT} % pour les professionnels, sur devis
+          </p>
           <p data-reveal data-reveal-delay="0.2" className="t-lead mt-8 max-w-2xl text-ivoire/75">
             On revient dans une salle autant pour sa lumière que pour sa carte. Nos suspensions,
             lustres et appliques composent un décor que l’on remarque, au-dessus des tables, du
@@ -113,7 +118,12 @@ export default async function RestaurationPage() {
               </div>
             ))}
           </div>
-          <p className="t-small mt-16 max-w-3xl border-l border-champagne pl-4 text-brun/70">
+          <p className="t-small mt-16 max-w-3xl text-brun/70">
+            Remise professionnelle de {PRO_DISCOUNT_PERCENT} % sur le prix de vente des pièces, hors
+            frais de livraison, non cumulable avec les pièces déjà en promotion
+            {promoNames.length > 0 ? ` (aujourd’hui : ${promoNames.join(", ")})` : ""}.
+          </p>
+          <p className="t-small mt-6 max-w-3xl border-l border-champagne pl-4 text-brun/70">
             Dans un établissement recevant du public, l’installation doit respecter les règles de
             sécurité qui s’appliquent à votre établissement. Faites valider le choix et la pose des
             luminaires par votre électricien ou votre bureau de contrôle.

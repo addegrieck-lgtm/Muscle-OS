@@ -22,3 +22,24 @@ describe("Restaurants, bars et hôtels", () => {
       ).toBe(true);
   });
 });
+
+describe("Remise professionnelle", () => {
+  it("retire 20 % hors pièces en promotion", async () => {
+    const { proDiscount, isOnPromotion } = await import("@/lib/catalog/pro");
+    expect(
+      proDiscount([
+        { total: 30000, onPromotion: false },
+        { total: 16000, onPromotion: true },
+      ]),
+    ).toBe(6000);
+    expect(isOnPromotion({ promotion: { buy: 3, free: 1 }, price: 8000 })).toBe(true);
+    expect(isOnPromotion({ price: 8000, compareAtPrice: 10000 })).toBe(true);
+    expect(isOnPromotion({ price: 8000, compareAtPrice: null })).toBe(false);
+  });
+  it("exclut Volute et Aiguille, en promotion", () => {
+    return import("@/lib/catalog/pro").then(({ isOnPromotion }) => {
+      const promo = CATALOG_PRODUCTS.filter(isOnPromotion).map((p) => p.slug);
+      expect(promo).toEqual(expect.arrayContaining(["volute", "aiguille"]));
+    });
+  });
+});
