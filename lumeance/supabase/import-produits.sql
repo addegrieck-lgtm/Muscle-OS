@@ -692,7 +692,7 @@ Les anneaux descendent en spirale sous un pavillon rond noir, de trois anneaux a
 Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
   22000, null,
   (select id from public.categories where slug = 'lustres'),
-  'draft', false, '{}'::jsonb, null,
+  'published', false, '{}'::jsonb, null,
   array['Aluminium', 'Acrylique', 'Acier inoxydable']::text[], array['Noir et or']::text[], '[{"label":"Sources lumineuses","value":"LED intégrées"},{"label":"Tension d’entrée","value":"90–260 V"},{"label":"Commande","value":"Télécommande fournie : couleur de lumière (chaude, neutre, blanche) et intensité"},{"label":"Anneaux","value":"Ø17 cm, acrylique fumé, boule d’attache dorée"},{"label":"Versions","value":"De 3 à 48 anneaux, pavillon rond Ø30 à Ø80 cm"},{"label":"Suspension","value":"Câbles réglables : de 120 à 800 cm selon la version"},{"label":"Finition","value":"Noir et or"},{"label":"Matières","value":"Acier inoxydable, aluminium, acrylique"},{"label":"Usages","value":"Escalier, duplex, mezzanine, séjour, restaurant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.', 5,
   'Halo — lustre LED anneaux en cascade pour escalier et double hauteur', 'Lustre design : anneaux d’acrylique fumé cerclés de LED, en spirale de 3 à 48 anneaux sous un pavillon rond noir. Télécommande fournie. Pour escalier, duplex, mezzanine et grands volumes.', '[]'::jsonb,

@@ -1347,7 +1347,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
