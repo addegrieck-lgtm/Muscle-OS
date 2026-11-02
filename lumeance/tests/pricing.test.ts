@@ -17,7 +17,7 @@ describe("recalcul serveur du panier", () => {
     expect(q.lines[0]!.unitPrice).toBe(base.price);
     expect(q.subtotal).toBe(base.price * 2);
     expect(q.total).toBe(base.price * 2);
-    expect(q.shipping).toBeNull();
+    expect(q.shipping).toBe(0); // livraison offerte (aucun forfait fixé)
   });
   it("applique l'ajustement de variante", () => {
     const v = withVariants.variants[1]!;

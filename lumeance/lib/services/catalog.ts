@@ -1,3 +1,4 @@
+import { roomById } from "@/lib/content/home";
 import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -42,6 +43,8 @@ export interface ProductQuery {
   material?: string;
   maxPrice?: number;
   sort?: "featured" | "price-asc" | "price-desc" | "name";
+  /** Pièce de la maison (lib/content/home.ts, ROOMS). */
+  room?: string;
 }
 
 export const getProducts = cache(async (): Promise<Product[]> => {
@@ -61,6 +64,8 @@ export const getProducts = cache(async (): Promise<Product[]> => {
 export function filterProducts(products: Product[], q: ProductQuery): Product[] {
   let list = products;
   if (q.category) list = list.filter((p) => p.categorySlug === q.category);
+  const room = roomById(q.room);
+  if (room) list = list.filter((p) => room.slugs.includes(p.slug));
   if (q.material) {
     const m = q.material.toLowerCase();
     list = list.filter((p) => p.materials.some((x) => x.toLowerCase().includes(m)));

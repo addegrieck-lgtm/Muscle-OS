@@ -151,7 +151,9 @@ export function priceCart(
   const discount = discounts.reduce((s, d) => s + d.amount, 0);
   const net = subtotal - discount;
 
-  let shippingAmount: number | null = null;
+  // Livraison standard offerte tant qu'aucun forfait n'est fixé dans les paramètres (choix du
+  // propriétaire : toutes les pièces sont livrées gratuitement).
+  let shippingAmount: number | null = 0;
   if (shipping.standardAmount > 0) {
     shippingAmount =
       shipping.freeThreshold > 0 && net >= shipping.freeThreshold ? 0 : shipping.standardAmount;
