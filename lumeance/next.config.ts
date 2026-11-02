@@ -57,6 +57,17 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" },
     ],
   },
+  // Domaine canonique : www.maisonlumeance.fr → maisonlumeance.fr (301).
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.maisonlumeance.fr" }],
+        destination: "https://maisonlumeance.fr/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

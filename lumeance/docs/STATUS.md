@@ -38,7 +38,8 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - Site **non indexable** tant que `NEXT_PUBLIC_INDEXABLE=1` n’est pas posé.
 
 ## Phase 8 — Préparation commerciale ⬜
-- [ ] Vérifier la disponibilité du nom (INPI) et du domaine lumeance.fr — aucun achat effectué.
+- [x] Domaine maisonlumeance.fr (OVH) relié au Worker Cloudflare ; www → domaine nu.
+- [ ] Vérifier la marque à l’INPI / EUIPO (risque de confusion avec « Lumiance », Havells Sylvania, classe 11).
 - [x] Projet Supabase créé ; catalogue importé et géré dans l'administration.
 - [x] Hébergement : site publié sur Cloudflare Workers via OpenNext ([HEBERGEMENT.md](HEBERGEMENT.md)).
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.

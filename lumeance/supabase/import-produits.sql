@@ -904,6 +904,93 @@ select (select id from public.products where reference = 'LUM-LUS-007'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-LUS-007') and storage_path = '/products/ondee/ambiance-escalier.webp');
 
+-- ════ Perle (LUM-LUS-008) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('perle', 'Perle', 'LUM-LUS-008', 'Des gouttes de cristal à bulles, coiffées d’un cône de métal, qui tombent en pluie lumineuse sous un pavillon.', 'Perle suspend des gouttes de cristal de 30 cm, chacune coiffée d’un fin cône d’aluminium. Éclairées de l’intérieur, les bulles prises dans le cristal scintillent comme des perles d’eau au matin.
+
+D’une seule goutte au-dessus d’une table de chevet à 49 gouttes en cascade pour une double hauteur : pavillon rond, en spirale ou linéaire, de 10 cm à 1 m. Finition dorée ou chromée ; blanc chaud ou blanc froid. Fils réglables.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  6000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'draft', false, '{}'::jsonb, null,
+  array['Aluminium', 'Cristal', 'Acier inoxydable']::text[], array['Doré', 'Chromé']::text[], '[{"label":"Type","value":"Lustre LED, gouttes de cristal suspendues"},{"label":"Sources lumineuses","value":"LED intégrée, fournie"},{"label":"Tension","value":"AC 110–240 V"},{"label":"Gouttes","value":"30 cm : cône d’aluminium et goutte de cristal à bulles"},{"label":"Formes","value":"Ronde (1 à 49 gouttes), spirale (18 à 36) ou linéaire (3 ou 5)"},{"label":"Suspension","value":"Fils réglables, de 120 à 350 cm selon la version"},{"label":"Matières","value":"Aluminium, cristal, acier inoxydable"},{"label":"Finitions","value":"Doré ou chromé"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"},{"label":"Garantie","value":"3 ans, selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond, assemblage requis. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée, en particulier pour les grandes versions. La hauteur se règle par les fils.', 5,
+  'Perle — lustre gouttes de cristal, doré ou chromé', 'Lustre Perle : gouttes de cristal à bulles et cônes d’aluminium, de 1 à 49 gouttes, rond, en spirale ou linéaire. Doré ou chromé, blanc chaud ou froid.', '[{"id":"finition","label":"Finition","values":[{"id":"dore","label":"Doré"},{"id":"chrome","label":"Chromé"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  '{"group":"Forme","variant":"Gouttes"}'::jsonb, 'cascade',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '1 goutte', 'LUM-LUS-008-G1', 'Ronde', 0,
+  5, true, 'Pavillon Ø10 cm · câble 150 cm · 3 W · gouttes de 30 cm', '/products/perle/rendu-g1-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-g1-dore-chaud.webp","dore-froid":"/products/perle/rendu-g1-dore-froid.webp","chrome-chaud":"/products/perle/rendu-g1-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-g1-chrome-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '2 gouttes', 'LUM-LUS-008-G2', 'Ronde', 12000,
+  5, true, 'Pavillon Ø15 cm · hauteur 120 cm, fils réglables jusqu’à 120 cm · 10 W · gouttes de 30 cm', '/products/perle/rendu-g2-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-g2-dore-chaud.webp","dore-froid":"/products/perle/rendu-g2-dore-froid.webp","chrome-chaud":"/products/perle/rendu-g2-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-g2-chrome-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '8 gouttes', 'LUM-LUS-008-G8', 'Ronde', 35000,
+  5, true, 'Pavillon Ø35 cm · hauteur 200 cm, fils réglables jusqu’à 200 cm · 40 W · gouttes de 30 cm', '/products/perle/rendu-g8-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-g8-dore-chaud.webp","dore-froid":"/products/perle/rendu-g8-dore-froid.webp","chrome-chaud":"/products/perle/rendu-g8-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-g8-chrome-froid.webp"}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '18 gouttes', 'LUM-LUS-008-G18', 'Ronde', 75000,
+  5, true, 'Pavillon Ø50 cm · hauteur 350 cm, fils réglables jusqu’à 200 cm · 90 W · gouttes de 30 cm', '/products/perle/rendu-g18-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-g18-dore-chaud.webp","dore-froid":"/products/perle/rendu-g18-dore-froid.webp","chrome-chaud":"/products/perle/rendu-g18-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-g18-chrome-froid.webp"}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '28 gouttes', 'LUM-LUS-008-G28', 'Ronde', 102000,
+  5, true, 'Pavillon Ø60 cm · hauteur 450 cm, fils réglables jusqu’à 250 cm · 140 W · gouttes de 30 cm', '/products/perle/rendu-g28-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-g28-dore-chaud.webp","dore-froid":"/products/perle/rendu-g28-dore-froid.webp","chrome-chaud":"/products/perle/rendu-g28-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-g28-chrome-froid.webp"}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '49 gouttes', 'LUM-LUS-008-A49', 'Ronde', 210000,
+  5, true, 'Pavillon Ø100 cm · hauteur 650 cm, fils réglables jusqu’à 350 cm · 245 W · gouttes de 30 cm', '/products/perle/rendu-a49-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-a49-dore-chaud.webp","dore-froid":"/products/perle/rendu-a49-dore-froid.webp","chrome-chaud":"/products/perle/rendu-a49-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-a49-chrome-froid.webp"}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '18 gouttes', 'LUM-LUS-008-S18', 'Spirale', 75000,
+  5, true, 'Pavillon Ø50 cm · hauteur 200 cm, fils réglables jusqu’à 200 cm · 90 W · gouttes de 30 cm', '/products/perle/rendu-s18-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-s18-dore-chaud.webp","dore-froid":"/products/perle/rendu-s18-dore-froid.webp","chrome-chaud":"/products/perle/rendu-s18-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-s18-chrome-froid.webp"}'::jsonb, 6)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '28 gouttes', 'LUM-LUS-008-S28', 'Spirale', 102000,
+  5, true, 'Pavillon Ø60 cm · hauteur 450 cm, fils réglables jusqu’à 250 cm · 140 W · gouttes de 30 cm', '/products/perle/rendu-s28-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-s28-dore-chaud.webp","dore-froid":"/products/perle/rendu-s28-dore-froid.webp","chrome-chaud":"/products/perle/rendu-s28-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-s28-chrome-froid.webp"}'::jsonb, 7)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '36 gouttes', 'LUM-LUS-008-S36', 'Spirale', 147000,
+  5, true, 'Pavillon Ø80 cm · hauteur 500 cm, fils réglables jusqu’à 300 cm · 180 W · gouttes de 30 cm', '/products/perle/rendu-s36-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-s36-dore-chaud.webp","dore-froid":"/products/perle/rendu-s36-dore-froid.webp","chrome-chaud":"/products/perle/rendu-s36-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-s36-chrome-froid.webp"}'::jsonb, 8)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '3 gouttes', 'LUM-LUS-008-L3', 'Linéaire', 14000,
+  5, true, 'Pavillon 60 × 12 cm · hauteur 120 cm, fils réglables jusqu’à 120 cm · 15 W · gouttes de 30 cm', '/products/perle/rendu-l3-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-l3-dore-chaud.webp","dore-froid":"/products/perle/rendu-l3-dore-froid.webp","chrome-chaud":"/products/perle/rendu-l3-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-l3-chrome-froid.webp"}'::jsonb, 9)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-008'), '5 gouttes', 'LUM-LUS-008-L5', 'Linéaire', 29000,
+  5, true, 'Pavillon 100 × 12 cm · hauteur 200 cm, fils réglables jusqu’à 200 cm · gouttes de 30 cm', '/products/perle/rendu-l5-dore-chaud.webp', '{"dore-chaud":"/products/perle/rendu-l5-dore-chaud.webp","dore-froid":"/products/perle/rendu-l5-dore-froid.webp","chrome-chaud":"/products/perle/rendu-l5-chrome-chaud.webp","chrome-froid":"/products/perle/rendu-l5-chrome-froid.webp"}'::jsonb, 10)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-008'), '/products/perle/ambiance-salon.webp', 'Lustre Perle doré allumé au-dessus d’un canapé, grappe de gouttes de cristal à bulles coiffées de cônes dorés', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-008') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-008') and storage_path = '/products/perle/ambiance-salon.webp');
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-008'), '/products/perle/ambiance-double-hauteur.webp', 'Lustre Perle doré dans un salon en double hauteur, cascade de gouttes de cristal sous un grand pavillon rond', 'Photographie d’ambiance du fabricant', 1,
+  false and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-008') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-008') and storage_path = '/products/perle/ambiance-double-hauteur.webp');
+
 -- ════ Méandre (LUM-SUS-004) ════
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
