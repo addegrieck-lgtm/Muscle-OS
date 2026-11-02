@@ -1022,6 +1022,52 @@ select (select id from public.products where reference = 'LUM-SUS-004'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-SUS-004') and storage_path = '/products/meandre/ambiance-salle-a-manger.webp');
 
+-- ════ Lucie (LUM-LUS-009) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('lucie', 'Lucie', 'LUM-LUS-009', 'Une pluie de cristal K9 taillé qui s’enroule en spirale sous un pavillon doré poli miroir.', 'Lucie suspend des centaines de boules de cristal K9 taillées à facettes et de fines perles en losange, enfilées sur des fils presque invisibles. Elles s’enroulent en spirale et s’affinent vers le bas ; sous le pavillon doré poli miroir, les spots allument chaque facette et projettent sur les murs et le plafond une constellation de reflets.
+
+Pensée pour les cages d’escalier, les duplex et les halls en double hauteur, elle se décline en quatre tailles, de 1,60 m à 3,50 m de hauteur. Lumière blanc chaud ou blanc froid, à fort rendu des couleurs.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  161000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'published', false, '{}'::jsonb, null,
+  array['Cristal K9', 'Acier inoxydable']::text[], array['Doré poli miroir']::text[], '[{"label":"Sources lumineuses","value":"Spots LED intégrés, 6 W chacun"},{"label":"Tension d’entrée","value":"90–265 V"},{"label":"Cristal","value":"K9 taillé à facettes, boules et perles en losange"},{"label":"Pavillon","value":"Acier inoxydable poli miroir doré"},{"label":"Versions","value":"Ø50 × H160, Ø60 × H210, Ø80 × H280 ou Ø100 × H350 cm"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"},{"label":"Rendu des couleurs","value":"IRC ≥ 98, sans scintillement, selon le fabricant"},{"label":"Surface conseillée","value":"De 10 à 25 m² selon la version, selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. Les fils de cristal s’accrochent un à un au pavillon.', 5,
+  'Lucie — lustre cristal K9 en spirale', 'Lustre Lucie : boules de cristal K9 taillé en spirale sous un pavillon doré poli miroir, de 1,60 à 3,50 m. Pour escalier et double hauteur.', '[{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
+  null, 'cascade',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-009'), 'Ø50 cm · H 160 cm', 'LUM-LUS-009-D50', null, 0,
+  5, true, 'Pavillon Ø50 cm · hauteur 160 cm · 7 spots LED, 42 W · pièce de 10 à 15 m²', '/products/lucie/rendu-d50-chaud.webp', '{"chaud":"/products/lucie/rendu-d50-chaud.webp","froid":"/products/lucie/rendu-d50-froid.webp"}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-009'), 'Ø60 cm · H 210 cm', 'LUM-LUS-009-D60', null, 69000,
+  5, true, 'Pavillon Ø60 cm · hauteur 210 cm · 10 spots LED, 60 W · pièce de 12 à 18 m²', '/products/lucie/rendu-d60-chaud.webp', '{"chaud":"/products/lucie/rendu-d60-chaud.webp","froid":"/products/lucie/rendu-d60-froid.webp"}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-009'), 'Ø80 cm · H 280 cm', 'LUM-LUS-009-D80', null, 161000,
+  5, true, 'Pavillon Ø80 cm · hauteur 280 cm · 15 spots LED, 90 W · pièce de 15 à 20 m²', '/products/lucie/rendu-d80-chaud.webp', '{"chaud":"/products/lucie/rendu-d80-chaud.webp","froid":"/products/lucie/rendu-d80-froid.webp"}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-009'), 'Ø100 cm · H 350 cm', 'LUM-LUS-009-D100', null, 239000,
+  5, true, 'Pavillon Ø100 cm · hauteur 350 cm · 20 spots LED, 120 W · pièce de 20 à 25 m²', '/products/lucie/rendu-d100-chaud.webp', '{"chaud":"/products/lucie/rendu-d100-chaud.webp","froid":"/products/lucie/rendu-d100-froid.webp"}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-009'), '/products/lucie/ambiance-escalier.webp', 'Lustre Lucie allumé dans une cage d’escalier, cascade de boules de cristal en spirale sous un pavillon doré, reflets lumineux sur les murs', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-009') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-009') and storage_path = '/products/lucie/ambiance-escalier.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.
