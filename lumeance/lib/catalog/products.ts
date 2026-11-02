@@ -497,6 +497,39 @@ const HALO_VARIANTS: ProductVariant[] = HALO_VERSIONS.map(([n, canopy, height, c
   imageUrl: `/products/halo/rendu-a${n}.webp`,
 }));
 
+// ── Ginkgo (LUM-LUS-006) ─────────────────────────────────────────────────────
+// Fiches fournisseur relevées le 02/11/2026 : feuilles de ginkgo en céramique, branches en acier
+// inoxydable brossé plaqué or, ampoules LED E14 fournies, 90–260 V, 15–30 m², garantie 3 ans,
+// intensité non réglable. Promotion −18 % jusqu'au 18/11/2026 ; prix de vente sur le « prix le
+// plus bas des 30 jours avant réduction » (égal au prix promotionnel + économie affichée). Prix
+// identique en lumière chaude ou froide. Nombre d'ampoules non communiqué.
+// Prix de vente : écart régulier demandé par le propriétaire (10 € par cm de longueur, de 670 € à
+// 1 370 €), au lieu de salePrice() qui donnait 670 / 830 / 920 / 1 370 €. Coefficient sur le prix
+// d'achat : ×1,82 / ×1,89 / ×1,76 / ×1,50.
+// [code, longueur, largeur, hauteur (cm), prix fournisseur hors promotion, prix de vente (centimes)]
+const GINKGO_VERSIONS: [string, number, number, number, number, number][] = [
+  ["l80", 80, 40, 30, 36815, 67000],
+  ["l100", 100, 45, 40, 46047, 87000],
+  ["l120", 120, 55, 50, 60815, 107000],
+  ["l150", 150, 55, 50, 91204, 137000],
+];
+const GINKGO_BASE_PRICE = Math.min(...GINKGO_VERSIONS.map((v) => v[5]));
+const GINKGO_VARIANTS: ProductVariant[] = GINKGO_VERSIONS.map(([code, l, w, h, , price]) => ({
+  id: `ginkgo-${code}`,
+  name: `L ${l} cm`,
+  sku: `LUM-LUS-006-${code.toUpperCase()}`,
+  finish: null,
+  priceAdjustment: price - GINKGO_BASE_PRICE,
+  stockQuantity: 5,
+  active: true,
+  details: `${l} × ${w} × ${h} cm (L × l × H) · ampoules LED E14 fournies`,
+  imageUrl: `/products/ginkgo/rendu-${code}-chaud.webp`,
+  // Visualisations 3D selon la couleur de lumière.
+  imageUrls: Object.fromEntries(
+    ["chaud", "froid"].map((t) => [t, `/products/ginkgo/rendu-${code}-${t}.webp`]),
+  ),
+}));
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1386,6 +1419,73 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre design : anneaux d’acrylique fumé cerclés de LED, en spirale de 3 à 48 anneaux sous un pavillon rond noir. Télécommande fournie. Pour escalier, duplex, mezzanine et grands volumes.",
     art: "halo",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-006",
+    slug: "ginkgo",
+    name: "Ginkgo",
+    reference: "LUM-LUS-006",
+    shortDescription:
+      "Une ramure dorée chargée de feuilles de ginkgo en céramique blanche, où la lumière se niche.",
+    description: [
+      "Ginkgo étire au-dessus de la table une ramure de métal doré brossé, couverte de feuilles de ginkgo en céramique blanche mate. Les ampoules se cachent dans le feuillage : allumée, la pièce rayonne doucement à travers les feuilles, comme une branche saisie dans la lumière du soir.",
+      "Sa forme allongée accompagne une table de salle à manger, un îlot de cuisine ou une console, de 80 à 150 cm de long. Lumière blanc chaud ou blanc froid.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: GINKGO_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "published",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Céramique", "Acier inoxydable"],
+    finishes: ["Doré brossé"],
+    specifications: [
+      { label: "Sources lumineuses", value: "Ampoules LED E14, fournies" },
+      { label: "Tension d’entrée", value: "90–260 V" },
+      { label: "Feuilles", value: "Céramique blanche mate" },
+      { label: "Structure", value: "Acier inoxydable brossé, plaqué or" },
+      {
+        label: "Dimensions (L × l × H)",
+        value: "80 × 40 × 30, 100 × 45 × 40, 120 × 55 × 50 ou 150 × 55 × 50 cm",
+      },
+      { label: "Suspension", value: "Câbles fins réglables" },
+      { label: "Couleur de lumière", value: "Blanc chaud ou blanc froid" },
+      { label: "Surface conseillée", value: "15 à 30 m², selon le fabricant" },
+      { label: "Garantie", value: "3 ans, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "ginkgo-1",
+        url: "/products/ginkgo/ambiance-cuisine.webp",
+        alt: "Lustre Ginkgo allumé au-dessus d’un îlot de cuisine sombre, ramure dorée couverte de feuilles de ginkgo en céramique blanche",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: GINKGO_VARIANTS,
+    options: [
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Ginkgo — lustre feuilles de céramique blanche sur ramure dorée",
+    seoDescription:
+      "Lustre design allongé : feuilles de ginkgo en céramique blanche sur une ramure en acier doré brossé, ampoules LED fournies. De 80 à 150 cm, pour table de salle à manger et îlot de cuisine.",
+    art: "organic",
     isDemo: false,
   },
 ];
