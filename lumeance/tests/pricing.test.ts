@@ -171,6 +171,21 @@ describe("offre par lot (3 achetées, la 4ᵉ offerte)", () => {
     expect(q.discount).toBe(16000);
     expect(q.total).toBe(9 * 8000 - 16000 + base.price);
   });
+  it("applique une remise en pourcentage sur le 2ᵉ exemplaire, le moins cher", () => {
+    const half = { ...promo, id: "half", promotion: { buy: 1, free: 1, percent: 50 } };
+    const q = priceCart(
+      [
+        { productId: "half", variantId: "grand", quantity: 2 },
+        { productId: "half", variantId: "petit", quantity: 1 },
+      ],
+      [...catalog, half],
+      noShipping,
+    );
+    // 3 exemplaires : une seule paire, le moins cher (8 000) à −50 %.
+    expect(q.discount).toBe(4000);
+    expect(q.discounts[0]!.label).toMatch(/1 achetée, la 2ᵉ à −50 %/);
+    expect(q.total).toBe(2 * 10000 + 8000 - 4000);
+  });
   it("calcule la livraison offerte sur le montant après remise", () => {
     const q = priceCart(
       [{ productId: "promo", variantId: "petit", quantity: 4 }],

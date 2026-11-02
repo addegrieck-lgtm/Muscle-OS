@@ -154,7 +154,13 @@ export function mapProduct(row: ProductRow, imageUrl: (path: string) => string):
     ...(Array.isArray(row.options) && row.options.length ? { options: row.options } : {}),
     ...(row.option_labels ? { optionLabels: row.option_labels } : {}),
     ...(isValidPromotion(row.promotion)
-      ? { promotion: { buy: row.promotion.buy, free: row.promotion.free } }
+      ? {
+          promotion: {
+            buy: row.promotion.buy,
+            free: row.promotion.free,
+            ...(row.promotion.percent ? { percent: row.promotion.percent } : {}),
+          },
+        }
       : {}),
     isDemo: false,
   };

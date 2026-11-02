@@ -55,6 +55,25 @@ alter table public.products
     )
   );
 
+-- LUMÉANCE — offre par lot avec remise en pourcentage (« 1 achetée, la 2ᵉ à −50 % »).
+-- Idempotent : peut être rejoué sans risque.
+-- { "buy": 1, "free": 1, "percent": 50 } : pour 1 exemplaire acheté, le 2ᵉ (le moins cher) à
+-- −50 %. Sans « percent », les exemplaires sont offerts (100 %).
+alter table public.products drop constraint if exists products_promotion_shape;
+alter table public.products
+  add constraint products_promotion_shape check (
+    promotion is null or (
+      jsonb_typeof(promotion -> 'buy') = 'number' and jsonb_typeof(promotion -> 'free') = 'number'
+      and (promotion ->> 'buy')::int between 1 and 20
+      and (promotion ->> 'free')::int between 1 and 20
+      and (
+        promotion -> 'percent' is null or jsonb_typeof(promotion -> 'percent') = 'null'
+        or (jsonb_typeof(promotion -> 'percent') = 'number'
+            and (promotion ->> 'percent')::int between 1 and 100)
+      )
+    )
+  );
+
 -- ════ Céleste (LUM-LUS-001) ════
 insert into public.products (slug, name, reference, short_description, description, price,
   compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
@@ -647,7 +666,7 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   null, 'Fixation murale. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.', 5,
   'Aiguille — applique murale LED minimaliste, tige et disque lumineux, noire ou dorée', 'Applique murale LED au dessin graphique : tige de 21 cm, disque lumineux, câble jusqu’à une rosace ronde. Noire ou dorée, lumière chaude, naturelle ou froide. Tête de lit, bureau, couloir.', '[{"id":"finition","label":"Finition","values":[{"id":"noir","label":"Noir"},{"id":"dore","label":"Doré"}]},{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"neutre","label":"Blanc naturel"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
   null, 'sconce',
-  null)
+  '{"buy":1,"free":1,"percent":50}'::jsonb)
 on conflict (reference) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
