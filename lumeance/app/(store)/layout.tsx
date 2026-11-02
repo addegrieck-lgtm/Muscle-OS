@@ -4,6 +4,7 @@ import { DemoBanner } from "@/components/layout/DemoBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MotionRoot } from "@/components/motion/MotionRoot";
+import { PageViewBeacon } from "@/components/layout/PageViewBeacon";
 import { isDemoCatalog } from "@/lib/services/catalog";
 import { paymentsEnabled } from "@/lib/env";
 import { organizationJsonLd, jsonLdScript } from "@/lib/seo/jsonld";
@@ -34,6 +35,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <Footer />
       <CookieConsent />
       <MotionRoot />
+      <PageViewBeacon />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
