@@ -3,7 +3,7 @@
 <script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
 </head><body>
 <script type="module">
-// Visualisation de Rosée (LUM-LUS-008) — modèle : rosee-model.js.
+// Visualisation de Perle (LUM-LUS-008) — modèle : perle-model.js.
 // Paramètres : layout (single | line | round | free | spiral | rings), n (gouttes),
 // canopy (Ø du pavillon, m) ou rect (« 0.6x0.12 »), finish (dore | chrome), temp (chaud | froid).
 import * as THREE from "three";
@@ -12,7 +12,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { buildRosee } from "/scripts/render/rosee-model.js";
+import { buildPerle } from "/scripts/render/perle-model.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { buildRoom } from "/scripts/render/room.js";
 
@@ -56,7 +56,7 @@ buildRoom(scene, { rand, temp: ROOM_TEMP, theme: "salon", wallZ: -2.6 });
 const keyL = new THREE.DirectionalLight({ chaud: 0xffe2c0, froid: 0xf2f5ff }[ROOM_TEMP], 0.28); keyL.position.set(2, -1, 3); scene.add(keyL);
 
 // ── Luminaire : gouttes sous le pavillon (fils raccourcis pour le cadrage, réglables) ──
-const { minY, width } = buildRosee({ THREE, scene, rand, layout: LAYOUT, n: N, canopy: CANOPY, rect: RECT, METAL, LIGHT, GLOW, topY: -0.35 });
+const { minY, width } = buildPerle({ THREE, scene, rand, layout: LAYOUT, n: N, canopy: CANOPY, rect: RECT, METAL, LIGHT, GLOW, topY: -0.35 });
 
 // ── Caméra : légère contre-plongée, pavillon et plaques dans le cadre ──
 const camera = new THREE.PerspectiveCamera(34, WIDTH / HEIGHT, 0.02, 50);

@@ -1,4 +1,4 @@
-// Lustre Rosée (LUM-LUS-008) — modèle 3D d'après les schémas cotés du fournisseur :
+// Lustre Perle (LUM-LUS-008) — modèle 3D d'après les schémas cotés du fournisseur :
 // gouttes de 30 cm (cône d'aluminium en haut, larme de cristal à bulles en bas, LED 3 W par
 // goutte), pavillon rond (Ø10 à Ø100 cm) ou rectangulaire (L 60 ou 100 × l 12 cm), fils
 // réglables. Dispositions des schémas : « libre » (couronnes, hauteurs variées), « spirale »
@@ -7,7 +7,7 @@
 // hauteur totale est réduite pour le cadrage, comme pour Ondée (fils réglables).
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
-export function buildRosee({ THREE, scene, rand, layout, n, canopy, rect, METAL, LIGHT, GLOW, topY = -0.35 }) {
+export function buildPerle({ THREE, scene, rand, layout, n, canopy, rect, METAL, LIGHT, GLOW, topY = -0.35 }) {
   const group = new THREE.Group(); scene.add(group);
   const metal = new THREE.MeshStandardMaterial(METAL);
   const wire = new THREE.MeshStandardMaterial({ color: 0xcfcfcf, metalness: 0.8, roughness: 0.35 });

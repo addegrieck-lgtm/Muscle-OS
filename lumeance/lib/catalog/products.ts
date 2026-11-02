@@ -572,14 +572,14 @@ const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, a
   imageUrl: `/products/ondee/rendu-c${n}.webp`,
 }));
 
-// ── Rosée (LUM-LUS-008) ──────────────────────────────────────────────────────
+// ── Perle (LUM-LUS-008) ───────────────────────────────────────────────────────
 // Fiches fournisseur relevées le 02/11/2026 : gouttes de 30 cm (cône d'aluminium, cristal à
 // bulles), LED intégrée, AC 110–240 V, garantie 3 ans ; aluminium, cristal, acier inoxydable ;
 // finition dorée ou chromée ; blanc chaud ou blanc froid. Promotion −9/−10 % jusqu'au
 // 18/11/2026 ; prix de vente sur le « prix le plus bas des 30 jours avant réduction ».
 // Pas de télécommande annoncée. Puissance de la version 5 gouttes non communiquée.
 // [code, forme, gouttes, pavillon, hauteur (cm), fils (cm), puissance (W), prix hors promotion]
-const ROSEE_VERSIONS: [
+const PERLE_VERSIONS: [
   string,
   string,
   number,
@@ -601,14 +601,14 @@ const ROSEE_VERSIONS: [
   ["l3", "Linéaire", 3, "60 × 12 cm", 120, 120, 15, 10766],
   ["l5", "Linéaire", 5, "100 × 12 cm", 200, 200, null, 19351],
 ];
-const ROSEE_MIN_PRICE = Math.min(...ROSEE_VERSIONS.map((v) => salePrice(v[7])));
-const ROSEE_VARIANTS: ProductVariant[] = ROSEE_VERSIONS.map(
+const PERLE_MIN_PRICE = Math.min(...PERLE_VERSIONS.map((v) => salePrice(v[7])));
+const PERLE_VARIANTS: ProductVariant[] = PERLE_VERSIONS.map(
   ([code, shape, n, canopy, h, wire, w, cost]) => ({
-    id: `rosee-${code}`,
+    id: `perle-${code}`,
     name: `${n} goutte${n > 1 ? "s" : ""}`,
     sku: `LUM-LUS-008-${code.toUpperCase()}`,
     finish: shape,
-    priceAdjustment: salePrice(cost) - ROSEE_MIN_PRICE,
+    priceAdjustment: salePrice(cost) - PERLE_MIN_PRICE,
     stockQuantity: 5,
     active: true,
     details: [
@@ -619,13 +619,13 @@ const ROSEE_VARIANTS: ProductVariant[] = ROSEE_VERSIONS.map(
     ]
       .filter(Boolean)
       .join(" · "),
-    imageUrl: `/products/rosee/rendu-${code}-dore-chaud.webp`,
+    imageUrl: `/products/perle/rendu-${code}-dore-chaud.webp`,
     // Visualisations 3D : finition × couleur de lumière.
     imageUrls: Object.fromEntries(
       ["dore", "chrome"].flatMap((f) =>
         ["chaud", "froid"].map((t) => [
           `${f}-${t}`,
-          `/products/rosee/rendu-${code}-${f}-${t}.webp`,
+          `/products/perle/rendu-${code}-${f}-${t}.webp`,
         ]),
       ),
     ),
@@ -1648,17 +1648,17 @@ export const CATALOG_PRODUCTS: Product[] = [
   },
   {
     id: "lum-lus-008",
-    slug: "rosee",
-    name: "Rosée",
+    slug: "perle",
+    name: "Perle",
     reference: "LUM-LUS-008",
     shortDescription:
       "Des gouttes de cristal à bulles, coiffées d’un cône de métal, qui tombent en pluie lumineuse sous un pavillon.",
     description: [
-      "Rosée suspend des gouttes de cristal de 30 cm, chacune coiffée d’un fin cône d’aluminium. Éclairées de l’intérieur, les bulles prises dans le cristal scintillent comme des perles d’eau au matin.",
+      "Perle suspend des gouttes de cristal de 30 cm, chacune coiffée d’un fin cône d’aluminium. Éclairées de l’intérieur, les bulles prises dans le cristal scintillent comme des perles d’eau au matin.",
       "D’une seule goutte au-dessus d’une table de chevet à 49 gouttes en cascade pour une double hauteur : pavillon rond, en spirale ou linéaire, de 10 cm à 1 m. Finition dorée ou chromée ; blanc chaud ou blanc froid. Fils réglables.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    price: ROSEE_MIN_PRICE,
+    price: PERLE_MIN_PRICE,
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
@@ -1689,23 +1689,23 @@ export const CATALOG_PRODUCTS: Product[] = [
     stockQuantity: 5,
     images: [
       {
-        id: "rosee-1",
-        url: "/products/rosee/ambiance-salon.webp",
-        alt: "Lustre Rosée doré allumé au-dessus d’un canapé, grappe de gouttes de cristal à bulles coiffées de cônes dorés",
+        id: "perle-1",
+        url: "/products/perle/ambiance-salon.webp",
+        alt: "Lustre Perle doré allumé au-dessus d’un canapé, grappe de gouttes de cristal à bulles coiffées de cônes dorés",
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: true,
         position: 0,
       },
       {
-        id: "rosee-2",
-        url: "/products/rosee/ambiance-double-hauteur.webp",
-        alt: "Lustre Rosée doré dans un salon en double hauteur, cascade de gouttes de cristal sous un grand pavillon rond",
+        id: "perle-2",
+        url: "/products/perle/ambiance-double-hauteur.webp",
+        alt: "Lustre Perle doré dans un salon en double hauteur, cascade de gouttes de cristal sous un grand pavillon rond",
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: false,
         position: 1,
       },
     ],
-    variants: ROSEE_VARIANTS,
+    variants: PERLE_VARIANTS,
     optionLabels: { group: "Forme", variant: "Gouttes" },
     options: [
       {
@@ -1725,9 +1725,9 @@ export const CATALOG_PRODUCTS: Product[] = [
         ],
       },
     ],
-    seoTitle: "Rosée — lustre gouttes de cristal, doré ou chromé",
+    seoTitle: "Perle — lustre gouttes de cristal, doré ou chromé",
     seoDescription:
-      "Lustre Rosée : gouttes de cristal à bulles et cônes d’aluminium, de 1 à 49 gouttes, rond, en spirale ou linéaire. Doré ou chromé, blanc chaud ou froid.",
+      "Lustre Perle : gouttes de cristal à bulles et cônes d’aluminium, de 1 à 49 gouttes, rond, en spirale ou linéaire. Doré ou chromé, blanc chaud ou froid.",
     art: "cascade",
     isDemo: false,
   },
