@@ -1,7 +1,13 @@
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { ButtonLink, Eyebrow } from "@/components/ui/Button";
-import { PRO_DISCOUNT_MIN_LABEL, PRO_DISCOUNT_PERCENT, isOnPromotion } from "@/lib/catalog/pro";
+import {
+  PRO_DISCOUNT_MAX_PERCENT,
+  PRO_DISCOUNT_MIN_LABEL,
+  PRO_TIERS,
+  isOnPromotion,
+} from "@/lib/catalog/pro";
+import { formatPrice } from "@/lib/money";
 import { PRO_CONTACT_HREF, PRO_SPACES, proUse } from "@/lib/content/restauration";
 import { getProducts } from "@/lib/services/catalog";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -19,8 +25,8 @@ const SERVICE = [
     text: "Envoyez-nous le plan, quelques photos et l’ambiance recherchée : nous vous proposons les pièces, les formats et le nombre de points lumineux adaptés.",
   },
   {
-    title: `−${PRO_DISCOUNT_PERCENT} % pour les professionnels`,
-    text: `Restaurants, bars et hôtels bénéficient de ${PRO_DISCOUNT_PERCENT} % de remise sur le prix des pièces dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, accordée sur devis. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
+    title: `Jusqu’à −${PRO_DISCOUNT_MAX_PERCENT} % pour les professionnels`,
+    text: `Restaurants, bars et hôtels bénéficient d’une remise sur devis dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, d’autant plus forte que le projet est important. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
   },
   {
     title: "Une lumière cohérente",
@@ -52,8 +58,7 @@ export default async function RestaurationPage() {
             La lumière fait la moitié de l’ambiance.
           </h1>
           <p data-reveal="fade" className="t-eyebrow mt-6 text-champagne">
-            −{PRO_DISCOUNT_PERCENT} % pour les professionnels dès {PRO_DISCOUNT_MIN_LABEL}, sur
-            devis
+            Jusqu’à −{PRO_DISCOUNT_MAX_PERCENT} % pour les professionnels, sur devis
           </p>
           <p data-reveal data-reveal-delay="0.2" className="t-lead mt-8 max-w-2xl text-ivoire/75">
             On revient dans une salle autant pour sa lumière que pour sa carte. Nos suspensions,
@@ -119,12 +124,31 @@ export default async function RestaurationPage() {
               </div>
             ))}
           </div>
-          <p className="t-small mt-16 max-w-3xl text-brun/70">
-            Remise professionnelle de {PRO_DISCOUNT_PERCENT} % sur le prix de vente des pièces, dès{" "}
-            {PRO_DISCOUNT_MIN_LABEL} de pièces commandées (pièces en promotion comprises dans ce
-            montant), hors frais de livraison, non cumulable avec les pièces déjà en promotion
-            {promoNames.length > 0 ? ` (aujourd’hui : ${promoNames.join(", ")})` : ""}.
-          </p>
+          <div className="mt-16 max-w-3xl">
+            <h3 className="t-eyebrow text-champagne">Remise professionnelle</h3>
+            <table className="mt-5 w-full max-w-md text-left">
+              <thead>
+                <tr className="t-small border-b border-brun/15 text-brun/60">
+                  <th className="pb-3 font-normal">Montant des pièces</th>
+                  <th className="pb-3 text-right font-normal">Remise</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PRO_TIERS.map((t) => (
+                  <tr key={t.min} className="border-b border-brun/10">
+                    <td className="py-3">Dès {formatPrice(t.min)}</td>
+                    <td className="py-3 text-right font-serif text-xl">−{t.percent} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="t-small mt-5 text-brun/70">
+              Montant des pièces commandées, hors livraison. La remise s’applique aux pièces qui ne
+              sont pas déjà en promotion
+              {promoNames.length > 0 ? ` (aujourd’hui : ${promoNames.join(", ")})` : ""} ; ces
+              dernières comptent toutefois pour atteindre le palier.
+            </p>
+          </div>
           <p className="t-small mt-6 max-w-3xl border-l border-champagne pl-4 text-brun/70">
             Dans un établissement recevant du public, l’installation doit respecter les règles de
             sécurité qui s’appliquent à votre établissement. Faites valider le choix et la pose des

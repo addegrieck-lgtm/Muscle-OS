@@ -1,7 +1,7 @@
 import { Card, Field, Flash, PageTitle, flashFrom, inputClass } from "@/components/admin/ui";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { requireAdmin } from "@/lib/auth/admin";
-import { PRO_DISCOUNT_MIN_LABEL, PRO_DISCOUNT_PERCENT } from "@/lib/catalog/pro";
+import { PRO_TIERS_LABEL } from "@/lib/catalog/pro";
 import { formatPrice } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createManualOrder } from "../actions";
@@ -118,10 +118,10 @@ export default async function NewOrder({
               <label className="flex items-start gap-3 text-sm">
                 <input name="pro_discount" type="checkbox" className="mt-1" />
                 <span>
-                  Remise professionnelle −{PRO_DISCOUNT_PERCENT} %
+                  Remise professionnelle
                   <span className="block text-xs opacity-70">
-                    Restaurants, bars, hôtels, dès {PRO_DISCOUNT_MIN_LABEL} de pièces : calculée sur
-                    les pièces hors promotion, hors livraison, et ajoutée à la remise ci-dessous.
+                    Restaurants, bars, hôtels : {PRO_TIERS_LABEL} de pièces. Calculée sur les pièces
+                    hors promotion, hors livraison, et ajoutée à la remise ci-dessous.
                   </span>
                 </span>
               </label>

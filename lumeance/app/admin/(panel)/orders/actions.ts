@@ -3,7 +3,6 @@
 import {
   PRO_DISCOUNT_MIN,
   PRO_DISCOUNT_MIN_LABEL,
-  PRO_DISCOUNT_PERCENT,
   isOnPromotion,
   proDiscount,
 } from "@/lib/catalog/pro";
@@ -172,18 +171,18 @@ export async function createManualOrder(form: FormData) {
     });
   }
   const subtotal = items.reduce((s, i) => s + i.total, 0);
-  // Remise professionnelle : −20 % hors pièces en promotion, dès 500 € de pièces, ajoutée à la
-  // remise saisie. Case cochée sous le minimum : refus explicite plutôt qu'une remise ignorée.
+  // Remise professionnelle par paliers (−10/15/20 % dès 500/1 500/3 000 € de pièces), sur les
+  // pièces hors promotion, ajoutée à la remise saisie. Case cochée sous le minimum : refus explicite plutôt qu'une remise ignorée.
   const wantsPro = form.get("pro_discount") === "on";
   if (wantsPro && subtotal < PRO_DISCOUNT_MIN)
     back("/admin/orders/new", {
       erreur: `Remise professionnelle : minimum ${PRO_DISCOUNT_MIN_LABEL} de pièces (commande : ${formatPrice(subtotal)}).`,
     });
-  const pro = wantsPro ? proDiscount(proLines) : 0;
-  if (pro > 0) {
-    d.discount_amount += pro;
+  const pro = wantsPro ? proDiscount(proLines) : { percent: 0, amount: 0 };
+  if (pro.amount > 0) {
+    d.discount_amount += pro.amount;
     d.admin_notes = [
-      `Remise professionnelle −${PRO_DISCOUNT_PERCENT} % (hors pièces en promotion) : ${formatPrice(pro)}.`,
+      `Remise professionnelle −${pro.percent} % (palier ${formatPrice(subtotal)} de pièces, hors pièces en promotion) : ${formatPrice(pro.amount)}.`,
       d.admin_notes,
     ]
       .filter(Boolean)
