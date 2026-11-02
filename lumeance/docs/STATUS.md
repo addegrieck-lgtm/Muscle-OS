@@ -58,7 +58,7 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 
 ## Catalogue au 1er novembre 2026
 - En ligne : Céleste, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »), Organza (lustre phare : voiles d'acrylique, 1 à 28 plaques), Aiguille (applique tige et disque lumineux, offre « 1 achetée, la 2ᵉ à −50 % »), Halo (lustre anneaux en spirale, 3 à 48 anneaux), Ginkgo (lustre feuilles de céramique, 80 à 150 cm).
-- Brouillons : Aigrette, Sylve.
+- Brouillons : Aigrette, Sylve, Ondée (lustre cascade de cônes dorés, 6 à 68 cônes).
 
 ## Points ouverts — à traiter avec le propriétaire
 - Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).

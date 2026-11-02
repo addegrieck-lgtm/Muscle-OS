@@ -530,6 +530,41 @@ const GINKGO_VARIANTS: ProductVariant[] = GINKGO_VERSIONS.map(([code, l, w, h, ,
   ),
 }));
 
+// ── Ondée (LUM-LUS-007) ──────────────────────────────────────────────────────
+// Fiches fournisseur relevées le 02/11/2026 : cônes H 40 cm × Ø3,2 cm en aluminium doré par
+// électrolyse, embout acrylique, LED 3 W par cône, 90–260 V, intensité réglable, commande par
+// télécommande, garantie 3 ans. Promotion −15/−16 % jusqu'au 18/11/2026 ; prix hors promotion =
+// prix promotionnel + économie affichée (le « prix le plus bas des 30 jours » affiché pour 12 et
+// 40 cônes est incohérent). Règle du propriétaire : télécommande fournie, +10 € inclus — à
+// confirmer qu'elle est bien livrée de série. Couleur de lumière non précisée.
+const ONDEE_REMOTE_EXTRA = 1000;
+// [cônes, pavillon Ø (cm), hauteur (cm), puissance (W), surface (m²), prix hors promotion (centimes)]
+const ONDEE_VERSIONS: [number, number, number, number, string, number][] = [
+  [6, 30, 200, 18, "5 à 10", 14911],
+  [9, 40, 250, 27, "6 à 12", 23128],
+  [12, 40, 250, 36, "7 à 15", 30844],
+  [16, 50, 300, 48, "7 à 15", 40189],
+  [25, 60, 400, 75, "15 à 28", 53693],
+  [30, 80, 450, 90, "18 à 35", 67731],
+  [40, 80, 500, 120, "20 à 38", 79493],
+  [48, 80, 650, 144, "24 à 42", 94460],
+  [68, 100, 750, 204, "28 à 45", 127967],
+];
+const ONDEE_MIN_PRICE = Math.min(...ONDEE_VERSIONS.map((v) => salePrice(v[5])));
+// Prix de base : version la moins chère, télécommande comprise.
+const ONDEE_BASE_PRICE = ONDEE_MIN_PRICE + ONDEE_REMOTE_EXTRA;
+const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, area, cost]) => ({
+  id: `ondee-c${n}`,
+  name: `${n} cônes`,
+  sku: `LUM-LUS-007-C${n}`,
+  finish: null,
+  priceAdjustment: salePrice(cost) - ONDEE_MIN_PRICE,
+  stockQuantity: 5,
+  active: true,
+  details: `Pavillon Ø${canopy} cm · hauteur ${h} cm, réglable · ${w} W · pièce de ${area} m² · télécommande fournie, intensité variable`,
+  imageUrl: `/products/ondee/rendu-c${n}.webp`,
+}));
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1486,6 +1521,62 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre design allongé : feuilles de ginkgo en céramique blanche sur une ramure en acier doré brossé, ampoules LED fournies. De 80 à 150 cm, pour table de salle à manger et îlot de cuisine.",
     art: "organic",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-007",
+    slug: "ondee",
+    name: "Ondée",
+    reference: "LUM-LUS-007",
+    shortDescription:
+      "Une pluie de cônes dorés, effilés comme des gouttes, dont chaque pointe s’allume.",
+    description: [
+      "Ondée fait tomber du plafond une pluie de cônes d’aluminium doré, longs de 40 cm et fins comme des gouttes étirées. À la base de chacun, un embout d’acrylique s’allume : de loin, la cascade dessine une constellation de points lumineux suspendus dans le vide.",
+      "Les cônes descendent en spirale sous un pavillon rond doré, de six au-dessus d’une table ou d’un îlot jusqu’à soixante-huit pour une cage d’escalier ou un volume de plusieurs étages. La hauteur se règle par les fils ; la télécommande, fournie, règle l’intensité.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: ONDEE_BASE_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Aluminium", "Acrylique"],
+    finishes: ["Doré"],
+    specifications: [
+      { label: "Sources lumineuses", value: "LED intégrées, 3 W par cône" },
+      { label: "Tension d’entrée", value: "90–260 V" },
+      { label: "Cônes", value: "H 40 cm, Ø3,2 cm, aluminium doré, embout acrylique" },
+      { label: "Versions", value: "De 6 à 68 cônes, pavillon rond Ø30 à Ø100 cm (H 3 cm)" },
+      {
+        label: "Suspension",
+        value: "Fils réglables, de 200 à 750 cm selon la version ; longueur sur mesure sur demande",
+      },
+      { label: "Commande", value: "Télécommande fournie : allumage et intensité variable" },
+      { label: "Matières", value: "Aluminium doré par électrolyse, acrylique" },
+      { label: "Garantie", value: "3 ans, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les fils.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "ondee-1",
+        url: "/products/ondee/ambiance-escalier.webp",
+        alt: "Lustre Ondée allumé dans une cage d’escalier hélicoïdale, cascade de cônes dorés aux pointes lumineuses",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: ONDEE_VARIANTS,
+    seoTitle: "Ondée — lustre LED cascade de cônes dorés pour escalier et double hauteur",
+    seoDescription:
+      "Lustre design : pluie de cônes d’aluminium doré aux pointes lumineuses, de 6 à 68 cônes sous un pavillon rond. Télécommande fournie. Pour escalier, duplex et grands volumes.",
+    art: "cascade",
     isDemo: false,
   },
 ];
