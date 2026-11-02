@@ -572,6 +572,66 @@ const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, a
   imageUrl: `/products/ondee/rendu-c${n}.webp`,
 }));
 
+// ── Perle (LUM-LUS-008) ───────────────────────────────────────────────────────
+// Fiches fournisseur relevées le 02/11/2026 : gouttes de 30 cm (cône d'aluminium, cristal à
+// bulles), LED intégrée, AC 110–240 V, garantie 3 ans ; aluminium, cristal, acier inoxydable ;
+// finition dorée ou chromée ; blanc chaud ou blanc froid. Promotion −9/−10 % jusqu'au
+// 18/11/2026 ; prix de vente sur le « prix le plus bas des 30 jours avant réduction ».
+// Pas de télécommande annoncée. Puissance de la version 5 gouttes non communiquée.
+// [code, forme, gouttes, pavillon, hauteur (cm), fils (cm), puissance (W), prix hors promotion]
+const PERLE_VERSIONS: [
+  string,
+  string,
+  number,
+  string,
+  number | null,
+  number,
+  number | null,
+  number,
+][] = [
+  ["g1", "Ronde", 1, "Ø10 cm", null, 150, 3, 2883],
+  ["g2", "Ronde", 2, "Ø15 cm", 120, 120, 10, 9984],
+  ["g8", "Ronde", 8, "Ø35 cm", 200, 200, 40, 22731],
+  ["g18", "Ronde", 18, "Ø50 cm", 350, 200, 90, 53408],
+  ["g28", "Ronde", 28, "Ø60 cm", 450, 250, 140, 71463],
+  ["a49", "Ronde", 49, "Ø100 cm", 650, 350, 245, 143694],
+  ["s18", "Spirale", 18, "Ø50 cm", 200, 200, 90, 53408],
+  ["s28", "Spirale", 28, "Ø60 cm", 450, 250, 140, 71463],
+  ["s36", "Spirale", 36, "Ø80 cm", 500, 300, 180, 101607],
+  ["l3", "Linéaire", 3, "60 × 12 cm", 120, 120, 15, 10766],
+  ["l5", "Linéaire", 5, "100 × 12 cm", 200, 200, null, 19351],
+];
+const PERLE_MIN_PRICE = Math.min(...PERLE_VERSIONS.map((v) => salePrice(v[7])));
+const PERLE_VARIANTS: ProductVariant[] = PERLE_VERSIONS.map(
+  ([code, shape, n, canopy, h, wire, w, cost]) => ({
+    id: `perle-${code}`,
+    name: `${n} goutte${n > 1 ? "s" : ""}`,
+    sku: `LUM-LUS-008-${code.toUpperCase()}`,
+    finish: shape,
+    priceAdjustment: salePrice(cost) - PERLE_MIN_PRICE,
+    stockQuantity: 5,
+    active: true,
+    details: [
+      `Pavillon ${canopy}`,
+      h ? `hauteur ${h} cm, fils réglables jusqu’à ${wire} cm` : `câble ${wire} cm`,
+      w ? `${w} W` : null,
+      "gouttes de 30 cm",
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    imageUrl: `/products/perle/rendu-${code}-dore-chaud.webp`,
+    // Visualisations 3D : finition × couleur de lumière.
+    imageUrls: Object.fromEntries(
+      ["dore", "chrome"].flatMap((f) =>
+        ["chaud", "froid"].map((t) => [
+          `${f}-${t}`,
+          `/products/perle/rendu-${code}-${f}-${t}.webp`,
+        ]),
+      ),
+    ),
+  }),
+);
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1583,6 +1643,91 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoTitle: "Ondée — lustre cascade de cônes dorés",
     seoDescription:
       "Lustre Ondée : pluie de cônes dorés aux pointes lumineuses, de 6 à 68 cônes, télécommande fournie. Pour escalier et double hauteur.",
+    art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-lus-008",
+    slug: "perle",
+    name: "Perle",
+    reference: "LUM-LUS-008",
+    shortDescription:
+      "Des gouttes de cristal à bulles, coiffées d’un cône de métal, qui tombent en pluie lumineuse sous un pavillon.",
+    description: [
+      "Perle suspend des gouttes de cristal de 30 cm, chacune coiffée d’un fin cône d’aluminium. Éclairées de l’intérieur, les bulles prises dans le cristal scintillent comme des perles d’eau au matin.",
+      "D’une seule goutte au-dessus d’une table de chevet à 49 gouttes en cascade pour une double hauteur : pavillon rond, en spirale ou linéaire, de 10 cm à 1 m. Finition dorée ou chromée ; blanc chaud ou blanc froid. Fils réglables.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: PERLE_MIN_PRICE,
+    compareAtPrice: null,
+    categoryId: "demo-cat-lustres",
+    categorySlug: "lustres",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Aluminium", "Cristal", "Acier inoxydable"],
+    finishes: ["Doré", "Chromé"],
+    specifications: [
+      { label: "Type", value: "Lustre LED, gouttes de cristal suspendues" },
+      { label: "Sources lumineuses", value: "LED intégrée, fournie" },
+      { label: "Tension", value: "AC 110–240 V" },
+      { label: "Gouttes", value: "30 cm : cône d’aluminium et goutte de cristal à bulles" },
+      {
+        label: "Formes",
+        value: "Ronde (1 à 49 gouttes), spirale (18 à 36) ou linéaire (3 ou 5)",
+      },
+      { label: "Suspension", value: "Fils réglables, de 120 à 350 cm selon la version" },
+      { label: "Matières", value: "Aluminium, cristal, acier inoxydable" },
+      { label: "Finitions", value: "Doré ou chromé" },
+      { label: "Couleur de lumière", value: "Blanc chaud ou blanc froid" },
+      { label: "Garantie", value: "3 ans, selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond, assemblage requis. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée, en particulier pour les grandes versions. La hauteur se règle par les fils.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "perle-1",
+        url: "/products/perle/ambiance-salon.webp",
+        alt: "Lustre Perle doré allumé au-dessus d’un canapé, grappe de gouttes de cristal à bulles coiffées de cônes dorés",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+      {
+        id: "perle-2",
+        url: "/products/perle/ambiance-double-hauteur.webp",
+        alt: "Lustre Perle doré dans un salon en double hauteur, cascade de gouttes de cristal sous un grand pavillon rond",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: false,
+        position: 1,
+      },
+    ],
+    variants: PERLE_VARIANTS,
+    optionLabels: { group: "Forme", variant: "Gouttes" },
+    options: [
+      {
+        id: "finition",
+        label: "Finition",
+        values: [
+          { id: "dore", label: "Doré" },
+          { id: "chrome", label: "Chromé" },
+        ],
+      },
+      {
+        id: "lumiere",
+        label: "Couleur de lumière",
+        values: [
+          { id: "chaud", label: "Blanc chaud" },
+          { id: "froid", label: "Blanc froid" },
+        ],
+      },
+    ],
+    seoTitle: "Perle — lustre gouttes de cristal, doré ou chromé",
+    seoDescription:
+      "Lustre Perle : gouttes de cristal à bulles et cônes d’aluminium, de 1 à 49 gouttes, rond, en spirale ou linéaire. Doré ou chromé, blanc chaud ou froid.",
     art: "cascade",
     isDemo: false,
   },

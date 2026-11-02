@@ -47,6 +47,10 @@ export const PRO_USES: Record<string, ProUse> = {
     space: "bar",
     use: "En version linéaire au-dessus d’un bar, ronde ou carrée dans une cage d’escalier.",
   },
+  perle: {
+    space: "accueil",
+    use: "En grappe au-dessus d’un bar ou en cascade dans un hall ; une goutte seule au-dessus de chaque table.",
+  },
   nebuleuse: { space: "accueil", use: "Pièce maîtresse d’une salle, d’un hall ou d’une entrée." },
   organza: {
     space: "accueil",
