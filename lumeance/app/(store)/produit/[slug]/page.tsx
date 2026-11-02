@@ -7,6 +7,8 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { VariantProvider } from "@/components/product/VariantContext";
 import { Breadcrumbs } from "@/components/ui/PageHeader";
+import { PRO_DISCOUNT_MAX_PERCENT, PRO_DISCOUNT_MIN_LABEL, isOnPromotion } from "@/lib/catalog/pro";
+import { proUse } from "@/lib/content/restauration";
 import { categoryLabel } from "@/lib/navigation";
 import { getProductBySlug, getProducts, relatedProducts } from "@/lib/services/catalog";
 import { getShippingSettings } from "@/lib/services/content";
@@ -97,6 +99,21 @@ export default async function ProductPage({ params }: Props) {
             <div id="achat" className="mt-10 scroll-mt-28">
               <AddToCart product={product} />
             </div>
+
+            {proUse(product.slug) && (
+              <p className="t-small mt-8 border-l border-champagne pl-4 text-brun/75">
+                <span className="t-eyebrow block text-champagne">Restaurants, bars et hôtels</span>
+                <span className="mt-1 block">{proUse(product.slug)!.use}</span>
+                <span className="mt-1 block">
+                  {isOnPromotion(product)
+                    ? "Pièce déjà en promotion : la remise professionnelle ne s’y ajoute pas."
+                    : `Professionnels : jusqu’à −${PRO_DISCOUNT_MAX_PERCENT} % dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, sur devis.`}
+                </span>
+                <a href="/restauration" className="mt-1 inline-block underline underline-offset-4">
+                  Équiper un établissement
+                </a>
+              </p>
+            )}
 
             <div className="mt-10 border-t border-brun/10">
               <AccordionItem title="Description" open>

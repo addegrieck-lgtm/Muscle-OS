@@ -1,11 +1,17 @@
 "use server";
 
+import {
+  PRO_DISCOUNT_MIN,
+  PRO_DISCOUNT_MIN_LABEL,
+  isOnPromotion,
+  proDiscount,
+} from "@/lib/catalog/pro";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { firstError } from "@/lib/admin/forms";
 import { back, dbError } from "@/lib/admin/redirect";
-import { parseEuroInput } from "@/lib/money";
+import { formatPrice, parseEuroInput } from "@/lib/money";
 import { canTransition } from "@/lib/services/orders";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -120,13 +126,14 @@ export async function createManualOrder(form: FormData) {
   const { data: products } = await supabase
     .from("products")
     .select(
-      "id, name, reference, price, product_variants(id, name, sku, finish, price_adjustment, active)",
+      "id, name, reference, price, compare_at_price, promotion, product_variants(id, name, sku, finish, price_adjustment, active)",
     )
     .in(
       "id",
       d.lines.map((l) => l.productId),
     );
   const items = [];
+  const proLines: { total: number; onPromotion: boolean }[] = [];
   for (const l of d.lines) {
     const p = products?.find((x) => x.id === l.productId);
     if (!p) back("/admin/orders/new", { erreur: "Produit introuvable." });
@@ -154,8 +161,33 @@ export async function createManualOrder(form: FormData) {
       variant_snapshot: v ? { id: v.id, name: v.name, sku: v.sku, finish: v.finish } : null,
       total: unit * l.quantity,
     });
+    proLines.push({
+      total: unit * l.quantity,
+      onPromotion: isOnPromotion({
+        promotion: p.promotion,
+        price: Number(p.price),
+        compareAtPrice: p.compare_at_price == null ? null : Number(p.compare_at_price),
+      }),
+    });
   }
   const subtotal = items.reduce((s, i) => s + i.total, 0);
+  // Remise professionnelle par paliers (−10/15/20 % dès 500/1 500/3 000 € de pièces), sur les
+  // pièces hors promotion, ajoutée à la remise saisie. Case cochée sous le minimum : refus explicite plutôt qu'une remise ignorée.
+  const wantsPro = form.get("pro_discount") === "on";
+  if (wantsPro && subtotal < PRO_DISCOUNT_MIN)
+    back("/admin/orders/new", {
+      erreur: `Remise professionnelle : minimum ${PRO_DISCOUNT_MIN_LABEL} de pièces (commande : ${formatPrice(subtotal)}).`,
+    });
+  const pro = wantsPro ? proDiscount(proLines) : { percent: 0, amount: 0 };
+  if (pro.amount > 0) {
+    d.discount_amount += pro.amount;
+    d.admin_notes = [
+      `Remise professionnelle −${pro.percent} % (palier ${formatPrice(subtotal)} de pièces, hors pièces en promotion) : ${formatPrice(pro.amount)}.`,
+      d.admin_notes,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
   if (d.discount_amount > subtotal + d.shipping_amount)
     back("/admin/orders/new", { erreur: "La remise dépasse le montant de la commande." });
 

@@ -66,16 +66,21 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
           </Link>
 
           <nav aria-label="Navigation principale" className="hidden xl:block">
-            <ul className="flex items-center gap-8">
+            <ul className="ml-8 flex items-center gap-6 2xl:gap-8">
               {MAIN_NAV.map((item) => {
                 const active =
                   pathname === item.href ||
                   (item.href !== "/collections" && pathname.startsWith(item.href));
                 return (
-                  <li key={item.href}>
+                  // Entre 1280 et 1536 px, la vue d'ensemble cède la place : les quatre
+                  // collections restent dans le menu, et « Collections » dans le menu mobile.
+                  <li
+                    key={item.href}
+                    className={item.href === "/collections" ? "hidden 2xl:block" : undefined}
+                  >
                     <Link
                       href={item.href}
-                      className={`t-eyebrow link-underline pb-1 ${active ? "opacity-100" : "opacity-75 hover:opacity-100"}`}
+                      className={`t-eyebrow link-underline whitespace-nowrap pb-1 ${active ? "opacity-100" : "opacity-75 hover:opacity-100"}`}
                       aria-current={active ? "page" : undefined}
                     >
                       {item.label}

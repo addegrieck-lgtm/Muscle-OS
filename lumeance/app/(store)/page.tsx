@@ -4,6 +4,7 @@ import { Immersive } from "@/components/home/Immersive";
 import { Manifesto } from "@/components/home/Manifesto";
 import { Materials } from "@/components/home/Materials";
 import { Newsletter } from "@/components/home/Newsletter";
+import { Professionals } from "@/components/home/Professionals";
 import { Signature } from "@/components/home/Signature";
 import { Intro } from "@/components/motion/Intro";
 import { getCategories, getFeaturedProducts } from "@/lib/services/catalog";
@@ -31,6 +32,7 @@ export default async function HomePage() {
       <Collections categories={categories} />
       <Signature products={featured} />
       <Immersive quote={content.immersiveQuote} />
+      <Professionals />
       <Materials />
       <Newsletter title={content.newsletterTitle} />
     </>
