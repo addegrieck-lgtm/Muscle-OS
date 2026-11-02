@@ -43,6 +43,10 @@ export const PRO_USES: Record<string, ProUse> = {
     space: "bar",
     use: "Au-dessus d’un comptoir, d’un bar ou d’une grande table d’hôtes.",
   },
+  sillage: {
+    space: "bar",
+    use: "Au-dessus d’un comptoir, d’une table d’hôtes ou d’une grande table.",
+  },
   celeste: {
     space: "bar",
     use: "En version linéaire au-dessus d’un bar, ronde ou carrée dans une cage d’escalier.",

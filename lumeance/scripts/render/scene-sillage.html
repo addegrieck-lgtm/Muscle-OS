@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Visualisation de Sillage (LUM-SUS-004) — modèle : sillage-model.js.
+// Une seule version (noyer, L 120 cm, intensité variable) : une seule vue, lumière chaude.
+import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { buildSillage } from "/scripts/render/sillage-model.js";
+import { buildRoom } from "/scripts/render/room.js";
+
+const t0 = performance.now();
+const SCALE = 2, WIDTH = 1200, HEIGHT = 1500;
+let s = 41;
+const rand = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const LIGHT = 0xffd2a0, GLOW = 0xfff1de;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(WIDTH, HEIGHT); renderer.setPixelRatio(SCALE);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.24;
+
+// ── Pièce : salon clair (voir room.js) ──
+buildRoom(scene, { rand, temp: "chaud", theme: "salon", wallZ: -1.8 });
+const keyL = new THREE.DirectionalLight(0xffe2c0, 0.3); keyL.position.set(2, -1, 3); scene.add(keyL);
+
+// ── Luminaire (noyer) ──
+const BAR_Y = -0.9;
+buildSillage({ THREE, scene, rand, BAR_Y, barY: BAR_Y, LIGHT, GLOW,
+  wood: { base: "#4a2716", dark: "30,14,6", light: "128,78,44" } });
+
+// ── Caméra : de trois quarts, légèrement sous la barre (diffuseur visible) ──
+const camera = new THREE.PerspectiveCamera(30, WIDTH / HEIGHT, 0.02, 50);
+const lookY = BAR_Y - 0.12;
+camera.position.set(1.45, BAR_Y - 0.6, 2.9);
+camera.lookAt(0, lookY, 0);
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(SCALE); composer.setSize(WIDTH, HEIGHT);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH * SCALE, HEIGHT * SCALE), 0.28, 0.25, 0.92));
+composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+  fragmentShader: "uniform sampler2D tDiffuse; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); } void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = distance(vUv, vec2(.5,.45)); c.rgb *= mix(1., .72, smoothstep(.38,.9,d)); c.rgb += (h(vUv*1400.)-.5)*.016; gl_FragColor = c; }",
+}));
+composer.render();
+window.__ms = performance.now() - t0;
+window.__done = true;
+</script></body></html>

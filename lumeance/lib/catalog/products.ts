@@ -572,6 +572,26 @@ const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, a
   imageUrl: `/products/ondee/rendu-c${n}.webp`,
 }));
 
+// ── Sillage (LUM-SUS-004) ─────────────────────────────────────────────────────
+// Fiche fournisseur relevée le 02/11/2026 : barre L 120 × l 5 × H 5 cm, teinte noyer (« Walnut »),
+// LED 24 W, intensité variable (« Dimmable »), pièce de 10 à 15 m². Une seule version (D120CM).
+// Promotion −12 % jusqu'au 18/11/2026 (202,39 €) ; prix de vente calculé sur le prix le plus bas
+// des 30 jours avant réduction : 231,93 €. Matière et mode de variation non précisés.
+const SILLAGE_COST = 23193;
+const SILLAGE_VARIANTS: ProductVariant[] = [
+  {
+    id: "sillage-l120",
+    name: "L 120 cm",
+    sku: "LUM-SUS-004-L120",
+    finish: null,
+    priceAdjustment: 0,
+    stockQuantity: 5,
+    active: true,
+    details: "Barre L 120 × l 5 × H 5 cm · LED 24 W, intensité variable · pièce de 10 à 15 m²",
+    imageUrl: "/products/sillage/rendu-noyer.webp",
+  },
+];
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1584,6 +1604,57 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre Ondée : pluie de cônes dorés aux pointes lumineuses, de 6 à 68 cônes, télécommande fournie. Pour escalier et double hauteur.",
     art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-sus-004",
+    slug: "sillage",
+    name: "Sillage",
+    reference: "LUM-SUS-004",
+    shortDescription:
+      "Une longue barre teinte noyer qui ondule en son milieu et diffuse vers le bas une lumière continue.",
+    description: [
+      "Sillage est une ligne de 120 cm, teinte noyer, qui se creuse en douceur en son milieu, comme le sillage d’un bateau sur l’eau. Toute sa face inférieure s’éclaire d’une lumière diffuse et continue, sans point lumineux visible.",
+      "Elle se suspend au-dessus d’une table de repas, d’un îlot de cuisine ou d’un comptoir, pour une pièce de 10 à 15 m². LED de 24 W, intensité variable.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: salePrice(SILLAGE_COST),
+    compareAtPrice: null,
+    categoryId: "demo-cat-suspensions",
+    categorySlug: "suspensions",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: [],
+    finishes: ["Noyer"],
+    specifications: [
+      { label: "Type", value: "Suspension linéaire LED" },
+      { label: "Sources lumineuses", value: "LED intégrée, 24 W, fournie" },
+      { label: "Intensité", value: "Variable, selon le fabricant" },
+      { label: "Dimensions", value: "L 120 × l 5 × H 5 cm" },
+      { label: "Finition", value: "Teinte noyer" },
+      { label: "Surface conseillée", value: "10 à 15 m², selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "sillage-1",
+        url: "/products/sillage/ambiance-salle-a-manger.webp",
+        alt: "Suspension Sillage teinte noyer allumée au-dessus d’une table de repas en bois, dans une salle à manger ouverte sur la cuisine",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: SILLAGE_VARIANTS,
+    seoTitle: "Sillage — suspension linéaire LED teinte noyer, 120 cm",
+    seoDescription:
+      "Suspension Sillage : barre de 120 cm teinte noyer, ondulée en son milieu, LED 24 W à intensité variable. Au-dessus d’une table, d’un îlot ou d’un comptoir.",
+    art: "tiers",
     isDemo: false,
   },
 ];

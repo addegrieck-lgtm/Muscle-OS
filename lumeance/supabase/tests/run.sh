@@ -21,9 +21,9 @@ echo "▶ import-produits.sql (×2)"
 "${PSQL[@]}" -f import-produits.sql -c "set client_min_messages = warning" >/dev/null
 "${PSQL[@]}" -f import-produits.sql >/dev/null 2>&1
 "${PSQL[@]}" -c "do \$\$ begin
-  if (select count(*) from public.products where reference like 'LUM-%' and status = 'published') <> 13 or (select count(*) from public.products where reference like 'LUM-%') <> 13 then raise exception 'pièces : %', (select count(*) from public.products where reference like 'LUM-%'); end if;
-  if (select count(*) from public.product_variants where sku like 'LUM-%') <> 90 then raise exception 'versions : %', (select count(*) from public.product_variants where sku like 'LUM-%'); end if;
-  if (select count(*) from public.product_images where storage_path like '/products/%') <> 19 then raise exception 'images : %', (select count(*) from public.product_images where storage_path like '/products/%'); end if;
+  if (select count(*) from public.products where reference like 'LUM-%' and status = 'published') <> 13 or (select count(*) from public.products where reference like 'LUM-%') <> 14 then raise exception 'pièces : %', (select count(*) from public.products where reference like 'LUM-%'); end if;
+  if (select count(*) from public.product_variants where sku like 'LUM-%') <> 91 then raise exception 'versions : %', (select count(*) from public.product_variants where sku like 'LUM-%'); end if;
+  if (select count(*) from public.product_images where storage_path like '/products/%') <> 20 then raise exception 'images : %', (select count(*) from public.product_images where storage_path like '/products/%'); end if;
   if exists (select 1 from public.products where reference like 'LUM-%' and category_id is null) then raise exception 'catégorie manquante'; end if;
   if (select promotion from public.products where reference = 'LUM-APP-002') is distinct from jsonb_build_object('buy', 3, 'free', 1) then raise exception 'offre Volute absente'; end if;
   if (select promotion from public.products where reference = 'LUM-APP-003') is distinct from jsonb_build_object('buy', 1, 'free', 1, 'percent', 50) then raise exception 'offre Aiguille absente'; end if;
