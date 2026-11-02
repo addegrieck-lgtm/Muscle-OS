@@ -793,7 +793,7 @@ Sa forme allongée accompagne une table de salle à manger, un îlot de cuisine 
 Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
   67000, null,
   (select id from public.categories where slug = 'lustres'),
-  'draft', false, '{}'::jsonb, null,
+  'published', false, '{}'::jsonb, null,
   array['Céramique', 'Acier inoxydable']::text[], array['Doré brossé']::text[], '[{"label":"Sources lumineuses","value":"Ampoules LED E14, fournies"},{"label":"Tension d’entrée","value":"90–260 V"},{"label":"Feuilles","value":"Céramique blanche mate"},{"label":"Structure","value":"Acier inoxydable brossé, plaqué or"},{"label":"Dimensions (L × l × H)","value":"80 × 40 × 30, 100 × 45 × 40, 120 × 55 × 50 ou 150 × 55 × 50 cm"},{"label":"Suspension","value":"Câbles fins réglables"},{"label":"Couleur de lumière","value":"Blanc chaud ou blanc froid"},{"label":"Surface conseillée","value":"15 à 30 m², selon le fabricant"},{"label":"Garantie","value":"3 ans, selon le fabricant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les câbles.', 5,
   'Ginkgo — lustre feuilles de céramique blanche sur ramure dorée', 'Lustre design allongé : feuilles de ginkgo en céramique blanche sur une ramure en acier doré brossé, ampoules LED fournies. De 80 à 150 cm, pour table de salle à manger et îlot de cuisine.', '[{"id":"lumiere","label":"Couleur de lumière","values":[{"id":"chaud","label":"Blanc chaud"},{"id":"froid","label":"Blanc froid"}]}]'::jsonb,
@@ -807,12 +807,12 @@ values ((select id from public.products where reference = 'LUM-LUS-006'), 'L 80 
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-006'), 'L 100 cm', 'LUM-LUS-006-L100', null, 16000,
+values ((select id from public.products where reference = 'LUM-LUS-006'), 'L 100 cm', 'LUM-LUS-006-L100', null, 20000,
   5, true, '100 × 45 × 40 cm (L × l × H) · ampoules LED E14 fournies', '/products/ginkgo/rendu-l100-chaud.webp', '{"chaud":"/products/ginkgo/rendu-l100-chaud.webp","froid":"/products/ginkgo/rendu-l100-froid.webp"}'::jsonb, 1)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-006'), 'L 120 cm', 'LUM-LUS-006-L120', null, 25000,
+values ((select id from public.products where reference = 'LUM-LUS-006'), 'L 120 cm', 'LUM-LUS-006-L120', null, 40000,
   5, true, '120 × 55 × 50 cm (L × l × H) · ampoules LED E14 fournies', '/products/ginkgo/rendu-l120-chaud.webp', '{"chaud":"/products/ginkgo/rendu-l120-chaud.webp","froid":"/products/ginkgo/rendu-l120-froid.webp"}'::jsonb, 2)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,

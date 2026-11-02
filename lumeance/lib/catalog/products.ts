@@ -503,20 +503,23 @@ const HALO_VARIANTS: ProductVariant[] = HALO_VERSIONS.map(([n, canopy, height, c
 // intensité non réglable. Promotion −18 % jusqu'au 18/11/2026 ; prix de vente sur le « prix le
 // plus bas des 30 jours avant réduction » (égal au prix promotionnel + économie affichée). Prix
 // identique en lumière chaude ou froide. Nombre d'ampoules non communiqué.
-// [code, longueur, largeur, hauteur (cm), prix fournisseur hors promotion (centimes)]
-const GINKGO_VERSIONS: [string, number, number, number, number][] = [
-  ["l80", 80, 40, 30, 36815],
-  ["l100", 100, 45, 40, 46047],
-  ["l120", 120, 55, 50, 60815],
-  ["l150", 150, 55, 50, 91204],
+// Prix de vente : écart régulier demandé par le propriétaire (10 € par cm de longueur, de 670 € à
+// 1 370 €), au lieu de salePrice() qui donnait 670 / 830 / 920 / 1 370 €. Coefficient sur le prix
+// d'achat : ×1,82 / ×1,89 / ×1,76 / ×1,50.
+// [code, longueur, largeur, hauteur (cm), prix fournisseur hors promotion, prix de vente (centimes)]
+const GINKGO_VERSIONS: [string, number, number, number, number, number][] = [
+  ["l80", 80, 40, 30, 36815, 67000],
+  ["l100", 100, 45, 40, 46047, 87000],
+  ["l120", 120, 55, 50, 60815, 107000],
+  ["l150", 150, 55, 50, 91204, 137000],
 ];
-const GINKGO_BASE_PRICE = Math.min(...GINKGO_VERSIONS.map((v) => salePrice(v[4])));
-const GINKGO_VARIANTS: ProductVariant[] = GINKGO_VERSIONS.map(([code, l, w, h, cost]) => ({
+const GINKGO_BASE_PRICE = Math.min(...GINKGO_VERSIONS.map((v) => v[5]));
+const GINKGO_VARIANTS: ProductVariant[] = GINKGO_VERSIONS.map(([code, l, w, h, , price]) => ({
   id: `ginkgo-${code}`,
   name: `L ${l} cm`,
   sku: `LUM-LUS-006-${code.toUpperCase()}`,
   finish: null,
-  priceAdjustment: salePrice(cost) - GINKGO_BASE_PRICE,
+  priceAdjustment: price - GINKGO_BASE_PRICE,
   stockQuantity: 5,
   active: true,
   details: `${l} × ${w} × ${h} cm (L × l × H) · ampoules LED E14 fournies`,
@@ -1434,7 +1437,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
