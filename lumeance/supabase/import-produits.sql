@@ -827,6 +827,77 @@ select (select id from public.products where reference = 'LUM-LUS-006'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-LUS-006') and storage_path = '/products/ginkgo/ambiance-cuisine.webp');
 
+-- ════ Ondée (LUM-LUS-007) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('ondee', 'Ondée', 'LUM-LUS-007', 'Une pluie de cônes dorés, effilés comme des gouttes, dont chaque pointe s’allume.', 'Ondée fait tomber du plafond une pluie de cônes d’aluminium doré, longs de 40 cm et fins comme des gouttes étirées. À la base de chacun, un embout d’acrylique s’allume : de loin, la cascade dessine une constellation de points lumineux suspendus dans le vide.
+
+Les cônes descendent en spirale sous un pavillon rond doré, de six au-dessus d’une table ou d’un îlot jusqu’à soixante-huit pour une cage d’escalier ou un volume de plusieurs étages. La hauteur se règle par les fils ; la télécommande, fournie, règle l’intensité.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  28000, null,
+  (select id from public.categories where slug = 'lustres'),
+  'published', false, '{}'::jsonb, null,
+  array['Aluminium', 'Acrylique']::text[], array['Doré']::text[], '[{"label":"Sources lumineuses","value":"LED intégrées, 3 W par cône"},{"label":"Tension d’entrée","value":"90–260 V"},{"label":"Cônes","value":"H 40 cm, Ø3,2 cm, aluminium doré, embout acrylique"},{"label":"Versions","value":"De 6 à 68 cônes, pavillon rond Ø30 à Ø100 cm (H 3 cm)"},{"label":"Suspension","value":"Fils réglables, de 200 à 750 cm selon la version ; longueur sur mesure sur demande"},{"label":"Commande","value":"Télécommande fournie : allumage et intensité variable"},{"label":"Matières","value":"Aluminium doré par électrolyse, acrylique"},{"label":"Garantie","value":"3 ans, selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les fils.', 5,
+  'Ondée — lustre LED cascade de cônes dorés pour escalier et double hauteur', 'Lustre design : pluie de cônes d’aluminium doré aux pointes lumineuses, de 6 à 68 cônes sous un pavillon rond. Télécommande fournie. Pour escalier, duplex et grands volumes.', '[]'::jsonb,
+  null, 'cascade',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '6 cônes', 'LUM-LUS-007-C6', null, 0,
+  5, true, 'Pavillon Ø30 cm · hauteur 200 cm, réglable · 18 W · pièce de 5 à 10 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c6.webp', '{}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '9 cônes', 'LUM-LUS-007-C9', null, 15000,
+  5, true, 'Pavillon Ø40 cm · hauteur 250 cm, réglable · 27 W · pièce de 6 à 12 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c9.webp', '{}'::jsonb, 1)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '12 cônes', 'LUM-LUS-007-C12', null, 29000,
+  5, true, 'Pavillon Ø40 cm · hauteur 250 cm, réglable · 36 W · pièce de 7 à 15 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c12.webp', '{}'::jsonb, 2)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '16 cônes', 'LUM-LUS-007-C16', null, 44000,
+  5, true, 'Pavillon Ø50 cm · hauteur 300 cm, réglable · 48 W · pièce de 7 à 15 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c16.webp', '{}'::jsonb, 3)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '25 cônes', 'LUM-LUS-007-C25', null, 65000,
+  5, true, 'Pavillon Ø60 cm · hauteur 400 cm, réglable · 75 W · pièce de 15 à 28 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c25.webp', '{}'::jsonb, 4)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '30 cônes', 'LUM-LUS-007-C30', null, 84000,
+  5, true, 'Pavillon Ø80 cm · hauteur 450 cm, réglable · 90 W · pièce de 18 à 35 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c30.webp', '{}'::jsonb, 5)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '40 cônes', 'LUM-LUS-007-C40', null, 100000,
+  5, true, 'Pavillon Ø80 cm · hauteur 500 cm, réglable · 120 W · pièce de 20 à 38 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c40.webp', '{}'::jsonb, 6)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '48 cônes', 'LUM-LUS-007-C48', null, 117000,
+  5, true, 'Pavillon Ø80 cm · hauteur 650 cm, réglable · 144 W · pièce de 24 à 42 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c48.webp', '{}'::jsonb, 7)
+on conflict (sku) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-LUS-007'), '68 cônes', 'LUM-LUS-007-C68', null, 165000,
+  5, true, 'Pavillon Ø100 cm · hauteur 750 cm, réglable · 204 W · pièce de 28 à 45 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c68.webp', '{}'::jsonb, 8)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-LUS-007'), '/products/ondee/ambiance-escalier.webp', 'Lustre Ondée allumé dans une cage d’escalier hélicoïdale, cascade de cônes dorés aux pointes lumineuses', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-LUS-007') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-LUS-007') and storage_path = '/products/ondee/ambiance-escalier.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.
