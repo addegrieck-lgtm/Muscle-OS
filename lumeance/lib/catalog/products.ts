@@ -655,35 +655,33 @@ const MEANDRE_VARIANTS: ProductVariant[] = [
   },
 ];
 
-// ── Cristalline (LUM-LUS-009) ────────────────────────────────────────────────
+// ── Lucie (LUM-LUS-009) ────────────────────────────────────────────────
 // Fiches fournisseur relevées le 02/11/2026 : cristal K9, acier inoxydable poli miroir doré,
 // LED 6 W par spot, 90–265 V, sans scintillement, IRC ≥ 98. Promotion −16 % jusqu'au 18/11/2026 ;
 // prix hors promotion = « prix le plus bas des 30 jours » (50 cm) ou prix promotionnel + économie
 // affichée. Prix identique en blanc chaud ou blanc froid. Pas de télécommande proposée.
 // [diamètre (cm), hauteur (cm), spots LED, surface (m²), prix fournisseur hors promotion (centimes)]
-const CRISTALLINE_VERSIONS: [number, number, number, string, number][] = [
+const LUCIE_VERSIONS: [number, number, number, string, number][] = [
   [50, 160, 7, "10 à 15", 107274],
   [60, 210, 10, "12 à 18", 152992],
   [80, 280, 15, "15 à 20", 214228],
   [100, 350, 20, "20 à 25", 266135],
 ];
-const CRISTALLINE_BASE_PRICE = Math.min(...CRISTALLINE_VERSIONS.map((v) => salePrice(v[4])));
-const CRISTALLINE_VARIANTS: ProductVariant[] = CRISTALLINE_VERSIONS.map(
-  ([d, h, n, area, cost]) => ({
-    id: `cristalline-d${d}`,
-    name: `Ø${d} cm · H ${h} cm`,
-    sku: `LUM-LUS-009-D${d}`,
-    finish: null,
-    priceAdjustment: salePrice(cost) - CRISTALLINE_BASE_PRICE,
-    stockQuantity: 5,
-    active: true,
-    details: `Pavillon Ø${d} cm · hauteur ${h} cm · ${n} spots LED, ${n * 6} W · pièce de ${area} m²`,
-    imageUrl: `/products/cristalline/rendu-d${d}-chaud.webp`,
-    imageUrls: Object.fromEntries(
-      ["chaud", "froid"].map((t) => [t, `/products/cristalline/rendu-d${d}-${t}.webp`]),
-    ),
-  }),
-);
+const LUCIE_BASE_PRICE = Math.min(...LUCIE_VERSIONS.map((v) => salePrice(v[4])));
+const LUCIE_VARIANTS: ProductVariant[] = LUCIE_VERSIONS.map(([d, h, n, area, cost]) => ({
+  id: `lucie-d${d}`,
+  name: `Ø${d} cm · H ${h} cm`,
+  sku: `LUM-LUS-009-D${d}`,
+  finish: null,
+  priceAdjustment: salePrice(cost) - LUCIE_BASE_PRICE,
+  stockQuantity: 5,
+  active: true,
+  details: `Pavillon Ø${d} cm · hauteur ${h} cm · ${n} spots LED, ${n * 6} W · pièce de ${area} m²`,
+  imageUrl: `/products/lucie/rendu-d${d}-chaud.webp`,
+  imageUrls: Object.fromEntries(
+    ["chaud", "froid"].map((t) => [t, `/products/lucie/rendu-d${d}-${t}.webp`]),
+  ),
+}));
 
 export const CATALOG_PRODUCTS: Product[] = [
   {
@@ -1838,21 +1836,21 @@ export const CATALOG_PRODUCTS: Product[] = [
   },
   {
     id: "lum-lus-009",
-    slug: "cristalline",
-    name: "Cristalline",
+    slug: "lucie",
+    name: "Lucie",
     reference: "LUM-LUS-009",
     shortDescription:
       "Une pluie de cristal K9 taillé qui s’enroule en spirale sous un pavillon doré poli miroir.",
     description: [
-      "Cristalline suspend des centaines de boules de cristal K9 taillées à facettes et de fines perles en losange, enfilées sur des fils presque invisibles. Elles s’enroulent en spirale et s’affinent vers le bas ; sous le pavillon doré poli miroir, les spots allument chaque facette et projettent sur les murs et le plafond une constellation de reflets.",
+      "Lucie suspend des centaines de boules de cristal K9 taillées à facettes et de fines perles en losange, enfilées sur des fils presque invisibles. Elles s’enroulent en spirale et s’affinent vers le bas ; sous le pavillon doré poli miroir, les spots allument chaque facette et projettent sur les murs et le plafond une constellation de reflets.",
       "Pensée pour les cages d’escalier, les duplex et les halls en double hauteur, elle se décline en quatre tailles, de 1,60 m à 3,50 m de hauteur. Lumière blanc chaud ou blanc froid, à fort rendu des couleurs.",
       "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
     ].join("\n\n"),
-    price: CRISTALLINE_BASE_PRICE,
+    price: LUCIE_BASE_PRICE,
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
@@ -1877,15 +1875,15 @@ export const CATALOG_PRODUCTS: Product[] = [
     stockQuantity: 5,
     images: [
       {
-        id: "cristalline-1",
-        url: "/products/cristalline/ambiance-escalier.webp",
-        alt: "Lustre Cristalline allumé dans une cage d’escalier, cascade de boules de cristal en spirale sous un pavillon doré, reflets lumineux sur les murs",
+        id: "lucie-1",
+        url: "/products/lucie/ambiance-escalier.webp",
+        alt: "Lustre Lucie allumé dans une cage d’escalier, cascade de boules de cristal en spirale sous un pavillon doré, reflets lumineux sur les murs",
         caption: "Photographie d’ambiance du fabricant",
         isPrimary: true,
         position: 0,
       },
     ],
-    variants: CRISTALLINE_VARIANTS,
+    variants: LUCIE_VARIANTS,
     options: [
       {
         id: "lumiere",
@@ -1896,9 +1894,9 @@ export const CATALOG_PRODUCTS: Product[] = [
         ],
       },
     ],
-    seoTitle: "Cristalline — lustre cristal K9 en spirale",
+    seoTitle: "Lucie — lustre cristal K9 en spirale",
     seoDescription:
-      "Lustre Cristalline : boules de cristal K9 taillé en spirale sous un pavillon doré poli miroir, de 1,60 à 3,50 m. Pour escalier et double hauteur.",
+      "Lustre Lucie : boules de cristal K9 taillé en spirale sous un pavillon doré poli miroir, de 1,60 à 3,50 m. Pour escalier et double hauteur.",
     art: "cascade",
     isDemo: false,
   },

@@ -1,11 +1,11 @@
-// Lustre Cristalline (LUM-LUS-009) — modèle 3D d'après les fiches à cotes et les photos du fournisseur :
+// Lustre Lucie (LUM-LUS-009) — modèle 3D d'après les fiches à cotes et les photos du fournisseur :
 // pavillon rond en acier inoxydable poli miroir doré (Ø50/60/80/100 cm) garni de spots LED (6 W ×
 // 7/10/15/20) ; fils fins portant des boules de cristal K9 taillées à facettes (grosses et
 // moyennes) et de petites perles en losange ; cascade en spirale qui s'affine vers le bas
 // (hauteur totale 160/210/280/350 cm). Répartition des perles relevée sur les photos (non cotée).
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
-export function buildCristalline({ THREE, scene, rand, D, H, spots, LIGHT, GLOW, topY = 0 }) {
+export function buildLucie({ THREE, scene, rand, D, H, spots, LIGHT, GLOW, topY = 0 }) {
   const group = new THREE.Group();
   scene.add(group);
   const R = D / 2;
