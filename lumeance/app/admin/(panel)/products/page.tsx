@@ -14,7 +14,8 @@ import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { CATALOG_PRODUCTS } from "@/lib/catalog/products";
 import { formatPrice } from "@/lib/money";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { importCatalogProducts } from "./actions";
+import { catalogSyncPlans } from "@/lib/admin/catalog-sync-plans";
+import { importCatalogProducts, syncCatalogProducts } from "./actions";
 
 export const metadata = { title: "Produits" };
 const STATUS_LABELS: Record<string, string> = {
@@ -51,6 +52,7 @@ export default async function ProductsPage({
     q,
     supabase.from("products").select("reference"),
   ]);
+  const { plans: syncs } = await catalogSyncPlans();
   const pending = missingProducts(
     CATALOG_PRODUCTS,
     (refs ?? []).map((r) => r.reference),
@@ -79,6 +81,32 @@ export default async function ProductsPage({
           </p>
           <SubmitButton variant="primary">Importer les nouvelles pièces</SubmitButton>
         </form>
+      )}
+      {syncs.length > 0 && (
+        <div className="mb-6 border border-champagne/40 bg-champagne/10 px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p>
+              {syncs.length === 1 ? "Une pièce a" : `${syncs.length} pièces ont`} des changements
+              préparés dans le catalogue (le stock et vos photos importées ne sont pas modifiés) :
+            </p>
+            <form action={syncCatalogProducts}>
+              <SubmitButton variant="primary">Tout mettre à jour</SubmitButton>
+            </form>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {syncs.map(({ product, plan }) => (
+              <li key={product.reference} className="flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  <strong>{product.name}</strong> — {plan.changes.join(" · ")}
+                </span>
+                <form action={syncCatalogProducts}>
+                  <input type="hidden" name="reference" value={product.reference} />
+                  <SubmitButton>Mettre à jour</SubmitButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       <form className="mb-4 flex flex-wrap gap-2">
         <input
