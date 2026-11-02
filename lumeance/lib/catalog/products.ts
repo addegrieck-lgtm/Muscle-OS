@@ -535,8 +535,8 @@ const GINKGO_VARIANTS: ProductVariant[] = GINKGO_VERSIONS.map(([code, l, w, h, ,
 // électrolyse, embout acrylique, LED 3 W par cône, 90–260 V, intensité réglable, commande par
 // télécommande, garantie 3 ans. Promotion −15/−16 % jusqu'au 18/11/2026 ; prix hors promotion =
 // prix promotionnel + économie affichée (le « prix le plus bas des 30 jours » affiché pour 12 et
-// 40 cônes est incohérent). Règle du propriétaire : télécommande fournie, +10 € inclus — à
-// confirmer qu'elle est bien livrée de série. Couleur de lumière non précisée.
+// 40 cônes est incohérent). Télécommande livrée de série (confirmé par le propriétaire), +10 €
+// inclus (règle du propriétaire). Couleur de lumière non précisée.
 const ONDEE_REMOTE_EXTRA = 1000;
 // [cônes, pavillon Ø (cm), hauteur (cm), puissance (W), surface (m²), prix hors promotion (centimes)]
 const ONDEE_VERSIONS: [number, number, number, number, string, number][] = [
@@ -550,7 +550,14 @@ const ONDEE_VERSIONS: [number, number, number, number, string, number][] = [
   [48, 80, 650, 144, "24 à 42", 94460],
   [68, 100, 750, 204, "28 à 45", 127967],
 ];
-const ONDEE_MIN_PRICE = Math.min(...ONDEE_VERSIONS.map((v) => salePrice(v[5])));
+// Prix à écart régulier (demande du propriétaire) : coefficient dégressif en douceur, de ×1,8
+// jusqu'à 300 € d'achat à ×1,5 à partir de 1 000 €, au lieu du palier brutal de salePrice() à
+// 500 € ; arrondi à la dizaine supérieure.
+const ondeePrice = (cost: number) => {
+  const k = 1.8 - 0.3 * Math.min(1, Math.max(0, (cost - 30000) / 70000));
+  return Math.ceil((cost * k) / 1000) * 1000;
+};
+const ONDEE_MIN_PRICE = Math.min(...ONDEE_VERSIONS.map((v) => ondeePrice(v[5])));
 // Prix de base : version la moins chère, télécommande comprise.
 const ONDEE_BASE_PRICE = ONDEE_MIN_PRICE + ONDEE_REMOTE_EXTRA;
 const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, area, cost]) => ({
@@ -558,7 +565,7 @@ const ONDEE_VARIANTS: ProductVariant[] = ONDEE_VERSIONS.map(([n, canopy, h, w, a
   name: `${n} cônes`,
   sku: `LUM-LUS-007-C${n}`,
   finish: null,
-  priceAdjustment: salePrice(cost) - ONDEE_MIN_PRICE,
+  priceAdjustment: ondeePrice(cost) - ONDEE_MIN_PRICE,
   stockQuantity: 5,
   active: true,
   details: `Pavillon Ø${canopy} cm · hauteur ${h} cm, réglable · ${w} W · pièce de ${area} m² · télécommande fournie, intensité variable`,
@@ -1539,7 +1546,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-lustres",
     categorySlug: "lustres",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,

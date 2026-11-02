@@ -839,7 +839,7 @@ Les cônes descendent en spirale sous un pavillon rond doré, de six au-dessus d
 Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
   28000, null,
   (select id from public.categories where slug = 'lustres'),
-  'draft', false, '{}'::jsonb, null,
+  'published', false, '{}'::jsonb, null,
   array['Aluminium', 'Acrylique']::text[], array['Doré']::text[], '[{"label":"Sources lumineuses","value":"LED intégrées, 3 W par cône"},{"label":"Tension d’entrée","value":"90–260 V"},{"label":"Cônes","value":"H 40 cm, Ø3,2 cm, aluminium doré, embout acrylique"},{"label":"Versions","value":"De 6 à 68 cônes, pavillon rond Ø30 à Ø100 cm (H 3 cm)"},{"label":"Suspension","value":"Fils réglables, de 200 à 750 cm selon la version ; longueur sur mesure sur demande"},{"label":"Commande","value":"Télécommande fournie : allumage et intensité variable"},{"label":"Matières","value":"Aluminium doré par électrolyse, acrylique"},{"label":"Garantie","value":"3 ans, selon le fabricant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée. La hauteur se règle par les fils.', 5,
   'Ondée — lustre LED cascade de cônes dorés pour escalier et double hauteur', 'Lustre design : pluie de cônes d’aluminium doré aux pointes lumineuses, de 6 à 68 cônes sous un pavillon rond. Télécommande fournie. Pour escalier, duplex et grands volumes.', '[]'::jsonb,
@@ -863,27 +863,27 @@ values ((select id from public.products where reference = 'LUM-LUS-007'), '12 c�
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-007'), '16 cônes', 'LUM-LUS-007-C16', null, 46000,
+values ((select id from public.products where reference = 'LUM-LUS-007'), '16 cônes', 'LUM-LUS-007-C16', null, 44000,
   5, true, 'Pavillon Ø50 cm · hauteur 300 cm, réglable · 48 W · pièce de 7 à 15 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c16.webp', '{}'::jsonb, 3)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-007'), '25 cônes', 'LUM-LUS-007-C25', null, 54000,
+values ((select id from public.products where reference = 'LUM-LUS-007'), '25 cônes', 'LUM-LUS-007-C25', null, 65000,
   5, true, 'Pavillon Ø60 cm · hauteur 400 cm, réglable · 75 W · pièce de 15 à 28 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c25.webp', '{}'::jsonb, 4)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-007'), '30 cônes', 'LUM-LUS-007-C30', null, 75000,
+values ((select id from public.products where reference = 'LUM-LUS-007'), '30 cônes', 'LUM-LUS-007-C30', null, 84000,
   5, true, 'Pavillon Ø80 cm · hauteur 450 cm, réglable · 90 W · pièce de 18 à 35 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c30.webp', '{}'::jsonb, 5)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-007'), '40 cônes', 'LUM-LUS-007-C40', null, 93000,
+values ((select id from public.products where reference = 'LUM-LUS-007'), '40 cônes', 'LUM-LUS-007-C40', null, 100000,
   5, true, 'Pavillon Ø80 cm · hauteur 500 cm, réglable · 120 W · pièce de 20 à 38 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c40.webp', '{}'::jsonb, 6)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
   stock_quantity, active, details, image_url, image_urls, position)
-values ((select id from public.products where reference = 'LUM-LUS-007'), '48 cônes', 'LUM-LUS-007-C48', null, 115000,
+values ((select id from public.products where reference = 'LUM-LUS-007'), '48 cônes', 'LUM-LUS-007-C48', null, 117000,
   5, true, 'Pavillon Ø80 cm · hauteur 650 cm, réglable · 144 W · pièce de 24 à 42 m² · télécommande fournie, intensité variable', '/products/ondee/rendu-c48.webp', '{}'::jsonb, 7)
 on conflict (sku) do nothing;
 insert into public.product_variants (product_id, name, sku, finish, price_adjustment,

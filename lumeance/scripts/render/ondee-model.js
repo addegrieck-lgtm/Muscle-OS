@@ -18,18 +18,22 @@ export function buildOndee({ THREE, scene, rand, n, canopy, LIGHT, GLOW, topY = 
   // Cône effilé : pointe fine en haut (attache), base Ø3,2 cm en bas.
   const coneGeo = new THREE.CylinderGeometry(R, 0.0025, CONE_H, 32, 1, true);
   const capGeo = new THREE.CylinderGeometry(R * 0.96, R * 0.96, 0.018, 32);
-  const span = 0.25 + 0.06 * Math.pow(n, 0.85);
-  const perTurn = Math.min(10, 4 + n / 5);
+  // Spirale nette : une hélice (ou plusieurs hélices imbriquées pour les grandes versions) qui
+  // descend régulièrement ; hauteur de cascade accrue pour bien séparer les cônes.
+  const span = 0.5 + 0.16 * Math.pow(n, 0.6);
+  const strands = Math.max(1, Math.ceil(n / 14));
+  const perStrand = Math.ceil(n / strands);
+  const turns = 1.25 + perStrand / 14;
   const cones = [], caps = [], wires = [];
   let minY = 0;
   const tips = [];
   for (let i = 0; i < n; i++) {
-    const t = n === 1 ? 0 : i / (n - 1);
-    const ang = (i / perTurn) * Math.PI * 2 + rand() * 0.3;
-    const shell = n > 16 ? 0.35 + 0.65 * Math.sqrt(((i * 7) % 5) / 4) : 0.85;
-    const r = (canopy / 2 - 0.03) * shell * (0.9 + rand() * 0.15);
+    const s = i % strands, k = Math.floor(i / strands);
+    const t = perStrand === 1 ? 0 : k / (perStrand - 1);
+    const ang = t * turns * Math.PI * 2 + (s * 2 * Math.PI) / strands + (rand() - 0.5) * 0.08;
+    const r = (canopy / 2 - 0.035) * (strands === 1 ? 0.95 : 1 - 0.45 * (s / (strands - 1)));
     const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
-    const top = topY - t * span - rand() * 0.04; // haut du cône
+    const top = topY - t * span - (s / strands) * (span / perStrand) - rand() * 0.01; // haut du cône
     const yc = top - CONE_H / 2;
     cones.push(coneGeo.clone().translate(x, yc, z));
     caps.push(capGeo.clone().translate(x, top - CONE_H - 0.009, z));
