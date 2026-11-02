@@ -26,6 +26,7 @@ echo "▶ import-produits.sql (×2)"
   if (select count(*) from public.product_images where storage_path like '/products/%') <> 16 then raise exception 'images : %', (select count(*) from public.product_images where storage_path like '/products/%'); end if;
   if exists (select 1 from public.products where reference like 'LUM-%' and category_id is null) then raise exception 'catégorie manquante'; end if;
   if (select promotion from public.products where reference = 'LUM-APP-002') is distinct from jsonb_build_object('buy', 3, 'free', 1) then raise exception 'offre Volute absente'; end if;
+  if (select promotion from public.products where reference = 'LUM-APP-003') is distinct from jsonb_build_object('buy', 1, 'free', 1, 'percent', 50) then raise exception 'offre Aiguille absente'; end if;
 end \$\$;"
 [ -n "${DEBUG_SQL:-}" ] && "${PSQL[@]}" -c "$DEBUG_SQL"
 echo "✔ Tests base de données réussis"

@@ -46,6 +46,8 @@ export interface ProductOption {
 export interface ProductPromotion {
   buy: number;
   free: number;
+  /** Remise sur les `free` exemplaires, en % (100 = offerts, défaut). */
+  percent?: number;
 }
 
 export interface SpecLine {

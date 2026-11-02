@@ -22,6 +22,7 @@ const productId = (reference: string) =>
 const migration = [
   "supabase/migrations/20261101000100_product_presentation.sql",
   "supabase/migrations/20261102000100_product_promotion.sql",
+  "supabase/migrations/20261103000100_product_promotion_percent.sql",
 ]
   .map((f) => readFileSync(join(root, f), "utf8").trim())
   .join("\n\n");

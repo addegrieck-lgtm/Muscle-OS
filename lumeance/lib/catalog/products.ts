@@ -1276,6 +1276,7 @@ export const CATALOG_PRODUCTS: Product[] = [
         ],
       },
     ],
+    promotion: { buy: 1, free: 1, percent: 50 },
     seoTitle: "Aiguille — applique murale LED minimaliste, tige et disque lumineux, noire ou dorée",
     seoDescription:
       "Applique murale LED au dessin graphique : tige de 21 cm, disque lumineux, câble jusqu’à une rosace ronde. Noire ou dorée, lumière chaude, naturelle ou froide. Tête de lit, bureau, couloir.",
