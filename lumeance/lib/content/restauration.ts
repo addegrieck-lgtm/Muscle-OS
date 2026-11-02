@@ -43,7 +43,7 @@ export const PRO_USES: Record<string, ProUse> = {
     space: "bar",
     use: "Au-dessus d’un comptoir, d’un bar ou d’une grande table d’hôtes.",
   },
-  sillage: {
+  meandre: {
     space: "bar",
     use: "Au-dessus d’un comptoir, d’une table d’hôtes ou d’une grande table.",
   },

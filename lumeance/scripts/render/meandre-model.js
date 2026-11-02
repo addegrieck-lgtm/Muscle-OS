@@ -1,4 +1,4 @@
-// Suspension Sillage (LUM-SUS-004) — modèle 3D d'après la fiche du fournisseur :
+// Suspension Méandre (LUM-SUS-004) — modèle 3D d'après la fiche du fournisseur :
 //   barre L 120 × l 5 × H 5 cm, teinte noyer, LED 24 W diffusée sous la barre.
 // Vue de face (fiche « L 120xW 5cm ») : la barre est droite à ses deux extrémités et descend en
 // S d'environ sa propre hauteur (≈ 5 cm) dans sa partie centrale (de 36 % à 64 % de la
@@ -6,7 +6,7 @@
 // sur la fiche). Pavillon non représenté sur la fiche : les câbles sortent du cadre.
 // Amplitude et positions estimées sur l'image du fournisseur (aucune cote fournie).
 
-export function buildSillage({ THREE, scene, rand, wood, LIGHT, GLOW, barY = -0.9 }) {
+export function buildMeandre({ THREE, scene, rand, wood, LIGHT, GLOW, barY = -0.9 }) {
   const L = 1.2, S = 0.05, STEP = 0.05;
   const X0 = -L / 2 + 0.36 * L, X1 = -L / 2 + 0.64 * L;
   const smooth = (t) => t * t * (3 - 2 * t);

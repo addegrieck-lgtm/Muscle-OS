@@ -3,7 +3,7 @@
 <script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
 </head><body>
 <script type="module">
-// Visualisation de Sillage (LUM-SUS-004) — modèle : sillage-model.js.
+// Visualisation de Méandre (LUM-SUS-004) — modèle : meandre-model.js.
 // Une seule version (noyer, L 120 cm, intensité variable) : une seule vue, lumière chaude.
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -12,7 +12,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
-import { buildSillage } from "/scripts/render/sillage-model.js";
+import { buildMeandre } from "/scripts/render/meandre-model.js";
 import { buildRoom } from "/scripts/render/room.js";
 
 const t0 = performance.now();
@@ -38,7 +38,7 @@ const keyL = new THREE.DirectionalLight(0xffe2c0, 0.3); keyL.position.set(2, -1,
 
 // ── Luminaire (noyer) ──
 const BAR_Y = -0.9;
-buildSillage({ THREE, scene, rand, BAR_Y, barY: BAR_Y, LIGHT, GLOW,
+buildMeandre({ THREE, scene, rand, BAR_Y, barY: BAR_Y, LIGHT, GLOW,
   wood: { base: "#4a2716", dark: "30,14,6", light: "128,78,44" } });
 
 // ── Caméra : de trois quarts, légèrement sous la barre (diffuseur visible) ──
