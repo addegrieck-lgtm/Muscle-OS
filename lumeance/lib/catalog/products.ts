@@ -1223,7 +1223,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     compareAtPrice: null,
     categoryId: "demo-cat-appliques",
     categorySlug: "appliques",
-    status: "draft",
+    status: "published",
     featured: false,
     dimensions: {},
     weight: null,
@@ -1231,7 +1231,8 @@ export const CATALOG_PRODUCTS: Product[] = [
     finishes: ["Noir", "Doré"],
     specifications: [
       { label: "Type", value: "Applique murale LED" },
-      { label: "Sources lumineuses", value: "LED, 5 W" },
+      { label: "Sources lumineuses", value: "LED intégrée, 5 W, fournie" },
+      { label: "Intensité", value: "Réglable, selon le fabricant" },
       { label: "Dimensions", value: "Corps H 21 cm · câble 30 cm, réglable · rosace Ø5,6 cm" },
       { label: "Finitions", value: "Noir ou doré" },
       {
@@ -1239,6 +1240,7 @@ export const CATALOG_PRODUCTS: Product[] = [
         value: "Blanc chaud (2700–3500 K), naturel (3500–5500 K) ou froid (5500–7000 K)",
       },
       { label: "Surface conseillée", value: "3 à 8 m², selon le fabricant" },
+      { label: "Garantie", value: "3 ans, selon le fabricant" },
     ],
     deliveryInformation: null,
     assemblyInformation:
