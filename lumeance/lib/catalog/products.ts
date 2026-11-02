@@ -632,6 +632,29 @@ const PERLE_VARIANTS: ProductVariant[] = PERLE_VERSIONS.map(
   }),
 );
 
+// ── Méandre (LUM-SUS-004) ─────────────────────────────────────────────────────
+// Fiche fournisseur relevée le 02/11/2026 : barre L 120 × l 5 × H 5 cm, corps en fer forgé laqué
+// effet bois (teinte noyer, « Walnut »), LED 24 W, intensité variable, télécommande, pièce de 10 à
+// 15 m². Une seule version (D120CM). Promotion −12 % jusqu'au 18/11/2026 (202,39 €) ; prix de vente
+// calculé sur le prix le plus bas des 30 jours avant réduction : 231,93 €.
+// Règle du propriétaire : télécommande fournie, +10 € inclus dans le prix.
+const MEANDRE_COST = 23193;
+const MEANDRE_REMOTE_EXTRA = 1000;
+const MEANDRE_VARIANTS: ProductVariant[] = [
+  {
+    id: "meandre-l120",
+    name: "L 120 cm",
+    sku: "LUM-SUS-004-L120",
+    finish: null,
+    priceAdjustment: 0,
+    stockQuantity: 5,
+    active: true,
+    details:
+      "Barre L 120 × l 5 × H 5 cm · LED 24 W · télécommande fournie, intensité variable · pièce de 10 à 15 m²",
+    imageUrl: "/products/meandre/rendu-noyer.webp",
+  },
+];
+
 export const CATALOG_PRODUCTS: Product[] = [
   {
     id: "lum-lus-001",
@@ -1729,6 +1752,58 @@ export const CATALOG_PRODUCTS: Product[] = [
     seoDescription:
       "Lustre Perle : gouttes de cristal à bulles et cônes d’aluminium, de 1 à 49 gouttes, rond, en spirale ou linéaire. Doré ou chromé, blanc chaud ou froid.",
     art: "cascade",
+    isDemo: false,
+  },
+  {
+    id: "lum-sus-004",
+    slug: "meandre",
+    name: "Méandre",
+    reference: "LUM-SUS-004",
+    shortDescription:
+      "Une longue barre au veinage de noyer qui serpente en son milieu et diffuse vers le bas une lumière continue.",
+    description: [
+      "Méandre est une ligne de 120 cm qui s’infléchit en douceur en son milieu, comme une rivière dans un paysage. Son corps en fer forgé, laqué d’un veinage de noyer, laisse toute sa face inférieure s’éclairer d’une lumière diffuse et continue, sans point lumineux visible.",
+      "Elle se suspend au-dessus d’une table de repas, d’un îlot de cuisine ou d’un comptoir, pour une pièce de 10 à 15 m². LED de 24 W ; télécommande fournie pour régler l’intensité.",
+      "Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.",
+    ].join("\n\n"),
+    price: salePrice(MEANDRE_COST) + MEANDRE_REMOTE_EXTRA,
+    compareAtPrice: null,
+    categoryId: "demo-cat-suspensions",
+    categorySlug: "suspensions",
+    status: "draft",
+    featured: false,
+    dimensions: {},
+    weight: null,
+    materials: ["Fer forgé", "Laque effet bois"],
+    finishes: ["Noyer"],
+    specifications: [
+      { label: "Type", value: "Suspension linéaire LED" },
+      { label: "Sources lumineuses", value: "LED intégrée, 24 W, fournie" },
+      { label: "Commande", value: "Télécommande fournie : intensité variable" },
+      { label: "Dimensions", value: "L 120 × l 5 × H 5 cm" },
+      { label: "Matières", value: "Fer forgé laqué effet bois, traité anticorrosion" },
+      { label: "Finition", value: "Veinage noyer" },
+      { label: "Surface conseillée", value: "10 à 15 m², selon le fabricant" },
+    ],
+    deliveryInformation: null,
+    assemblyInformation:
+      "Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.",
+    stockQuantity: 5,
+    images: [
+      {
+        id: "meandre-1",
+        url: "/products/meandre/ambiance-salle-a-manger.webp",
+        alt: "Suspension Méandre au veinage de noyer allumée au-dessus d’une table de repas en bois, dans une salle à manger ouverte sur la cuisine",
+        caption: "Photographie d’ambiance du fabricant",
+        isPrimary: true,
+        position: 0,
+      },
+    ],
+    variants: MEANDRE_VARIANTS,
+    seoTitle: "Méandre — suspension linéaire LED effet noyer, 120 cm",
+    seoDescription:
+      "Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Au-dessus d’une table, d’un îlot ou d’un comptoir.",
+    art: "tiers",
     isDemo: false,
   },
 ];

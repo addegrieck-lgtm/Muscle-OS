@@ -991,6 +991,37 @@ select (select id from public.products where reference = 'LUM-LUS-008'), '/produ
 where not exists (select 1 from public.product_images
   where product_id = (select id from public.products where reference = 'LUM-LUS-008') and storage_path = '/products/perle/ambiance-double-hauteur.webp');
 
+-- ════ Méandre (LUM-SUS-004) ════
+insert into public.products (slug, name, reference, short_description, description, price,
+  compare_at_price, category_id, status, featured, dimensions, weight, materials, finishes,
+  technical_specifications, delivery_information, assembly_information, stock_quantity,
+  seo_title, seo_description, options, option_labels, art, promotion)
+values ('meandre', 'Méandre', 'LUM-SUS-004', 'Une longue barre au veinage de noyer qui serpente en son milieu et diffuse vers le bas une lumière continue.', 'Méandre est une ligne de 120 cm qui s’infléchit en douceur en son milieu, comme une rivière dans un paysage. Son corps en fer forgé, laqué d’un veinage de noyer, laisse toute sa face inférieure s’éclairer d’une lumière diffuse et continue, sans point lumineux visible.
+
+Elle se suspend au-dessus d’une table de repas, d’un îlot de cuisine ou d’un comptoir, pour une pièce de 10 à 15 m². LED de 24 W ; télécommande fournie pour régler l’intensité.
+
+Caractéristiques techniques communiquées par le fabricant. Les documents de conformité sont en cours de vérification avant la mise en vente.',
+  43000, null,
+  (select id from public.categories where slug = 'suspensions'),
+  'draft', false, '{}'::jsonb, null,
+  array['Fer forgé', 'Laque effet bois']::text[], array['Noyer']::text[], '[{"label":"Type","value":"Suspension linéaire LED"},{"label":"Sources lumineuses","value":"LED intégrée, 24 W, fournie"},{"label":"Commande","value":"Télécommande fournie : intensité variable"},{"label":"Dimensions","value":"L 120 × l 5 × H 5 cm"},{"label":"Matières","value":"Fer forgé laqué effet bois, traité anticorrosion"},{"label":"Finition","value":"Veinage noyer"},{"label":"Surface conseillée","value":"10 à 15 m², selon le fabricant"}]'::jsonb,
+  null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.', 5,
+  'Méandre — suspension linéaire LED effet noyer, 120 cm', 'Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Au-dessus d’une table, d’un îlot ou d’un comptoir.', '[]'::jsonb,
+  null, 'tiers',
+  null)
+on conflict (reference) do nothing;
+insert into public.product_variants (product_id, name, sku, finish, price_adjustment,
+  stock_quantity, active, details, image_url, image_urls, position)
+values ((select id from public.products where reference = 'LUM-SUS-004'), 'L 120 cm', 'LUM-SUS-004-L120', null, 0,
+  5, true, 'Barre L 120 × l 5 × H 5 cm · LED 24 W · télécommande fournie, intensité variable · pièce de 10 à 15 m²', '/products/meandre/rendu-noyer.webp', '{}'::jsonb, 0)
+on conflict (sku) do nothing;
+insert into public.product_images (product_id, storage_path, alt_text, caption, position, is_primary)
+select (select id from public.products where reference = 'LUM-SUS-004'), '/products/meandre/ambiance-salle-a-manger.webp', 'Suspension Méandre au veinage de noyer allumée au-dessus d’une table de repas en bois, dans une salle à manger ouverte sur la cuisine', 'Photographie d’ambiance du fabricant', 0,
+  true and not exists (select 1 from public.product_images
+    where product_id = (select id from public.products where reference = 'LUM-SUS-004') and is_primary)
+where not exists (select 1 from public.product_images
+  where product_id = (select id from public.products where reference = 'LUM-SUS-004') and storage_path = '/products/meandre/ambiance-salle-a-manger.webp');
+
 commit;
 
 -- Vérification : une ligne par pièce, avec son nombre de versions et d'images.
