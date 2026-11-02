@@ -49,6 +49,58 @@ export function slugify(input: string) {
 }
 
 /** Convertit le formulaire d'administration produit en données validées (Zod). */
+/**
+ * Options sans incidence sur le prix, une ligne par option :
+ *   « Finition : Doré (dore), Noir (noir) »
+ * L'identifiant entre parenthèses est conservé (il relie l'option aux visualisations 3D des
+ * versions) ; une valeur sans identifiant en reçoit un, tiré de son libellé.
+ */
+export function parseOptions(raw: string) {
+  return raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const i = line.indexOf(":");
+      const label = (i === -1 ? line : line.slice(0, i)).trim();
+      const values = (i === -1 ? "" : line.slice(i + 1))
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+        .map((v) => {
+          const m = v.match(/^(.*?)\s*\(([a-z0-9-]+)\)$/);
+          return m ? { id: m[2]!, label: m[1]!.trim() } : { id: slugify(v), label: v };
+        });
+      return { id: OPTION_IDS[label.toLowerCase()] ?? slugify(label), label, values };
+    });
+}
+/** Identifiants historiques des options (utilisés par les visualisations 3D). */
+const OPTION_IDS: Record<string, string> = {
+  "couleur de lumière": "lumiere",
+  finition: "finition",
+};
+
+export function optionsToText(
+  options: { label: string; values: { id: string; label: string }[] }[],
+) {
+  return options
+    .map((o) => `${o.label} : ${o.values.map((v) => `${v.label} (${v.id})`).join(", ")}`)
+    .join("\n");
+}
+
+/** Offre par lot : vide = aucune offre. */
+function promotionFromForm(fd: FormData) {
+  const buy = str(fd, "promo_buy").trim();
+  const free = str(fd, "promo_free").trim();
+  const percent = str(fd, "promo_percent").trim();
+  if (!buy && !free) return null;
+  return {
+    buy: Number(buy),
+    free: Number(free),
+    ...(percent && Number(percent) !== 100 ? { percent: Number(percent) } : {}),
+  };
+}
+
 export function productFromForm(fd: FormData) {
   const price = parseEuroInput(str(fd, "price"));
   const compare = str(fd, "compare_at_price").trim()
@@ -81,6 +133,8 @@ export function productFromForm(fd: FormData) {
     stock_quantity: Number(str(fd, "stock_quantity") || 0),
     seo_title: str(fd, "seo_title"),
     seo_description: str(fd, "seo_description"),
+    options: parseOptions(str(fd, "options")),
+    promotion: promotionFromForm(fd),
   };
   return productSchema.safeParse(raw);
 }

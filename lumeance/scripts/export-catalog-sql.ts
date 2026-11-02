@@ -23,6 +23,7 @@ const migration = [
   "supabase/migrations/20261101000100_product_presentation.sql",
   "supabase/migrations/20261102000100_product_promotion.sql",
   "supabase/migrations/20261103000100_product_promotion_percent.sql",
+  "supabase/migrations/20261104000100_catalog_hash.sql",
 ]
   .map((f) => readFileSync(join(root, f), "utf8").trim())
   .join("\n\n");

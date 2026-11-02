@@ -95,6 +95,30 @@ export const productSchema = z
     stock_quantity: z.number().int().min(0).max(100000),
     seo_title: optionalText(70),
     seo_description: optionalText(170),
+    options: z
+      .array(
+        z.object({
+          id: z.string().regex(/^[a-z0-9-]{1,40}$/),
+          label: z.string().trim().min(1).max(60),
+          values: z
+            .array(
+              z.object({
+                id: z.string().regex(/^[a-z0-9-]{1,40}$/, "Identifiant d'option invalide"),
+                label: z.string().trim().min(1).max(60),
+              }),
+            )
+            .min(1, "Chaque option doit avoir au moins une valeur")
+            .max(20),
+        }),
+      )
+      .max(6),
+    promotion: z
+      .object({
+        buy: z.number().int().min(1).max(20),
+        free: z.number().int().min(1).max(20),
+        percent: z.number().int().min(1).max(99).optional(),
+      })
+      .nullable(),
   })
   .refine((p) => p.compare_at_price === null || p.compare_at_price > p.price, {
     message: "Le prix barré doit être supérieur au prix de vente",

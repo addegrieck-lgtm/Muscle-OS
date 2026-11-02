@@ -99,11 +99,14 @@ pièce suit ce modèle, sauf demande contraire.
 ## 5. Base Supabase (site en ligne)
 
 - Après toute modification du catalogue dans le code : `npm run catalog:sql` (régénère
-  `supabase/import-produits.sql`, qui n'écrase jamais l'existant).
-- Pour une pièce **déjà en base**, écrire un correctif `supabase/correctifs/<date>-<piece>-<objet>.sql`
-  (transaction, sans risque à rejouer, requête de vérification à la fin) et le **tester sur une
-  base jetable** qui simule la base en ligne (ancien import + correctifs déjà publiés). Le
-  propriétaire le colle ensuite dans Supabase → SQL Editor.
+  `supabase/import-produits.sql`, utile pour une base neuve ou une nouvelle migration).
+- **Nouvelle pièce** : administration → Produits → « Importer les nouvelles pièces ».
+- **Pièce déjà en base** : administration → Produits → bandeau « changements préparés dans le
+  catalogue » → « Mettre à jour » (ou « Tout mettre à jour »). Le bandeau liste les changements
+  (fiche, versions, photos). Le stock et les photos importées dans l'administration ne sont jamais
+  modifiés ; les versions créées à la main (SKU hors modèle « <référence>-… ») sont conservées.
+  Voir `lib/admin/catalog-sync.ts`. Plus de correctif SQL à coller, sauf nouvelle colonne
+  (migration).
 - Mettre à jour le nombre d'images attendu dans `supabase/tests/run.sh` si la galerie change.
 
 ## 6. Avant de publier

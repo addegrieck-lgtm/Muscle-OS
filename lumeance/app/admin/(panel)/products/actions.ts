@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { imageRows, missingProducts, productRow, variantRows } from "@/lib/admin/catalog-import";
+import { catalogHash } from "@/lib/admin/catalog-sync";
+import { catalogSyncPlans } from "@/lib/admin/catalog-sync-plans";
 import { firstError, productFromForm } from "@/lib/admin/forms";
 import { uploadImage } from "@/lib/admin/media";
 import { back, dbError } from "@/lib/admin/redirect";
@@ -206,7 +208,10 @@ export async function importCatalogProducts() {
   for (const p of todo) {
     const { data: row, error } = await supabase
       .from("products")
-      .insert(productRow(p, categoryId.get(p.categorySlug ?? "") ?? null))
+      .insert({
+        ...productRow(p, categoryId.get(p.categorySlug ?? "") ?? null),
+        catalog_hash: catalogHash(p),
+      })
       .select("id")
       .single();
     if (error)
@@ -228,4 +233,77 @@ export async function importCatalogProducts() {
   }
   refreshStore();
   back("/admin/products", { ok: `Importé : ${done.join(", ")}. À relire avant publication.` });
+}
+
+/**
+ * Met à jour les pièces déjà en base à partir du catalogue écrit dans le code (toutes, ou celle
+ * dont la référence est envoyée). Le stock et les photos importées dans l'administration ne sont
+ * jamais modifiés. Voir lib/admin/catalog-sync.ts.
+ */
+export async function syncCatalogProducts(form: FormData) {
+  await requireAdmin(CATALOG_ROLES);
+  const only = String(form.get("reference") ?? "").toUpperCase();
+  const { error, plans } = await catalogSyncPlans();
+  if (error) back("/admin/products", { erreur: error });
+  const todo = plans.filter((x) => !only || x.product.reference.toUpperCase() === only);
+  if (!todo.length) back("/admin/products", { ok: "Tout est déjà à jour." });
+  const supabase = await createSupabaseServerClient();
+  const done: string[] = [];
+  for (const { product, db, plan, hash } of todo) {
+    const fail = (e: { message: string; code?: string }) =>
+      back("/admin/products", { erreur: `${product.name} : ${dbError("catalogSync", e)}` });
+    {
+      const { error: e } = await supabase
+        .from("products")
+        .update({ ...plan.product, catalog_hash: hash })
+        .eq("id", db.id);
+      if (e) fail(e);
+    }
+    if (plan.variantsDelete.length) {
+      const { error: e } = await supabase
+        .from("product_variants")
+        .delete()
+        .in("id", plan.variantsDelete);
+      if (e) fail(e);
+    }
+    for (const { id: vid, patch } of plan.variantsUpdate) {
+      const { error: e } = await supabase.from("product_variants").update(patch).eq("id", vid);
+      if (e) fail(e);
+    }
+    if (plan.variantsInsert.length) {
+      const { error: e } = await supabase.from("product_variants").insert(plan.variantsInsert);
+      if (e) fail(e);
+    }
+    // Images : suppressions, puis retrait de l'ancienne image principale avant d'en désigner une
+    // nouvelle (une seule image principale par pièce, contrainte en base).
+    if (plan.imagesDelete.length) {
+      const { error: e } = await supabase
+        .from("product_images")
+        .delete()
+        .in("id", plan.imagesDelete);
+      if (e) fail(e);
+    }
+    const newPrimary =
+      plan.imagesUpdate.some((u) => u.patch.is_primary === true) ||
+      plan.imagesInsert.some((r) => r.is_primary === true);
+    if (newPrimary) {
+      const { error: e } = await supabase
+        .from("product_images")
+        .update({ is_primary: false })
+        .eq("product_id", db.id)
+        .like("storage_path", "/products/%");
+      if (e) fail(e);
+    }
+    for (const { id: iid, patch } of plan.imagesUpdate) {
+      const { error: e } = await supabase.from("product_images").update(patch).eq("id", iid);
+      if (e) fail(e);
+    }
+    if (plan.imagesInsert.length) {
+      const { error: e } = await supabase.from("product_images").insert(plan.imagesInsert);
+      if (e) fail(e);
+    }
+    done.push(product.name);
+  }
+  refreshStore();
+  back("/admin/products", { ok: `Mis à jour depuis le catalogue : ${done.join(", ")}.` });
 }
