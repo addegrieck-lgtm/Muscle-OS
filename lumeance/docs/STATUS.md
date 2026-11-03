@@ -64,6 +64,12 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - En ligne : Céleste, Aigrette, Sylve, Luciole, Silhouette, Nébuleuse, Constellation, Volute (applique spirale, offre « 3 achetées, la 4ᵉ offerte »), Organza (lustre phare : voiles d'acrylique, 1 à 28 plaques), Aiguille (applique tige et disque lumineux, offre « 1 achetée, la 2ᵉ à −50 % »), Halo (lustre anneaux en spirale, 3 à 48 anneaux), Ginkgo (lustre feuilles de céramique, 80 à 150 cm), Ondée (lustre cascade de cônes dorés, 6 à 68 cônes), Lucie (lustre cristal K9 en spirale, 4 tailles).
 - Brouillons : Perle, Méandre.
 
+## Avis clients vérifiés (3 novembre 2026)
+- Demande d'avis : page d'une commande expédiée ou livrée → « Créer le lien de demande d'avis » (jeton aléatoire, empreinte seule en base, 60 jours) ; lien à envoyer au client (pas de service d'e-mail).
+- Dépôt : `/avis/[jeton]`, une note par pièce de la commande, photos (4 max, réduites dans le navigateur, bucket privé). Relecture dans `/admin/reviews` (publier, refuser, répondre) ; photos copiées dans le bucket public à la publication.
+- Affichage : fiches produits (moyenne, répartition, « Achat vérifié », réponse), données structurées AggregateRating/Review seulement si avis publiés. Page `/avis-clients` (information sur le contrôle des avis, art. L111-7-2 et D111-17 C. conso.).
+- Migration : `supabase/migrations/20261107000100_reviews.sql`.
+
 ## Points ouverts — à traiter avec le propriétaire
 - Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).
 - Photos fabricant : obtenir une autorisation écrite d’utilisation, puis des visuels propres.

@@ -21,6 +21,9 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { OrderStatus, PaymentStatus } from "@/lib/validation/schemas";
 import { changeOrderStatus, recordManualPayment, saveAdminNotes } from "../actions";
+import { createReviewRequest } from "../../reviews/actions";
+import { siteUrl } from "@/lib/env";
+import { REVIEWABLE_ORDER_STATUSES } from "@/lib/services/reviews";
 
 export const metadata = { title: "Commande" };
 
@@ -84,6 +87,16 @@ export default async function OrderPage({
     last_name: string | null;
     phone: string | null;
   } | null;
+  const sp = await searchParams;
+  const reviewLink = /^[A-Za-z0-9_-]{40,64}$/.test(sp.avis ?? "")
+    ? `${siteUrl}/avis/${sp.avis}`
+    : null;
+  const canAskReview = (REVIEWABLE_ORDER_STATUSES as readonly string[]).includes(o.status);
+  const { data: reviewReq } = await supabase
+    .from("review_requests")
+    .select("created_at, expires_at")
+    .eq("order_id", id)
+    .maybeSingle();
   const next = allowedTransitions(o.status as OrderStatus, o.payment_status as PaymentStatus);
   const canRecordPayment =
     session.role !== "order_manager" && ["unpaid", "pending", "failed"].includes(o.payment_status);
@@ -103,7 +116,7 @@ export default async function OrderPage({
           </>
         }
       />
-      <Flash {...flashFrom(await searchParams)} />
+      <Flash {...flashFrom(sp)} />
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           <Table head={["Produit", "Réf.", "Prix unitaire", "Qté", "Total"]}>
@@ -233,6 +246,34 @@ export default async function OrderPage({
               <p className="mt-3 text-xs text-brun/50">
                 « Payée » ne peut être atteint qu’après un paiement confirmé.
               </p>
+            )}
+          </Card>
+          <Card title="Avis client">
+            <div id="avis" />
+            {reviewLink ? (
+              <div className="space-y-2 text-sm">
+                <p>Lien personnel à envoyer au client (affiché une seule fois) :</p>
+                <input readOnly value={reviewLink} className={inputClass} />
+                <p className="text-xs text-brun/50">
+                  Valable 60 jours. Copiez-le dans votre e-mail ou message au client.
+                </p>
+              </div>
+            ) : canAskReview ? (
+              <form action={createReviewRequest} className="space-y-2">
+                <input type="hidden" name="orderId" value={id} />
+                {reviewReq && (
+                  <p className="text-xs text-brun/55">
+                    Lien créé le {new Date(reviewReq.created_at).toLocaleDateString("fr-FR")},
+                    valable jusqu’au {new Date(reviewReq.expires_at).toLocaleDateString("fr-FR")}.
+                    En créer un nouveau désactive l’ancien.
+                  </p>
+                )}
+                <SubmitButton variant="secondary">
+                  {reviewReq ? "Créer un nouveau lien" : "Créer le lien de demande d’avis"}
+                </SubmitButton>
+              </form>
+            ) : (
+              <p className="text-sm text-brun/55">Disponible une fois la commande expédiée.</p>
             )}
           </Card>
           <Card title="Client">

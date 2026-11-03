@@ -27,6 +27,7 @@ export const FOOTER_NAV = {
   service: [
     { href: "/livraison", label: "Livraison" },
     { href: "/retours", label: "Retours et garanties" },
+    { href: "/avis-clients", label: "Avis clients" },
     { href: "/cgv", label: "Conditions générales de vente" },
     { href: "/mentions-legales", label: "Mentions légales" },
     { href: "/confidentialite", label: "Confidentialité et cookies" },

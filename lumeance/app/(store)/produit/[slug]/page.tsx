@@ -13,6 +13,8 @@ import { categoryLabel } from "@/lib/navigation";
 import { getProductBySlug, getProducts, relatedProducts } from "@/lib/services/catalog";
 import { getShippingSettings } from "@/lib/services/content";
 import { jsonLdScript, productJsonLd } from "@/lib/seo/jsonld";
+import { ProductReviews, RatingBadge } from "@/components/reviews/ProductReviews";
+import { getPublishedReviews } from "@/lib/services/reviews-db";
 import { pageMetadata } from "@/lib/seo/metadata";
 import type { Dimensions } from "@/types/catalog";
 
@@ -49,7 +51,8 @@ export default async function ProductPage({ params }: Props) {
   ]);
   if (!product) notFound();
   const related = relatedProducts(all, product);
-  const jsonLd = productJsonLd(product);
+  const reviews = product.isDemo ? [] : await getPublishedReviews(product.id);
+  const jsonLd = productJsonLd(product, reviews);
   const dims = Object.entries(product.dimensions).filter(([, v]) => typeof v === "number") as [
     keyof Dimensions,
     number,
@@ -84,6 +87,9 @@ export default async function ProductPage({ params }: Props) {
           <div className="lg:col-span-5 lg:pt-6">
             <p className="t-eyebrow text-champagne">{categoryLabel(product.categorySlug)}</p>
             <h1 className="t-h1 mt-4">{product.name}</h1>
+            <div className="mt-3">
+              <RatingBadge reviews={reviews} />
+            </div>
             <p className="t-small mt-3 text-brun/50">Réf. {product.reference}</p>
             {product.shortDescription && (
               <p className="t-lead mt-8 text-brun/85">{product.shortDescription}</p>
@@ -195,6 +201,8 @@ export default async function ProductPage({ params }: Props) {
           <StickyBuyBar product={product} targetId="achat" />
         </VariantProvider>
       </section>
+
+      {!product.isDemo && <ProductReviews reviews={reviews} />}
 
       {related.length > 0 && (
         <section className="bg-creme py-24 md:py-32" aria-labelledby="related-title">
