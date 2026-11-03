@@ -30,6 +30,15 @@ export default function ConfidentialitePage() {
               3 ans maximum pour la preuve du consentement.
             </li>
             <li>
+              <strong>Compte client</strong> : identité, e-mail, téléphone (facultatif), mot de
+              passe (chiffré, jamais lisible par nous) ; pour une entreprise, raison sociale, SIRET
+              et numéro de TVA, vérifiés sur l’annuaire public des entreprises ; code de parrainage
+              et lien avec le parrain ; cumul des commandes payées (Cercle Luméance). Base légale :
+              exécution du contrat (gestion du compte et des avantages). Conservation : jusqu’à la
+              suppression du compte, puis 3 ans, sauf obligations comptables. Authentification
+              opérée par Supabase.
+            </li>
+            <li>
               <strong>Formulaire de contact</strong> : nom, e-mail, message. Base légale : intérêt
               légitime à répondre. Conservation : 3 ans à compter du dernier échange.
             </li>

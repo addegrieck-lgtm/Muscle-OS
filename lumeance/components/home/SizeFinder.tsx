@@ -1,9 +1,9 @@
 "use client";
 
+import { Price } from "@/components/account/AccountProvider";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { formatPrice } from "@/lib/money";
 import type { SizeSuggestion } from "@/lib/content/home";
 
 /**
@@ -73,7 +73,9 @@ export function SizeFinder({ items }: { items: SizeSuggestion[] }) {
                   <p className="t-small text-brun/50">
                     Conseillée de {m.min} à {m.max} m²
                   </p>
-                  <p className="mt-3 font-serif text-xl">{formatPrice(m.price)}</p>
+                  <p className="mt-3 font-serif text-xl">
+                    <Price cents={m.price} />
+                  </p>
                 </div>
               </Link>
             </li>

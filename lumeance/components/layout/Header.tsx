@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useAccount } from "@/components/account/AccountProvider";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LogoSymbol, Wordmark } from "@/components/brand/Logo";
@@ -12,6 +13,7 @@ import { MobileMenu } from "./MobileMenu";
 const DARK_TOP = ["/", "/maison"];
 
 export function Header({ banner }: { banner?: React.ReactNode }) {
+  const account = useAccount();
   const pathname = usePathname();
   const { count, ready, lastAdded } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -92,6 +94,26 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-5">
+            <Link
+              href={account.loggedIn ? "/compte" : "/compte/connexion"}
+              className="t-eyebrow flex items-center gap-2"
+              aria-label={account.loggedIn ? "Mon compte" : "Se connecter ou créer un compte"}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1}
+                aria-hidden
+              >
+                <circle cx="12" cy="8.5" r="3.5" />
+                <path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" />
+              </svg>
+              <span className="hidden sm:inline">
+                {account.loggedIn ? (account.firstName ?? "Compte") : "Compte"}
+              </span>
+            </Link>
             <Link
               href="/panier"
               className="t-eyebrow relative flex items-center gap-2"

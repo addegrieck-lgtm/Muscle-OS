@@ -1,7 +1,7 @@
+import { Price } from "@/components/account/AccountProvider";
 import Link from "next/link";
 import { ProductVisual } from "@/components/product/ProductVisual";
 import { Arrow, ButtonLink, Eyebrow } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/money";
 import { categoryLabel } from "@/lib/navigation";
 import type { Product } from "@/types/catalog";
 
@@ -67,7 +67,7 @@ export function Signature({ products }: { products: Product[] }) {
                       {p.variants.some((v) => v.active && v.priceAdjustment > 0) && (
                         <span className="mr-1 text-base text-brun/50">dès</span>
                       )}
-                      {formatPrice(p.price)}
+                      <Price cents={p.price} />
                     </span>
                     <Link
                       href={`/produit/${p.slug}`}

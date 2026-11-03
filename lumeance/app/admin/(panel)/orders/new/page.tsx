@@ -125,6 +125,16 @@ export default async function NewOrder({
                   </span>
                 </span>
               </label>
+              <label className="flex items-start gap-3 text-sm">
+                <input name="account_benefits" type="checkbox" className="mt-1" />
+                <span>
+                  Avantages du compte client
+                  <span className="block text-xs opacity-70">
+                    Si l’e-mail correspond à un compte en ligne : remise entreprise (si validée),
+                    Cercle Luméance, parrainage et avoir — comme dans le panier du site.
+                  </span>
+                </span>
+              </label>
               <Field label="Remise (€)">
                 <input name="discount_amount" defaultValue="0" className={inputClass} />
               </Field>

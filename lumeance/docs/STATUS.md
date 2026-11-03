@@ -45,6 +45,9 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
 - [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).
+- [x] Comptes clients : particuliers (Cercle Luméance, parrainage) et entreprises validées
+  (prix HT, remise −5/−10/−20 % dès 500/1 500/3 000 € HT) — mise en service :
+  [COMPTES.md](COMPTES.md).
 
 ## Audit du 1er novembre 2026 — corrections appliquées ✅
 - Sélecteur de versions : « 26 sphères · 870 € » au lieu de « 26 870 € » (lisible comme un seul montant).
@@ -65,7 +68,7 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - Demande d'avis : page d'une commande expédiée ou livrée → « Créer le lien de demande d'avis » (jeton aléatoire, empreinte seule en base, 60 jours) ; lien à envoyer au client (pas de service d'e-mail).
 - Dépôt : `/avis/[jeton]`, une note par pièce de la commande, photos (4 max, réduites dans le navigateur, bucket privé). Relecture dans `/admin/reviews` (publier, refuser, répondre) ; photos copiées dans le bucket public à la publication.
 - Affichage : fiches produits (moyenne, répartition, « Achat vérifié », réponse), données structurées AggregateRating/Review seulement si avis publiés. Page `/avis-clients` (information sur le contrôle des avis, art. L111-7-2 et D111-17 C. conso.).
-- Migration : `supabase/migrations/20261106000100_reviews.sql`.
+- Migration : `supabase/migrations/20261107000100_reviews.sql`.
 
 ## Points ouverts — à traiter avec le propriétaire
 - Pages légales : 20+ champs « À compléter » visibles (raison sociale, SIRET, adresse, directeur de publication, hébergeur, médiateur, responsable de traitement).

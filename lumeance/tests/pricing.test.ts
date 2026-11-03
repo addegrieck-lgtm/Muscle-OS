@@ -197,3 +197,28 @@ describe("offre par lot (3 achetées, la 4ᵉ offerte)", () => {
     expect(q.total).toBe(24000 + 1500);
   });
 });
+
+describe("Avantages du compte dans le panier", () => {
+  it("remise pro et affichage HT pour un compte entreprise validé", async () => {
+    const { priceCart } = await import("@/lib/services/pricing");
+    const { CATALOG_PRODUCTS } = await import("@/lib/catalog/products");
+    const sylve = CATALOG_PRODUCTS.find((p) => p.slug === "sylve")!;
+    const v = sylve.variants.find((x) => x.active)!;
+    const options = Object.fromEntries((sylve.options ?? []).map((o) => [o.id, o.values[0]!.id]));
+    const lines = [
+      {
+        productId: sylve.id,
+        variantId: v.id,
+        quantity: 2,
+        ...(sylve.options?.length ? { options } : {}),
+      },
+    ];
+    const free = { standardAmount: 0, freeThreshold: 0 };
+    const plain = priceCart(lines, CATALOG_PRODUCTS, free);
+    const pro = priceCart(lines, CATALOG_PRODUCTS, free, { type: "entreprise", proApproved: true });
+    expect(plain.priceMode).toBe("ttc");
+    expect(pro.priceMode).toBe("ht");
+    expect(pro.discounts.at(-1)!.label).toMatch(/Remise professionnelle/);
+    expect(pro.total).toBeLessThan(plain.total);
+  });
+});

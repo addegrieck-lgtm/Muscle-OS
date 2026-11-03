@@ -76,7 +76,7 @@ export default async function ReviewsAdmin({
         {...flashFrom(sp)}
         error={
           error
-            ? "Avis indisponibles : collez la migration supabase/migrations/20261106000100_reviews.sql dans Supabase → SQL Editor."
+            ? "Avis indisponibles : collez la migration supabase/migrations/20261107000100_reviews.sql dans Supabase → SQL Editor."
             : flashFrom(sp).error
         }
       />

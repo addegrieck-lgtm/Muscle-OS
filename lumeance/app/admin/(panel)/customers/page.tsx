@@ -6,6 +6,15 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Clients" };
 
+type AccountRow = { account_type: string; pro_status: string; company_name: string | null };
+function accountLabel(raw: unknown): string {
+  const a = (Array.isArray(raw) ? raw[0] : raw) as AccountRow | null | undefined;
+  if (!a) return "—";
+  if (a.account_type !== "entreprise") return "Particulier";
+  const s = { pending: "à valider", approved: "validé", rejected: "refusé" }[a.pro_status] ?? "";
+  return `${a.company_name ?? "Entreprise"} · ${s}`;
+}
+
 export default async function CustomersPage({
   searchParams,
 }: {
@@ -16,9 +25,12 @@ export default async function CustomersPage({
   const supabase = await createSupabaseServerClient();
   let q = supabase
     .from("customers")
-    .select("id, email, first_name, last_name, created_at, orders(total, payment_status)")
+    .select(
+      `id, email, first_name, last_name, created_at, orders(total, payment_status), customer_accounts${sp.pros ? "!inner" : ""}(account_type, pro_status, company_name)`,
+    )
     .order("created_at", { ascending: false })
     .limit(200);
+  if (sp.pros) q = q.eq("customer_accounts.pro_status", "pending");
   if (sp.q) {
     const term = sp.q
       .replace(/[%,()]/g, " ")
@@ -26,7 +38,13 @@ export default async function CustomersPage({
       .slice(0, 60);
     q = q.or(`email.ilike.%${term}%,last_name.ilike.%${term}%,first_name.ilike.%${term}%`);
   }
-  const { data } = await q;
+  const [{ data }, { count: pending }] = await Promise.all([
+    q,
+    supabase
+      .from("customer_accounts")
+      .select("auth_user_id", { count: "exact", head: true })
+      .eq("pro_status", "pending"),
+  ]);
   return (
     <>
       <PageTitle
@@ -38,6 +56,22 @@ export default async function CustomersPage({
           ) : undefined
         }
       />
+      {(pending ?? 0) > 0 && !sp.pros && (
+        <p className="mb-4 border-l-2 border-champagne bg-creme/60 px-4 py-3 text-sm">
+          {pending} compte(s) entreprise à valider.{" "}
+          <Link href="/admin/customers?pros=1" className="underline">
+            Les voir
+          </Link>
+        </p>
+      )}
+      {sp.pros && (
+        <p className="mb-4 text-sm">
+          Comptes entreprise à valider ·{" "}
+          <Link href="/admin/customers" className="underline">
+            Tous les clients
+          </Link>
+        </p>
+      )}
       <form className="mb-4 flex gap-2">
         <input
           name="q"
@@ -50,7 +84,7 @@ export default async function CustomersPage({
         </button>
       </form>
       <Table
-        head={["Client", "E-mail", "Commandes", "Total payé", "Depuis"]}
+        head={["Client", "E-mail", "Compte", "Commandes", "Total payé", "Depuis"]}
         empty={data?.length ? undefined : "Aucun client."}
       >
         {(data ?? []).map((c) => {
@@ -66,6 +100,7 @@ export default async function CustomersPage({
                 </Link>
               </td>
               <td className="px-4 py-3">{c.email}</td>
+              <td className="px-4 py-3">{accountLabel(c.customer_accounts)}</td>
               <td className="px-4 py-3">{orders.length}</td>
               <td className="px-4 py-3">{formatPrice(paid)}</td>
               <td className="px-4 py-3 text-brun/60">

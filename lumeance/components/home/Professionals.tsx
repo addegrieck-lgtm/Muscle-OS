@@ -17,7 +17,7 @@ export function Professionals() {
             partie de nos luminaires trouvent naturellement leur place en restauration et en
             hôtellerie. Nous vous aidons à composer la lumière de votre établissement, avec jusqu’à{" "}
             {PRO_DISCOUNT_MAX_PERCENT} % de remise professionnelle dès {PRO_DISCOUNT_MIN_LABEL}{" "}
-            d’achat, sur devis.
+            d’achat, avec un compte entreprise.
           </p>
           <div data-reveal className="mt-10">
             <ButtonLink href="/restauration" variant="outline">

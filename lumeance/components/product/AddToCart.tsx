@@ -1,11 +1,11 @@
 "use client";
 
+import { Price } from "@/components/account/AccountProvider";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/money";
 import { requestSubject } from "@/lib/catalog/request-subject";
 import { pinEvent } from "@/lib/analytics/pinterest";
 import { promotionHint, promotionLabel } from "@/lib/catalog/promotion";
@@ -39,11 +39,10 @@ export function AddToCart({ product }: { product: Product }) {
             sinon, une version plus chère afficherait un prix barré inférieur au prix réel. */}
         {product.compareAtPrice && price === product.price && (
           <span className="mr-3 text-xl text-brun/40 line-through">
-            {formatPrice(product.compareAtPrice)}
+            <Price cents={product.compareAtPrice} />
           </span>
         )}
-        {formatPrice(price)}
-        <span className="t-small ml-3 font-sans text-brun/50">TTC</span>
+        <Price cents={price} suffix />
       </p>
       {product.promotion && (
         <p className="t-eyebrow -mt-3 text-champagne">
