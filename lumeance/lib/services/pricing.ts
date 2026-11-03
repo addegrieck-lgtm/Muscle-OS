@@ -1,6 +1,8 @@
 import type { Product, ShippingSettings } from "@/types/catalog";
 import type { CartLineInput } from "@/lib/validation/schemas";
 import { promotionDiscount, promotionLabel } from "@/lib/catalog/promotion";
+import { isOnPromotion } from "@/lib/catalog/pro";
+import { accountDiscounts, type AccountContext } from "@/lib/catalog/loyalty";
 
 export interface PricedLine {
   productId: string;
@@ -19,6 +21,7 @@ export interface PricedLine {
 }
 
 export interface CartDiscount {
+  /** Pièce concernée ; vide pour une remise de compte (pro, Cercle, parrainage). */
   productId: string;
   label: string; // ex. « Aube — 3 achetées, la 4ᵉ offerte »
   amount: number; // centimes, positif
@@ -36,6 +39,10 @@ export interface CartQuote {
   shipping: number | null; // null = à confirmer
   total: number;
   itemCount: number;
+  /** « ht » pour un compte entreprise validé : montants affichés hors taxes. */
+  priceMode: "ttc" | "ht";
+  /** Avoir de parrainage appliqué (à marquer utilisé à la commande). */
+  usedCreditId: string | null;
 }
 
 /**
@@ -55,6 +62,7 @@ export function priceCart(
   input: CartLineInput[],
   catalog: Product[],
   shipping: Pick<ShippingSettings, "standardAmount" | "freeThreshold">,
+  account: AccountContext | null = null,
 ): CartQuote {
   const byId = new Map(catalog.map((p) => [p.id, p]));
   const merged = new Map<string, CartLineInput>();
@@ -148,6 +156,19 @@ export function priceCart(
         amount,
       });
   }
+  // Avantages du compte (remise pro, Cercle, parrainage), après les offres par lot ; les remises
+  // en pourcentage ne portent pas sur les pièces déjà en promotion.
+  const afterLots = subtotal - discounts.reduce((s, d) => s + d.amount, 0);
+  const acc = accountDiscounts(
+    lines.map((l) => {
+      const p = byId.get(l.productId)!;
+      return { total: l.total, onPromotion: isOnPromotion(p) };
+    }),
+    afterLots,
+    account,
+  );
+  for (const d of acc.discounts)
+    discounts.push({ productId: "", label: d.label, amount: d.amount });
   const discount = discounts.reduce((s, d) => s + d.amount, 0);
   const net = subtotal - discount;
 
@@ -167,5 +188,7 @@ export function priceCart(
     shipping: shippingAmount,
     total: net + (shippingAmount ?? 0),
     itemCount: lines.reduce((s, l) => s + l.quantity, 0),
+    priceMode: account?.type === "entreprise" && account.proApproved ? "ht" : "ttc",
+    usedCreditId: acc.usedCreditId,
   };
 }

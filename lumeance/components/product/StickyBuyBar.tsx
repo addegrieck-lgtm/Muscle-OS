@@ -1,9 +1,9 @@
 "use client";
 
+import { Price } from "@/components/account/AccountProvider";
 import { useEffect, useState } from "react";
 import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/money";
 import type { Product } from "@/types/catalog";
 
 /**
@@ -49,7 +49,7 @@ export function StickyBuyBar({ product, targetId }: { product: Product; targetId
         <div className="min-w-0">
           <p className="truncate font-serif text-lg leading-tight">{product.name}</p>
           <p className="t-small text-brun/70">
-            {formatPrice(price)} <span className="text-brun/45">TTC</span>
+            <Price cents={price} suffix suffixClassName="ml-1 text-brun/45" />
             {variant && <span className="text-brun/45"> · {variant.name}</span>}
           </p>
         </div>

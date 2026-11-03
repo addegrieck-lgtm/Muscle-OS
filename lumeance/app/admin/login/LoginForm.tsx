@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { signIn } from "../actions-auth";
 import { inputClass } from "@/components/admin/ui";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(signIn, { error: "" });
@@ -18,9 +19,8 @@ export function LoginForm() {
         <span className="mb-1.5 block text-[0.7rem] uppercase tracking-[0.14em] text-brun/60">
           Mot de passe
         </span>
-        <input
+        <PasswordInput
           name="password"
-          type="password"
           required
           minLength={8}
           autoComplete="current-password"

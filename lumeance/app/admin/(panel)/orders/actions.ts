@@ -1,5 +1,7 @@
 "use server";
 
+import { accountDiscounts, type AccountContext } from "@/lib/catalog/loyalty";
+import { ht } from "@/lib/catalog/tax";
 import {
   PRO_DISCOUNT_MIN,
   PRO_DISCOUNT_MIN_LABEL,
@@ -171,22 +173,76 @@ export async function createManualOrder(form: FormData) {
     });
   }
   const subtotal = items.reduce((s, i) => s + i.total, 0);
-  // Remise professionnelle par paliers (−10/15/20 % dès 500/1 500/3 000 € de pièces), sur les
+  // Remise professionnelle par paliers (−5/10/20 % dès 500/1 500/3 000 € HT de pièces), sur les
   // pièces hors promotion, ajoutée à la remise saisie. Case cochée sous le minimum : refus explicite plutôt qu'une remise ignorée.
   const wantsPro = form.get("pro_discount") === "on";
-  if (wantsPro && subtotal < PRO_DISCOUNT_MIN)
+  if (wantsPro && ht(subtotal) < PRO_DISCOUNT_MIN)
     back("/admin/orders/new", {
-      erreur: `Remise professionnelle : minimum ${PRO_DISCOUNT_MIN_LABEL} de pièces (commande : ${formatPrice(subtotal)}).`,
+      erreur: `Remise professionnelle : minimum ${PRO_DISCOUNT_MIN_LABEL} de pièces (commande : ${formatPrice(ht(subtotal))} HT).`,
     });
   const pro = wantsPro ? proDiscount(proLines) : { percent: 0, amount: 0 };
   if (pro.amount > 0) {
     d.discount_amount += pro.amount;
     d.admin_notes = [
-      `Remise professionnelle −${pro.percent} % (palier ${formatPrice(subtotal)} de pièces, hors pièces en promotion) : ${formatPrice(pro.amount)}.`,
+      `Remise professionnelle −${pro.percent} % (palier : ${formatPrice(ht(subtotal))} HT de pièces, hors pièces en promotion) : ${formatPrice(pro.amount)} TTC.`,
       d.admin_notes,
     ]
       .filter(Boolean)
       .join("\n");
+  }
+  // Avantages du compte client en ligne (même e-mail) : remise pro si validée, Cercle,
+  // parrainage — même calcul que le panier du site (lib/catalog/loyalty.ts).
+  let usedCreditId: string | null = null;
+  if (form.get("account_benefits") === "on") {
+    if (wantsPro)
+      back("/admin/orders/new", {
+        erreur: "Choisissez soit la remise professionnelle manuelle, soit les avantages du compte.",
+      });
+    const { data: acc } = await supabase
+      .from("customer_accounts")
+      .select(
+        "auth_user_id, customer_id, account_type, pro_status, referred_by, customers!inner(email)",
+      )
+      .eq("customers.email", d.email)
+      .maybeSingle();
+    if (!acc)
+      back("/admin/orders/new", {
+        erreur: "Aucun compte client en ligne pour cette adresse e-mail.",
+      });
+    const [{ data: paidOrders }, { data: credits }] = await Promise.all([
+      supabase
+        .from("orders")
+        .select("total")
+        .eq("customer_id", acc.customer_id)
+        .in("payment_status", ["paid", "partially_refunded"]),
+      supabase
+        .from("referral_credits")
+        .select("id, amount")
+        .eq("account_id", acc.auth_user_id)
+        .is("used_at", null)
+        .order("created_at"),
+    ]);
+    const ctx: AccountContext =
+      acc.account_type === "entreprise"
+        ? { type: "entreprise", proApproved: acc.pro_status === "approved" }
+        : {
+            type: "particulier",
+            spent: (paidOrders ?? []).reduce((s, o) => s + Number(o.total), 0),
+            referredFirstOrder: Boolean(acc.referred_by) && (paidOrders ?? []).length === 0,
+            credits: (credits ?? []).map((c) => ({ id: c.id, amount: Number(c.amount) })),
+          };
+    const res = accountDiscounts(proLines, subtotal - d.discount_amount, ctx);
+    const total = res.discounts.reduce((s, x) => s + x.amount, 0);
+    if (total > 0) {
+      d.discount_amount += total;
+      usedCreditId = res.usedCreditId;
+      d.admin_notes = [
+        `Avantages du compte : ${res.discounts.map((x) => `${x.label} ${formatPrice(x.amount)}`).join(" ; ")}.`,
+        d.admin_notes,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
   }
   if (d.discount_amount > subtotal + d.shipping_amount)
     back("/admin/orders/new", { erreur: "La remise dépasse le montant de la commande." });
@@ -228,6 +284,13 @@ export async function createManualOrder(form: FormData) {
   if (iErr) {
     await supabase.from("orders").delete().eq("id", order.id);
     back("/admin/orders/new", { erreur: dbError("order_items", iErr) });
+  }
+  if (usedCreditId) {
+    await supabase
+      .from("referral_credits")
+      .update({ used_order_id: order.id, used_at: new Date().toISOString() })
+      .eq("id", usedCreditId)
+      .is("used_at", null);
   }
   back(`/admin/orders/${order.id}`, { ok: "Commande manuelle créée en brouillon." });
 }

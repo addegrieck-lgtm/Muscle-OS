@@ -1,3 +1,6 @@
+import { CIRCLE_LEVELS, REFERRAL_AMOUNT, REFERRAL_MIN_ORDER } from "@/lib/catalog/loyalty";
+import { PRO_TIERS_LABEL } from "@/lib/catalog/pro";
+import { formatPrice } from "@/lib/money";
 import { LEGAL_PENDING } from "@/lib/seo/legal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LegalNotice, Prose, Todo } from "@/components/ui/Prose";
@@ -39,8 +42,38 @@ export default function CgvPage() {
           <h2>3. Prix</h2>
           <p>
             Les prix sont indiqués en euros toutes taxes comprises, hors frais de livraison indiqués
-            avant validation de la commande.
+            avant validation de la commande. Pour un compte entreprise validé, ils sont également
+            présentés hors taxes (TVA de 20 %) ; le total TTC reste indiqué.
           </p>
+          <h3>Avantages des comptes clients</h3>
+          <p>
+            Les avantages ci-dessous sont réservés aux titulaires d’un compte, ne s’appliquent pas
+            aux pièces déjà en promotion (offre par lot ou prix barré) ni aux frais de livraison, et
+            sont calculés automatiquement au moment de la commande. Ils ne sont ni échangeables ni
+            remboursables et peuvent être modifiés pour l’avenir, sans effet sur les commandes
+            passées.
+          </p>
+          <ul>
+            <li>
+              <strong>Comptes entreprise</strong> (professionnels disposant d’un SIRET, après
+              vérification par LUMÉANCE) : {PRO_TIERS_LABEL}, selon le montant hors taxes des pièces
+              commandées.
+            </li>
+            <li>
+              <strong>Cercle Luméance</strong> (particuliers) :{" "}
+              {CIRCLE_LEVELS.map(
+                (l) => `${l.name}, −${l.percent} % dès ${formatPrice(l.min)} d’achats cumulés`,
+              ).join(" ; ")}
+              . Seules les commandes payées et non remboursées comptent.
+            </li>
+            <li>
+              <strong>Parrainage</strong> (particuliers) : {formatPrice(REFERRAL_AMOUNT)} de remise
+              pour le filleul sur sa première commande d’au moins {formatPrice(REFERRAL_MIN_ORDER)}{" "}
+              ; {formatPrice(REFERRAL_AMOUNT)} d’avoir pour le parrain quand cette commande est
+              payée, utilisable sur une commande d’au moins {formatPrice(REFERRAL_MIN_ORDER)}, un
+              avoir par commande. Le parrainage de soi-même ou par des comptes multiples est exclu.
+            </li>
+          </ul>
           <h2>4. Commande et paiement</h2>
           <p>
             <Todo>

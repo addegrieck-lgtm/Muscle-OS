@@ -8,6 +8,7 @@ import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { useCart } from "@/components/cart/CartProvider";
 import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
+import { ht } from "@/lib/catalog/tax";
 import type { CartQuote } from "@/lib/services/pricing";
 
 export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
@@ -38,6 +39,10 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
       </p>
     );
   }
+  // Compte entreprise validé : montants affichés hors taxes, TVA détaillée, total TTC.
+  const isHT = quote?.priceMode === "ht";
+  const money = (cents: number) => formatPrice(isHT ? ht(cents) : cents);
+
   if (!quote || quote.lines.length === 0) {
     return (
       <div className="py-24 text-center">
@@ -100,7 +105,10 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                       <p className="t-small mt-1 text-champagne">Pièce fictive (aperçu)</p>
                     )}
                   </div>
-                  <p className="font-serif text-xl">{formatPrice(l.total)}</p>
+                  <p className="font-serif text-xl">
+                    {formatPrice(isHT ? ht(l.total) : l.total)}
+                    {isHT && <span className="t-small ml-1 font-sans text-brun/50">HT</span>}
+                  </p>
                 </div>
                 <div className="mt-auto flex items-center justify-between pt-4">
                   <div
@@ -171,13 +179,16 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
           <h2 className="t-eyebrow">Récapitulatif</h2>
           <dl className="mt-8 space-y-4">
             <div className="flex justify-between">
-              <dt>Sous-total</dt>
-              <dd>{formatPrice(quote.subtotal)}</dd>
+              <dt>Sous-total{isHT ? " HT" : ""}</dt>
+              <dd>{money(quote.subtotal)}</dd>
             </div>
-            {quote.discounts.map((d) => (
-              <div key={d.productId} className="flex justify-between gap-4 text-champagne">
-                <dt>Offre {d.label}</dt>
-                <dd className="shrink-0">− {formatPrice(d.amount)}</dd>
+            {quote.discounts.map((d, i) => (
+              <div
+                key={`${d.productId}-${i}`}
+                className="flex justify-between gap-4 text-champagne"
+              >
+                <dt>{d.productId ? `Offre ${d.label}` : d.label}</dt>
+                <dd className="shrink-0">− {money(d.amount)}</dd>
               </div>
             ))}
             <div className="flex justify-between text-brun/70">
@@ -187,9 +198,21 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                   ? "À confirmer"
                   : quote.shipping === 0
                     ? "Offerte"
-                    : formatPrice(quote.shipping)}
+                    : money(quote.shipping)}
               </dd>
             </div>
+            {isHT && (
+              <>
+                <div className="flex justify-between border-t border-brun/15 pt-4">
+                  <dt>Total HT</dt>
+                  <dd>{formatPrice(ht(quote.total))}</dd>
+                </div>
+                <div className="flex justify-between text-brun/70">
+                  <dt>TVA 20 %</dt>
+                  <dd>{formatPrice(quote.total - ht(quote.total))}</dd>
+                </div>
+              </>
+            )}
             <div className="flex justify-between border-t border-brun/15 pt-4 font-serif text-2xl">
               <dt>Total TTC</dt>
               <dd>{formatPrice(quote.total)}</dd>

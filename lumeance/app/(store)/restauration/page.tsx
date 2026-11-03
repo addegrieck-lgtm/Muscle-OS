@@ -26,7 +26,7 @@ const SERVICE = [
   },
   {
     title: `Jusqu’à −${PRO_DISCOUNT_MAX_PERCENT} % pour les professionnels`,
-    text: `Restaurants, bars et hôtels bénéficient d’une remise sur devis dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, d’autant plus forte que le projet est important. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
+    text: `Restaurants, bars et hôtels bénéficient d’une remise dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, d’autant plus forte que le projet est important : automatique avec un compte entreprise, ou sur devis. Nous vérifions aussi auprès du fabricant les quantités et les délais avant de nous engager.`,
   },
   {
     title: "Une lumière cohérente",
@@ -58,7 +58,7 @@ export default async function RestaurationPage() {
             La lumière fait la moitié de l’ambiance.
           </h1>
           <p data-reveal="fade" className="t-eyebrow mt-6 text-champagne">
-            Jusqu’à −{PRO_DISCOUNT_MAX_PERCENT} % pour les professionnels, sur devis
+            Jusqu’à −{PRO_DISCOUNT_MAX_PERCENT} % pour les professionnels
           </p>
           <p data-reveal data-reveal-delay="0.2" className="t-lead mt-8 max-w-2xl text-ivoire/75">
             On revient dans une salle autant pour sa lumière que pour sa carte. Nos suspensions,
@@ -129,22 +129,23 @@ export default async function RestaurationPage() {
             <table className="mt-5 w-full max-w-md text-left">
               <thead>
                 <tr className="t-small border-b border-brun/15 text-brun/60">
-                  <th className="pb-3 font-normal">Montant des pièces</th>
+                  <th className="pb-3 font-normal">Montant HT des pièces</th>
                   <th className="pb-3 text-right font-normal">Remise</th>
                 </tr>
               </thead>
               <tbody>
                 {PRO_TIERS.map((t) => (
                   <tr key={t.min} className="border-b border-brun/10">
-                    <td className="py-3">Dès {formatPrice(t.min)}</td>
+                    <td className="py-3">Dès {formatPrice(t.min)} HT</td>
                     <td className="py-3 text-right font-serif text-xl">−{t.percent} %</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <p className="t-small mt-5 text-brun/70">
-              Montant des pièces commandées, hors livraison. La remise s’applique aux pièces qui ne
-              sont pas déjà en promotion
+              Montant hors taxes des pièces commandées, hors livraison. Pour un compte entreprise
+              validé, la remise s’applique automatiquement dans le panier ; sinon, sur devis. La
+              remise s’applique aux pièces qui ne sont pas déjà en promotion
               {promoNames.length > 0 ? ` (aujourd’hui : ${promoNames.join(", ")})` : ""} ; ces
               dernières comptent toutefois pour atteindre le palier.
             </p>
