@@ -72,3 +72,41 @@ describe("Comptes entreprise", () => {
     ]);
   });
 });
+
+describe("Inscription", () => {
+  it("contrôle la clé du SIRET", async () => {
+    const { isValidSiret } = await import("@/lib/validation/account");
+    expect(isValidSiret("73282932000074")).toBe(true); // SIRET réel valide (Luhn)
+    expect(isValidSiret("73282932000075")).toBe(false);
+    expect(isValidSiret("1234")).toBe(false);
+  });
+  it("exige un mot de passe robuste et un SIRET pour une entreprise", async () => {
+    const { signupSchema } = await import("@/lib/validation/account");
+    const base = {
+      account_type: "particulier",
+      first_name: "Ada",
+      last_name: "L",
+      email: "ada@example.test",
+      password: "motdepasse",
+      terms: "on",
+    };
+    expect(signupSchema.safeParse(base).success).toBe(false);
+    expect(signupSchema.safeParse({ ...base, password: "motdepasse42" }).success).toBe(true);
+    const pro = signupSchema.safeParse({
+      ...base,
+      password: "motdepasse42",
+      account_type: "entreprise",
+      company_name: "Bistrot",
+    });
+    expect(pro.success).toBe(false);
+    expect(
+      signupSchema.safeParse({
+        ...base,
+        password: "motdepasse42",
+        account_type: "entreprise",
+        company_name: "Bistrot",
+        siret: "732 829 320 00074",
+      }).success,
+    ).toBe(true);
+  });
+});

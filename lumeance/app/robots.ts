@@ -9,13 +9,17 @@ export default function robots(): MetadataRoute.Robots {
     // épingles enrichies), sans ouvrir l'indexation aux moteurs de recherche.
     return {
       rules: [
-        { userAgent: "Pinterestbot", allow: "/", disallow: ["/admin", "/api", "/panier"] },
+        {
+          userAgent: "Pinterestbot",
+          allow: "/",
+          disallow: ["/admin", "/api", "/panier", "/compte"],
+        },
         { userAgent: "*", disallow: "/" },
       ],
     };
   }
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/panier"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/panier", "/compte"] },
     sitemap: absoluteUrl("/sitemap.xml"),
     host: absoluteUrl("/"),
   };
