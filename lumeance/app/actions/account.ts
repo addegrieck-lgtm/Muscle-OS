@@ -18,7 +18,19 @@ export interface AccountFormState {
   ok: boolean;
   message: string;
   errors?: Record<string, string>;
+  /** Saisie renvoyée après une erreur (jamais le mot de passe) pour ne pas vider le formulaire. */
+  values?: Record<string, string>;
 }
+
+const keep = (form: FormData): Record<string, string> =>
+  Object.fromEntries(
+    [...form.entries()].filter(
+      ([k, v]) =>
+        typeof v === "string" &&
+        !["password", "confirm", "website"].includes(k) &&
+        !k.startsWith("$"),
+    ) as [string, string][],
+  );
 
 const UNAVAILABLE = "Les comptes clients ouvriront prochainement.";
 
@@ -52,11 +64,13 @@ export async function signUpAccount(
       ok: false,
       message: "Merci de vérifier le formulaire.",
       errors: fieldErrors(parsed.error.issues),
+      values: keep(form),
     };
   const d = parsed.data;
   if (d.website) return { ok: true, message: "Merci." };
   const db = createSupabaseServiceClient();
-  if (!isSupabaseConfigured() || !db) return { ok: false, message: UNAVAILABLE };
+  if (!isSupabaseConfigured() || !db)
+    return { ok: false, message: UNAVAILABLE, values: keep(form) };
 
   // Même réponse que l'adresse soit nouvelle ou déjà inscrite (pas de divulgation des comptes).
   const done: AccountFormState = {
@@ -81,8 +95,13 @@ export async function signUpAccount(
         ok: false,
         message: "Mot de passe refusé : choisissez-en un plus robuste.",
         errors: { password: "Mot de passe trop faible ou trop courant" },
+        values: keep(form),
       };
-    return { ok: false, message: "L’inscription n’a pas abouti. Merci de réessayer plus tard." };
+    return {
+      ok: false,
+      message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
+      values: keep(form),
+    };
   }
   const user = data.user;
   // Adresse déjà inscrite : Supabase renvoie un utilisateur sans identité ; rien n'est créé.
@@ -103,7 +122,11 @@ export async function signUpAccount(
     .single();
   if (cErr || !customer) {
     console.error("signup customer:", cErr?.message);
-    return { ok: false, message: "L’inscription n’a pas abouti. Merci de réessayer plus tard." };
+    return {
+      ok: false,
+      message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
+      values: keep(form),
+    };
   }
 
   let referredBy: string | null = null;
@@ -132,22 +155,24 @@ export async function signUpAccount(
     if (!aErr) break;
     if (aErr.code !== "23505" || !aErr.message.includes("referral_code")) {
       console.error("signup account:", aErr.message);
-      return { ok: false, message: "L’inscription n’a pas abouti. Merci de réessayer plus tard." };
+      return {
+        ok: false,
+        message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
+        values: keep(form),
+      };
     }
   }
 
   if (d.newsletter) {
-    await db
-      .from("newsletter_subscribers")
-      .upsert(
-        {
-          email: d.email,
-          consent_timestamp: new Date().toISOString(),
-          consent_source: "inscription",
-          status: "subscribed",
-        },
-        { onConflict: "email" },
-      );
+    await db.from("newsletter_subscribers").upsert(
+      {
+        email: d.email,
+        consent_timestamp: new Date().toISOString(),
+        consent_source: "inscription",
+        status: "subscribed",
+      },
+      { onConflict: "email" },
+    );
   }
   return done;
 }
@@ -160,13 +185,18 @@ export async function signInAccount(
   if (!(await allowRequest(`account-login:${await ip()}`, 8, 15 * 60_000, "LOGIN_LIMITER")))
     return { ok: false, message: "Trop de tentatives. Réessayez dans 15 minutes." };
   const parsed = signinSchema.safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { ok: false, message: "E-mail ou mot de passe incorrect." };
+  if (!parsed.success)
+    return { ok: false, message: "E-mail ou mot de passe incorrect.", values: keep(form) };
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
     if (/confirm/i.test(error.message))
-      return { ok: false, message: "Confirmez d’abord votre adresse e-mail grâce au lien reçu." };
-    return { ok: false, message: "E-mail ou mot de passe incorrect." };
+      return {
+        ok: false,
+        message: "Confirmez d’abord votre adresse e-mail grâce au lien reçu.",
+        values: keep(form),
+      };
+    return { ok: false, message: "E-mail ou mot de passe incorrect.", values: keep(form) };
   }
   redirect(safeNext(form.get("next")));
 }

@@ -45,6 +45,9 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
 - [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).
+- [x] Comptes clients : particuliers (Cercle Luméance, parrainage) et entreprises validées
+  (prix HT, remise −5/−10/−20 % dès 500/1 500/3 000 € HT) — mise en service :
+  [COMPTES.md](COMPTES.md).
 
 ## Audit du 1er novembre 2026 — corrections appliquées ✅
 - Sélecteur de versions : « 26 sphères · 870 € » au lieu de « 26 870 € » (lisible comme un seul montant).

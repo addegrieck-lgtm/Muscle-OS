@@ -59,6 +59,7 @@ function Message({ state }: { state: AccountFormState }) {
 
 const inputProps = (name: string, state: AccountFormState) => ({
   name,
+  defaultValue: state.values?.[name],
   className: field,
   "aria-invalid": Boolean(state.errors?.[name]),
   "aria-describedby": `err-${name}`,
@@ -150,7 +151,7 @@ export function SignupForm({ referral = "" }: { referral?: string }) {
         <Field label="Code de parrainage (facultatif)" name="referral" state={state}>
           <input
             {...inputProps("referral", state)}
-            defaultValue={referral}
+            defaultValue={state.values?.referral ?? referral}
             autoCapitalize="characters"
           />
         </Field>
@@ -158,7 +159,12 @@ export function SignupForm({ referral = "" }: { referral?: string }) {
 
       <div className="space-y-4">
         <label className="t-small flex items-start gap-3">
-          <input type="checkbox" name="newsletter" className="mt-1 accent-champagne" />
+          <input
+            type="checkbox"
+            name="newsletter"
+            defaultChecked={state.values?.newsletter === "on"}
+            className="mt-1 accent-champagne"
+          />
           <span>
             Je souhaite recevoir la lettre de la maison (nouvelles pièces, conseils). Désinscription
             en un clic.
@@ -169,6 +175,7 @@ export function SignupForm({ referral = "" }: { referral?: string }) {
             type="checkbox"
             name="terms"
             required
+            defaultChecked={state.values?.terms === "on"}
             className="mt-1 accent-champagne"
             aria-describedby="err-terms"
           />

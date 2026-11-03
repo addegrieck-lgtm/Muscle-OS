@@ -5,15 +5,31 @@ import { useState } from "react";
 /**
  * Champ mot de passe avec bouton « œil » pour afficher ou masquer la saisie (règle du
  * propriétaire : présent sur TOUS les champs mot de passe du site et de l'administration).
+ * Champ contrôlé : la saisie survit à la remise à zéro du formulaire après une erreur serveur,
+ * sans jamais transiter par la réponse du serveur.
  */
 export function PasswordInput({
   className = "",
+  // Ignoré : le champ est contrôlé (pas de valeur pré-remplie pour un mot de passe).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  defaultValue: _ignored,
+  onChange,
   ...props
 }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
   const [visible, setVisible] = useState(false);
+  const [value, setValue] = useState("");
   return (
     <span className="relative block">
-      <input {...props} type={visible ? "text" : "password"} className={`${className} pr-11`} />
+      <input
+        {...props}
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          onChange?.(e);
+        }}
+        type={visible ? "text" : "password"}
+        className={`${className} pr-11`}
+      />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}

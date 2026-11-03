@@ -13,6 +13,8 @@ export const FOOTER_NAV = {
   maison: [
     { href: "/maison", label: "La Maison" },
     { href: "/restauration", label: "Restaurants, bars et hôtels" },
+    { href: "/avantages", label: "Avantages et Cercle Luméance" },
+    { href: "/compte", label: "Mon compte" },
     { href: "/journal", label: "Journal" },
     { href: "/contact", label: "Contact" },
   ],
