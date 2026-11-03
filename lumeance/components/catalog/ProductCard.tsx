@@ -1,3 +1,4 @@
+import { Price } from "@/components/account/AccountProvider";
 import Link from "next/link";
 import { ProductVisual } from "@/components/product/ProductVisual";
 import { formatPrice } from "@/lib/money";
@@ -44,11 +45,11 @@ export function ProductCard({
           <p className="shrink-0 pt-6 font-serif text-xl">
             {product.compareAtPrice && !range.varies && (
               <span className="mr-2 text-base text-brun/40 line-through">
-                {formatPrice(product.compareAtPrice)}
+                <Price cents={product.compareAtPrice} />
               </span>
             )}
             {range.varies && <span className="mr-1 text-base text-brun/50">dès</span>}
-            {formatPrice(range.min)}
+            <Price cents={range.min} />
           </p>
         </div>
       </Link>

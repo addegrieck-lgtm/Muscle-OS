@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { accountContext, getCurrentAccount } from "@/lib/services/account";
 import { getProducts } from "@/lib/services/catalog";
 import { getShippingSettings } from "@/lib/services/content";
 import { priceCart, type CartQuote } from "@/lib/services/pricing";
@@ -23,12 +24,19 @@ function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   return Object.fromEntries(issues.map((i) => [String(i.path[0] ?? "form"), i.message]));
 }
 
-/** Recalcule le panier côté serveur à partir du catalogue publié. */
+/**
+ * Recalcule le panier côté serveur à partir du catalogue publié, avec les avantages du compte
+ * connecté (remise pro, Cercle, parrainage) lus côté serveur.
+ */
 export async function quoteCart(input: unknown): Promise<CartQuote> {
   const parsed = cartSchema.safeParse(input);
   const lines = parsed.success ? parsed.data : [];
-  const [catalog, shipping] = await Promise.all([getProducts(), getShippingSettings()]);
-  return priceCart(lines, catalog, shipping);
+  const [catalog, shipping, account] = await Promise.all([
+    getProducts(),
+    getShippingSettings(),
+    getCurrentAccount(),
+  ]);
+  return priceCart(lines, catalog, shipping, accountContext(account));
 }
 
 export async function subscribeNewsletter(_: FormState, form: FormData): Promise<FormState> {
