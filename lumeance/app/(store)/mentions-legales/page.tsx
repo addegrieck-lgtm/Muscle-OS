@@ -1,3 +1,4 @@
+import { LEGAL_PENDING } from "@/lib/seo/legal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LegalNotice, Prose, Todo } from "@/components/ui/Prose";
 import { getContactSettings } from "@/lib/services/content";
@@ -7,6 +8,8 @@ export const metadata = pageMetadata({
   title: "Mentions légales",
   description: "Mentions légales du site LUMÉANCE.",
   path: "/mentions-legales",
+  // Hors index tant que les champs « À compléter » ne sont pas remplis (lib/seo/legal.ts).
+  noindex: LEGAL_PENDING,
 });
 
 export default async function MentionsPage() {

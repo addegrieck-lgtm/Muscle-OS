@@ -18,7 +18,7 @@ Base et fichiers : **Supabase** (offre gratuite pour le développement ; mise en
 **Recommandation** : développement sur Vercel Hobby ou Cloudflare (gratuits) + Supabase gratuit ; à l’ouverture, Cloudflare Workers (OpenNext) ou Vercel Pro + Supabase Pro.
 
 ## Mise en production
-1. Variables : `NEXT_PUBLIC_SITE_URL=https://maisonlumeance.fr`, clés Supabase, `NEXT_PUBLIC_INDEXABLE=1` seulement quand contenus et pages légales sont validés.
+1. Variables : `NEXT_PUBLIC_SITE_URL=https://maisonlumeance.fr`, clés Supabase, `NEXT_PUBLIC_INDEXABLE=1` (ouvert aux moteurs le 3 novembre 2026, à la demande du propriétaire ; pages légales incomplètes hors index via `lib/seo/legal.ts`).
 2. DNS : apex `maisonlumeance.fr` et `www` vers l’hébergeur ; redirection 301 `www` → apex (domaine canonique) ; HTTPS automatique.
 3. Supabase : URL du site et URL de redirection d’authentification sur le domaine final.
 4. Environnements distincts développement / production (deux projets Supabase).
