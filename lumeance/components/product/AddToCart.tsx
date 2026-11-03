@@ -7,6 +7,7 @@ import { useSelectedVariant } from "@/components/product/VariantContext";
 import { buttonClass } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/money";
 import { requestSubject } from "@/lib/catalog/request-subject";
+import { pinEvent } from "@/lib/analytics/pinterest";
 import { promotionHint, promotionLabel } from "@/lib/catalog/promotion";
 import type { Product, ProductVariant } from "@/types/catalog";
 
@@ -135,6 +136,20 @@ export function AddToCart({ product }: { product: Product }) {
                 variantId: variant?.id ?? null,
                 quantity: qty,
                 ...(product.options?.length ? { options } : {}),
+              });
+              // Sans effet si le visiteur n'a pas accepté la balise Pinterest.
+              pinEvent("addtocart", {
+                value: (price * qty) / 100,
+                currency: "EUR",
+                order_quantity: qty,
+                line_items: [
+                  {
+                    product_id: product.reference,
+                    product_name: product.name,
+                    product_price: price / 100,
+                    product_quantity: qty,
+                  },
+                ],
               });
               setAdded(true);
             }}

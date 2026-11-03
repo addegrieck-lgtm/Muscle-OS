@@ -1,4 +1,5 @@
 import { CartProvider } from "@/components/cart/CartProvider";
+import { PinterestTag } from "@/components/analytics/PinterestTag";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { DemoBanner } from "@/components/layout/DemoBanner";
 import { Footer } from "@/components/layout/Footer";
@@ -34,6 +35,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <main id="contenu">{children}</main>
       <Footer />
       <CookieConsent />
+      <PinterestTag />
       <MotionRoot />
       <PageViewBeacon />
       <script

@@ -22,15 +22,16 @@ const securityHeaders = [
  * d'eval). Tout est servi par le site lui-même, sauf les images et l'API Supabase.
  * 'unsafe-inline' reste nécessaire pour les scripts : Next.js et le script d'intro sont injectés
  * en ligne (passer à des nonces imposerait un middleware sur toutes les pages).
- * À compléter si un service tiers est ajouté (mesure d'audience, paiement Stripe : js.stripe.com…).
+ * Balise Pinterest (après consentement) : s.pinimg.com (script), ct.pinterest.com (envois).
+ * À compléter si un service tiers est ajouté (paiement Stripe : js.stripe.com…).
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://s.pinimg.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co",
+  "img-src 'self' data: blob: https://*.supabase.co https://ct.pinterest.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ct.pinterest.com",
   "worker-src 'self' blob:",
   "media-src 'self' https://*.supabase.co",
   "object-src 'none'",
