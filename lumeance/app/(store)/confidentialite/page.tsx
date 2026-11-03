@@ -1,3 +1,4 @@
+import { LEGAL_PENDING } from "@/lib/seo/legal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LegalNotice, Prose, Todo } from "@/components/ui/Prose";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -6,6 +7,8 @@ export const metadata = pageMetadata({
   title: "Confidentialité et cookies",
   description: "Politique de confidentialité et gestion des cookies du site LUMÉANCE.",
   path: "/confidentialite",
+  // Hors index tant que les champs « À compléter » ne sont pas remplis (lib/seo/legal.ts).
+  noindex: LEGAL_PENDING,
 });
 
 export default function ConfidentialitePage() {

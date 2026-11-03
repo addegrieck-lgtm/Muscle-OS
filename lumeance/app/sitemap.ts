@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { publishedArticles } from "@/lib/content/journal";
 import { getCategories, getProducts } from "@/lib/services/catalog";
 import { absoluteUrl } from "@/lib/seo/metadata";
+import { LEGAL_PATHS, LEGAL_PENDING } from "@/lib/seo/legal";
 
 export const dynamic = "force-dynamic";
 
@@ -21,11 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/confidentialite",
   ];
   return [
-    ...stat.map((p) => ({
-      url: absoluteUrl(p),
-      changeFrequency: "weekly" as const,
-      priority: p === "/" ? 1 : 0.6,
-    })),
+    ...stat
+      .filter((p) => !(LEGAL_PENDING && LEGAL_PATHS.includes(p)))
+      .map((p) => ({
+        url: absoluteUrl(p),
+        changeFrequency: "weekly" as const,
+        priority: p === "/" ? 1 : 0.6,
+      })),
     ...categories.map((c) => ({
       url: absoluteUrl(`/collections/${c.slug}`),
       changeFrequency: "weekly" as const,
