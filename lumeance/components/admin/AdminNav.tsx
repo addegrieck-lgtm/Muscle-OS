@@ -10,6 +10,7 @@ const ITEMS: { href: string; label: string; roles?: AdminRole[] }[] = [
   { href: "/admin/seo", label: "Référencement" },
   { href: "/admin/orders", label: "Commandes" },
   { href: "/admin/customers", label: "Clients" },
+  { href: "/admin/reviews", label: "Avis clients" },
   { href: "/admin/products", label: "Produits", roles: ["super_admin", "admin"] },
   { href: "/admin/categories", label: "Catégories", roles: ["super_admin", "admin"] },
   { href: "/admin/media", label: "Médias", roles: ["super_admin", "admin"] },
