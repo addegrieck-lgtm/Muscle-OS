@@ -257,3 +257,34 @@ export async function updatePassword(
   if (error) return { ok: false, message: "Mot de passe refusé : choisissez-en un plus robuste." };
   return { ok: true, message: "Votre mot de passe est modifié." };
 }
+
+/**
+ * Validation d'un lien reçu par e-mail (inscription, nouveau mot de passe), déclenchée par un
+ * clic sur un bouton : les robots des messageries (Outlook, Gmail…) qui ouvrent les liens pour
+ * les analyser ne soumettent pas de formulaire, le lien à usage unique n'est donc pas consommé.
+ * Le jeton (token_hash) ne dépend pas du navigateur : le lien fonctionne même ouvert ailleurs.
+ */
+export async function confirmEmailLink(form: FormData) {
+  const next = safeNext(form.get("next"), "/compte?bienvenue=1");
+  const tokenHash = String(form.get("token_hash") ?? "");
+  const type = String(form.get("type") ?? "");
+  const code = String(form.get("code") ?? "");
+  let ok = false;
+  if (isSupabaseConfigured()) {
+    const supabase = await createSupabaseServerClient();
+    if (
+      tokenHash &&
+      ["email", "signup", "recovery", "email_change", "invite", "magiclink"].includes(type)
+    ) {
+      ok = !(
+        await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type as "email" | "signup" | "recovery" | "email_change" | "invite" | "magiclink",
+        })
+      ).error;
+    } else if (code) {
+      ok = !(await supabase.auth.exchangeCodeForSession(code)).error;
+    }
+  }
+  redirect(ok ? next : "/compte/connexion?lien=expire");
+}
