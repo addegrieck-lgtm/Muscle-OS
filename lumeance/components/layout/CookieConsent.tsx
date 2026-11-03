@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { PINTEREST_TAG_ID } from "@/lib/analytics/pinterest";
 
-const KEY = "lumeance.consent.v1";
+// v2 : ajout du choix « publicité et réseaux sociaux » (balise Pinterest) ; les choix v1 ne
+// couvraient pas ce traceur, le bandeau est donc présenté de nouveau.
+const KEY = "lumeance.consent.v2";
 
 /**
- * Passer à true UNIQUEMENT le jour où un traceur soumis à consentement est ajouté (mesure
- * d'audience non exemptée, publicité, réseaux sociaux). Tant que le site n'utilise que des
- * éléments strictement nécessaires, la CNIL n'impose aucun bandeau : il reste masqué, ainsi que
- * le lien « Gérer les cookies » du pied de page.
+ * Bandeau requis dès qu'un traceur soumis à consentement est actif : aujourd'hui la balise
+ * Pinterest (publicité et réseaux sociaux), si son identifiant est configuré.
  */
-export const CONSENT_REQUIRED = false;
+export const CONSENT_REQUIRED = Boolean(PINTEREST_TAG_ID);
 const OPEN_EVENT = "lumeance:cookies";
+/** Émis à chaque enregistrement du choix : les traceurs autorisés se chargent aussitôt. */
+export const CONSENT_EVENT = "lumeance:consent";
 
-export type Consent = { audience: boolean; at: string };
+export type Consent = { audience: boolean; marketing: boolean; at: string };
 
 export function readConsent(): Consent | null {
   try {
@@ -26,24 +29,34 @@ export function readConsent(): Consent | null {
 }
 
 /**
- * Bandeau de consentement. Le site n'utilise aujourd'hui AUCUN traceur soumis à consentement
- * (pas de publicité, pas de mesure d'audience). Le choix est conservé pour l'activation future
- * d'une mesure d'audience : rien ne sera chargé sans accord (refus aussi simple que l'accord).
+ * Bandeau de consentement (recommandations CNIL) : refus aussi simple que l'accord, rien n'est
+ * chargé avant le choix, choix modifiable à tout moment (« Gérer les cookies » du pied de page),
+ * conservé 6 mois puis redemandé.
  */
 export function CookieConsent() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!CONSENT_REQUIRED) return;
-    if (!readConsent()) setOpen(true);
+    const c = readConsent();
+    const expired = c && Date.now() - new Date(c.at).getTime() > 182 * 24 * 3600 * 1000;
+    if (!c || expired) setOpen(true);
     const onOpen = () => setOpen(true);
     window.addEventListener(OPEN_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_EVENT, onOpen);
   }, []);
 
-  const save = (audience: boolean) => {
-    localStorage.setItem(KEY, JSON.stringify({ audience, at: new Date().toISOString() }));
+  const save = (accept: boolean) => {
+    const c: Consent = { audience: false, marketing: accept, at: new Date().toISOString() };
+    try {
+      localStorage.setItem(KEY, JSON.stringify(c));
+    } catch {
+      /* stockage indisponible : le choix vaut pour la visite en cours */
+    }
+    window.dispatchEvent(new Event(CONSENT_EVENT));
     setOpen(false);
+    // Retrait du consentement : la balise déjà chargée cesse d'être utilisée au rechargement.
+    if (!accept && window.pintrk) window.location.reload();
   };
 
   if (!open) return null;
@@ -55,9 +68,10 @@ export function CookieConsent() {
     >
       <p className="t-eyebrow text-champagne">Cookies</p>
       <p className="t-small mt-3">
-        Ce site n’utilise que des éléments strictement nécessaires (panier, préférences). Aucune
-        mesure d’audience ni publicité n’est active. Si une mesure d’audience est ajoutée, elle ne
-        sera activée qu’avec votre accord.{" "}
+        Avec votre accord, nous utilisons la balise de Pinterest pour mesurer l’efficacité de nos
+        publications et vous proposer nos pièces sur Pinterest. Le panier et vos préférences,
+        strictement nécessaires, ne demandent pas d’accord. Vous pouvez changer d’avis à tout moment
+        depuis « Gérer les cookies », en bas de page.{" "}
         <Link href="/confidentialite" className="underline underline-offset-4">
           En savoir plus
         </Link>
@@ -68,14 +82,14 @@ export function CookieConsent() {
           onClick={() => save(false)}
           className="t-eyebrow border border-brun/25 px-5 py-3 hover:border-brun"
         >
-          Refuser
+          Tout refuser
         </button>
         <button
           type="button"
           onClick={() => save(true)}
           className="t-eyebrow bg-brun px-5 py-3 text-ivoire hover:bg-noir"
         >
-          Accepter
+          Tout accepter
         </button>
       </div>
     </div>

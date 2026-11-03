@@ -57,19 +57,23 @@ export default function ConfidentialitePage() {
             une réclamation auprès de la CNIL (cnil.fr).
           </p>
           <h2>Cookies et stockage local</h2>
-          <p>
-            Le site n’utilise aujourd’hui que des éléments strictement nécessaires, exemptés de
-            consentement :
-          </p>
+          <p>Le site utilise des éléments strictement nécessaires, exemptés de consentement :</p>
           <ul>
             <li>votre panier, conservé sur votre appareil (stockage local) ;</li>
             <li>pour les administrateurs uniquement, un cookie de session d’authentification.</li>
           </ul>
           <p>
-            Aucune mesure d’audience, aucun cookie publicitaire et aucun réseau social tiers ne sont
-            chargés : c’est pourquoi aucun bandeau de consentement ne vous est présenté. Si une
-            mesure d’audience soumise à consentement est ajoutée, elle ne sera activée qu’avec votre
-            accord, recueilli par un bandeau et modifiable à tout moment depuis le pied de page.
+            Uniquement avec votre accord, recueilli par un bandeau, nous utilisons la balise de
+            Pinterest (Pinterest Europe Ltd., Irlande). Elle mesure les visites et les ajouts au
+            panier issus de nos publications Pinterest et permet de vous présenter nos pièces sur
+            Pinterest. Pinterest dépose ses propres cookies et traite ces données selon sa politique
+            de confidentialité (policy.pinterest.com). Aucune adresse e-mail ni autre donnée
+            d’identification ne lui est transmise par le site. Sans accord, rien n’est chargé.
+          </p>
+          <p>
+            Votre choix est conservé 6 mois sur votre appareil, puis vous est demandé de nouveau.
+            Vous pouvez le modifier à tout moment depuis « Gérer les cookies », en bas de chaque
+            page.
           </p>
         </Prose>
       </div>
