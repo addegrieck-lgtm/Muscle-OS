@@ -11,6 +11,8 @@ export function organizationJsonLd() {
     description: DEFAULT_DESCRIPTION,
     url: absoluteUrl("/"),
     logo: absoluteUrl("/brand/logo-principal-ivoire.svg"),
+    // Profils officiels de la maison (relient le site à ses comptes pour les moteurs).
+    sameAs: ["https://www.pinterest.com/MaisonLumeance/"],
   };
 }
 

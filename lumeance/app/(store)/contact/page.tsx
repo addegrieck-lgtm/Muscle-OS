@@ -4,7 +4,7 @@ import { getContactSettings } from "@/lib/services/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "Contact",
+  title: "Contact — conseil et devis luminaires",
   description:
     "Une question sur une pièce, un projet d’éclairage ou l’ouverture de la boutique ? Écrivez à LUMÉANCE.",
   path: "/contact",

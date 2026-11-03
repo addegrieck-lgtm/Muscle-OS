@@ -4,7 +4,7 @@ import { getShippingSettings } from "@/lib/services/content";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
-  title: "Livraison",
+  title: "Livraison offerte et réception des luminaires",
   description:
     "Informations de livraison LUMÉANCE : zones, délais communiqués pièce par pièce, réception des luminaires.",
   path: "/livraison",

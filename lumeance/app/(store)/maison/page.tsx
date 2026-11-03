@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo/metadata";
 import { isDemoCatalog } from "@/lib/services/catalog";
 
 export const metadata = pageMetadata({
-  title: "La Maison",
+  title: "La Maison — luminaires design sélectionnés",
   description:
     "LUMÉANCE, maison française de luminaires design : notre regard sur la lumière, nos exigences et notre manière de sélectionner chaque pièce.",
   path: "/maison",

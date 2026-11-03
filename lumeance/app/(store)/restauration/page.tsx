@@ -15,7 +15,7 @@ import { pageMetadata } from "@/lib/seo/metadata";
 export const metadata = pageMetadata({
   title: "Luminaires pour restaurants, bars et hôtels",
   description:
-    "Suspensions, lustres et appliques design pour restaurants, bars et hôtels : au-dessus des tables, du comptoir, à l’accueil et en terrasse. Sélection et devis pour votre établissement.",
+    "Luminaires design pour restaurants, bars et hôtels : suspensions au-dessus des tables, lustres d’accueil, appliques et terrasse. Sélection et devis sur mesure.",
   path: "/restauration",
 });
 

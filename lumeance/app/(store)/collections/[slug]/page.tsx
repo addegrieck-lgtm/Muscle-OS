@@ -16,11 +16,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const category = await getCategory(slug);
   if (!category) return {};
   const seo = CATEGORY_SEO[slug];
+  // Catégorie sans pièce publiée : hors index (page trop mince pour les moteurs).
+  const empty = !(await getProducts()).some((p) => p.categorySlug === slug);
   return pageMetadata({
     title: seo?.title ?? category.name,
     description: seo?.description ?? category.description ?? "",
     path: `/collections/${slug}`,
-    noindex: Object.keys(await searchParams).length > 0,
+    noindex: empty || Object.keys(await searchParams).length > 0,
   });
 }
 

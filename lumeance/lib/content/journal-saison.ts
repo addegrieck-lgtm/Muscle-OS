@@ -53,6 +53,13 @@ export const SEASON_ARTICLES: Article[] = [
           "Un variateur ou une télécommande permet d’adapter la lumière au moment : pleine intensité pour recevoir, lumière tamisée pour un film ou une soirée calme. Vérifiez simplement que les ampoules et le luminaire sont compatibles avec la variation, car toutes les LED ne le sont pas.",
         ],
       },
+      {
+        heading: "Pièce par pièce",
+        paragraphs: [
+          "Au salon, une suspension ou un lustre à intensité réglable, complété par une lampe et une applique, suffit à créer plusieurs ambiances. Dans la chambre, privilégiez des appliques de chevet orientées vers le mur plutôt que vers les yeux. Dans l’entrée, une lumière douce et chaude accueille dès le seuil.",
+          "Dans une salle à manger, abaisser légèrement la suspension au-dessus de la table resserre la lumière sur les convives et crée une atmosphère plus intime pour les dîners d’hiver.",
+        ],
+      },
     ],
     faq: [
       {

@@ -11,6 +11,7 @@ export const CATEGORY_SEO: Record<
     body: [
       "Un lustre est la pièce qui structure une pièce entière. Dans un grand salon, une cage d’escalier ou une salle de réception, il donne l’échelle et fixe le regard.",
       "Pour bien le choisir, partez de la hauteur sous plafond et du volume : un lustre en cascade se lit à la verticale et accompagne une double hauteur ; une composition en anneau ou en couronne s’adresse plutôt aux plafonds plus bas et aux grandes tables.",
+      "Nos lustres vont de la cascade de sphères de verre au cristal taillé en spirale, en passant par les ramures de métal et les voiles d’acrylique. Chaque fiche indique les dimensions, la hauteur réglable et la surface conseillée par le fabricant, avec une visualisation 3D de chaque version.",
     ],
   },
   suspensions: {
@@ -21,6 +22,7 @@ export const CATEGORY_SEO: Record<
     body: [
       "La suspension se pense au-dessus d’un usage : une table, un îlot, un coin salon. Sa hauteur d’accroche et son diamètre déterminent l’équilibre de l’ensemble.",
       "Le verre soufflé adoucit et réchauffe la lumière, le cristal la fragmente en reflets, le métal doré la dirige et dessine des ombres. Chaque fiche indique les matériaux et les dimensions de la pièce.",
+      "Au-dessus d’une table de salle à manger, comptez en général 70 à 80 cm entre le plateau et le bas de la suspension, pour éclairer les convives sans les éblouir. Pour une table longue ou un îlot, une suspension linéaire ou deux suspensions alignées répartissent la lumière sur toute la longueur. Chaque fiche précise les dimensions et la hauteur réglable.",
     ],
   },
   appliques: {
@@ -31,6 +33,7 @@ export const CATEGORY_SEO: Record<
     body: [
       "L’applique travaille la paroi : elle révèle une pierre, un enduit, une boiserie. Elle rythme un couloir, accompagne un escalier ou encadre une tête de lit.",
       "Posée par paire ou en série, elle crée une lumière d’ambiance complémentaire à l’éclairage principal.",
+      "Une applique murale crée un second plan de lumière : de part et d’autre d’un lit, le long d’un couloir, autour d’un miroir ou d’une console. Les modèles qui éclairent vers le haut et vers le bas dessinent des éventails de lumière sur le mur, tandis que les tableaux lumineux deviennent de véritables œuvres. Installées à hauteur d’yeux, autour de 1,60 à 1,80 m, elles éclairent sans éblouir. Certaines sont étanches et conviennent aussi à l’extérieur.",
     ],
   },
   lampadaires: {

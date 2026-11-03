@@ -1830,7 +1830,7 @@ export const CATALOG_PRODUCTS: Product[] = [
     variants: MEANDRE_VARIANTS,
     seoTitle: "Méandre — suspension linéaire LED effet noyer, 120 cm",
     seoDescription:
-      "Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Au-dessus d’une table, d’un îlot ou d’un comptoir.",
+      "Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Pour table, îlot ou comptoir.",
     art: "tiers",
     isDemo: false,
   },
