@@ -1006,7 +1006,7 @@ Caractéristiques techniques communiquées par le fabricant. Les documents de co
   'published', false, '{}'::jsonb, null,
   array['Fer forgé', 'Laque effet bois']::text[], array['Noyer']::text[], '[{"label":"Type","value":"Suspension linéaire LED"},{"label":"Sources lumineuses","value":"LED intégrée, 24 W, fournie"},{"label":"Commande","value":"Télécommande fournie : intensité variable"},{"label":"Dimensions","value":"L 120 × l 5 × H 5 cm"},{"label":"Matières","value":"Fer forgé laqué effet bois, traité anticorrosion"},{"label":"Finition","value":"Veinage noyer"},{"label":"Surface conseillée","value":"10 à 15 m², selon le fabricant"}]'::jsonb,
   null, 'Installation au plafond. Le raccordement doit être réalisé hors tension, dans le respect de la norme NF C 15-100 ; l’intervention d’un électricien qualifié est recommandée.', 5,
-  'Méandre — suspension linéaire LED effet noyer, 120 cm', 'Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Au-dessus d’une table, d’un îlot ou d’un comptoir.', '[]'::jsonb,
+  'Méandre — suspension linéaire LED effet noyer, 120 cm', 'Suspension Méandre : barre de 120 cm au veinage de noyer, ondulée en son milieu, LED 24 W, télécommande fournie. Pour table, îlot ou comptoir.', '[]'::jsonb,
   null, 'tiers',
   null)
 on conflict (reference) do nothing;

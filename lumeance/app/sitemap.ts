@@ -29,11 +29,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         priority: p === "/" ? 1 : 0.6,
       })),
-    ...categories.map((c) => ({
-      url: absoluteUrl(`/collections/${c.slug}`),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    })),
+    ...categories
+      .filter((c) => products.some((p) => p.categorySlug === c.slug))
+      .map((c) => ({
+        url: absoluteUrl(`/collections/${c.slug}`),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      })),
     // Les fiches fictives de démonstration ne sont jamais déclarées.
     ...products
       .filter((p) => !p.isDemo)

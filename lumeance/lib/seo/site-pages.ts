@@ -14,6 +14,7 @@ import { CATEGORY_SEO } from "@/lib/content/categories";
 import { publishedArticles } from "@/lib/content/journal";
 import { categoryLabel } from "@/lib/navigation";
 import { withSuffix, type PageInput } from "@/lib/seo/audit";
+import { LEGAL_PATHS, LEGAL_PENDING } from "@/lib/seo/legal";
 import type { Category, Product } from "@/types/catalog";
 
 const titleOf = (m: Metadata): string => {
@@ -38,16 +39,20 @@ export function sitePages(products: Product[], categories: Category[]): PageInpu
     ["/mentions-legales", "Mentions légales", mentions],
     ["/confidentialite", "Confidentialité", confidentialite],
   ];
-  const pages: PageInput[] = statics.map(([path, name, m]) => ({
-    path,
-    kind: path === "/" ? "accueil" : "page",
-    name,
-    title: titleOf(m),
-    description: String(m.description ?? ""),
-    text: "",
-  }));
+  // Pages hors index (légales incomplètes) : non auditées.
+  const pages: PageInput[] = statics
+    .filter(([path]) => !(LEGAL_PENDING && LEGAL_PATHS.includes(path)))
+    .map(([path, name, m]) => ({
+      path,
+      kind: path === "/" ? "accueil" : "page",
+      name,
+      title: titleOf(m),
+      description: String(m.description ?? ""),
+      text: "",
+    }));
 
-  for (const c of categories) {
+  // Catégories sans pièce : hors index, non auditées.
+  for (const c of categories.filter((c) => products.some((p) => p.categorySlug === c.slug))) {
     const seo = CATEGORY_SEO[c.slug];
     pages.push({
       path: `/collections/${c.slug}`,
@@ -86,7 +91,10 @@ export function sitePages(products: Product[], categories: Category[]): PageInpu
       name: a.title,
       title: withSuffix(a.title),
       description: a.description,
-      text: a.sections.flatMap((s) => [s.heading, ...s.paragraphs]).join(" "),
+      text: [
+        ...a.sections.flatMap((s) => [s.heading, ...s.paragraphs]),
+        ...(a.faq ?? []).flatMap((f) => [f.q, f.a]),
+      ].join(" "),
       minWords: 500,
       internalLinks: (a.productSlugs ?? []).filter((s) => live.has(s)).length + a.related.length,
     });

@@ -44,7 +44,20 @@ export default async function ArticlePage({ params }: Props) {
     author: { "@type": "Organization", name: SITE_NAME },
     publisher: { "@type": "Organization", name: SITE_NAME },
     mainEntityOfPage: absoluteUrl(`/journal/${a.slug}`),
+    image: absoluteUrl("/og-default.png"),
   };
+  // Questions fréquentes de l'article, en données structurées (contenu visible sur la page).
+  const faqLd = a.faq?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: a.faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
   return (
     <article>
       <PageHeader
@@ -115,6 +128,12 @@ export default async function ArticlePage({ params }: Props) {
         </section>
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(ld) }} />
+      {faqLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }}
+        />
+      )}
     </article>
   );
 }
