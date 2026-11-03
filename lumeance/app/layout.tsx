@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   robots: publicEnv.NEXT_PUBLIC_INDEXABLE ? undefined : { index: false, follow: false },
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  // Revendication du site sur Pinterest (compte @MaisonLumeance).
+  verification: { other: { "p:domain_verify": "7b13000b3962afdad3e2bd5df14ccaf1" } },
 };
 
 export const viewport: Viewport = {
