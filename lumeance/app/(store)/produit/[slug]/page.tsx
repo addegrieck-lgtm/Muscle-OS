@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: Props) {
                 <span className="mt-1 block">
                   {isOnPromotion(product)
                     ? "Pièce déjà en promotion : la remise professionnelle ne s’y ajoute pas."
-                    : `Professionnels : jusqu’à −${PRO_DISCOUNT_MAX_PERCENT} % dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, sur devis.`}
+                    : `Professionnels : jusqu’à −${PRO_DISCOUNT_MAX_PERCENT} % dès ${PRO_DISCOUNT_MIN_LABEL} d’achat, avec un compte entreprise.`}
                 </span>
                 <a href="/restauration" className="mt-1 inline-block underline underline-offset-4">
                   Équiper un établissement
