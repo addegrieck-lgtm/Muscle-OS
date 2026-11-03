@@ -23,8 +23,11 @@
      `https://maisonlumeance.fr/compte/confirmation` (et `https://maisonlumeance.fr/**`).
    - *Emails → SMTP* : brancher un service d'envoi (Brevo, Resend, OVH…) : l'envoi intégré de
      Supabase est limité à quelques e-mails par heure et réservé aux tests.
-   - *Emails → Templates* : traduire « Confirm signup » et « Reset password » en français
-     (le lien `{{ .ConfirmationURL }}` reste inchangé).
+   - *Emails → Templates* : coller `docs/emails/confirmation-inscription.html` dans
+     « Confirm signup » et `docs/emails/nouveau-mot-de-passe.html` dans « Reset password ».
+     Ces modèles mènent à `/compte/confirmation?token_hash=…` : la validation se fait au clic
+     sur un bouton (les robots d'Outlook qui ouvrent les liens ne les consomment plus) et
+     fonctionne dans n'importe quel navigateur (contrairement au lien `{{ .ConfirmationURL }}`).
    - *Policies → Password* : longueur minimale 10 (le site l'exige déjà).
 3. Déployer le site.
 
