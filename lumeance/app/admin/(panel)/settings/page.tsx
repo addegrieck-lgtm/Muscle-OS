@@ -17,6 +17,7 @@ import { back, dbError } from "@/lib/admin/redirect";
 import { readSetting, writeSetting } from "@/lib/admin/settings";
 import { centsToInput, parseEuroInput } from "@/lib/money";
 import { DEFAULT_CONTACT, DEFAULT_SHIPPING } from "@/lib/services/content";
+import { checkoutAvailable, paymentsDiagnostic } from "@/lib/payments";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import {
@@ -225,10 +226,21 @@ export default async function SettingsPage({
         </Card>
         <Card title="Paiement en ligne">
           <p className="text-sm text-brun/75">
-            <Badge value="draft" label="Désactivé" /> Le paiement en ligne n’est pas activé dans
-            cette version. Son activation se fait côté serveur (variables d’environnement) après
-            intégration d’un prestataire : voir <code>docs/PAIEMENT.md</code>.
+            {checkoutAvailable() ? (
+              <Badge value="published" label="Ouvert" />
+            ) : (
+              <Badge value="draft" label="Fermé" />
+            )}{" "}
+            Stripe Checkout. Réglages dans Cloudflare (Variables and Secrets), puis redéploiement :
+            voir <code>docs/PAIEMENT.md</code>.
           </p>
+          <ul className="mt-3 space-y-1 text-sm">
+            {paymentsDiagnostic().map((c) => (
+              <li key={c.label} className={c.ok ? "text-brun/75" : "text-[#8a3b2a]"}>
+                {c.ok ? "✓" : "✗"} {c.label}
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
 

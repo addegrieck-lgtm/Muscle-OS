@@ -1,5 +1,5 @@
 import "server-only";
-import { paymentsEnabled } from "@/lib/env";
+import { cleanSecret, paymentProviderName, paymentsEnabled } from "@/lib/env";
 import { createStripeProvider } from "./stripe";
 import { PaymentsDisabledError, type PaymentProvider } from "./types";
 
@@ -10,13 +10,32 @@ import { PaymentsDisabledError, type PaymentProvider } from "./types";
  */
 export function getPaymentProvider(): PaymentProvider {
   if (!paymentsEnabled()) throw new PaymentsDisabledError();
-  if (process.env.PAYMENT_PROVIDER === "stripe") {
-    const secret = process.env.STRIPE_SECRET_KEY;
-    const webhook = process.env.STRIPE_WEBHOOK_SECRET;
-    if (secret && /^(sk|rk)_(test|live)_/.test(secret) && webhook?.startsWith("whsec_"))
+  if (paymentProviderName() === "stripe") {
+    const secret = cleanSecret(process.env.STRIPE_SECRET_KEY);
+    const webhook = cleanSecret(process.env.STRIPE_WEBHOOK_SECRET);
+    if (/^(sk|rk)_(test|live)_/.test(secret) && webhook.startsWith("whsec_"))
       return createStripeProvider(secret, webhook);
   }
   throw new PaymentsDisabledError();
+}
+
+/**
+ * Diagnostic SANS secret (présence et forme des valeurs uniquement), affiché dans
+ * l'administration : quelles conditions manquent pour ouvrir la commande en ligne.
+ */
+export function paymentsDiagnostic(): { label: string; ok: boolean }[] {
+  const flag = cleanSecret(process.env.PAYMENTS_ENABLED).toLowerCase();
+  const secret = cleanSecret(process.env.STRIPE_SECRET_KEY);
+  const webhook = cleanSecret(process.env.STRIPE_WEBHOOK_SECRET);
+  return [
+    { label: "PAYMENTS_ENABLED vaut 1", ok: flag === "1" || flag === "true" },
+    { label: "PAYMENT_PROVIDER vaut stripe", ok: paymentProviderName() === "stripe" },
+    {
+      label: "STRIPE_SECRET_KEY commence par sk_test_ ou sk_live_ (ou rk_…)",
+      ok: /^(sk|rk)_(test|live)_/.test(secret),
+    },
+    { label: "STRIPE_WEBHOOK_SECRET commence par whsec_", ok: webhook.startsWith("whsec_") },
+  ];
 }
 
 /** Le parcours de commande peut-il être proposé ? */

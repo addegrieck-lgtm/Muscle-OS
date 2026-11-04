@@ -27,7 +27,21 @@ export function isSupabaseConfigured(): boolean {
 }
 
 /** Interrupteur du paiement en ligne. Ne suffit pas à lui seul : les clés du prestataire doivent
- * aussi être présentes (voir lib/payments/index.ts et docs/PAIEMENT.md). */
+ * aussi être présentes (voir lib/payments/index.ts et docs/PAIEMENT.md). Valeurs tolérantes aux
+ * espaces, guillemets et majuscules saisis par erreur dans le tableau de bord. */
 export function paymentsEnabled(): boolean {
-  return process.env.PAYMENTS_ENABLED === "1" && Boolean(process.env.PAYMENT_PROVIDER);
+  const flag = cleanSecret(process.env.PAYMENTS_ENABLED).toLowerCase();
+  return (flag === "1" || flag === "true") && Boolean(paymentProviderName());
+}
+
+export function paymentProviderName(): string {
+  return cleanSecret(process.env.PAYMENT_PROVIDER).toLowerCase();
+}
+
+/** Valeur de variable nettoyée : espaces, retours à la ligne et guillemets copiés par erreur. */
+export function cleanSecret(value: string | undefined): string {
+  return (value ?? "")
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .trim();
 }
