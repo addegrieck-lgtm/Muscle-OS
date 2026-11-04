@@ -9,6 +9,7 @@ const ITEMS: { href: string; label: string; roles?: AdminRole[] }[] = [
   { href: "/admin/stats", label: "Statistiques" },
   { href: "/admin/seo", label: "Référencement" },
   { href: "/admin/google", label: "Google Search Console" },
+  { href: "/admin/mots-cles", label: "Mots-clés" },
   { href: "/admin/orders", label: "Commandes" },
   { href: "/admin/customers", label: "Clients" },
   { href: "/admin/reviews", label: "Avis clients" },
