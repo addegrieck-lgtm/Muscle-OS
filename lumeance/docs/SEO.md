@@ -87,3 +87,15 @@ moyenne seulement avec de vrais avis vérifiés).
 - Flux **Google Shopping** : `/flux/google-shopping.xml` (une ligne par version, prix et stock
   réels, pas de GTIN : `identifier_exists = no`). À déclarer dans Google Merchant Center **une fois
   le paiement en ligne ouvert** (Merchant Center exige un achat possible sur le site).
+
+## Veille concurrentielle (phase H)
+
+- Migration `supabase/migrations/20261111000100_competitors.sql` (concurrents, relevés de pages,
+  relevés de prix ; réservés aux administrateurs).
+- Administration → **Veille concurrentielle** : concurrents choisis par la maison ; « Relever
+  maintenant » lit la page d'accueil (titre, description, types de données structurées) et le
+  plan du site public (nombre de pages, nouvelles pages depuis le relevé précédent), uniquement si
+  le robots.txt l'autorise, au plus une fois par heure et par site, robot identifié
+  « LumeanceVeille », au plus 5 pages lues ; relevés de prix saisis à la main avec leur source
+  https et leur date, comparés au prix « à partir de » de la pièce LUMÉANCE équivalente.
+- Aucun trafic, classement ou volume concurrent n'est estimé (aucune source gratuite fiable).

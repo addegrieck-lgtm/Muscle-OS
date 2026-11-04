@@ -12,6 +12,7 @@ const ITEMS: { href: string; label: string; roles?: AdminRole[] }[] = [
   { href: "/admin/mots-cles", label: "Mots-clés" },
   { href: "/admin/maillage", label: "Maillage interne" },
   { href: "/admin/fiches-produits", label: "Fiches produits (SEO)" },
+  { href: "/admin/concurrents", label: "Veille concurrentielle" },
   { href: "/admin/orders", label: "Commandes" },
   { href: "/admin/customers", label: "Clients" },
   { href: "/admin/reviews", label: "Avis clients" },
