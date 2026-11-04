@@ -20,6 +20,11 @@ export default async function SigninPage({
     <>
       <PageHeader eyebrow="Compte" title="Bon retour parmi nous." />
       <div className="container-luxe max-w-xl pb-32">
+        {lien === "confirme" && (
+          <p role="status" className="t-small mb-8 border-l border-champagne px-4 py-3 text-brun">
+            Votre adresse est confirmée. Connectez-vous avec votre e-mail et votre mot de passe.
+          </p>
+        )}
         {lien === "expire" && (
           <p
             role="alert"
