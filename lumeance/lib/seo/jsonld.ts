@@ -11,9 +11,22 @@ export function organizationJsonLd() {
     slogan: "L’art de révéler la lumière.",
     description: DEFAULT_DESCRIPTION,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/brand/logo-principal-ivoire.svg"),
+    // Image matricielle carrée : format le plus sûr pour le logo affiché par Google.
+    logo: absoluteUrl("/brand/icone-512.png"),
     // Profils officiels de la maison (relient le site à ses comptes pour les moteurs).
     sameAs: ["https://www.pinterest.com/MaisonLumeance/"],
+  };
+}
+
+/** Nom du site affiché par Google au-dessus des résultats. */
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    alternateName: "Maison LUMÉANCE",
+    url: absoluteUrl("/"),
+    inLanguage: "fr-FR",
   };
 }
 

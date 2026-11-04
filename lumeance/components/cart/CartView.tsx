@@ -83,7 +83,6 @@ export function CartView({ checkoutOpen }: { checkoutOpen: boolean }) {
                     alt=""
                     fill
                     sizes="128px"
-                    unoptimized={l.imageUrl.startsWith("/")}
                     className="object-cover"
                   />
                 ) : (

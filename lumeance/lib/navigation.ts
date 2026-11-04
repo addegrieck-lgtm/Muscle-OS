@@ -23,6 +23,9 @@ export const FOOTER_NAV = {
     { href: "/collections/suspensions", label: "Suspensions" },
     { href: "/collections/appliques", label: "Appliques murales" },
     { href: "/collections/lampadaires", label: "Lampadaires" },
+    { href: "/luminaires/escalier", label: "Lustres pour escalier" },
+    { href: "/luminaires/salle-a-manger", label: "Salle à manger" },
+    { href: "/luminaires/salon", label: "Salon" },
   ],
   service: [
     { href: "/livraison", label: "Livraison" },

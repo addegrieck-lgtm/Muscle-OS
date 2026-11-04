@@ -11,3 +11,5 @@ next-env.d.ts
 .wrangler
 .dev.vars*
 !.env.production
+# Versions réduites des photos, générées à la construction
+public/img-w

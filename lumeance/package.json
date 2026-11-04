@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3100",
+    "prebuild": "node scripts/images/variants.mjs",
     "build": "next build",
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",
@@ -48,6 +49,7 @@
     "eslint-config-next": "^15.5.28",
     "opentype.js": "^2.0.0",
     "prettier": "^3.9.10",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "three-gpu-pathtracer": "^0.0.27",
     "three-mesh-bvh": "^0.9.17",

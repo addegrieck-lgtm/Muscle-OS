@@ -22,7 +22,7 @@ export function Rooms({ products }: { products: Product[] }) {
         <ul className="mt-14 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
           {rooms.map((r, k) => (
             <li key={r.id} data-reveal data-reveal-delay={String((k % 5) * 0.08)}>
-              <Link href={`/collections?piece=${r.id}`} className="group block">
+              <Link href={`/luminaires/${r.id}`} className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden bg-noir">
                   {r.image && (
                     <Image

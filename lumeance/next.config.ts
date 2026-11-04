@@ -53,6 +53,11 @@ const nextConfig: NextConfig = {
   // Import d'images (10 Mo max, contrôlé côté serveur) via les actions d'administration.
   experimental: { serverActions: { bodySizeLimit: "12mb" } },
   images: {
+    // Versions réduites générées à la construction (voir lib/image-loader.ts).
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
+    deviceSizes: [640, 828, 1080, 1200, 1600, 1920],
+    imageSizes: [96, 128, 256, 384],
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" },
