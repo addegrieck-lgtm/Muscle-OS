@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Arrow, Eyebrow } from "@/components/ui/Button";
-import { publishedArticles } from "@/lib/content/journal";
+import { listPublishedArticles } from "@/lib/services/journal";
 
 /** Accueil : les trois derniers articles du journal. */
-export function JournalTeaser() {
-  const list = publishedArticles().slice(0, 3);
+export async function JournalTeaser() {
+  const list = (await listPublishedArticles()).slice(0, 3);
   if (!list.length) return null;
   return (
     <section className="bg-ivoire py-24 md:py-36" aria-labelledby="journal-title">

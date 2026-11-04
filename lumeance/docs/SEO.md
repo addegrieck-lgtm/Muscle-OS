@@ -30,3 +30,33 @@ moyenne seulement avec de vrais avis vérifiés).
 
 - Cache des pages sur Cloudflare (R2 pour OpenNext) : à configurer avec le compte Cloudflare.
 - Date de mise à jour des fiches dans le sitemap : nécessite une colonne `updated_at` exposée.
+
+## Studio éditorial (phase D)
+
+- Migration `supabase/migrations/20261109000100_journal.sql` (table `journal_articles`, à coller
+  dans Supabase → SQL Editor). Sans elle, le site continue avec les articles du code.
+- Administration → **Studio éditorial** : créer, relire, programmer, dépublier, archiver.
+  Statuts : brouillon, à relire, programmé, en ligne, archivé.
+- **Aucune publication sans validation** : seul le bouton « Valider et publier », avec la case de
+  relecture cochée, rend un article public (contrainte en base : un article publié a forcément une
+  date et une validation). La lecture publique est limitée par la RLS aux articles validés dont la
+  date est passée.
+- Articles du code : « Reprendre dans le studio » les copie avec leurs dates ; ensuite la version
+  du studio fait foi (la dépublier la retire aussi du site).
+- Propositions de la rédaction (`lib/content/journal-propositions.ts`) : ajoutées en « à relire »,
+  jamais publiées automatiquement ; sources laissées vides (à renseigner uniquement avec des
+  sources réelles).
+- Aperçu d'un brouillon : `/journal/<adresse>?apercu=1`, réservé aux administrateurs (non indexé).
+- Format du texte : `## Intertitre`, paragraphes séparés par une ligne vide ; FAQ en blocs
+  `Q : …` / `R : …` ; liens et sources `Libellé | adresse`.
+
+## Mots-clés (phase E)
+
+- Migration `supabase/migrations/20261110000100_seo_keywords.sql` (table `seo_keywords` :
+  expression, page cible, intention, priorité ; réservée aux administrateurs).
+- Administration → **Mots-clés** : expressions suivies avec leur position, impressions, clics et
+  taux de clic réels (Search Console, 28 ou 90 jours, évolution vs période précédente), page qui
+  ressort dans Google (alerte si elle diffère de la cible), cannibalisation (plusieurs pages pour
+  une même recherche), recherches réelles non suivies, pistes tirées de la structure du site.
+- **Volume de recherche et difficulté : « Non renseigné »** — aucune source gratuite fiable ;
+  aucun chiffre n'est estimé ni stocké, tout est relu dans Search Console à l'affichage.
