@@ -64,7 +64,11 @@ export async function createCustomerAccount(
   authUserId: string,
   p: AccountProfile,
 ): Promise<string | null> {
-  const { data: customer, error: cErr } = await db
+  const {
+    data: customer,
+    error: cErr,
+    status,
+  } = await db
     .from("customers")
     .upsert(
       {
@@ -77,7 +81,8 @@ export async function createCustomerAccount(
     )
     .select("id")
     .single();
-  if (cErr || !customer) return `customers: ${cErr?.code} ${cErr?.message}`;
+  if (cErr || !customer)
+    return `customers: ${cErr?.code ?? `http${status}`} ${cErr?.message ?? "aucune ligne"}`;
 
   let referredBy: string | null = null;
   if (p.referral) {
