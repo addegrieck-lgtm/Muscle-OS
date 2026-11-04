@@ -4,6 +4,7 @@ import { signOutAccount } from "@/app/actions/account";
 import { CopyButton } from "@/components/account/CopyButton";
 import { buttonClass } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getAdminSession } from "@/lib/auth/admin";
 import { isSupabaseConfigured, siteUrl } from "@/lib/env";
 import {
   CIRCLE_LEVELS,
@@ -61,12 +62,17 @@ export default async function AccountPage({
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getUser();
     if (!data.user) redirect("/compte/connexion?suite=/compte");
+    const admin = await getAdminSession();
     return (
       <>
         <PageHeader
           eyebrow="Compte"
-          title="Aucun compte client."
-          intro="Cette session n’est liée à aucun compte client (accès administration)."
+          title={admin ? "Aucun compte client." : "Fiche client indisponible."}
+          intro={
+            admin
+              ? "Cette session n’est liée à aucun compte client (accès administration)."
+              : "Vous êtes bien connecté, mais votre fiche client n’a pas pu être préparée. Réessayez dans un instant ; si cela persiste, écrivez-nous depuis la page Contact."
+          }
         />
         <div className="container-luxe pb-32">
           <form action={signOutAccount}>
