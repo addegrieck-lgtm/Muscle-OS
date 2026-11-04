@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { LuminaireArt } from "@/components/art/LuminaireArt";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { formatArticleDate, publishedArticles } from "@/lib/content/journal";
+import { formatArticleDate } from "@/lib/content/journal";
+import { listPublishedArticles } from "@/lib/services/journal";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
@@ -11,8 +12,11 @@ export const metadata = pageMetadata({
   path: "/journal",
 });
 
-export default function JournalPage() {
-  const [first, ...rest] = publishedArticles();
+// Articles du studio : lus à chaque visite (publication et programmation sans redéploiement).
+export const dynamic = "force-dynamic";
+
+export default async function JournalPage() {
+  const [first, ...rest] = await listPublishedArticles();
   return (
     <>
       <PageHeader

@@ -4,6 +4,7 @@ import { Badge, Card, Flash, PageTitle, Table } from "@/components/admin/ui";
 import { auditSite } from "@/lib/seo/audit";
 import { sitePages } from "@/lib/seo/site-pages";
 import { getCategories, getProducts } from "@/lib/services/catalog";
+import { listPublishedArticles } from "@/lib/services/journal";
 import { requireAdmin } from "@/lib/auth/admin";
 import { formatPrice } from "@/lib/money";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/services/orders";
@@ -57,7 +58,7 @@ export default async function Dashboard({
     getProducts(),
     getCategories(),
   ]);
-  const seo = auditSite(sitePages(products, categories));
+  const seo = auditSite(sitePages(products, categories, await listPublishedArticles()));
   const t = traffic as {
     views: number;
     visitors: number;

@@ -6,26 +6,49 @@ import { Arrow } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Prose } from "@/components/ui/Prose";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { formatArticleDate, getArticle } from "@/lib/content/journal";
+import { getAdminSession } from "@/lib/auth/admin";
+import { formatArticleDate } from "@/lib/content/journal";
+import { findPublishedArticle, previewArticle } from "@/lib/services/journal";
 import { getProducts } from "@/lib/services/catalog";
 import { absoluteUrl, pageMetadata, SITE_NAME } from "@/lib/seo/metadata";
 import { jsonLdScript } from "@/lib/seo/jsonld";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ apercu?: string }>;
+};
+
+/** Article en ligne, ou brouillon en aperçu pour un administrateur (`?apercu=1`). */
+async function load({ params, searchParams }: Props) {
+  const slug = (await params).slug;
+  if ((await searchParams).apercu && (await getAdminSession())) {
+    const draft = await previewArticle(slug);
+    if (draft) return { a: draft, preview: true };
+  }
+  const a = await findPublishedArticle(slug);
+  return a ? { a, preview: false } : null;
+}
 
 // Rendu à chaque visite : un article programmé n'existe (page, sitemap) qu'à partir de sa date.
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const a = getArticle((await params).slug);
-  return a
-    ? pageMetadata({ title: a.title, description: a.description, path: `/journal/${a.slug}` })
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const r = await load(props);
+  return r
+    ? pageMetadata({
+        title: r.a.title,
+        description: r.a.description,
+        path: `/journal/${r.a.slug}`,
+        noindex: r.preview,
+      })
     : {};
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const a = getArticle((await params).slug);
-  if (!a) notFound();
+export default async function ArticlePage(props: Props) {
+  const r = await load(props);
+  if (!r) notFound();
+  const { a, preview } = r;
+  const sources = "sources" in a ? (a.sources ?? []) : [];
   // Pièces évoquées : uniquement celles publiées au catalogue, dans l'ordre de l'article.
   const catalog = a.productSlugs?.length ? await getProducts() : [];
   const products = (a.productSlugs ?? [])
@@ -60,6 +83,11 @@ export default async function ArticlePage({ params }: Props) {
     : null;
   return (
     <article>
+      {preview && (
+        <p className="fixed inset-x-0 top-0 z-[60] bg-champagne py-2 text-center text-xs uppercase tracking-[0.2em] text-noir">
+          Aperçu — article non publié
+        </p>
+      )}
       <PageHeader
         crumbs={[
           { name: "Accueil", path: "/" },
@@ -98,6 +126,20 @@ export default async function ArticlePage({ params }: Props) {
               ))}
             </section>
           ) : null}
+          {sources.length > 0 && (
+            <section>
+              <h2>Sources</h2>
+              <ul className="mt-4 space-y-2">
+                {sources.map((s) => (
+                  <li key={s.href}>
+                    <a href={s.href} target="_blank" rel="noreferrer">
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <p className="t-small pt-8 text-brun/55">
             Ces repères sont donnés à titre indicatif ; pour toute installation électrique, faites
             appel à un professionnel qualifié.

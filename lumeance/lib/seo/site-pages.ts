@@ -13,7 +13,7 @@ import { metadata as retours } from "@/app/(store)/retours/page";
 import { CATEGORY_SEO } from "@/lib/content/categories";
 import { ROOMS } from "@/lib/content/home";
 import { ROOM_MIN_PRODUCTS, ROOM_SEO, roomProducts } from "@/lib/content/rooms-seo";
-import { publishedArticles } from "@/lib/content/journal";
+import type { Article } from "@/lib/content/journal";
 import { categoryLabel } from "@/lib/navigation";
 import { withSuffix, type PageInput } from "@/lib/seo/audit";
 import { LEGAL_PATHS, LEGAL_PENDING } from "@/lib/seo/legal";
@@ -28,7 +28,11 @@ const titleOf = (m: Metadata): string => {
 };
 
 /** Toutes les pages publiques du site, prêtes pour l'audit. */
-export function sitePages(products: Product[], categories: Category[]): PageInput[] {
+export function sitePages(
+  products: Product[],
+  categories: Category[],
+  articles: Article[],
+): PageInput[] {
   const statics: [string, string, Metadata][] = [
     ["/", "Accueil", home],
     ["/maison", "La Maison", maison],
@@ -108,7 +112,7 @@ export function sitePages(products: Product[], categories: Category[]): PageInpu
   }
 
   const live = new Set(products.map((p) => p.slug));
-  for (const a of publishedArticles()) {
+  for (const a of articles) {
     pages.push({
       path: `/journal/${a.slug}`,
       kind: "article",

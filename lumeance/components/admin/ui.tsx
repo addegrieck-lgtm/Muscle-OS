@@ -131,6 +131,8 @@ const BADGE: Record<string, string> = {
   pending: "bg-[#f3e6cc] text-[#7a5a1e]",
   failed: "bg-[#f2dcd6] text-[#8a3b2a]",
   partially_refunded: "bg-[#f3e6cc] text-[#7a5a1e]",
+  review: "bg-[#f3e6cc] text-[#7a5a1e]",
+  scheduled: "bg-[#dde6f0] text-[#2f4b6b]",
 };
 
 export function Badge({ value, label }: { value: string; label?: string }) {
