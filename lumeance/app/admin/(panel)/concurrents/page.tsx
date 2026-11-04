@@ -298,7 +298,9 @@ export default async function CompetitorsPage({
                         </a>
                         {r.notes && <span className="block text-xs text-brun/50">{r.notes}</span>}
                       </td>
-                      <td className="py-2 text-right tabular-nums">{formatPrice(Number(r.price))}</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatPrice(Number(r.price))}
+                      </td>
                       <td className="py-2">
                         {o ? (
                           <>

@@ -2,7 +2,7 @@ import "server-only";
 import { siteUrl } from "@/lib/env";
 import { linksTo } from "@/lib/seo/backlinks";
 import { robotsAllows } from "@/lib/seo/competitors";
-import { fetchPublic } from "./public-fetch";
+import { fetchPublic, isPublicHttpsUrl } from "./public-fetch";
 
 export interface LinkCheck {
   check_status: "present" | "absent" | "blocked" | "error";
@@ -14,14 +14,18 @@ export interface LinkCheck {
 
 /** Lit la page source (robots.txt respecté) et y cherche un lien vers le site. */
 export async function verifyBacklinkUrl(sourceUrl: string): Promise<LinkCheck> {
-  const u = new URL(sourceUrl);
+  // Les anciennes pages en http sont lues en https (seul protocole autorisé).
+  const url = sourceUrl.replace(/^http:/i, "https:");
+  if (!isPublicHttpsUrl(url))
+    return { check_status: "error", message: "Adresse non publique refusée." };
+  const u = new URL(url);
   const robots = await fetchPublic(`${u.origin}/robots.txt`);
   if (!robotsAllows(robots && robots.status < 400 ? robots.text : "", u.pathname))
     return {
       check_status: "blocked",
       message: "Le robots.txt de ce site interdit la vérification : contrôlez à la main.",
     };
-  const page = await fetchPublic(sourceUrl);
+  const page = await fetchPublic(url);
   if (!page || page.status >= 400)
     return {
       check_status: "error",
