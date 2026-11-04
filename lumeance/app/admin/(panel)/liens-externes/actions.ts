@@ -6,6 +6,7 @@ import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { back, dbError } from "@/lib/admin/redirect";
 import { domainOf, parseGscLinksExport } from "@/lib/seo/backlinks";
 import { verifyBacklinkUrl } from "@/lib/services/backlink-check";
+import { isPublicHttpsUrl } from "@/lib/services/public-fetch";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const PAGE = "/admin/liens-externes";
@@ -29,8 +30,8 @@ export async function addBacklink(form: FormData) {
   const raw = s(form, "source_url");
   const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   const domain = domainOf(url);
-  if (!domain || !domain.includes("."))
-    back(PAGE, { erreur: "Adresse de la page source invalide." });
+  if (!domain || !isPublicHttpsUrl(url.replace(/^http:/i, "https:")))
+    back(PAGE, { erreur: "Adresse de la page source invalide (site public uniquement)." });
   const kind = z.enum(KINDS).catch("autre").parse(s(form, "kind"));
   const status = z.enum(STATUSES).catch("prospect").parse(s(form, "status"));
   const target = s(form, "target_path");
@@ -116,7 +117,7 @@ export async function checkBacklink(form: FormData) {
 /** Import du rapport « Liens » exporté de Search Console (liens constatés par Google). */
 export async function importGscLinks(form: FormData) {
   await requireAdmin(CATALOG_ROLES);
-  const urls = parseGscLinksExport(s(form, "csv")).slice(0, 500);
+  const urls = parseGscLinksExport(s(form, "csv")).filter(isPublicHttpsUrl).slice(0, 500);
   if (!urls.length) back(PAGE, { erreur: "Aucune adresse reconnue dans le texte collé." });
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

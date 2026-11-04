@@ -1,11 +1,6 @@
 import "server-only";
 import { fetchPublic as get } from "./public-fetch";
-import {
-  parsePageMeta,
-  parseSitemap,
-  robotsAllows,
-  robotsSitemaps,
-} from "@/lib/seo/competitors";
+import { parsePageMeta, parseSitemap, robotsAllows, robotsSitemaps } from "@/lib/seo/competitors";
 
 const MAX_URLS = 5000;
 

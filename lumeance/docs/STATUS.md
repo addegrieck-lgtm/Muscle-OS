@@ -80,3 +80,9 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 ## Points ouverts
 - Accents de Cormorant Garamond relativement hauts sur les minuscules : dessin d’origine de la police imposée.
 - Double opt-in de la lettre : nécessite un service d’e-mail (non choisi).
+
+## SEO avancé (phases B à K) ✅
+- Images allégées, pages par pièce, Search Console, studio éditorial, mots-clés, maillage,
+  fiches produits et flux Google Shopping, veille concurrentielle, liens externes, rapports
+  hebdomadaires. Détails et mise en service : `docs/SEO.md`.
+

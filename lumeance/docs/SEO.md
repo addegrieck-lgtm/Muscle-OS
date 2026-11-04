@@ -1,5 +1,37 @@
 # SEO — notes techniques
 
+## Récapitulatif (phases B à K)
+
+| Administration | Rôle | Données |
+| --- | --- | --- |
+| Référencement | Audit de toutes les pages publiques | Contenu du site |
+| Rapports SEO | Rapport hebdomadaire et alertes | Search Console, audits, base |
+| Google Search Console | Clics, impressions, positions, indexation | API Search Console |
+| Mots-clés | Expressions suivies, page cible, cannibalisation | Search Console (volume : « Non renseigné ») |
+| Maillage interne | Liens entre pages, orphelines, liens cassés | Contenu du site |
+| Fiches produits (SEO) | Score par fiche, manques fournisseur | Catalogue |
+| Veille concurrentielle | Relevés publics, prix sourcés | Pages publiques (robots.txt respecté) |
+| Liens externes | Liens obtenus, démarchés, perdus | Vérification de page, export Search Console |
+| Studio éditorial | Articles : brouillon → validation → publication | Base |
+
+**Mise en service (une fois, dans Supabase → SQL Editor, dans cet ordre)** :
+`20261109000100_journal.sql`, `20261110000100_seo_keywords.sql`,
+`20261111000100_competitors.sql`, `20261112000100_backlinks.sql`,
+`20261113000100_seo_reports.sql` (toutes incluses dans `setup.sql` pour une installation neuve).
+
+**Secrets Cloudflare** : `GOOGLE_SERVICE_ACCOUNT_JSON` (Search Console, lecture seule),
+`CRON_SECRET` (rapport du lundi, aussi dans les secrets GitHub Actions), facultatifs
+`BREVO_API_KEY`, `REPORT_EMAIL_TO`, `REPORT_EMAIL_FROM` (rapport par e-mail).
+
+**Principes** : aucune donnée inventée (volumes, positions, liens, avis, caractéristiques) ;
+aucun article publié sans validation ; aucun achat de lien ni envoi automatique ; les pages
+extérieures ne sont lues qu'en https, sur des domaines publics, robots.txt respecté.
+
+**Vérifications** : `npm run check` (dont `tests/seo-site.test.ts` : chaque page ≥ 90 à l'audit,
+aucun doublon de titre, aucun lien cassé), `npm run test:db`, et après déploiement
+`CHROMIUM_PATH=… npm run smoke -- https://maisonlumeance.fr` (statut, h1, JSON-LD, erreurs du
+navigateur, débordement mobile, poids des images, sitemap, robots, flux).
+
 ## Images (phase B)
 
 Sur Cloudflare (OpenNext sans service d'images), `/_next/image` renvoie la photo d'origine quelle

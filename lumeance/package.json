@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:db": "bash supabase/tests/run.sh",
+    "smoke": "node scripts/smoke.mjs",
     "check": "npm run typecheck && npm run lint && npm test",
     "admin:init": "node scripts/init-admin.mjs",
     "brand": "node scripts/build-brand.mjs",
