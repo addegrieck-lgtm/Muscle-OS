@@ -15,7 +15,7 @@ import {
 } from "@/lib/catalog/loyalty";
 import { PRO_TIERS } from "@/lib/catalog/pro";
 import { formatPrice } from "@/lib/money";
-import { getCurrentAccount } from "@/lib/services/account";
+import { accountRepairReference, getCurrentAccount } from "@/lib/services/account";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -75,6 +75,11 @@ export default async function AccountPage({
           }
         />
         <div className="container-luxe pb-32">
+          {!admin && accountRepairReference() && (
+            <p className="t-small mb-8 text-brun/50">
+              Référence technique : {accountRepairReference()}
+            </p>
+          )}
           <form action={signOutAccount}>
             <button className={buttonClass("outline")}>Se déconnecter</button>
           </form>
