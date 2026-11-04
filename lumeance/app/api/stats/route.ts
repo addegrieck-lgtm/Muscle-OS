@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import { siteUrl } from "@/lib/env";
+import { getAdminSession } from "@/lib/auth/admin";
 import { allowRequest } from "@/lib/services/request-guard";
-import { cleanPath, deviceOf, isBot, referrerHost, sourceOf } from "@/lib/services/traffic";
+import {
+  cleanPath,
+  hasAuthCookie,
+  isExcludedDevice,
+  deviceOf,
+  isBot,
+  referrerHost,
+  sourceOf,
+} from "@/lib/services/traffic";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
 /**
@@ -21,6 +30,11 @@ export async function POST(req: Request) {
   }
   const path = cleanPath(body.path);
   if (!path) return ok;
+  // Visites de l'équipe non comptées : appareil exclu depuis l'administration, ou
+  // administrateur connecté (vérifié seulement si un cookie de session est présent).
+  const cookie = req.headers.get("cookie");
+  if (isExcludedDevice(cookie)) return ok;
+  if (hasAuthCookie(cookie) && (await getAdminSession())) return ok;
   const ip = req.headers.get("cf-connecting-ip") ?? "0.0.0.0";
   if (!(await allowRequest(`stats:${ip}`, 120, 60_000, "FORMS_LIMITER"))) return ok;
   const db = createSupabaseServiceClient();
