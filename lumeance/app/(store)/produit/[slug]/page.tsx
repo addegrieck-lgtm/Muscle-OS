@@ -56,7 +56,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
   const related = relatedProducts(all, product);
   const reviews = product.isDemo ? [] : await getPublishedReviews(product.id);
-  const jsonLd = productJsonLd(product, reviews);
+  const jsonLd = productJsonLd(product, reviews, shipping);
   const dims = Object.entries(product.dimensions).filter(([, v]) => typeof v === "number") as [
     keyof Dimensions,
     number,
