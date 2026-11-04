@@ -95,7 +95,9 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
 
           <div className="flex items-center gap-5">
             <Link
-              href={account.loggedIn ? "/compte" : "/compte/connexion"}
+              // Toujours /compte : la page redirige vers la connexion si besoin. Évite d'envoyer un
+              // client connecté vers le formulaire avant que l'état du compte soit chargé.
+              href="/compte"
               className="t-eyebrow flex items-center gap-2"
               aria-label={account.loggedIn ? "Mon compte" : "Se connecter ou créer un compte"}
             >

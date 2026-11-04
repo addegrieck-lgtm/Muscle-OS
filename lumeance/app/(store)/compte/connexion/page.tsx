@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
 import { SigninForm } from "@/components/account/AccountForms";
+import { isSupabaseConfigured } from "@/lib/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -16,6 +19,11 @@ export default async function SigninPage({
 }) {
   const { lien, suite } = await searchParams;
   const next = suite && suite.startsWith("/") && !suite.startsWith("//") ? suite : "/compte";
+  // Déjà connecté : pas de nouveau formulaire, on poursuit directement.
+  if (isSupabaseConfigured()) {
+    const { data } = await (await createSupabaseServerClient()).auth.getUser();
+    if (data.user && !lien) redirect(next);
+  }
   return (
     <>
       <PageHeader eyebrow="Compte" title="Bon retour parmi nous." />
