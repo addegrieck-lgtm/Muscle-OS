@@ -107,9 +107,4 @@ export const getFeaturedProducts = cache(async (limit = 6) => {
   return (await getProducts()).filter((p) => p.featured).slice(0, limit);
 });
 
-export function relatedProducts(all: Product[], product: Product, limit = 3): Product[] {
-  return all
-    .filter((p) => p.id !== product.id && p.categorySlug === product.categorySlug)
-    .concat(all.filter((p) => p.id !== product.id && p.categorySlug !== product.categorySlug))
-    .slice(0, limit);
-}
+export { relatedProducts } from "@/lib/catalog/related";

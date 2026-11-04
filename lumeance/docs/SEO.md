@@ -60,3 +60,15 @@ moyenne seulement avec de vrais avis vérifiés).
   une même recherche), recherches réelles non suivies, pistes tirées de la structure du site.
 - **Volume de recherche et difficulté : « Non renseigné »** — aucune source gratuite fiable ;
   aucun chiffre n'est estimé ni stocké, tout est relu dans Search Console à l'affichage.
+
+## Maillage interne (phase F)
+
+- `lib/seo/linking.ts` : graphe des liens contextuels du site (hors menu et pied de page), calculé
+  à partir du contenu publié ; les mêmes fonctions produisent les liens affichés.
+- Liens ajoutés sur le site : fiche produit → pages par pièce où elle est conseillée et articles
+  qui la citent (« Pour aller plus loin ») ; page par pièce → guides associés (« Nos guides »).
+- Administration → **Maillage interne** : liens reçus et émis par page, textes des liens, pages
+  orphelines ou peu liées, liens cassés, liens à ajouter (article citant une pièce sans lien ;
+  page parlant d'un mot-clé suivi sans renvoyer vers sa page cible).
+- Test de non-régression : aucun lien du contenu vers une page inexistante, chaque fiche et page
+  par pièce reçoit au moins 3 liens contextuels.
