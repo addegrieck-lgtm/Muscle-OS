@@ -8,6 +8,7 @@ const ITEMS: { href: string; label: string; roles?: AdminRole[] }[] = [
   { href: "/admin/dashboard", label: "Tableau de bord" },
   { href: "/admin/stats", label: "Statistiques" },
   { href: "/admin/seo", label: "Référencement" },
+  { href: "/admin/rapports", label: "Rapports SEO" },
   { href: "/admin/google", label: "Google Search Console" },
   { href: "/admin/mots-cles", label: "Mots-clés" },
   { href: "/admin/maillage", label: "Maillage interne" },

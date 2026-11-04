@@ -110,3 +110,20 @@ moyenne seulement avec de vrais avis vérifiés).
   « Liens » de Search Console. Pistes légitimes et modèle de message à envoyer soi-même.
 - « Obtenu » n'est attribué qu'après vérification ou import Google. Aucun achat de lien, aucun
   envoi automatique.
+
+## Rapports et automatisations (phase J)
+
+- Migration `supabase/migrations/20261113000100_seo_reports.sql` (table `seo_reports`).
+- Administration → **Rapports SEO** : clics et impressions Google de la semaine contre la
+  précédente, recherches en recul ou en progrès (3 places ou plus), pages qui perdent des clics,
+  mots-clés suivis, score d'audit, score moyen des fiches, maillage, liens externes (les 5 liens
+  obtenus les moins récemment contrôlés sont revérifiés), studio ; alertes classées critique /
+  attention / info ; historique de 26 semaines ; bouton « Générer maintenant ».
+- **Automatique chaque lundi** (`.github/workflows/lumeance-seo-report.yml`) :
+  1. créer un secret aléatoire d'au moins 24 caractères ;
+  2. Cloudflare → lumeance → Variables and Secrets : secret `CRON_SECRET` ;
+  3. GitHub → dépôt → Settings → Secrets and variables → Actions : secret `CRON_SECRET` (même
+     valeur). Sans secret, la route `/api/cron/seo-report` reste fermée (401).
+- **E-mail facultatif** (Brevo, offre gratuite) : secrets Cloudflare `BREVO_API_KEY`,
+  `REPORT_EMAIL_TO`, `REPORT_EMAIL_FROM` (adresse validée dans Brevo).
+- Statistiques de visite détaillées (GA4) : prévues à l'ouverture du paiement.

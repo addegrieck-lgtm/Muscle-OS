@@ -4,10 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { back, dbError } from "@/lib/admin/redirect";
-import { siteUrl } from "@/lib/env";
-import { domainOf, linksTo, parseGscLinksExport } from "@/lib/seo/backlinks";
-import { robotsAllows } from "@/lib/seo/competitors";
-import { fetchPublic } from "@/lib/services/public-fetch";
+import { domainOf, parseGscLinksExport } from "@/lib/seo/backlinks";
+import { verifyBacklinkUrl } from "@/lib/services/backlink-check";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const PAGE = "/admin/liens-externes";
@@ -97,43 +95,15 @@ export async function checkBacklink(form: FormData) {
   if (!b) back(PAGE, { erreur: "Lien introuvable." });
   if (b.checked_at && Date.now() - new Date(b.checked_at).getTime() < 10 * 60_000)
     back(PAGE, { erreur: "Vérifié il y a moins de 10 minutes." });
-  const u = new URL(b.source_url);
-  const robots = await fetchPublic(`${u.origin}/robots.txt`);
-  const allowed = robotsAllows(robots && robots.status < 400 ? robots.text : "", u.pathname);
-  let patch: Record<string, unknown>;
-  let msg: string;
-  if (!allowed) {
-    patch = { check_status: "blocked" };
-    msg = "Le robots.txt de ce site interdit la vérification : contrôlez à la main.";
-  } else {
-    const page = await fetchPublic(b.source_url);
-    if (!page || page.status >= 400) {
-      patch = { check_status: "error" };
-      msg = page ? `Page source : HTTP ${page.status}.` : "Page source injoignable.";
-    } else {
-      const found = linksTo(page.text, new URL(siteUrl).hostname);
-      if (found.length) {
-        const best = found[0]!;
-        let target: string | null = null;
-        try {
-          target = new URL(best.href).pathname || "/";
-        } catch {
-          /* adresse illisible */
-        }
-        patch = {
-          check_status: "present",
-          status: "obtenu",
-          anchor: best.anchor.slice(0, 300) || null,
-          rel: best.rel.slice(0, 60) || null,
-          target_path: target,
+  const r = await verifyBacklinkUrl(b.source_url);
+  const { message: msg, ...found } = r;
+  const patch: Record<string, unknown> =
+    r.check_status === "present"
+      ? { ...found, status: "obtenu" }
+      : {
+          check_status: r.check_status,
+          ...(r.check_status === "absent" && b.status === "obtenu" ? { status: "perdu" } : {}),
         };
-        msg = `Lien trouvé${best.anchor ? ` (« ${best.anchor.slice(0, 60)} »)` : ""}.`;
-      } else {
-        patch = { check_status: "absent", ...(b.status === "obtenu" ? { status: "perdu" } : {}) };
-        msg = "Aucun lien vers le site sur cette page.";
-      }
-    }
-  }
   const { error } = await supabase
     .from("backlinks")
     .update({ ...patch, checked_at: new Date().toISOString() })
