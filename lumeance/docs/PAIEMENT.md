@@ -31,4 +31,6 @@ Code : `lib/payments/stripe.ts` (API Stripe en `fetch`, signature vérifiée en 
 4. **Test** : commande avec la carte `4242 4242 4242 4242` (date future, CVC quelconque) → la commande doit passer « Payée » dans l’administration ; tester un remboursement ; tester l’abandon (la commande s’annule à l’expiration).
 5. **Passage en réel** : refaire l’étape 2 en mode réel (nouvelles clés `sk_live_…` et nouveau `whsec_…`, l’endpoint de webhook est distinct) et remplacer les deux secrets dans Cloudflare. Compléter la section 4 des CGV (moyens de paiement activés).
 
+**Bouton « Commande en ligne bientôt disponible » malgré les réglages** : Administration → Paramètres → Paiement en ligne indique, pour chaque variable, si le site la lit et si sa forme est correcte (sans jamais afficher les clés). Toute modification de variable dans Cloudflare demande un redéploiement.
+
 Pour fermer la boutique à tout moment : `PAYMENTS_ENABLED=0`.

@@ -236,8 +236,8 @@ export default async function SettingsPage({
           </p>
           <ul className="mt-3 space-y-1 text-sm">
             {paymentsDiagnostic().map((c) => (
-              <li key={c.label} className={c.ok ? "text-brun/75" : "text-[#8a3b2a]"}>
-                {c.ok ? "✓" : "✗"} {c.label}
+              <li key={c.name} className={c.ok ? "text-brun/75" : "text-[#8a3b2a]"}>
+                {c.ok ? "✓" : "✗"} <code>{c.name}</code> : {c.detail}
               </li>
             ))}
           </ul>

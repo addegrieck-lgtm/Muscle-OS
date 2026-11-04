@@ -215,9 +215,14 @@ describe("réglages du paiement saisis dans Cloudflare", () => {
     expect(paymentsDiagnostic().every((c) => c.ok)).toBe(true);
     process.env.STRIPE_WEBHOOK_SECRET = "abc";
     const d = paymentsDiagnostic();
-    expect(d.filter((c) => !c.ok).map((c) => c.label)).toEqual([
-      "STRIPE_WEBHOOK_SECRET commence par whsec_",
-    ]);
+    expect(d.filter((c) => !c.ok).map((c) => c.name)).toEqual(["STRIPE_WEBHOOK_SECRET"]);
+    delete process.env.PAYMENTS_ENABLED;
+    expect(paymentsDiagnostic()[0]).toMatchObject({
+      ok: false,
+      detail: expect.stringMatching(/absente/),
+    });
+    process.env.STRIPE_SECRET_KEY = "pk_test_publique";
+    expect(paymentsDiagnostic()[2]!.detail).toMatch(/clé publique/);
     expect(JSON.stringify(d)).not.toContain("sk_test_123");
   });
 });
