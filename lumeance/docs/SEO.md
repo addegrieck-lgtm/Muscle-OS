@@ -49,3 +49,14 @@ moyenne seulement avec de vrais avis vérifiés).
 - Aperçu d'un brouillon : `/journal/<adresse>?apercu=1`, réservé aux administrateurs (non indexé).
 - Format du texte : `## Intertitre`, paragraphes séparés par une ligne vide ; FAQ en blocs
   `Q : …` / `R : …` ; liens et sources `Libellé | adresse`.
+
+## Mots-clés (phase E)
+
+- Migration `supabase/migrations/20261110000100_seo_keywords.sql` (table `seo_keywords` :
+  expression, page cible, intention, priorité ; réservée aux administrateurs).
+- Administration → **Mots-clés** : expressions suivies avec leur position, impressions, clics et
+  taux de clic réels (Search Console, 28 ou 90 jours, évolution vs période précédente), page qui
+  ressort dans Google (alerte si elle diffère de la cible), cannibalisation (plusieurs pages pour
+  une même recherche), recherches réelles non suivies, pistes tirées de la structure du site.
+- **Volume de recherche et difficulté : « Non renseigné »** — aucune source gratuite fiable ;
+  aucun chiffre n'est estimé ni stocké, tout est relu dans Search Console à l'affichage.

@@ -143,3 +143,38 @@ export async function inspectUrl(url: string): Promise<Inspection | { error: str
     return { error: (e as Error).message };
   }
 }
+
+export type GscSession =
+  | { ok: false; status: "unconfigured" | "no-access" | "error"; message?: string; email?: string }
+  | {
+      ok: true;
+      email: string;
+      property: string;
+      query: (body: Record<string, unknown>) => Promise<GscRow[]>;
+    };
+
+/** Accès authentifié à la propriété Search Console du site (requêtes Search Analytics). */
+export async function gscSession(): Promise<GscSession> {
+  const sa = readServiceAccount();
+  if (!sa) return { ok: false, status: "unconfigured" };
+  try {
+    const token = await googleAccessToken(sa, SCOPE);
+    const { siteEntry = [] } = await call<{
+      siteEntry?: { siteUrl: string; permissionLevel: string }[];
+    }>(token, `${API}/sites`);
+    const property = pickProperty(siteEntry, new URL(siteUrl).hostname);
+    if (!property) return { ok: false, status: "no-access", email: sa.client_email };
+    const url = `${API}/sites/${encodeURIComponent(property)}/searchAnalytics/query`;
+    return {
+      ok: true,
+      email: sa.client_email,
+      property,
+      query: (body) =>
+        call<{ rows?: GscRow[] }>(token, url, { dataState: "all", ...body }).then(
+          (r) => r.rows ?? [],
+        ),
+    };
+  } catch (e) {
+    return { ok: false, status: "error", message: (e as Error).message, email: sa.client_email };
+  }
+}
