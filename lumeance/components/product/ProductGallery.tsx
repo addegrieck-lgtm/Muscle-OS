@@ -70,7 +70,6 @@ export function ProductGallery({ product }: { product: Product }) {
                   alt={s.img.alt}
                   fill
                   priority={i === 0}
-                  unoptimized={s.img.url.startsWith("/")}
                   sizes="(min-width: 1024px) 55vw, 100vw"
                   className="object-cover"
                 />
@@ -117,7 +116,6 @@ export function ProductGallery({ product }: { product: Product }) {
                   alt=""
                   fill
                   sizes="80px"
-                  unoptimized={s.img.url.startsWith("/")}
                   className="object-cover"
                 />
               ) : (

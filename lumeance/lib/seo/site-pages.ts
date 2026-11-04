@@ -11,6 +11,8 @@ import { metadata as home } from "@/app/(store)/page";
 import { metadata as restauration } from "@/app/(store)/restauration/page";
 import { metadata as retours } from "@/app/(store)/retours/page";
 import { CATEGORY_SEO } from "@/lib/content/categories";
+import { ROOMS } from "@/lib/content/home";
+import { ROOM_MIN_PRODUCTS, ROOM_SEO, roomProducts } from "@/lib/content/rooms-seo";
 import { publishedArticles } from "@/lib/content/journal";
 import { categoryLabel } from "@/lib/navigation";
 import { withSuffix, type PageInput } from "@/lib/seo/audit";
@@ -64,6 +66,28 @@ export function sitePages(products: Product[], categories: Category[]): PageInpu
       minWords: 80,
       keywords: [c.name.replace(/s$/, "")],
       internalLinks: products.filter((p) => p.categorySlug === c.slug).length,
+    });
+  }
+
+  // Entrées par pièce de la maison (hors index sous ROOM_MIN_PRODUCTS pièces : non auditées).
+  for (const r of ROOMS) {
+    const seo = ROOM_SEO[r.id];
+    const items = roomProducts(r.slugs, products);
+    if (!seo || items.length < ROOM_MIN_PRODUCTS) continue;
+    pages.push({
+      path: `/luminaires/${r.id}`,
+      kind: "catégorie",
+      name: r.label,
+      title: withSuffix(seo.title),
+      description: seo.description,
+      text: [
+        seo.intro,
+        ...seo.sections.flatMap((s) => [s.h2, ...s.body]),
+        ...seo.faq.flatMap((f) => [f.q, f.a]),
+      ].join(" "),
+      minWords: 250,
+      keywords: [seo.keyword],
+      internalLinks: items.length,
     });
   }
 

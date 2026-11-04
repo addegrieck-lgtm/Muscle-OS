@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
+import { ROOMS } from "@/lib/content/home";
 import { publishedArticles } from "@/lib/content/journal";
+import { ROOM_MIN_PRODUCTS, ROOM_SEO, roomProducts } from "@/lib/content/rooms-seo";
 import { getCategories, getProducts } from "@/lib/services/catalog";
 import { absoluteUrl } from "@/lib/seo/metadata";
 import { LEGAL_PATHS, LEGAL_PENDING } from "@/lib/seo/legal";
@@ -38,6 +40,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         priority: 0.8,
       })),
+    // Entrées par pièce, seulement avec assez de pièces en ligne (sinon hors index).
+    ...ROOMS.filter(
+      (r) => ROOM_SEO[r.id] && roomProducts(r.slugs, products).length >= ROOM_MIN_PRODUCTS,
+    ).map((r) => ({
+      url: absoluteUrl(`/luminaires/${r.id}`),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
     // Les fiches fictives de démonstration ne sont jamais déclarées.
     ...products
       .filter((p) => !p.isDemo)

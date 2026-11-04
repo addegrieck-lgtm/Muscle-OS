@@ -9,7 +9,7 @@ import { MotionRoot } from "@/components/motion/MotionRoot";
 import { PageViewBeacon } from "@/components/layout/PageViewBeacon";
 import { isDemoCatalog } from "@/lib/services/catalog";
 import { paymentsEnabled } from "@/lib/env";
-import { organizationJsonLd, jsonLdScript } from "@/lib/seo/jsonld";
+import { organizationJsonLd, jsonLdScript, websiteJsonLd } from "@/lib/seo/jsonld";
 
 // Pages rendues à chaque requête : un produit publié depuis l'administration apparaît aussitôt,
 // sans dépendre d'un cache de pages persistant (absent sur Cloudflare Workers).
@@ -42,7 +42,9 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
         <PageViewBeacon />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{
+            __html: jsonLdScript([organizationJsonLd(), websiteJsonLd()]),
+          }}
         />
       </CartProvider>
     </AccountProvider>

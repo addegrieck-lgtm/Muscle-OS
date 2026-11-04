@@ -26,13 +26,22 @@ export const ROOMS: { id: string; label: string; text: string; slugs: string[] }
     id: "salle-a-manger",
     label: "Salle à manger et cuisine",
     text: "Au-dessus d’une table ou d’un îlot, une lumière qui rassemble.",
-    slugs: ["ginkgo", "constellation", "sylve", "aigrette", "luciole", "organza", "celeste"],
+    slugs: [
+      "ginkgo",
+      "constellation",
+      "meandre",
+      "sylve",
+      "aigrette",
+      "luciole",
+      "organza",
+      "celeste",
+    ],
   },
   {
     id: "escalier",
     label: "Escalier et double hauteur",
     text: "Des cascades qui habitent la verticale, de quelques mètres à plusieurs étages.",
-    slugs: ["ondee", "halo", "organza", "celeste", "nebuleuse"],
+    slugs: ["ondee", "lucie", "halo", "perle", "organza", "celeste", "nebuleuse"],
   },
   {
     id: "salon",
@@ -44,7 +53,7 @@ export const ROOMS: { id: string; label: string; text: string; slugs: string[] }
     id: "chambre",
     label: "Chambre",
     text: "Des appliques de chevet et une lumière douce pour le soir.",
-    slugs: ["aiguille", "volute", "silhouette", "luciole"],
+    slugs: ["aiguille", "volute", "silhouette", "luciole", "perle"],
   },
   {
     id: "entree",
