@@ -1,0 +1,24 @@
+# LUMÉANCE : rapport SEO hebdomadaire (lundi matin). Appelle la route protégée du site ; le secret
+# CRON_SECRET doit être identique dans GitHub (Settings → Secrets → Actions) et chez Cloudflare.
+name: LUMÉANCE — rapport SEO
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Générer le rapport
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET absent : rapport automatique non configuré."
+            exit 0
+          fi
+          curl -fsS --retry 2 --max-time 120 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://maisonlumeance.fr/api/cron/seo-report
