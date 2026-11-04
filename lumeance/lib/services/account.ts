@@ -33,6 +33,26 @@ const PAID = ["paid", "partially_refunded"];
  * Supabase non configuré). L'identité vient du jeton de session vérifié par Supabase ; les
  * données sont lues avec la clé de service, filtrées sur cet identifiant.
  */
+/** Échec de la réparation de fiche pendant la requête en cours (diagnostic). */
+const repairState = cache((): { error: string | null } => ({ error: null }));
+
+/**
+ * Référence technique de l'échec (code d'erreur seul, sans message ni donnée), affichée au
+ * client pour qu'il puisse la transmettre.
+ */
+export function accountRepairReference(): string | null {
+  const e = repairState().error;
+  if (!e) return null;
+  const [table = "?", rest = ""] = e.split(/:\s*(.*)/s);
+  const [code = "?", ...words] = rest.split(" ");
+  // Message de Supabase tronqué, sans donnée personnelle (ex. « Invalid API key »).
+  const hint = words
+    .join(" ")
+    .replace(/[^\p{L}\p{N} ._-]/gu, "")
+    .slice(0, 60);
+  return `${table}-${code}${hint ? ` (${hint})` : ""}`;
+}
+
 export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null> => {
   if (!isSupabaseConfigured()) return null;
   const supabase = await createSupabaseServerClient();
@@ -62,6 +82,7 @@ export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null>
     const failed = await createCustomerAccount(db, user.id, profile);
     if (failed) {
       console.error("account repair:", failed);
+      repairState().error = failed;
       return null;
     }
     ({ data: acc } = await read());
