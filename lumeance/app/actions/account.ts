@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isSupabaseConfigured, siteUrl } from "@/lib/env";
+import { createCustomerAccount, profileMetadata } from "@/lib/services/account-create";
 import { signupErrorMessage } from "@/lib/services/signup-errors";
 import { clientIp } from "@/lib/services/rate-limit";
 import { allowRequest } from "@/lib/services/request-guard";
@@ -39,13 +40,6 @@ const fieldErrors = (issues: { path: PropertyKey[]; message: string }[]) =>
   Object.fromEntries(issues.map((i) => [String(i.path[0] ?? "form"), i.message]));
 
 const ip = async () => clientIp(await headers());
-
-/** Code de parrainage : 8 caractères sans ambiguïté de lecture (pas de 0/O, 1/I). */
-function referralCode(): string {
-  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  return Array.from(bytes, (b) => A[b % A.length]).join("");
-}
 
 /** Chemin interne uniquement (évite les redirections ouvertes). */
 const safeNext = (v: FormDataEntryValue | string | null | undefined, fallback = "/compte") => {
@@ -86,7 +80,16 @@ export async function signUpAccount(
     password: d.password,
     options: {
       emailRedirectTo: `${siteUrl}/compte/confirmation`,
-      data: { first_name: d.first_name },
+      data: profileMetadata({
+        first_name: d.first_name,
+        last_name: d.last_name,
+        phone: d.phone ?? null,
+        account_type: d.account_type,
+        company_name: d.company_name ?? null,
+        siret: d.siret,
+        vat_number: d.vat_number,
+        referral: d.referral,
+      }),
     },
   });
   if (error) {
@@ -110,61 +113,20 @@ export async function signUpAccount(
   // Adresse déjà inscrite : Supabase renvoie un utilisateur sans identité ; rien n'est créé.
   if (!user || (user.identities && user.identities.length === 0)) return done;
 
-  const { data: customer, error: cErr } = await db
-    .from("customers")
-    .upsert(
-      {
-        email: d.email,
-        first_name: d.first_name,
-        last_name: d.last_name,
-        ...(d.phone ? { phone: d.phone } : {}),
-      },
-      { onConflict: "email" },
-    )
-    .select("id")
-    .single();
-  if (cErr || !customer) {
-    console.error("signup customer:", cErr?.code, cErr?.message);
-    return {
-      ok: false,
-      message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
-      values: keep(form),
-    };
-  }
-
-  let referredBy: string | null = null;
-  if (d.referral) {
-    const { data: sponsor } = await db
-      .from("customer_accounts")
-      .select("auth_user_id")
-      .eq("referral_code", d.referral)
-      .maybeSingle();
-    referredBy = sponsor?.auth_user_id ?? null;
-  }
-  const entreprise = d.account_type === "entreprise";
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const { error: aErr } = await db.from("customer_accounts").insert({
-      auth_user_id: user.id,
-      customer_id: customer.id,
-      account_type: d.account_type,
-      company_name: entreprise ? d.company_name : null,
-      siret: entreprise ? d.siret : null,
-      vat_number: entreprise ? d.vat_number : null,
-      pro_status: entreprise ? "pending" : "none",
-      referral_code: referralCode(),
-      // Le parrainage est réservé aux particuliers (les entreprises ont leurs paliers).
-      referred_by: entreprise ? null : referredBy,
-    });
-    if (!aErr) break;
-    if (aErr.code !== "23505" || !aErr.message.includes("referral_code")) {
-      console.error("signup account:", aErr.code, aErr.message);
-      return {
-        ok: false,
-        message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
-        values: keep(form),
-      };
-    }
-  }
+  // L'e-mail de confirmation est déjà parti : en cas d'échec, la fiche sera recréée à la
+  // première connexion à partir des données gardées dans le compte (getCurrentAccount).
+  const failed = await createCustomerAccount(db, user.id, {
+    email: d.email,
+    first_name: d.first_name,
+    last_name: d.last_name,
+    phone: d.phone ?? null,
+    account_type: d.account_type,
+    company_name: d.company_name ?? null,
+    siret: d.siret,
+    vat_number: d.vat_number,
+    referral: d.referral,
+  });
+  if (failed) console.error("signup account:", failed);
 
   if (d.newsletter) {
     await db.from("newsletter_subscribers").upsert(

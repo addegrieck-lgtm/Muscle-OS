@@ -93,12 +93,15 @@ export function KpiCard({
   previous,
   format = "int",
   delay = 0,
+  lowerIsBetter = false,
 }: {
   label: string;
   value: number;
   previous?: number;
   format?: "int" | "decimal" | "euro" | "percent";
   delay?: number;
+  /** Baisse = progrès (ex. position moyenne dans Google). */
+  lowerIsBetter?: boolean;
 }) {
   const [ref, p] = useReveal<HTMLDivElement>(900, delay);
   const delta =
@@ -125,7 +128,7 @@ export function KpiCard({
       </p>
       {delta !== null && (
         <p
-          className={`mt-1 text-xs ${delta > 0 ? "text-emerald-700" : delta < 0 ? "text-red-700" : "text-brun/45"}`}
+          className={`mt-1 text-xs ${(lowerIsBetter ? -delta : delta) > 0 ? "text-emerald-700" : delta !== 0 ? "text-red-700" : "text-brun/45"}`}
         >
           {delta > 0 ? "▲" : delta < 0 ? "▼" : "•"} {Math.abs(delta)} % vs période précédente
         </p>

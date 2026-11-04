@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { AccountContext } from "@/lib/catalog/loyalty";
+import { createCustomerAccount, profileFromUser } from "@/lib/services/account-create";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 
@@ -32,21 +33,76 @@ const PAID = ["paid", "partially_refunded"];
  * Supabase non configuré). L'identité vient du jeton de session vérifié par Supabase ; les
  * données sont lues avec la clé de service, filtrées sur cet identifiant.
  */
+/** Échec de la réparation de fiche pendant la requête en cours (diagnostic). */
+const repairState = cache((): { error: string | null } => ({ error: null }));
+
+/**
+ * Référence technique de l'échec (code d'erreur seul, sans message ni donnée), affichée au
+ * client pour qu'il puisse la transmettre.
+ */
+export function accountRepairReference(): string | null {
+  const e = repairState().error;
+  if (!e) return null;
+  const [table = "?", rest = ""] = e.split(/:\s*(.*)/s);
+  const [code = "?", ...words] = rest.split(" ");
+  // Message de Supabase tronqué, sans donnée personnelle (ex. « Invalid API key »).
+  const hint = words
+    .join(" ")
+    .replace(/[^\p{L}\p{N} ._-]/gu, "")
+    .slice(0, 60);
+  return `${table}-${code}${hint ? ` (${hint})` : ""}`;
+}
+
 export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null> => {
   if (!isSupabaseConfigured()) return null;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   const db = createSupabaseServiceClient();
-  if (!user || !db) return null;
-  const { data: acc } = await db
-    .from("customer_accounts")
-    .select(
-      "auth_user_id, customer_id, account_type, company_name, siret, vat_number, pro_status, referral_code, referred_by, customers(email, first_name, last_name, phone)",
-    )
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-  if (!acc) return null;
+  if (!user) return null;
+  if (!db) {
+    repairState().error = "config: cle-service-absente";
+    return null;
+  }
+  const read = () =>
+    db
+      .from("customer_accounts")
+      .select(
+        "auth_user_id, customer_id, account_type, company_name, siret, vat_number, pro_status, referral_code, referred_by, customers(email, first_name, last_name, phone)",
+      )
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+  let { data: acc, error: readErr } = await read();
+  if (readErr) {
+    console.error("account read:", readErr.code, readErr.message);
+    repairState().error = `lecture: ${readErr.code} ${readErr.message}`;
+    return null;
+  }
+  if (!acc) {
+    // Adresse confirmée mais fiche absente (création interrompue à l'inscription) : on la
+    // recrée à partir des données gardées dans le compte, sauf pour un administrateur.
+    const { data: admin } = await db
+      .from("admin_users")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    const profile = profileFromUser(user);
+    if (admin || !user.email_confirmed_at || !profile) {
+      repairState().error = `compte: ${admin ? "administrateur" : !profile ? "sans-email" : "non-confirme"}`;
+      return null;
+    }
+    const failed = await createCustomerAccount(db, user.id, profile);
+    if (failed) {
+      console.error("account repair:", failed);
+      repairState().error = failed;
+      return null;
+    }
+    ({ data: acc, error: readErr } = await read());
+    if (!acc) {
+      repairState().error = `relecture: ${readErr?.code ?? "vide"} ${readErr?.message ?? ""}`;
+      return null;
+    }
+  }
   const [{ data: orders }, { data: credits }] = await Promise.all([
     db.from("orders").select("total").eq("customer_id", acc.customer_id).in("payment_status", PAID),
     db
@@ -85,7 +141,8 @@ export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null>
 /** Contexte utilisé par le calcul du panier. */
 export function accountContext(a: CustomerAccount | null): AccountContext | null {
   if (!a) return null;
-  if (a.type === "entreprise") return { type: "entreprise", proApproved: a.proStatus === "approved" };
+  if (a.type === "entreprise")
+    return { type: "entreprise", proApproved: a.proStatus === "approved" };
   return {
     type: "particulier",
     spent: a.spent,
