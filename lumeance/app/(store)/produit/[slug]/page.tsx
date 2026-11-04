@@ -6,11 +6,14 @@ import { AddToCart } from "@/components/product/AddToCart";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { VariantProvider } from "@/components/product/VariantContext";
+import { FurtherReading } from "@/components/linking/FurtherReading";
 import { Breadcrumbs } from "@/components/ui/PageHeader";
 import { PRO_DISCOUNT_MAX_PERCENT, PRO_DISCOUNT_MIN_LABEL, isOnPromotion } from "@/lib/catalog/pro";
 import { proUse } from "@/lib/content/restauration";
 import { categoryLabel } from "@/lib/navigation";
 import { getProductBySlug, getProducts, relatedProducts } from "@/lib/services/catalog";
+import { listPublishedArticles } from "@/lib/services/journal";
+import { articlesForProduct, roomsForProduct } from "@/lib/seo/linking";
 import { getShippingSettings } from "@/lib/services/content";
 import { jsonLdScript, productJsonLd } from "@/lib/seo/jsonld";
 import { ProductReviews, RatingBadge } from "@/components/reviews/ProductReviews";
@@ -44,15 +47,16 @@ const formatMm = (mm: number) => `${(mm / 10).toLocaleString("fr-FR")} cm`;
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const [product, all, shipping] = await Promise.all([
+  const [product, all, shipping, articles] = await Promise.all([
     getProductBySlug(slug),
     getProducts(),
     getShippingSettings(),
+    listPublishedArticles(),
   ]);
   if (!product) notFound();
   const related = relatedProducts(all, product);
   const reviews = product.isDemo ? [] : await getPublishedReviews(product.id);
-  const jsonLd = productJsonLd(product, reviews);
+  const jsonLd = productJsonLd(product, reviews, shipping);
   const dims = Object.entries(product.dimensions).filter(([, v]) => typeof v === "number") as [
     keyof Dimensions,
     number,
@@ -217,6 +221,12 @@ export default async function ProductPage({ params }: Props) {
             </div>
           </div>
         </section>
+      )}
+      {!product.isDemo && (
+        <FurtherReading
+          rooms={roomsForProduct(all, product.slug)}
+          articles={articlesForProduct(articles, product.slug)}
+        />
       )}
       {jsonLd && (
         <script

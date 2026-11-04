@@ -2,11 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { FurtherReading } from "@/components/linking/FurtherReading";
 import { AccordionItem } from "@/components/product/Accordion";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ROOMS, roomById } from "@/lib/content/home";
 import { ROOM_MIN_PRODUCTS, ROOM_SEO, roomProducts } from "@/lib/content/rooms-seo";
 import { getProducts } from "@/lib/services/catalog";
+import { listPublishedArticles } from "@/lib/services/journal";
+import { guidesForRoom } from "@/lib/seo/linking";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 type Props = { params: Promise<{ room: string }> };
@@ -86,6 +89,11 @@ export default async function RoomPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      <FurtherReading
+        title="Nos guides"
+        articles={guidesForRoom(await listPublishedArticles(), room)}
+      />
 
       <nav aria-label="Autres pièces" className="border-t border-brun/10 bg-ivoire py-16">
         <div className="container-luxe">

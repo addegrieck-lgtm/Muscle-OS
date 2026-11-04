@@ -1336,7 +1336,151 @@ create policy seo_keywords_write on public.seo_keywords for all to authenticated
 revoke all on public.seo_keywords from anon;
 grant select, insert, update, delete on public.seo_keywords to authenticated;
 
--- ════ migrations/20261109000100_wishlist.sql ════
+-- ════ migrations/20261111000100_competitors.sql ════
+-- LUMÉANCE — veille concurrentielle (phase H).
+-- Uniquement des informations publiques et vérifiables : concurrents choisis par la maison,
+-- relevés de prix saisis à la main avec leur source et leur date, et instantanés de pages
+-- publiques (titre, description, nombre d'adresses du plan du site) pris à la demande, dans le
+-- respect du robots.txt. Aucun trafic ni classement concurrent n'est estimé.
+-- Idempotent.
+
+create table if not exists public.competitors (
+  id uuid primary key default gen_random_uuid(),
+  name text not null check (char_length(name) between 2 and 80),
+  domain text not null unique check (domain ~ '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'),
+  notes text check (char_length(notes) <= 1000),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.competitor_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  competitor_id uuid not null references public.competitors (id) on delete cascade,
+  taken_at timestamptz not null default now(),
+  -- ok | blocked (robots.txt) | error
+  status text not null check (status in ('ok', 'blocked', 'error')),
+  message text check (char_length(message) <= 500),
+  title text check (char_length(title) <= 300),
+  description text check (char_length(description) <= 600),
+  structured_types text[] not null default '{}',
+  url_count integer check (url_count >= 0),
+  -- Adresses du plan du site (au plus 5 000), pour repérer les nouveautés d'un relevé à l'autre.
+  urls text[] not null default '{}'
+);
+create index if not exists competitor_snapshots_idx on public.competitor_snapshots (competitor_id, taken_at desc);
+
+create table if not exists public.competitor_prices (
+  id uuid primary key default gen_random_uuid(),
+  competitor_id uuid not null references public.competitors (id) on delete cascade,
+  product_label text not null check (char_length(product_label) between 2 and 160),
+  -- Pièce LUMÉANCE comparable (adresse produit), facultative.
+  our_slug text check (our_slug is null or our_slug ~ '^[a-z0-9-]+$'),
+  price bigint not null check (price > 0), -- centimes TTC
+  source_url text not null check (source_url ~ '^https://'),
+  observed_on date not null default current_date,
+  notes text check (char_length(notes) <= 500),
+  created_at timestamptz not null default now()
+);
+create index if not exists competitor_prices_idx on public.competitor_prices (competitor_id, observed_on desc);
+
+do $$
+declare t text;
+begin
+  foreach t in array array['competitors', 'competitor_prices'] loop
+    execute format('drop trigger if exists %I on public.%I', t || '_audit', t);
+    execute format('create trigger %I after insert or update or delete on public.%I
+                    for each row execute function public.log_admin_activity()', t || '_audit', t);
+  end loop;
+  foreach t in array array['competitors', 'competitor_snapshots', 'competitor_prices'] loop
+    execute format('alter table public.%I enable row level security', t);
+    execute format('drop policy if exists %I on public.%I', t || '_read', t);
+    execute format('create policy %I on public.%I for select to authenticated using (public.is_admin())', t || '_read', t);
+    execute format('drop policy if exists %I on public.%I', t || '_write', t);
+    execute format('create policy %I on public.%I for all to authenticated
+                    using (public.is_catalog_admin()) with check (public.is_catalog_admin())', t || '_write', t);
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+  end loop;
+end $$;
+
+-- ════ migrations/20261112000100_backlinks.sql ════
+-- LUMÉANCE — liens externes (phase I).
+-- Suivi des liens réellement obtenus ou démarchés à la main : aucun achat de lien, aucune
+-- campagne automatique. La présence d'un lien n'est marquée qu'après vérification de la page
+-- source (lecture à la demande) ou import du rapport « Liens » de Search Console.
+-- Idempotent.
+
+create table if not exists public.backlinks (
+  id uuid primary key default gen_random_uuid(),
+  source_url text not null unique check (source_url ~ '^https?://' and char_length(source_url) <= 600),
+  source_domain text not null check (char_length(source_domain) <= 253),
+  target_path text check (target_path is null or target_path ~ '^/[^\s]*$'),
+  kind text not null default 'autre'
+    check (kind in ('annuaire', 'presse', 'blog', 'partenaire', 'fournisseur', 'reseau', 'autre')),
+  status text not null default 'prospect'
+    check (status in ('prospect', 'contacte', 'obtenu', 'refuse', 'perdu')),
+  -- Dernière vérification de la page source.
+  check_status text check (check_status in ('present', 'absent', 'blocked', 'error')),
+  checked_at timestamptz,
+  anchor text check (char_length(anchor) <= 300),
+  rel text check (char_length(rel) <= 60),
+  origin text not null default 'manuel' check (origin in ('manuel', 'search_console')),
+  notes text check (char_length(notes) <= 1000),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists backlinks_status_idx on public.backlinks (status, source_domain);
+
+drop trigger if exists backlinks_touch on public.backlinks;
+create or replace function public.backlinks_touch() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+create trigger backlinks_touch before update on public.backlinks
+  for each row execute function public.backlinks_touch();
+
+drop trigger if exists backlinks_audit on public.backlinks;
+create trigger backlinks_audit after insert or update or delete on public.backlinks
+  for each row execute function public.log_admin_activity();
+
+alter table public.backlinks enable row level security;
+drop policy if exists backlinks_read on public.backlinks;
+create policy backlinks_read on public.backlinks for select to authenticated using (public.is_admin());
+drop policy if exists backlinks_write on public.backlinks;
+create policy backlinks_write on public.backlinks for all to authenticated
+  using (public.is_catalog_admin()) with check (public.is_catalog_admin());
+revoke all on public.backlinks from anon;
+grant select, insert, update, delete on public.backlinks to authenticated;
+
+-- ════ migrations/20261113000100_seo_reports.sql ════
+-- LUMÉANCE — rapports SEO hebdomadaires (phase J).
+-- Instantané calculé chaque semaine (ou à la demande) à partir des données réelles : Search
+-- Console, audits du site, studio, liens externes. Aucune donnée estimée.
+-- Idempotent.
+
+create table if not exists public.seo_reports (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  period_start date not null,
+  period_end date not null,
+  -- manuel (bouton de l'administration) ou planifie (tâche hebdomadaire)
+  trigger text not null default 'manuel' check (trigger in ('manuel', 'planifie')),
+  alerts integer not null default 0 check (alerts >= 0),
+  data jsonb not null check (jsonb_typeof(data) = 'object')
+);
+create index if not exists seo_reports_created_idx on public.seo_reports (created_at desc);
+
+alter table public.seo_reports enable row level security;
+drop policy if exists seo_reports_read on public.seo_reports;
+create policy seo_reports_read on public.seo_reports for select to authenticated using (public.is_admin());
+drop policy if exists seo_reports_write on public.seo_reports;
+create policy seo_reports_write on public.seo_reports for all to authenticated
+  using (public.is_catalog_admin()) with check (public.is_catalog_admin());
+revoke all on public.seo_reports from anon;
+grant select, insert, delete on public.seo_reports to authenticated;
+
+-- ════ migrations/20261114000100_wishlist.sql ════
 -- LUMÉANCE — liste d'envies des comptes clients. Idempotent : peut être rejoué sans risque.
 -- Les visiteurs gardent leurs envies dans leur navigateur ; une fois connectés, elles sont
 -- enregistrées ici et retrouvées sur tous leurs appareils. Écriture par le serveur (clé

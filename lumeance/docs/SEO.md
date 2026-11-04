@@ -1,5 +1,37 @@
 # SEO — notes techniques
 
+## Récapitulatif (phases B à K)
+
+| Administration | Rôle | Données |
+| --- | --- | --- |
+| Référencement | Audit de toutes les pages publiques | Contenu du site |
+| Rapports SEO | Rapport hebdomadaire et alertes | Search Console, audits, base |
+| Google Search Console | Clics, impressions, positions, indexation | API Search Console |
+| Mots-clés | Expressions suivies, page cible, cannibalisation | Search Console (volume : « Non renseigné ») |
+| Maillage interne | Liens entre pages, orphelines, liens cassés | Contenu du site |
+| Fiches produits (SEO) | Score par fiche, manques fournisseur | Catalogue |
+| Veille concurrentielle | Relevés publics, prix sourcés | Pages publiques (robots.txt respecté) |
+| Liens externes | Liens obtenus, démarchés, perdus | Vérification de page, export Search Console |
+| Studio éditorial | Articles : brouillon → validation → publication | Base |
+
+**Mise en service (une fois, dans Supabase → SQL Editor, dans cet ordre)** :
+`20261109000100_journal.sql`, `20261110000100_seo_keywords.sql`,
+`20261111000100_competitors.sql`, `20261112000100_backlinks.sql`,
+`20261113000100_seo_reports.sql` (toutes incluses dans `setup.sql` pour une installation neuve).
+
+**Secrets Cloudflare** : `GOOGLE_SERVICE_ACCOUNT_JSON` (Search Console, lecture seule),
+`CRON_SECRET` (rapport du lundi, aussi dans les secrets GitHub Actions), facultatifs
+`BREVO_API_KEY`, `REPORT_EMAIL_TO`, `REPORT_EMAIL_FROM` (rapport par e-mail).
+
+**Principes** : aucune donnée inventée (volumes, positions, liens, avis, caractéristiques) ;
+aucun article publié sans validation ; aucun achat de lien ni envoi automatique ; les pages
+extérieures ne sont lues qu'en https, sur des domaines publics, robots.txt respecté.
+
+**Vérifications** : `npm run check` (dont `tests/seo-site.test.ts` : chaque page ≥ 90 à l'audit,
+aucun doublon de titre, aucun lien cassé), `npm run test:db`, et après déploiement
+`CHROMIUM_PATH=… npm run smoke -- https://maisonlumeance.fr` (statut, h1, JSON-LD, erreurs du
+navigateur, débordement mobile, poids des images, sitemap, robots, flux).
+
 ## Images (phase B)
 
 Sur Cloudflare (OpenNext sans service d'images), `/_next/image` renvoie la photo d'origine quelle
@@ -60,3 +92,70 @@ moyenne seulement avec de vrais avis vérifiés).
   une même recherche), recherches réelles non suivies, pistes tirées de la structure du site.
 - **Volume de recherche et difficulté : « Non renseigné »** — aucune source gratuite fiable ;
   aucun chiffre n'est estimé ni stocké, tout est relu dans Search Console à l'affichage.
+
+## Maillage interne (phase F)
+
+- `lib/seo/linking.ts` : graphe des liens contextuels du site (hors menu et pied de page), calculé
+  à partir du contenu publié ; les mêmes fonctions produisent les liens affichés.
+- Liens ajoutés sur le site : fiche produit → pages par pièce où elle est conseillée et articles
+  qui la citent (« Pour aller plus loin ») ; page par pièce → guides associés (« Nos guides »).
+- Administration → **Maillage interne** : liens reçus et émis par page, textes des liens, pages
+  orphelines ou peu liées, liens cassés, liens à ajouter (article citant une pièce sans lien ;
+  page parlant d'un mot-clé suivi sans renvoyer vers sa page cible).
+- Test de non-régression : aucun lien du contenu vers une page inexistante, chaque fiche et page
+  par pièce reçoit au moins 3 liens contextuels.
+
+## Fiches produits (phase G)
+
+- Données structurées `Product` enrichies (uniquement des données réelles) : URL et images
+  absolues, catégorie, finitions, dimensions et poids s'ils sont renseignés, état neuf, vendeur,
+  livraison (frais réels de la boutique, pays desservis), droit de rétractation de 14 jours (page
+  Retours ; frais de retour non indiqués tant qu'ils ne sont pas fixés). Note moyenne uniquement
+  avec de vrais avis vérifiés.
+- Administration → **Fiches produits (SEO)** : score par fiche (titre, description, photos et
+  textes alternatifs, visuel par version, dimensions, lumière, matières, poids, garantie, prix,
+  liens, avis) et liste « À demander au fournisseur ». Aucun manque n'est comblé
+  automatiquement ; lien « Tester dans Google » (test des résultats enrichis).
+- Flux **Google Shopping** : `/flux/google-shopping.xml` (une ligne par version, prix et stock
+  réels, pas de GTIN : `identifier_exists = no`). À déclarer dans Google Merchant Center **une fois
+  le paiement en ligne ouvert** (Merchant Center exige un achat possible sur le site).
+
+## Veille concurrentielle (phase H)
+
+- Migration `supabase/migrations/20261111000100_competitors.sql` (concurrents, relevés de pages,
+  relevés de prix ; réservés aux administrateurs).
+- Administration → **Veille concurrentielle** : concurrents choisis par la maison ; « Relever
+  maintenant » lit la page d'accueil (titre, description, types de données structurées) et le
+  plan du site public (nombre de pages, nouvelles pages depuis le relevé précédent), uniquement si
+  le robots.txt l'autorise, au plus une fois par heure et par site, robot identifié
+  « LumeanceVeille », au plus 5 pages lues ; relevés de prix saisis à la main avec leur source
+  https et leur date, comparés au prix « à partir de » de la pièce LUMÉANCE équivalente.
+- Aucun trafic, classement ou volume concurrent n'est estimé (aucune source gratuite fiable).
+
+## Liens externes (phase I)
+
+- Migration `supabase/migrations/20261112000100_backlinks.sql` (table `backlinks`, administrateurs).
+- Administration → **Liens externes** : pages qui citent (ou pourraient citer) LUMÉANCE, avec
+  type, statut (à contacter, contacté, obtenu, refusé, perdu) et notes ; « Vérifier » lit la page
+  source (robots.txt respecté) et constate le lien, son texte et s'il transmet de la popularité
+  (pas de nofollow / sponsored / ugc) ; un lien disparu passe en « perdu ». Import de l'export
+  « Liens » de Search Console. Pistes légitimes et modèle de message à envoyer soi-même.
+- « Obtenu » n'est attribué qu'après vérification ou import Google. Aucun achat de lien, aucun
+  envoi automatique.
+
+## Rapports et automatisations (phase J)
+
+- Migration `supabase/migrations/20261113000100_seo_reports.sql` (table `seo_reports`).
+- Administration → **Rapports SEO** : clics et impressions Google de la semaine contre la
+  précédente, recherches en recul ou en progrès (3 places ou plus), pages qui perdent des clics,
+  mots-clés suivis, score d'audit, score moyen des fiches, maillage, liens externes (les 5 liens
+  obtenus les moins récemment contrôlés sont revérifiés), studio ; alertes classées critique /
+  attention / info ; historique de 26 semaines ; bouton « Générer maintenant ».
+- **Automatique chaque lundi** (`.github/workflows/lumeance-seo-report.yml`) :
+  1. créer un secret aléatoire d'au moins 24 caractères ;
+  2. Cloudflare → lumeance → Variables and Secrets : secret `CRON_SECRET` ;
+  3. GitHub → dépôt → Settings → Secrets and variables → Actions : secret `CRON_SECRET` (même
+     valeur). Sans secret, la route `/api/cron/seo-report` reste fermée (401).
+- **E-mail facultatif** (Brevo, offre gratuite) : secrets Cloudflare `BREVO_API_KEY`,
+  `REPORT_EMAIL_TO`, `REPORT_EMAIL_FROM` (adresse validée dans Brevo).
+- Statistiques de visite détaillées (GA4) : prévues à l'ouverture du paiement.
