@@ -273,6 +273,7 @@ export async function confirmEmailLink(form: FormData) {
   const type = String(form.get("type") ?? "");
   const code = String(form.get("code") ?? "");
   let ok = false;
+  let confirmed = false;
   if (isSupabaseConfigured()) {
     const supabase = await createSupabaseServerClient();
     if (
@@ -287,7 +288,13 @@ export async function confirmEmailLink(form: FormData) {
       ).error;
     } else if (code) {
       ok = !(await supabase.auth.exchangeCodeForSession(code)).error;
+      // Un `code` n'est émis qu'après la vérification de l'adresse par Supabase : l'échange
+      // échoue seulement si le lien est ouvert dans un autre navigateur que celui de
+      // l'inscription (ex. lien ouvert depuis l'app Mail). L'adresse est bien confirmée.
+      confirmed = !ok && type !== "recovery" && !next.includes("mot-de-passe");
     }
   }
-  redirect(ok ? next : "/compte/connexion?lien=expire");
+  redirect(
+    ok ? next : confirmed ? "/compte/connexion?lien=confirme" : "/compte/connexion?lien=expire",
+  );
 }
