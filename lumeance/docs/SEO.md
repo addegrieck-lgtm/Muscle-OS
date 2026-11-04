@@ -99,3 +99,14 @@ moyenne seulement avec de vrais avis vérifiés).
   « LumeanceVeille », au plus 5 pages lues ; relevés de prix saisis à la main avec leur source
   https et leur date, comparés au prix « à partir de » de la pièce LUMÉANCE équivalente.
 - Aucun trafic, classement ou volume concurrent n'est estimé (aucune source gratuite fiable).
+
+## Liens externes (phase I)
+
+- Migration `supabase/migrations/20261112000100_backlinks.sql` (table `backlinks`, administrateurs).
+- Administration → **Liens externes** : pages qui citent (ou pourraient citer) LUMÉANCE, avec
+  type, statut (à contacter, contacté, obtenu, refusé, perdu) et notes ; « Vérifier » lit la page
+  source (robots.txt respecté) et constate le lien, son texte et s'il transmet de la popularité
+  (pas de nofollow / sponsored / ugc) ; un lien disparu passe en « perdu ». Import de l'export
+  « Liens » de Search Console. Pistes légitimes et modèle de message à envoyer soi-même.
+- « Obtenu » n'est attribué qu'après vérification ou import Google. Aucun achat de lien, aucun
+  envoi automatique.
