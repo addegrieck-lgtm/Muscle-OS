@@ -8,7 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { MotionRoot } from "@/components/motion/MotionRoot";
 import { PageViewBeacon } from "@/components/layout/PageViewBeacon";
 import { isDemoCatalog } from "@/lib/services/catalog";
-import { paymentsEnabled } from "@/lib/env";
+import { checkoutAvailable } from "@/lib/payments";
 import { organizationJsonLd, jsonLdScript, websiteJsonLd } from "@/lib/seo/jsonld";
 
 // Pages rendues à chaque requête : un produit publié depuis l'administration apparaît aussitôt,
@@ -29,7 +29,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
           banner={
             isDemoCatalog() ? (
               <DemoBanner />
-            ) : !paymentsEnabled() ? (
+            ) : !checkoutAvailable() ? (
               <DemoBanner variant="preparation" />
             ) : undefined
           }

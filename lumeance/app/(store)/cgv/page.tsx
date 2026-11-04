@@ -76,10 +76,13 @@ export default function CgvPage() {
           </ul>
           <h2>4. Commande et paiement</h2>
           <p>
-            <Todo>
-              étapes de commande, moyens de paiement acceptés, prestataire de paiement, moment du
-              débit
-            </Todo>
+            La commande se passe en ligne : choix des pièces dans le panier, saisie des coordonnées
+            et de l’adresse de livraison, acceptation des présentes conditions, puis paiement sur la
+            page sécurisée de notre prestataire Stripe. Les coordonnées bancaires sont saisies
+            uniquement chez Stripe et ne sont jamais transmises à LUMÉANCE. Le montant est débité au
+            moment du paiement ; la commande est confirmée dès réception de la confirmation du
+            paiement par Stripe.{" "}
+            <Todo>moyens de paiement activés dans Stripe (carte bancaire, Apple Pay…)</Todo>
           </p>
           <h2>5. Livraison</h2>
           <p>

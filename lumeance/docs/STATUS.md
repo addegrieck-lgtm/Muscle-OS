@@ -44,7 +44,7 @@ Légende : ✅ fait et vérifié · 🟡 fait, non vérifiable sans service exte
 - [x] Hébergement : site publié sur Cloudflare Workers via OpenNext ([HEBERGEMENT.md](HEBERGEMENT.md)).
 - [ ] Sélection fournisseurs, documents de conformité, photographies réelles, saisie des 20 à 40 pièces.
 - [ ] Faire valider CGV, mentions légales, confidentialité ; choisir un médiateur.
-- [ ] Intégrer le paiement ([PAIEMENT.md](PAIEMENT.md)).
+- [x] Intégrer le paiement Stripe ([PAIEMENT.md](PAIEMENT.md)) — reste à saisir les clés et à tester en mode test.
 - [x] Comptes clients : particuliers (Cercle Luméance, parrainage) et entreprises validées
   (prix HT, remise −5/−10/−20 % dès 500/1 500/3 000 € HT) — mise en service :
   [COMPTES.md](COMPTES.md).

@@ -1,6 +1,6 @@
 import { CartView } from "@/components/cart/CartView";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { paymentsEnabled } from "@/lib/env";
+import { checkoutAvailable } from "@/lib/payments";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
@@ -15,8 +15,8 @@ export default function CartPage() {
     <>
       <PageHeader eyebrow="Votre sélection" title="Panier" />
       <div className="container-luxe pb-32">
-        {/* V1 : le parcours de commande reste fermé tant que le paiement n'est pas intégré. */}
-        <CartView checkoutOpen={paymentsEnabled() && false} />
+        {/* Parcours de commande ouvert seulement si Stripe est entièrement configuré. */}
+        <CartView checkoutOpen={checkoutAvailable()} />
       </div>
     </>
   );
