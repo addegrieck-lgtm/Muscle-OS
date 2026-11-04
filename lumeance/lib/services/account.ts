@@ -59,7 +59,11 @@ export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null>
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   const db = createSupabaseServiceClient();
-  if (!user || !db) return null;
+  if (!user) return null;
+  if (!db) {
+    repairState().error = "config: cle-service-absente";
+    return null;
+  }
   const read = () =>
     db
       .from("customer_accounts")
@@ -68,7 +72,12 @@ export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null>
       )
       .eq("auth_user_id", user.id)
       .maybeSingle();
-  let { data: acc } = await read();
+  let { data: acc, error: readErr } = await read();
+  if (readErr) {
+    console.error("account read:", readErr.code, readErr.message);
+    repairState().error = `lecture: ${readErr.code} ${readErr.message}`;
+    return null;
+  }
   if (!acc) {
     // Adresse confirmée mais fiche absente (création interrompue à l'inscription) : on la
     // recrée à partir des données gardées dans le compte, sauf pour un administrateur.
@@ -78,15 +87,21 @@ export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null>
       .eq("auth_user_id", user.id)
       .maybeSingle();
     const profile = profileFromUser(user);
-    if (admin || !user.email_confirmed_at || !profile) return null;
+    if (admin || !user.email_confirmed_at || !profile) {
+      repairState().error = `compte: ${admin ? "administrateur" : !profile ? "sans-email" : "non-confirme"}`;
+      return null;
+    }
     const failed = await createCustomerAccount(db, user.id, profile);
     if (failed) {
       console.error("account repair:", failed);
       repairState().error = failed;
       return null;
     }
-    ({ data: acc } = await read());
-    if (!acc) return null;
+    ({ data: acc, error: readErr } = await read());
+    if (!acc) {
+      repairState().error = `relecture: ${readErr?.code ?? "vide"} ${readErr?.message ?? ""}`;
+      return null;
+    }
   }
   const [{ data: orders }, { data: credits }] = await Promise.all([
     db.from("orders").select("total").eq("customer_id", acc.customer_id).in("payment_status", PAID),
