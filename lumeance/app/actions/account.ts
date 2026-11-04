@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isSupabaseConfigured, siteUrl } from "@/lib/env";
+import { signupErrorMessage } from "@/lib/services/signup-errors";
 import { clientIp } from "@/lib/services/rate-limit";
 import { allowRequest } from "@/lib/services/request-guard";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -89,7 +90,9 @@ export async function signUpAccount(
     },
   });
   if (error) {
-    console.error("signup:", error.message);
+    console.error("signup:", error.code, error.status, error.message);
+    const known = signupErrorMessage(error.code, error.message);
+    if (known) return { ok: false, values: keep(form), ...known };
     if (/password/i.test(error.message))
       return {
         ok: false,
@@ -121,7 +124,7 @@ export async function signUpAccount(
     .select("id")
     .single();
   if (cErr || !customer) {
-    console.error("signup customer:", cErr?.message);
+    console.error("signup customer:", cErr?.code, cErr?.message);
     return {
       ok: false,
       message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
@@ -154,7 +157,7 @@ export async function signUpAccount(
     });
     if (!aErr) break;
     if (aErr.code !== "23505" || !aErr.message.includes("referral_code")) {
-      console.error("signup account:", aErr.message);
+      console.error("signup account:", aErr.code, aErr.message);
       return {
         ok: false,
         message: "L’inscription n’a pas abouti. Merci de réessayer plus tard.",
