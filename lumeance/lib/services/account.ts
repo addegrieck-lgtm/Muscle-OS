@@ -43,8 +43,14 @@ const repairState = cache((): { error: string | null } => ({ error: null }));
 export function accountRepairReference(): string | null {
   const e = repairState().error;
   if (!e) return null;
-  const [table, code] = e.split(/:\s*/);
-  return `${table ?? "?"}-${(code ?? "").split(" ")[0] || "?"}`;
+  const [table = "?", rest = ""] = e.split(/:\s*(.*)/s);
+  const [code = "?", ...words] = rest.split(" ");
+  // Message de Supabase tronqué, sans donnée personnelle (ex. « Invalid API key »).
+  const hint = words
+    .join(" ")
+    .replace(/[^\p{L}\p{N} ._-]/gu, "")
+    .slice(0, 60);
+  return `${table}-${code}${hint ? ` (${hint})` : ""}`;
 }
 
 export const getCurrentAccount = cache(async (): Promise<CustomerAccount | null> => {
