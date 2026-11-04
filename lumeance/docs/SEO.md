@@ -72,3 +72,18 @@ moyenne seulement avec de vrais avis vérifiés).
   page parlant d'un mot-clé suivi sans renvoyer vers sa page cible).
 - Test de non-régression : aucun lien du contenu vers une page inexistante, chaque fiche et page
   par pièce reçoit au moins 3 liens contextuels.
+
+## Fiches produits (phase G)
+
+- Données structurées `Product` enrichies (uniquement des données réelles) : URL et images
+  absolues, catégorie, finitions, dimensions et poids s'ils sont renseignés, état neuf, vendeur,
+  livraison (frais réels de la boutique, pays desservis), droit de rétractation de 14 jours (page
+  Retours ; frais de retour non indiqués tant qu'ils ne sont pas fixés). Note moyenne uniquement
+  avec de vrais avis vérifiés.
+- Administration → **Fiches produits (SEO)** : score par fiche (titre, description, photos et
+  textes alternatifs, visuel par version, dimensions, lumière, matières, poids, garantie, prix,
+  liens, avis) et liste « À demander au fournisseur ». Aucun manque n'est comblé
+  automatiquement ; lien « Tester dans Google » (test des résultats enrichis).
+- Flux **Google Shopping** : `/flux/google-shopping.xml` (une ligne par version, prix et stock
+  réels, pas de GTIN : `identifier_exists = no`). À déclarer dans Google Merchant Center **une fois
+  le paiement en ligne ouvert** (Merchant Center exige un achat possible sur le site).
