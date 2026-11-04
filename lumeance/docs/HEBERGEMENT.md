@@ -38,7 +38,7 @@ Dans le tableau de bord Cloudflare : **Workers & Pages → Créer → Importer u
 | Commande de déploiement | `npx opennextjs-cloudflare deploy` |
 | Variable de **build** | `SKIP_DEPENDENCY_INSTALL=1` (évite l'installation pnpm automatique, qui échoue ; `npm ci` s'en charge) |
 
-Variables d'**exécution** (Settings → Variables and Secrets) : `NEXT_PUBLIC_SUPABASE_URL` (sans `/rest/v1`), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (clé publishable), `SUPABASE_SERVICE_ROLE_KEY` (type **Secret**). `NEXT_PUBLIC_SITE_URL` est fournie par `.env.production`. Les pages lisent la configuration à l'exécution : aucune variable Supabase n'est nécessaire au build. `keep_vars` (dans `wrangler.jsonc`) empêche chaque déploiement d'effacer ces variables.
+Variables d'**exécution** (Settings → Variables and Secrets) : `NEXT_PUBLIC_SUPABASE_URL` (sans `/rest/v1`), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (clé publishable), `SUPABASE_SERVICE_ROLE_KEY` (type **Secret**). `NEXT_PUBLIC_SITE_URL` est fournie par `.env.production`. Les pages lisent la configuration à l'exécution : aucune variable Supabase n'est nécessaire au build. `keep_vars` (dans `wrangler.jsonc`) empêche chaque déploiement d'effacer ces variables. Paiement en ligne : `PAYMENTS_ENABLED`, `PAYMENT_PROVIDER`, `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET` (voir [PAIEMENT.md](PAIEMENT.md)).
 
 Domaine personnalisé : Workers → lumeance → Paramètres → Domaines et routes.
 

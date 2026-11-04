@@ -26,8 +26,8 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(publicEnv.NEXT_PUBLIC_SUPABASE_URL && publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-/** Le paiement en ligne est DÉSACTIVÉ en V1 ; ce drapeau serveur ne suffit pas à lui seul :
- * un prestataire doit aussi être implémenté (voir lib/payments). */
+/** Interrupteur du paiement en ligne. Ne suffit pas à lui seul : les clés du prestataire doivent
+ * aussi être présentes (voir lib/payments/index.ts et docs/PAIEMENT.md). */
 export function paymentsEnabled(): boolean {
   return process.env.PAYMENTS_ENABLED === "1" && Boolean(process.env.PAYMENT_PROVIDER);
 }

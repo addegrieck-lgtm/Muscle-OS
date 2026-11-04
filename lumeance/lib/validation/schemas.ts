@@ -207,6 +207,15 @@ export const manualOrderSchema = z.object({
   admin_notes: optionalText(2000),
 });
 
+// ── Commande en ligne ───────────────────────────────────────────────────────
+export const checkoutSchema = z.object({
+  email: emailSchema,
+  phone: optionalText(30),
+  address: addressSchema,
+  accept_cgv: z.literal("on", { message: "Merci d’accepter les conditions générales de vente." }),
+  lines: cartSchema.min(1, "Votre panier est vide."),
+});
+
 export const homeContentSchema = z.object({
   heroTitle: z.string().trim().min(1).max(60),
   heroSignature: z.string().trim().min(1).max(120),

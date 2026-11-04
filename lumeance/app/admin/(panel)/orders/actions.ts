@@ -15,7 +15,9 @@ import { firstError } from "@/lib/admin/forms";
 import { back, dbError } from "@/lib/admin/redirect";
 import { formatPrice, parseEuroInput } from "@/lib/money";
 import { canTransition } from "@/lib/services/orders";
+import { getPaymentProvider } from "@/lib/payments";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import {
   manualOrderSchema,
   orderStatusChangeSchema,
@@ -88,6 +90,70 @@ export async function recordManualPayment(form: FormData) {
   });
   if (error) back(`/admin/orders/${orderId}`, { erreur: dbError("recordManualPayment", error) });
   back(`/admin/orders/${orderId}`, { ok: "Paiement enregistré." });
+}
+
+/**
+ * Remboursement d'un paiement en ligne via le prestataire. Le montant remboursable est relu en
+ * base (paiements confirmés − remboursements déjà faits) ; la clé d'idempotence empêche un double
+ * remboursement en cas de double envoi du formulaire.
+ */
+export async function refundOnlinePayment(form: FormData) {
+  const session = await requireAdmin(CATALOG_ROLES);
+  const orderId = z.string().uuid().parse(form.get("orderId"));
+  const page = `/admin/orders/${orderId}`;
+  const amount = parseEuroInput(String(form.get("amount") ?? ""));
+  if (!amount || amount <= 0) back(page, { erreur: "Montant de remboursement invalide." });
+  const note = String(form.get("note") ?? "").slice(0, 500);
+
+  let provider;
+  try {
+    provider = getPaymentProvider();
+  } catch {
+    back(page, { erreur: "Le paiement en ligne n’est pas configuré." });
+  }
+  const db = createSupabaseServiceClient();
+  if (!db) back(page, { erreur: "Base de données non configurée." });
+  const supabase = await createSupabaseServerClient();
+  const { data: txs } = await supabase
+    .from("payment_transactions")
+    .select("kind, amount, provider, provider_reference, status")
+    .eq("order_id", orderId)
+    .eq("status", "succeeded");
+  const online = (txs ?? []).filter((t) => t.kind === "payment" && t.provider === provider.name);
+  const charge = online[0];
+  if (!charge?.provider_reference)
+    back(page, { erreur: "Aucun paiement en ligne à rembourser pour cette commande." });
+  const paid = online.reduce((s, t) => s + Number(t.amount), 0);
+  const refunded = (txs ?? [])
+    .filter((t) => t.kind === "refund")
+    .reduce((s, t) => s + Number(t.amount), 0);
+  if (amount > paid - refunded)
+    back(page, {
+      erreur: `Montant supérieur au reste remboursable (${formatPrice(paid - refunded)}).`,
+    });
+
+  let reference: string;
+  try {
+    ({ reference } = await provider.refund(
+      charge.provider_reference,
+      amount,
+      `refund:${orderId}:${refunded}:${amount}`,
+    ));
+  } catch (e) {
+    console.error("refund:", e instanceof Error ? e.message : e);
+    back(page, { erreur: "Le remboursement a été refusé par le prestataire de paiement." });
+  }
+  const { error } = await db.rpc("record_provider_refund", {
+    p_order_id: orderId,
+    p_provider: provider.name,
+    p_amount: amount,
+    p_reference: reference,
+    p_recorded_by: session.userId,
+    p_note: note,
+  });
+  if (error) back(page, { erreur: dbError("refundOnlinePayment", error) });
+  revalidatePath(page);
+  back(page, { ok: `Remboursement de ${formatPrice(amount)} effectué.` });
 }
 
 /** Commande manuelle : les prix sont TOUJOURS relus en base, jamais saisis. */

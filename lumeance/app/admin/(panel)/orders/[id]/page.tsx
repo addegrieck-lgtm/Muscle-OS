@@ -20,7 +20,12 @@ import {
 } from "@/lib/services/orders";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { OrderStatus, PaymentStatus } from "@/lib/validation/schemas";
-import { changeOrderStatus, recordManualPayment, saveAdminNotes } from "../actions";
+import {
+  changeOrderStatus,
+  recordManualPayment,
+  refundOnlinePayment,
+  saveAdminNotes,
+} from "../actions";
 import { createReviewRequest } from "../../reviews/actions";
 import { siteUrl } from "@/lib/env";
 import { REVIEWABLE_ORDER_STATUSES } from "@/lib/services/reviews";
@@ -100,6 +105,13 @@ export default async function OrderPage({
   const next = allowedTransitions(o.status as OrderStatus, o.payment_status as PaymentStatus);
   const canRecordPayment =
     session.role !== "order_manager" && ["unpaid", "pending", "failed"].includes(o.payment_status);
+  const succeeded = (payments ?? []).filter((p) => p.status === "succeeded");
+  const refundable =
+    succeeded
+      .filter((p) => p.kind === "payment" && p.provider === "stripe")
+      .reduce((s, p) => s + Number(p.amount), 0) -
+    succeeded.filter((p) => p.kind === "refund").reduce((s, p) => s + Number(p.amount), 0);
+  const canRefund = session.role !== "order_manager" && refundable > 0;
 
   return (
     <>
@@ -181,9 +193,7 @@ export default async function OrderPage({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-brun/50">
-                Aucun paiement enregistré. Le paiement en ligne n’est pas activé.
-              </p>
+              <p className="text-sm text-brun/50">Aucun paiement enregistré.</p>
             )}
             {canRecordPayment && (
               <form
@@ -214,6 +224,38 @@ export default async function OrderPage({
                   </SubmitButton>
                   <p className="mt-2 text-xs text-brun/50">
                     À n’utiliser qu’après réception effective des fonds. L’action est journalisée.
+                  </p>
+                </div>
+              </form>
+            )}
+            {canRefund && (
+              <form
+                action={refundOnlinePayment}
+                className="mt-5 grid gap-3 border-t border-brun/10 pt-5 md:grid-cols-3"
+              >
+                <input type="hidden" name="orderId" value={id} />
+                <Field label="Montant à rembourser (€)">
+                  <input
+                    name="amount"
+                    required
+                    defaultValue={centsToInput(refundable)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Motif">
+                  <input name="note" maxLength={500} className={inputClass} />
+                </Field>
+                <div className="md:col-span-3">
+                  <SubmitButton
+                    variant="secondary"
+                    confirm="Rembourser ce montant au client via Stripe ? Cette opération est définitive."
+                  >
+                    Rembourser via Stripe
+                  </SubmitButton>
+                  <p className="mt-2 text-xs text-brun/50">
+                    Remboursement sur le moyen de paiement du client (reste remboursable :{" "}
+                    {formatPrice(refundable)}). Un remboursement total passe la commande en «
+                    Remboursée ».
                   </p>
                 </div>
               </form>
