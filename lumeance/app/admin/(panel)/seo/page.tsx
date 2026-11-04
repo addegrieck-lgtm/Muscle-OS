@@ -6,6 +6,7 @@ import { publicEnv, siteUrl } from "@/lib/env";
 import { auditSite, type PageAudit, type Severity } from "@/lib/seo/audit";
 import { sitePages } from "@/lib/seo/site-pages";
 import { getCategories, getProducts } from "@/lib/services/catalog";
+import { listPublishedArticles } from "@/lib/services/journal";
 
 export const metadata = { title: "Référencement (SEO)" };
 
@@ -39,7 +40,7 @@ export default async function SeoPage({
   const sp = await searchParams;
   const kind = KINDS.includes(sp.type as (typeof KINDS)[number]) ? sp.type! : "tout";
   const [products, categories] = await Promise.all([getProducts(), getCategories()]);
-  const { audits, score, issues, errors } = auditSite(sitePages(products, categories));
+  const { audits, score, issues, errors } = auditSite(sitePages(products, categories, await listPublishedArticles()));
   const list = kind === "tout" ? audits : audits.filter((a) => a.kind === kind);
   const words = audits.reduce((s, a) => s + a.words, 0);
   const top = issues
