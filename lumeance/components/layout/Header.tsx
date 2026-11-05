@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LogoSymbol, Wordmark } from "@/components/brand/Logo";
 import { useCart } from "@/components/cart/CartProvider";
+import { useWishlist } from "@/components/wishlist/WishlistProvider";
 import { MAIN_NAV } from "@/lib/navigation";
 import { MobileMenu } from "./MobileMenu";
 
@@ -16,6 +17,7 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
   const account = useAccount();
   const pathname = usePathname();
   const { count, ready, lastAdded } = useCart();
+  const wishlist = useWishlist();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
@@ -95,7 +97,9 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
 
           <div className="flex items-center gap-5">
             <Link
-              href={account.loggedIn ? "/compte" : "/compte/connexion"}
+              // Toujours /compte : la page redirige vers la connexion si besoin. Évite d'envoyer un
+              // client connecté vers le formulaire avant que l'état du compte soit chargé.
+              href="/compte"
               className="t-eyebrow flex items-center gap-2"
               aria-label={account.loggedIn ? "Mon compte" : "Se connecter ou créer un compte"}
             >
@@ -110,9 +114,25 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
                 <circle cx="12" cy="8.5" r="3.5" />
                 <path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" />
               </svg>
-              <span className="hidden sm:inline">
+              <span className="hidden sm:inline xl:hidden 2xl:inline">
                 {account.loggedIn ? (account.firstName ?? "Compte") : "Compte"}
               </span>
+            </Link>
+            <Link
+              href="/envies"
+              className="t-eyebrow relative flex items-center gap-2"
+              aria-label={`Mes envies${wishlist.ready && wishlist.ids.length ? `, ${wishlist.ids.length} pièce${wishlist.ids.length > 1 ? "s" : ""}` : ""}`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill={wishlist.ready && wishlist.ids.length ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth={1}
+                aria-hidden
+              >
+                <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
+              </svg>
             </Link>
             <Link
               href="/panier"
@@ -130,7 +150,7 @@ export function Header({ banner }: { banner?: React.ReactNode }) {
                 <path d="M5 8h14l-1.2 12H6.2L5 8Z" />
                 <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
               </svg>
-              <span className="hidden sm:inline">Panier</span>
+              <span className="hidden sm:inline xl:hidden 2xl:inline">Panier</span>
               {ready && count > 0 && (
                 <span
                   className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-champagne px-1 text-[0.65rem] tracking-normal text-ivoire transition-transform duration-500 ${

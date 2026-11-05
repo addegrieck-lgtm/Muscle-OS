@@ -1,5 +1,6 @@
 "use client";
 
+import { WishlistButton } from "@/components/wishlist/WishlistProvider";
 import { Price } from "@/components/account/AccountProvider";
 import Link from "next/link";
 import { useState } from "react";
@@ -165,6 +166,11 @@ export function AddToCart({ product }: { product: Product }) {
             Demander cette pièce
           </Link>
         )}
+        <WishlistButton
+          productId={product.id}
+          productName={product.name}
+          className="w-12 shrink-0 border border-brun/20 hover:border-brun"
+        />
       </div>
       {!available && (
         <p className="t-small text-brun/70">

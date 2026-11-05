@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { AreaChart, BarList, Donut, KpiCard, Rise } from "@/components/admin/motion";
 import { Card, Flash, PageTitle } from "@/components/admin/ui";
+import { cookies } from "next/headers";
 import { requireAdmin } from "@/lib/auth/admin";
+import { NO_STATS_COOKIE } from "@/lib/services/traffic";
+import { setDeviceExcluded } from "./actions";
 import { siteUrl } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -54,6 +57,7 @@ export default async function StatsPage({
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("admin_traffic_stats", { p_days: days });
   const t = (data ?? null) as Traffic | null;
+  const excluded = (await cookies()).get(NO_STATS_COOKIE)?.value === "1";
 
   return (
     <>
@@ -74,6 +78,21 @@ export default async function StatsPage({
           </div>
         }
       />
+      <form
+        action={setDeviceExcluded}
+        className="mb-6 flex flex-wrap items-center gap-3 border-l-2 border-champagne bg-creme px-4 py-3 text-sm"
+      >
+        <input type="hidden" name="exclude" value={excluded ? "0" : "1"} />
+        <span>
+          Vos visites ne sont pas comptées quand vous êtes connecté à l’administration.{" "}
+          {excluded
+            ? "Cet appareil est exclu, même sans connexion."
+            : "Pour exclure aussi cet appareil quand vous n’êtes pas connecté :"}
+        </span>
+        <button type="submit" className="underline underline-offset-4">
+          {excluded ? "Recompter cet appareil" : "Ne plus compter cet appareil"}
+        </button>
+      </form>
       <Flash
         error={
           error

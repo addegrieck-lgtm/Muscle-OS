@@ -1,6 +1,7 @@
 import { Price } from "@/components/account/AccountProvider";
 import Link from "next/link";
 import { ProductVisual } from "@/components/product/ProductVisual";
+import { WishlistButton } from "@/components/wishlist/WishlistProvider";
 import { formatPrice } from "@/lib/money";
 import { priceRange } from "@/lib/catalog/price-range";
 import { categoryLabel } from "@/lib/navigation";
@@ -10,14 +11,27 @@ export function ProductCard({
   product,
   index = 0,
   mood = "nuit",
+  reveal = true,
 }: {
   product: Product;
   index?: number;
   mood?: "nuit" | "jour";
+  /** false : carte affichée après coup (côté client), sans animation d'apparition. */
+  reveal?: boolean;
 }) {
   const range = priceRange(product);
   return (
-    <article data-reveal data-reveal-delay={String((index % 3) * 0.12)} className="group">
+    <article
+      data-reveal={reveal ? "" : undefined}
+      data-reveal-delay={reveal ? String((index % 3) * 0.12) : undefined}
+      className="group relative"
+    >
+      <WishlistButton
+        productId={product.id}
+        productName={product.name}
+        tone="light"
+        className="absolute right-3 top-3 z-10 h-10 w-10 rounded-full bg-noir/25 backdrop-blur-sm"
+      />
       <Link
         href={`/produit/${product.slug}`}
         className="block"

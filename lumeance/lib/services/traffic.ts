@@ -39,3 +39,16 @@ export function cleanPath(path: unknown): string | null {
   if (/^\/(admin|api|_next)(\/|$)/.test(p)) return null;
   return p;
 }
+
+/** Cookie technique posé depuis l'administration : cet appareil n'est pas compté. */
+export const NO_STATS_COOKIE = "lumeance_no_stats";
+
+/** En-tête Cookie : appareil exclu de la mesure ? */
+export function isExcludedDevice(cookieHeader: string | null): boolean {
+  return new RegExp(`(?:^|;\\s*)${NO_STATS_COOKIE}=1(?:;|$)`).test(cookieHeader ?? "");
+}
+
+/** En-tête Cookie : session Supabase présente (à vérifier côté serveur) ? */
+export function hasAuthCookie(cookieHeader: string | null): boolean {
+  return /(?:^|;\s*)sb-[^=]*-auth-token/.test(cookieHeader ?? "");
+}

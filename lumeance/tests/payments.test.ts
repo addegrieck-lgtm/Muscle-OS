@@ -193,3 +193,36 @@ describe("prestataire Stripe", () => {
     await expect(p.refund("pi_1", 100, "k")).resolves.toEqual({ reference: "re_2" });
   });
 });
+
+describe("réglages du paiement saisis dans Cloudflare", () => {
+  afterEach(() => {
+    for (const k of [
+      "PAYMENTS_ENABLED",
+      "PAYMENT_PROVIDER",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+    ])
+      delete process.env[k];
+  });
+
+  it("tolère espaces, guillemets et majuscules ; le diagnostic ne révèle aucune valeur", async () => {
+    const { checkoutAvailable, paymentsDiagnostic } = await import("@/lib/payments");
+    process.env.PAYMENTS_ENABLED = " true ";
+    process.env.PAYMENT_PROVIDER = "Stripe\n";
+    process.env.STRIPE_SECRET_KEY = ' "sk_test_123" ';
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_abc ";
+    expect(checkoutAvailable()).toBe(true);
+    expect(paymentsDiagnostic().every((c) => c.ok)).toBe(true);
+    process.env.STRIPE_WEBHOOK_SECRET = "abc";
+    const d = paymentsDiagnostic();
+    expect(d.filter((c) => !c.ok).map((c) => c.name)).toEqual(["STRIPE_WEBHOOK_SECRET"]);
+    delete process.env.PAYMENTS_ENABLED;
+    expect(paymentsDiagnostic()[0]).toMatchObject({
+      ok: false,
+      detail: expect.stringMatching(/absente/),
+    });
+    process.env.STRIPE_SECRET_KEY = "pk_test_publique";
+    expect(paymentsDiagnostic()[2]!.detail).toMatch(/clé publique/);
+    expect(JSON.stringify(d)).not.toContain("sk_test_123");
+  });
+});
