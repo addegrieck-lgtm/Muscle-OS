@@ -42,7 +42,9 @@ for (const path of PAGES) {
     title: document.title,
     description: document.querySelector('meta[name="description"]')?.getAttribute("content") ?? "",
     canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? "",
-    ld: [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => s.textContent),
+    ld: [...document.querySelectorAll('script[type="application/ld+json"]')].map(
+      (s) => s.textContent,
+    ),
     overflow: document.documentElement.scrollWidth > innerWidth,
   }));
   const types = [];
@@ -57,7 +59,8 @@ for (const path of PAGES) {
   const status = res?.status() ?? 0;
   if (status !== 200) problems.push(`${path} : HTTP ${status}`);
   if (info.h1 !== 1) problems.push(`${path} : ${info.h1} balise(s) h1`);
-  if (!info.title || info.description.length < 50) problems.push(`${path} : titre ou description manquant`);
+  if (!info.title || info.description.length < 50)
+    problems.push(`${path} : titre ou description manquant`);
   if (!info.canonical) problems.push(`${path} : pas d'adresse canonique`);
   if (info.overflow) problems.push(`${path} : défilement horizontal sur mobile`);
   for (const e of errors) problems.push(`${path} : erreur navigateur « ${e.slice(0, 120)} »`);
@@ -66,10 +69,13 @@ for (const path of PAGES) {
   );
   await page.close();
 }
+// Lecture par le navigateur (même réseau et même proxy que les pages).
+const rawPage = await browser.newPage();
 for (const path of RAW) {
-  const r = await fetch(BASE + path);
-  if (r.status !== 200) problems.push(`${path} : HTTP ${r.status}`);
-  console.log(`${r.status} ${path} — ${(await r.text()).length} octets`);
+  const r = await rawPage.goto(BASE + path);
+  const status = r?.status() ?? 0;
+  if (status !== 200) problems.push(`${path} : HTTP ${status}`);
+  console.log(`${status} ${path} — ${(await r?.body())?.length ?? 0} octets`);
 }
 await browser.close();
 if (problems.length) {

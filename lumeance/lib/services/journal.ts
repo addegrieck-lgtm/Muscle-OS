@@ -5,6 +5,7 @@ import { mergeArticles, rowToArticle, type ArticleRow } from "@/lib/content/jour
 import { isSupabaseConfigured } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { memo } from "./ttl-memo";
 
 export const ARTICLE_COLUMNS =
   "id, slug, status, published_at, category, title, description, excerpt, art, sections, faq, product_slugs, related, sources, notes, origin, approved_at, updated_at";
@@ -23,12 +24,14 @@ const studioRows = cache(async (): Promise<ArticleRow[]> => {
     const { data } = await anon.from("journal_articles").select(ARTICLE_COLUMNS);
     return (data as ArticleRow[] | null) ?? [];
   }
-  const { data, error } = await db.from("journal_articles").select(ARTICLE_COLUMNS);
-  if (error) {
-    console.error("journal:", error.code, error.message);
+  return memo("public:journal", async () => {
+    const { data, error } = await db.from("journal_articles").select(ARTICLE_COLUMNS);
+    if (error) throw new Error(`${error.code} ${error.message}`);
+    return (data as ArticleRow[] | null) ?? [];
+  }).catch((e: Error) => {
+    console.error("journal:", e.message);
     return [];
-  }
-  return (data as ArticleRow[] | null) ?? [];
+  });
 });
 
 /** Articles en ligne (code + studio), du plus récent au plus ancien. */

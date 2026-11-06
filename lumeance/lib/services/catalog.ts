@@ -7,6 +7,7 @@ import { priceRange } from "@/lib/catalog/price-range";
 import { DEMO_CATEGORIES, DEMO_PRODUCTS } from "@/lib/demo/catalog";
 import { createSupabasePublicClient, storagePublicUrl } from "@/lib/supabase/public";
 import { mapCategory, mapProduct, type CategoryRow, type ProductRow } from "./mappers";
+import { memo } from "./ttl-memo";
 import type { Category, Product } from "@/types/catalog";
 
 export const PRODUCT_SELECT =
@@ -25,13 +26,15 @@ export function isDemoCatalog(): boolean {
 export const getCategories = cache(async (): Promise<Category[]> => {
   // Les textes des catégories sont des descriptions générales, communes aux deux catalogues.
   if (!isSupabaseConfigured()) return DEMO_CATEGORIES;
-  const { data, error } = await createSupabasePublicClient()
-    .from("categories")
-    .select("id, name, slug, description, image_path, position")
-    .eq("active", true)
-    .order("position");
-  if (error) throw new Error(`Catégories indisponibles : ${error.message}`);
-  return (data as CategoryRow[]).map(mapCategory);
+  return memo("public:categories", async () => {
+    const { data, error } = await createSupabasePublicClient()
+      .from("categories")
+      .select("id, name, slug, description, image_path, position")
+      .eq("active", true)
+      .order("position");
+    if (error) throw new Error(`Catégories indisponibles : ${error.message}`);
+    return (data as CategoryRow[]).map(mapCategory);
+  });
 });
 
 export const getCategory = cache(async (slug: string) => {
@@ -50,14 +53,16 @@ export interface ProductQuery {
 export const getProducts = cache(async (): Promise<Product[]> => {
   if (usesCodeCatalog()) return PUBLISHED_CATALOG;
   if (isDemoCatalog()) return DEMO_PRODUCTS;
-  const { data, error } = await createSupabasePublicClient()
-    .from("products")
-    .select(PRODUCT_SELECT)
-    .eq("status", "published")
-    .order("featured", { ascending: false })
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(`Catalogue indisponible : ${error.message}`);
-  return (data as ProductRow[]).map((r) => mapProduct(r, storagePublicUrl));
+  return memo("public:products", async () => {
+    const { data, error } = await createSupabasePublicClient()
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("status", "published")
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(`Catalogue indisponible : ${error.message}`);
+    return (data as ProductRow[]).map((r) => mapProduct(r, storagePublicUrl));
+  });
 });
 
 /** Filtrage et tri purs (testés), appliqués au catalogue publié. */

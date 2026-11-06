@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { Card, Field, Flash, PageTitle, flashFrom, inputClass } from "@/components/admin/ui";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
@@ -29,7 +29,7 @@ async function saveHome(form: FormData) {
   if (!parsed.success) back("/admin/content", { erreur: firstError(parsed.error.issues) });
   const { error } = await writeSetting("content.home", parsed.data, true);
   if (error) back("/admin/content", { erreur: dbError("saveHome", error) });
-  revalidatePath("/", "layout");
+  revalidatePublic("/", "layout");
   back("/admin/content", { ok: "Page d’accueil mise à jour." });
 }
 
