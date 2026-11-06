@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { memo } from "./ttl-memo";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { ContactSettings, HomeContent, ShippingSettings } from "@/types/catalog";
@@ -33,15 +34,19 @@ export const DEFAULT_CONTACT: ContactSettings = {
 
 const getPublicSettings = cache(async (): Promise<Record<string, unknown>> => {
   if (!isSupabaseConfigured()) return {};
-  const { data, error } = await createSupabasePublicClient()
-    .from("site_settings")
-    .select("setting_key, setting_value")
-    .eq("is_public", true);
-  if (error) {
-    console.error("Réglages publics indisponibles :", error.message);
-    return {};
-  }
-  return Object.fromEntries(data.map((r) => [r.setting_key, r.setting_value]));
+  const settings = await memo("public:settings", async () => {
+    const { data, error } = await createSupabasePublicClient()
+      .from("site_settings")
+      .select("setting_key, setting_value")
+      .eq("is_public", true);
+    // Erreur : rien n'est gardé en mémoire, la prochaine visite réessaie.
+    if (error) throw new Error(error.message);
+    return Object.fromEntries(data.map((r) => [r.setting_key, r.setting_value]));
+  }).catch((e: Error) => {
+    console.error("Réglages publics indisponibles :", e.message);
+    return null;
+  });
+  return settings ?? {};
 });
 
 async function setting<T extends object>(key: string, fallback: T): Promise<T> {

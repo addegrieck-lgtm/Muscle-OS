@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { z } from "zod";
 import {
   Badge,
@@ -63,7 +63,7 @@ async function saveSettings(form: FormData) {
   if (!result.success) back("/admin/settings", { erreur: firstError(result.error.issues) });
   const { error } = await writeSetting((result as { key: string }).key, result.data, true);
   if (error) back("/admin/settings", { erreur: dbError("saveSettings", error) });
-  revalidatePath("/", "layout");
+  revalidatePublic("/", "layout");
   back("/admin/settings", { ok: "Paramètres enregistrés." });
 }
 

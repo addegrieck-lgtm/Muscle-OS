@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
 import { imageRows, missingProducts, productRow, variantRows } from "@/lib/admin/catalog-import";
@@ -17,8 +17,8 @@ import { variantSchema } from "@/lib/validation/schemas";
 const id = z.string().uuid();
 
 function refreshStore(slug?: string) {
-  revalidatePath("/", "layout");
-  if (slug) revalidatePath(`/produit/${slug}`);
+  revalidatePublic("/", "layout");
+  if (slug) revalidatePublic(`/produit/${slug}`);
 }
 
 export async function createProduct(form: FormData) {

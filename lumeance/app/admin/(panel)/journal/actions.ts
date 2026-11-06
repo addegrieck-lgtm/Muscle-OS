@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { CATALOG_ROLES, requireAdmin } from "@/lib/auth/admin";
@@ -16,10 +16,10 @@ const uuid = z.string().uuid();
 const LIST = "/admin/journal";
 
 function refresh(slug?: string) {
-  revalidatePath("/journal");
-  if (slug) revalidatePath(`/journal/${slug}`);
-  revalidatePath("/");
-  revalidatePath(LIST);
+  revalidatePublic("/journal");
+  if (slug) revalidatePublic(`/journal/${slug}`);
+  revalidatePublic("/");
+  revalidatePublic(LIST);
 }
 
 /** Enregistre un article (création en brouillon, ou mise à jour sans changer son statut). */

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { z } from "zod";
 import { Card, Field, Flash, PageTitle, flashFrom, inputClass } from "@/components/admin/ui";
 import { SubmitButton } from "@/components/admin/SubmitButton";
@@ -31,7 +31,7 @@ async function upload(form: FormData) {
     const r = await uploadImage(supabase, f, meta.data.folder, meta.data.alt_text);
     if (r.error) errors.push(`${f.name.slice(0, 60)} : ${r.error}`);
   }
-  revalidatePath("/admin/media");
+  revalidatePublic("/admin/media");
   if (errors.length) back("/admin/media", { erreur: errors.join(" — ") });
   back("/admin/media", { ok: `${files.length} fichier(s) importé(s).` });
 }

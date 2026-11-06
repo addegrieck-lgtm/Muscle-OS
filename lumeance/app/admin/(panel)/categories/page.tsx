@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePublic } from "@/lib/admin/revalidate";
 import { z } from "zod";
 import { Card, Field, Flash, PageTitle, flashFrom, inputClass } from "@/components/admin/ui";
 import { SubmitButton } from "@/components/admin/SubmitButton";
@@ -18,7 +18,7 @@ async function saveCategory(form: FormData) {
   if (form.get("op") === "delete" && cid) {
     const { error } = await supabase.from("categories").delete().eq("id", cid);
     if (error) back("/admin/categories", { erreur: dbError("deleteCategory", error) });
-    revalidatePath("/", "layout");
+    revalidatePublic("/", "layout");
     back("/admin/categories", {
       ok: "Catégorie supprimée (les produits associés n’ont plus de catégorie).",
     });
@@ -36,7 +36,7 @@ async function saveCategory(form: FormData) {
     ? await supabase.from("categories").update(parsed.data).eq("id", cid)
     : await supabase.from("categories").insert(parsed.data);
   if (error) back("/admin/categories", { erreur: dbError("saveCategory", error) });
-  revalidatePath("/", "layout");
+  revalidatePublic("/", "layout");
   back("/admin/categories", { ok: "Catégorie enregistrée." });
 }
 
