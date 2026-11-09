@@ -58,7 +58,9 @@ ile.COLORS.update({
     "allium": (180, 110, 220), "cornflower": (70, 100, 200), "azure_bluet": (220, 225, 230), "oxeye_daisy": (230, 230, 220),
     "azalea": (100, 130, 50), "flowering_azalea": (150, 110, 140), "cave_vines": (90, 110, 40),
     "cave_vines_plant": (90, 110, 40), "red_carpet": (160, 39, 34), "water": (60, 90, 200),
-    "polished_andesite": (132, 135, 134), "crimson_planks": (101, 49, 71), "crimson_stairs": (101, 49, 71),
+    "polished_andesite": (132, 135, 134), "sandstone": (216, 203, 155), "smooth_sandstone": (223, 214, 170),
+    "red_concrete": (142, 32, 32), "purple_concrete": (100, 32, 156), "magenta_terracotta": (149, 88, 108),
+    "yellow_concrete": (240, 175, 21), "blackstone": (42, 36, 41), "black_concrete": (8, 10, 15), "crimson_planks": (101, 49, 71), "crimson_stairs": (101, 49, 71),
     "red_nether_bricks": (90, 14, 18), "moss_block": (89, 109, 45), "moss_carpet": (89, 109, 45),
 })
 
@@ -413,12 +415,23 @@ class Hub:
                     m = max(abs(x - cx), abs(z - cz))
                     if hs < m < hs + o:
                         w.set(x, ytop - 1, z, "dark_oak_slab[type=top]")
+            # toit concave : avant-toit presque plat, puis pente qui se redresse vers le faîte
+            n_rings = hs + o - max(hn, -1)
+            steep = int(n_rings * 0.55)
+            rise = [0]
+            for kk in range(1, n_rings + 1):
+                rise.append(rise[-1] + (0 if kk == 1 else 2 if kk > steep else 1))
             k = 0
             r = hs + o
             while r > hn:
-                yy = ytop + k
+                yy = ytop + rise[k]
                 mat = TRIM if k == 0 else ROOF
                 full = TRIM + "s" if k == 0 else ROOF + "_planks"
+                if k and rise[k] - rise[k - 1] == 2:  # marche haute : planches sous les escaliers
+                    for x in range(cx - r, cx + r + 1):
+                        for z in range(cz - r, cz + r + 1):
+                            if max(abs(x - cx), abs(z - cz)) == r:
+                                w.set(x, yy - 1, z, ROOF + "_planks")
                 if r <= 0:
                     w.set(cx, yy, cz, full)
                     break
@@ -444,13 +457,13 @@ class Hub:
                 k += 1
                 r -= 1
             if last:
-                top_y = ytop + k + 1
+                top_y = ytop + rise[min(k, len(rise) - 1)] + 1
                 for yy in range(top_y, top_y + 2):
                     w.set(cx, yy, cz, f"{TRIM}_wall[up=true]")
                 w.set(cx, top_y + 2, cz, "amethyst_block")
                 w.set(cx, top_y + 3, cz, "amethyst_cluster[facing=up]")
             else:
-                y = ytop + (hs + o - hn)
+                y = ytop + rise[hs + o - hn]
                 for x in range(cx - hn + 1, cx + hn):
                     for z in range(cz - hn + 1, cz + hn):
                         w.set(x, y - 1, z, "dark_oak_planks")
@@ -558,43 +571,134 @@ def main() -> None:
         hub.path((bx / ln * 10, bz / ln * 10), (bx, bz), i)
     hub.path((0, 10), (0, 47), 9)  # belvédère sud
     hub.plan_terrain()
-    hub.build_island()
+
+    # ---------------- relief : île principale + pétales + tours + îlots, en disques empilés
+    from relief import Body, dark_crystal, material
+    from dragon import Dragon
+
+    main_body = Body(0, 0, R, G, 58, 1)
+    main_body.radius = lambda a: edge_r(math.cos(a), math.sin(a))
+    bodies: list[tuple[Body, bool]] = [(main_body, True)]
+    petals, towers = [], []
+    DRAGON_A = -math.pi / 4  # nord-est
+    for i in range(17):
+        a = (i + 0.35 * h2(i, 0, 230)) / 17 * 2 * math.pi
+        if abs(math.atan2(math.sin(a - DRAGON_A), math.cos(a - DRAGON_A))) < 0.32:
+            continue
+        r = 7 + h2(i, 1, 231) * 5
+        er = edge_r(math.cos(a), math.sin(a))
+        cx, cz = math.cos(a) * (er + r * 0.2), math.sin(a) * (er + r * 0.2)
+        top = G - 3 + int(h2(i, 2, 232) * 9)
+        b = Body(cx, cz, r, top, r * 2.4, 10 + i, crystal=i % 3 == 0)
+        bodies.append((b, False))
+        petals.append(b)
+    for i, ang in enumerate((150, 205, 250, 20, 95)):
+        a = math.radians(ang)
+        er = edge_r(math.cos(a), math.sin(a))
+        cx, cz = math.cos(a) * (er + 9), math.sin(a) * (er + 9)
+        bodies.append((Body(cx, cz, 6, G - 1, 30, 40 + i), False))
+        nd = 2 + i % 3
+        for j in range(nd):
+            bodies.append((Body(cx, cz, 4.6 - j * 0.3, G + 5 + j * 6, 7, 50 + i * 5 + j), False))
+        towers.append((round(cx), G + 5 + (nd - 1) * 6, round(cz)))
+    dr = edge_r(math.cos(DRAGON_A), math.sin(DRAGON_A)) + 8
+    dx_, dz_ = round(math.cos(DRAGON_A) * dr), round(math.sin(DRAGON_A) * dr)
+    bodies += [(Body(dx_, dz_, 12, G + 1, 40, 70), False), (Body(dx_, dz_, 9.5, G + 8, 8, 71), False),
+               (Body(dx_, dz_, 10.5, G + 15, 8, 72), False)]
+    islets = []
+    for i, (ang, rr, dy, r) in enumerate([(20, 76, 6, 5), (70, 82, -10, 7), (125, 74, 12, 4.5), (165, 84, -4, 6),
+                                          (215, 78, 9, 5.5), (260, 86, -12, 7), (330, 80, -6, 6)]):
+        a = math.radians(ang)
+        b = Body(math.cos(a) * rr, math.sin(a) * rr, r, G + dy, r * 2.5, 80 + i, crystal=i % 2 == 0)
+        bodies.append((b, False))
+        islets.append(b)
+
+    cols: dict[tuple[int, int], list[list[int]]] = {}
+    for b, is_main in bodies:
+        rr = int(b.r * 1.25) + 2
+        for x in range(int(b.cx) - rr, int(b.cx) + rr + 1):
+            for z in range(int(b.cz) - rr, int(b.cz) + rr + 1):
+                iv = b.interval(x, z, hub.top.get((x, z)) if is_main else None)
+                if not iv:
+                    continue
+                lo, top = iv
+                if not is_main and (x, z) in hub.flat:
+                    top = min(top, G)
+                    lo = min(lo, top)
+                cols.setdefault((x, z), []).append([lo, top])
+    w = hub.w
+    for (x, z), ivs in cols.items():
+        ivs.sort()
+        merged = [ivs[0][:]]
+        for lo, top in ivs[1:]:
+            if lo <= merged[-1][1] + 1:
+                merged[-1][1] = max(merged[-1][1], top)
+            else:
+                merged.append([lo, top])
+        for lo, top in merged:
+            for y in range(lo, top + 1):
+                w.set(x, y, z, material(x, y, z, top, G))
+            d = isl_d(x, z)
+            hub.hang(x, lo - 1, z, d if d < 1 else 0.9, (G - lo) / 48)
+        hub.top[(x, z)] = merged[-1][1]
+
     hub.build_plaza()
     for _, cx, cz, h, tiers, door, lines, plat in PAVILIONS:
         hub.pagoda(cx, cz, h, tiers, door, lines, plat)
     hub.finish_paths()
 
-    # couronne de colonnes autour de l'île, reliées par des guirlandes
-    tops = []
-    n = 15
-    for i in range(n):
-        a = (i + 0.3 * h2(i, 0, 190)) / n * 2 * math.pi
-        rr = edge_r(math.cos(a), math.sin(a)) * (0.93 + 0.12 * h2(i, 1, 191))
-        x, z = round(math.cos(a) * rr), round(math.sin(a) * rr)
-        top = G + 3 + int(h2(i, 2, 192) * 12)
-        tops.append(hub.pillar(x, z, 3.2 + h2(i, 3, 193) * 2.6, top, G - 28 - int(h2(i, 4, 194) * 12)))
-    for i, (x, t, z) in enumerate(tops):
-        if i % 3 == 1:
-            hub.crystal(x, t + 1, z, 4 + h2(i, 5, 195) * 3)
-        elif i % 3 == 2:
-            hub.lamp(x, z, 1)
-            hub.tree(x + 1, z - 1, 1, i)
-        else:
-            hub.tree(x, z, 2, i)
-    for i in range(n):
-        a, b = tops[i], tops[(i + 1) % n]
-        hub.garland((a[0], a[1] + 1, a[2]), (b[0], b[1] + 1, b[2]))
+    # dragon rubis sur sa tour, tourné vers la place
+    Dragon(w, dx_ - 2, G + 16, dz_ + 2, (-dx_, -dz_), scale=1.45).build()
+    for x in range(dx_ - 12, dx_ + 13):
+        for z in range(dz_ - 12, dz_ + 13):
+            hub.reserved.add((x, z))
 
-    # îlots flottants
-    for i, (ang, rr, dy, r) in enumerate([(20, 72, 6, 5), (70, 78, -10, 7), (125, 70, 12, 4.5), (165, 80, -4, 6),
-                                          (215, 74, 9, 5.5), (260, 82, -12, 7), (305, 71, 3, 4.5), (345, 79, -6, 6)]):
-        a = math.radians(ang)
+    def lowest(x: int, z: int) -> int | None:
+        for y in range(G - 80, G + 30):
+            if w.get(x, y, z) and base(w.get(x, y, z)) in ("obsidian", "crying_obsidian", "amethyst_block") or (
+                    w.get(x, y, z) and "terracotta" in w.get(x, y, z) or w.get(x, y, z) in ("sandstone", "smooth_sandstone", "smooth_red_sandstone")):
+                return y
+        return None
+
+    # gros cristaux sombres sous les pétales, les îlots et l'île principale
+    for b in petals + islets:
+        x, z = round(b.cx), round(b.cz)
+        lo = lowest(x, z)
+        if b.crystal and lo is not None:
+            dark_crystal(w, x, lo, z, b.r * 1.6, b.r * 0.42, b.salt)
+    for i in range(6):
+        a, rr = h2(i, 6, 240) * 2 * math.pi, 6 + h2(i, 7, 241) * 24
         x, z = round(math.cos(a) * rr), round(math.sin(a) * rr)
-        hub.islet(x, z, G + dy, r)
-        if i % 2:
-            hub.tree(x, z, 2, 50 + i)
+        lo = lowest(x, z)
+        if lo is not None:
+            dark_crystal(w, x, lo, z, 14 + h2(i, 8, 242) * 12, 3 + h2(i, 9, 243) * 2, i * 7)
+
+    # décor des pétales, tours et îlots
+    for i, b in enumerate(petals):
+        x, z = round(b.cx), round(b.cz)
+        t = hub.top.get((x, z), b.top)
+        if (x, z) in hub.flat:
+            continue
+        if i % 3 == 0:
+            hub.crystal(x, t + 1, z, 4 + b.r * 0.35)
+        elif i % 3 == 1:
+            hub.tree(x, z, 3, 300 + i)
         else:
-            hub.crystal(x, G + dy + 1, z, 3 + r * 0.4)
+            hub.tree(x, z, 2, 300 + i)
+            hub.lamp(x + 3, z, 2)
+    for i, (x, t, z) in enumerate(towers):
+        hub.tree(x, z, 2 + i % 2, 320 + i)
+    for i, b in enumerate(islets):
+        x, z = round(b.cx), round(b.cz)
+        if i % 2:
+            hub.tree(x, z, 2, 340 + i)
+        else:
+            hub.crystal(x, b.top + 1, z, 3 + b.r * 0.5)
+    # guirlandes entre pétales voisins
+    for a_, b_ in zip(petals, petals[1:] + petals[:1]):
+        pa, pb = (round(a_.cx), a_.top + 4, round(a_.cz)), (round(b_.cx), b_.top + 4, round(b_.cz))
+        if math.dist(pa, pb) < 30:
+            hub.garland(pa, pb)
 
     # arbres et cristaux sur l'île
     placed: list[tuple[int, int]] = []
@@ -616,14 +720,6 @@ def main() -> None:
             hub.tree(x, z, size, i)
         if len(placed) >= 46:
             break
-    # cristaux suspendus sous l'île
-    for i in range(10):
-        a, rr = h2(i, 6, 210) * 2 * math.pi, 8 + h2(i, 7, 211) * 26
-        x, z = round(math.cos(a) * rr), round(math.sin(a) * rr)
-        y = min(y for (bx, y, bz) in [(x, yy, z) for yy in range(G - 60, G) if hub.w.get(x, yy, z)]) if any(
-            hub.w.get(x, yy, z) for yy in range(G - 60, G)) else None
-        if y is not None:
-            hub.crystal(x, y - 1, z, 4 + h2(i, 8, 212) * 4, down=True)
     # lampadaires le long des chemins
     for (x, z) in sorted(hub.paths):
         if h2(x, z, 220) < 0.025 and (x, z) not in hub.reserved:
@@ -641,8 +737,10 @@ def main() -> None:
     print(f"hub-jardin {info['size'][0]}×{info['size'][1]}×{info['size'][2]}  blocs={info['blocks']}  "
           f"palette={info['palette']}  offset={info['offset']}")
     if not args.no_preview:
-        render_iso(hub.w.b, HERE / "apercu-isometrique.png", scale=4, bg=(150, 190, 225))
-        centre = {p: b for p, b in hub.w.b.items() if abs(p[0]) <= 48 and abs(p[2]) <= 48 and p[1] >= G - 3}
+        # vue depuis le sud-ouest (côté spawn) : le dragon fait face au spectateur
+        sw = {(-x, y, -z): s for (x, y, z), s in hub.w.b.items()}
+        render_iso(sw, HERE / "apercu-isometrique.png", scale=4, bg=(150, 190, 225))
+        centre = {p: b for p, b in sw.items() if abs(p[0]) <= 64 and abs(p[2]) <= 64 and p[1] >= G - 12}
         render_iso(centre, HERE / "apercu-centre.png", scale=8, bg=(150, 190, 225))
         labels = [(cx, cz, n_[0]) for _, cx, cz, h, _, _, n_, _ in PAVILIONS] + [(0, 0, "SPAWN")]
         render_plan(hub.w.b, HERE / "plan.png", [], G + 30, scale=5, labels=labels,
