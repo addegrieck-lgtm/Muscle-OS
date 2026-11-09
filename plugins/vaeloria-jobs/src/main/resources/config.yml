@@ -1,0 +1,560 @@
+# VaeloriaJobs — métiers et arbres de protection.
+# Après modification : /metiers reload (les bonus de tous les joueurs connectés sont recalculés).
+#
+# Règle de conception : tout bonus est VANILLA. Un nœud ne donne que :
+#   - un modificateur d'attribut Minecraft (même effet que la commande /attribute) ;
+#   - un effet de potion permanent vanilla.
+# Pas d'objet custom, pas de double drop, pas de dégâts inventés.
+#
+# Attention PvP : VaeloriaCombat ignore la résistance au recul (ignore-knockback-resistance: true),
+# donc « knockback_resistance » n'aurait aucun effet en combat. Les arbres utilisent à la place
+# « explosion_knockback_resistance » (souffle de TNT/creepers, utile en raid).
+
+progression:
+  # XP pour passer du niveau n-1 au niveau n = base × n^exposant (arrondi).
+  # base 20, exposant 1.5, niveau 30 : niveau 10 ≈ 2 900 XP, niveau 20 ≈ 14 600 XP, niveau 30 ≈ 41 000 XP.
+  base: 20
+  exponent: 1.5
+  max-level: 30
+  # Points de compétence gagnés par niveau. 30 niveaux × 1 point = 30 points = coût total de chaque arbre.
+  points-per-level: 1
+  # Réinitialiser un arbre (tous les points rendus, XP conservée) : délai en heures entre deux réinitialisations.
+  reset-cooldown-hours: 24
+  # Message « +2,5 XP Mineur » dans la barre d'action à chaque gain.
+  action-bar: true
+  # Niveaux annoncés à tout le serveur.
+  announce-levels: [10, 20, 30]
+
+anti-abuse:
+  # Les blocs posés par un joueur (ou formés par lave + eau, ou poussés par un piston) ne donnent pas d'XP.
+  ignore-placed-blocks: true
+  # Multiplicateur d'XP des monstres de spawner (fermes à mobs). 0 = aucune XP.
+  spawner-multiplier: 0.25
+  # Pas d'XP en créatif.
+  ignore-creative: true
+
+effects:
+  # Mondes où les bonus des arbres s'appliquent. Vide = partout.
+  # Exemple pour couper les bonus en arène : [world, world_nether, world_the_end]
+  worlds: []
+
+jobs:
+  # ───────────────────────────── MINEUR ─────────────────────────────
+  mineur:
+    name: "Mineur"
+    icon: IRON_PICKAXE
+    tree: "Rempart de pierre"
+    description:
+      - "Miner les minerais et la roche naturelle."
+    xp:
+      break:
+        STONE: 0.3
+        DEEPSLATE: 0.35
+        ANDESITE: 0.3
+        DIORITE: 0.3
+        GRANITE: 0.3
+        TUFF: 0.3
+        NETHERRACK: 0.1
+        COAL_ORE: 2
+        DEEPSLATE_COAL_ORE: 2
+        COPPER_ORE: 1.5
+        DEEPSLATE_COPPER_ORE: 1.5
+        IRON_ORE: 4
+        DEEPSLATE_IRON_ORE: 4
+        GOLD_ORE: 5
+        DEEPSLATE_GOLD_ORE: 5
+        NETHER_GOLD_ORE: 2
+        NETHER_QUARTZ_ORE: 2
+        REDSTONE_ORE: 3
+        DEEPSLATE_REDSTONE_ORE: 3
+        LAPIS_ORE: 4
+        DEEPSLATE_LAPIS_ORE: 4
+        DIAMOND_ORE: 12
+        DEEPSLATE_DIAMOND_ORE: 12
+        EMERALD_ORE: 12
+        DEEPSLATE_EMERALD_ORE: 12
+        ANCIENT_DEBRIS: 25
+        OBSIDIAN: 3
+    nodes:
+      pied_sur:
+        name: "Pied sûr"
+        icon: LEATHER_BOOTS
+        slot: 40
+        level: 1
+        cost: 1
+        description: ["Les galeries apprennent à tomber."]
+        effects:
+          - { attribute: safe_fall_distance, amount: 1 }
+      poumons:
+        name: "Poumons de mineur"
+        icon: GLASS_BOTTLE
+        slot: 38
+        level: 3
+        cost: 2
+        requires: [pied_sur]
+        links: [39]
+        effects:
+          - { attribute: oxygen_bonus, amount: 1 }
+      tete_froide:
+        name: "Tête froide"
+        icon: MAGMA_CREAM
+        slot: 42
+        level: 3
+        cost: 2
+        requires: [pied_sur]
+        links: [41]
+        effects:
+          - { attribute: burning_time, amount: -0.15, operation: add_multiplied_base }
+      peau_de_roc:
+        name: "Peau de roc"
+        icon: STONE
+        slot: 22
+        level: 8
+        cost: 3
+        requires: [pied_sur]
+        links: [31]
+        effects:
+          - { attribute: armor, amount: 1 }
+      reflexes:
+        name: "Réflexes de galerie"
+        icon: FEATHER
+        slot: 20
+        level: 10
+        cost: 3
+        requires: [poumons]
+        links: [29]
+        effects:
+          - { attribute: fall_damage_multiplier, amount: -0.1, operation: add_multiplied_base }
+      coffrage:
+        name: "Coffrage"
+        icon: TNT
+        slot: 24
+        level: 10
+        cost: 3
+        requires: [tete_froide]
+        links: [33]
+        description: ["Moins projeté par les explosions."]
+        effects:
+          - { attribute: explosion_knockback_resistance, amount: 0.15 }
+      souffle_profond:
+        name: "Souffle profond"
+        icon: HEART_OF_THE_SEA
+        slot: 11
+        level: 16
+        cost: 4
+        requires: [reflexes]
+        effects:
+          - { attribute: oxygen_bonus, amount: 1 }
+      peau_deepslate:
+        name: "Peau de deepslate"
+        icon: DEEPSLATE
+        slot: 15
+        level: 16
+        cost: 4
+        requires: [coffrage]
+        effects:
+          - { attribute: armor, amount: 0.5 }
+      coeur_montagne:
+        name: "Cœur de la montagne"
+        icon: OBSIDIAN
+        slot: 4
+        level: 25
+        cost: 8
+        requires: [souffle_profond, peau_deepslate, peau_de_roc]
+        links: [2, 3, 5, 6, 13]
+        description: ["Ultime : la roche ne cède plus."]
+        effects:
+          - { attribute: armor_toughness, amount: 1 }
+
+  # ───────────────────────────── FARMER ─────────────────────────────
+  farmer:
+    name: "Farmer"
+    icon: GOLDEN_HOE
+    tree: "Racines"
+    description:
+      - "Récolter les cultures mûres et élever les animaux."
+    xp:
+      # Cultures : seulement quand elles sont mûres.
+      harvest:
+        WHEAT: 1
+        CARROTS: 1
+        POTATOES: 1
+        BEETROOTS: 1
+        NETHER_WART: 1.5
+        COCOA: 1.5
+      # Blocs naturels (non posés).
+      break:
+        MELON: 1
+        PUMPKIN: 1
+        SUGAR_CANE: 0.5
+        CACTUS: 0.5
+        BAMBOO: 0.1
+      breed:
+        COW: 2
+        MOOSHROOM: 2
+        SHEEP: 2
+        PIG: 2
+        CHICKEN: 1.5
+        RABBIT: 2
+        GOAT: 2
+    nodes:
+      bonne_mine:
+        name: "Bonne mine"
+        icon: BREAD
+        slot: 40
+        level: 1
+        cost: 1
+        effects:
+          - { attribute: max_health, amount: 1 }
+      pieds_boue:
+        name: "Pieds dans la boue"
+        icon: MUD
+        slot: 38
+        level: 3
+        cost: 2
+        requires: [bonne_mine]
+        links: [39]
+        description: ["Moins ralenti par le sable des âmes,", "la neige poudreuse et les toiles."]
+        effects:
+          - { attribute: movement_efficiency, amount: 0.25 }
+      ecorce:
+        name: "Écorce"
+        icon: OAK_LOG
+        slot: 42
+        level: 3
+        cost: 2
+        requires: [bonne_mine]
+        links: [41]
+        effects:
+          - { attribute: armor, amount: 0.5 }
+      seve_vive:
+        name: "Sève vive"
+        icon: GOLDEN_CARROT
+        slot: 22
+        level: 8
+        cost: 3
+        requires: [bonne_mine]
+        links: [31]
+        effects:
+          - { attribute: max_health, amount: 1 }
+      botte_de_foin:
+        name: "Botte de foin"
+        icon: HAY_BLOCK
+        slot: 20
+        level: 10
+        cost: 3
+        requires: [pieds_boue]
+        links: [29]
+        effects:
+          - { attribute: fall_damage_multiplier, amount: -0.15, operation: add_multiplied_base }
+      epouvantail:
+        name: "Épouvantail"
+        icon: CARVED_PUMPKIN
+        slot: 24
+        level: 10
+        cost: 3
+        requires: [ecorce]
+        links: [33]
+        effects:
+          - { attribute: explosion_knockback_resistance, amount: 0.1 }
+      rosee:
+        name: "Rosée"
+        icon: WATER_BUCKET
+        slot: 11
+        level: 16
+        cost: 4
+        requires: [botte_de_foin]
+        effects:
+          - { attribute: burning_time, amount: -0.15, operation: add_multiplied_base }
+      ecorce_dure:
+        name: "Écorce dure"
+        icon: DARK_OAK_LOG
+        slot: 15
+        level: 16
+        cost: 4
+        requires: [epouvantail]
+        effects:
+          - { attribute: armor_toughness, amount: 0.5 }
+      racines_profondes:
+        name: "Racines profondes"
+        icon: GOLDEN_APPLE
+        slot: 4
+        level: 25
+        cost: 8
+        requires: [rosee, ecorce_dure, seve_vive]
+        links: [2, 3, 5, 6, 13]
+        description: ["Ultime : la terre nourrit le corps."]
+        effects:
+          - { attribute: max_health, amount: 2 }
+
+  # ──────────────────────────── CHASSEUR ────────────────────────────
+  chasseur:
+    name: "Chasseur"
+    icon: BOW
+    tree: "Instinct"
+    description:
+      - "Chasser les monstres et pêcher."
+    xp:
+      kill:
+        ZOMBIE: 2
+        HUSK: 2
+        DROWNED: 2.5
+        ZOMBIE_VILLAGER: 2
+        SKELETON: 2.5
+        STRAY: 2.5
+        BOGGED: 2.5
+        SPIDER: 2
+        CAVE_SPIDER: 2
+        CREEPER: 3
+        SLIME: 1
+        MAGMA_CUBE: 1
+        ENDERMAN: 5
+        WITCH: 6
+        PHANTOM: 4
+        SILVERFISH: 0.5
+        ZOMBIFIED_PIGLIN: 1.5
+        PIGLIN: 3
+        PIGLIN_BRUTE: 8
+        HOGLIN: 4
+        ZOGLIN: 4
+        BLAZE: 6
+        GHAST: 8
+        WITHER_SKELETON: 8
+        GUARDIAN: 5
+        ELDER_GUARDIAN: 50
+        SHULKER: 6
+        PILLAGER: 4
+        VINDICATOR: 6
+        EVOKER: 15
+        RAVAGER: 15
+        BREEZE: 6
+        WARDEN: 100
+        WITHER: 200
+        ENDER_DRAGON: 500
+      # Poisson, trésor ou déchet attrapé à la canne.
+      fish: 2
+    nodes:
+      pas_de_velours:
+        name: "Pas de velours"
+        icon: RABBIT_FOOT
+        slot: 40
+        level: 1
+        cost: 1
+        effects:
+          - { attribute: safe_fall_distance, amount: 1 }
+      pistage:
+        name: "Pistage"
+        icon: COBWEB
+        slot: 38
+        level: 3
+        cost: 2
+        requires: [pas_de_velours]
+        links: [39]
+        effects:
+          - { attribute: movement_efficiency, amount: 0.25 }
+      sang_froid:
+        name: "Sang-froid"
+        icon: FEATHER
+        slot: 42
+        level: 3
+        cost: 2
+        requires: [pas_de_velours]
+        links: [41]
+        effects:
+          - { attribute: fall_damage_multiplier, amount: -0.1, operation: add_multiplied_base }
+      cuir_epais:
+        name: "Cuir épais"
+        icon: LEATHER_CHESTPLATE
+        slot: 22
+        level: 8
+        cost: 3
+        requires: [pas_de_velours]
+        links: [31]
+        effects:
+          - { attribute: armor, amount: 1 }
+      plongee:
+        name: "Plongée"
+        icon: TROPICAL_FISH
+        slot: 20
+        level: 10
+        cost: 3
+        requires: [pistage]
+        links: [29]
+        effects:
+          - { attribute: oxygen_bonus, amount: 1 }
+      fuite:
+        name: "Fuite"
+        icon: CREEPER_HEAD
+        slot: 24
+        level: 10
+        cost: 3
+        requires: [sang_froid]
+        links: [33]
+        effects:
+          - { attribute: explosion_knockback_resistance, amount: 0.15 }
+      nageur:
+        name: "Nageur"
+        icon: PRISMARINE_SHARD
+        slot: 11
+        level: 16
+        cost: 4
+        requires: [plongee]
+        effects:
+          - { attribute: water_movement_efficiency, amount: 0.2 }
+      carapace:
+        name: "Carapace"
+        icon: SHIELD
+        slot: 15
+        level: 16
+        cost: 4
+        requires: [fuite]
+        effects:
+          - { attribute: armor_toughness, amount: 0.5 }
+      predateur:
+        name: "Instinct du prédateur"
+        icon: CROSSBOW
+        slot: 4
+        level: 25
+        cost: 8
+        requires: [nageur, carapace, cuir_epais]
+        links: [2, 3, 5, 6, 13]
+        description: ["Ultime : la traque endurcit."]
+        effects:
+          - { attribute: max_health, amount: 2 }
+
+  # ─────────────────────── FORGERON / ALCHIMISTE ───────────────────────
+  forgeron:
+    name: "Forgeron"
+    icon: ANVIL
+    tree: "Alliage"
+    description:
+      - "Forger l'équipement, fondre les minerais,"
+      - "enchanter et brasser des potions."
+    xp:
+      # XP par objet fabriqué (seulement ce qui ne se « dé-fabrique » pas : pas de boucle lingot ↔ bloc).
+      craft:
+        IRON_HELMET: 4
+        IRON_CHESTPLATE: 6
+        IRON_LEGGINGS: 5
+        IRON_BOOTS: 3
+        IRON_SWORD: 2
+        IRON_PICKAXE: 2
+        IRON_AXE: 2
+        IRON_SHOVEL: 1
+        IRON_HOE: 1
+        DIAMOND_HELMET: 10
+        DIAMOND_CHESTPLATE: 16
+        DIAMOND_LEGGINGS: 14
+        DIAMOND_BOOTS: 8
+        DIAMOND_SWORD: 6
+        DIAMOND_PICKAXE: 8
+        DIAMOND_AXE: 8
+        DIAMOND_SHOVEL: 3
+        DIAMOND_HOE: 5
+        SHIELD: 2
+        BOW: 1
+        CROSSBOW: 2
+        ANVIL: 8
+        ENCHANTING_TABLE: 10
+        BREWING_STAND: 3
+      # XP par objet retiré du four.
+      smelt:
+        IRON_INGOT: 1
+        GOLD_INGOT: 1.5
+        COPPER_INGOT: 0.5
+        NETHERITE_SCRAP: 8
+        GLASS: 0.2
+      # Table d'enchantement : XP par niveau d'expérience de l'enchantement (1 à 30).
+      enchant-per-level: 1
+      # Alambic : XP par potion produite (le dernier joueur à avoir ouvert l'alambic est crédité).
+      brew-per-potion: 2
+      # Table de forgeron : XP par amélioration en netherite.
+      smith: 25
+    nodes:
+      mains_calleuses:
+        name: "Mains calleuses"
+        icon: FURNACE
+        slot: 40
+        level: 1
+        cost: 1
+        effects:
+          - { attribute: burning_time, amount: -0.1, operation: add_multiplied_base }
+      trempe:
+        name: "Trempe"
+        icon: IRON_INGOT
+        slot: 38
+        level: 3
+        cost: 2
+        requires: [mains_calleuses]
+        links: [39]
+        effects:
+          - { attribute: armor_toughness, amount: 0.5 }
+      vapeurs:
+        name: "Vapeurs d'alambic"
+        icon: BREWING_STAND
+        slot: 42
+        level: 3
+        cost: 2
+        requires: [mains_calleuses]
+        links: [41]
+        effects:
+          - { attribute: oxygen_bonus, amount: 1 }
+      plastron_forge:
+        name: "Plastron forgé"
+        icon: IRON_CHESTPLATE
+        slot: 22
+        level: 8
+        cost: 3
+        requires: [mains_calleuses]
+        links: [31]
+        effects:
+          - { attribute: armor, amount: 1 }
+      rivets:
+        name: "Rivets"
+        icon: CHAIN
+        slot: 20
+        level: 10
+        cost: 3
+        requires: [trempe]
+        links: [29]
+        effects:
+          - { attribute: explosion_knockback_resistance, amount: 0.15 }
+      ignifuge:
+        name: "Ignifuge"
+        icon: MAGMA_CREAM
+        slot: 24
+        level: 10
+        cost: 3
+        requires: [vapeurs]
+        links: [33]
+        effects:
+          - { attribute: burning_time, amount: -0.15, operation: add_multiplied_base }
+      alliage:
+        name: "Alliage"
+        icon: GOLD_INGOT
+        slot: 11
+        level: 16
+        cost: 4
+        requires: [rivets]
+        effects:
+          - { attribute: armor_toughness, amount: 0.5 }
+      elixir:
+        name: "Élixir de santé"
+        icon: GLISTERING_MELON_SLICE
+        slot: 15
+        level: 16
+        cost: 4
+        requires: [ignifuge]
+        effects:
+          - { attribute: max_health, amount: 1 }
+      salamandre:
+        name: "Peau de salamandre"
+        icon: BLAZE_ROD
+        slot: 4
+        level: 25
+        cost: 8
+        requires: [alliage, elixir, plastron_forge]
+        links: [2, 3, 5, 6, 13]
+        description: ["Ultime : le feu et la lave ne brûlent plus."]
+        effects:
+          - { potion: fire_resistance, level: 1 }

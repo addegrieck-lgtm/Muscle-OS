@@ -1,0 +1,18 @@
+name: VaeloriaJobs
+version: '${version}'
+main: fr.vaeloria.jobs.VaeloriaJobsPlugin
+api-version: '1.21'
+description: "Métiers VÆLORIA (Mineur, Farmer, Chasseur, Forgeron) et arbres de protection aux bonus 100 % vanilla."
+authors: [VÆLORIA]
+commands:
+  metiers:
+    description: Métiers et arbres de protection
+    usage: /metiers [metier] | info [joueur] | xp <joueur> <metier> <quantité> | reset <joueur> [metier] | reload
+    aliases: [metier, jobs, job]
+    permission: vaeloria.jobs.use
+permissions:
+  vaeloria.jobs.use:
+    default: true
+  vaeloria.jobs.admin:
+    description: Donner de l'XP, réinitialiser un joueur, recharger la config
+    default: op
