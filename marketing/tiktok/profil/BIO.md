@@ -11,20 +11,13 @@
 
 ## Bio (80 caractères max, retours à la ligne compris)
 
-Version principale (69) :
+Le Discord est le seul lien mis en avant (64 caractères) :
 
     ⚔️ Faction & PvP 1.8 FR
-    🔥 Raids · Guerres · KOTH
-    👑 Saison I bientôt ↓
-
-Variante avec le slogan (79) :
-
-    LE RETOUR DE LA VRAIE GUERRE ⚔️
-    Serveur Faction & PvP 1.8 FR
-    Saison I bientôt 👑
+    👑 Saison I bientôt
+    💬 discord.gg/vaeloria
 
 ## Lien
 
-- **Site** : https://vaeloria.fr (le lien cliquable dans la bio demande un compte Entreprise ou 1 000 abonnés).
-- **Discord** : https://discord.gg/vaeloria
-- Sans lien cliquable, mettre `vaeloria.fr` en toutes lettres dans la bio ou en commentaire épinglé.
+- **Discord uniquement** : https://discord.gg/vaeloria
+- Le lien cliquable dans la bio demande un compte Entreprise ou 1 000 abonnés. En attendant, l'adresse écrite dans la bio suffit.
