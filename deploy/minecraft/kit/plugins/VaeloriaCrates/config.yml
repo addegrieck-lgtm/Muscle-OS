@@ -1,0 +1,13 @@
+# VaeloriaCrates — réglages généraux.
+# Les coffres, clés et lots se configurent EN JEU avec /crate admin (enregistrés dans crates.yml).
+
+prefix: "&6[VÆLORIA] &7"
+
+# Durée de la roulette d'ouverture (en ticks, 20 = 1 seconde). Chaque coffre peut la désactiver.
+animation-ticks: 60
+
+# Repousse le joueur qui clique un coffre sans la bonne clé.
+knockback-without-key: true
+
+# Annonce globale lorsqu'un lot marqué « annonce » est gagné. {player}, {item}, {crate}.
+broadcast-format: "&6[VÆLORIA] &e{player} &7a obtenu &f{item} &7dans le coffre {crate}&7 !"

@@ -1,0 +1,231 @@
+# VæloriaRTP — réglages généraux. Les mondes se configurent dans worlds.yml ou en jeu avec /rtpadmin.
+# Textes au format MiniMessage : https://docs.advntr.dev/minimessage/format.html
+
+portals:
+  wand-material: GOLDEN_AXE
+  max-volume: 10000 # blocs max par portail (garde-fou contre un coin oublié) ; /rtpadmin portal maxvolume <n>
+  particle-interval-ticks: 4 # fréquence d'animation (20 ticks = 1 s)
+  density: 0.4 # particules par bloc de zone à chaque animation
+  max-particles-per-portal: 60 # plafond par portail et par animation
+  view-distance: 48 # animation seulement si un joueur est à moins de 48 blocs
+  ambient-sound: true # bourdonnement discret de portail
+  default-style: vaeloria
+  # Styles de particules. DUST (couleur) et DUST_COLOR_TRANSITION (from → to) acceptent n'importe
+  # quelle couleur hexadécimale ; les autres particules sont celles du jeu (PORTAL, END_ROD…).
+  # weight = proportion de cette couche dans le mélange.
+  styles:
+    vaeloria:
+      display-name: <#D21F2F>Rouge Væloria
+      icon: RED_STAINED_GLASS
+      layers:
+      - particle: DUST_COLOR_TRANSITION
+        from: '#D21F2F'
+        to: '#5E0710'
+        size: 1.4
+        weight: 6
+      - particle: DUST
+        color: '#FFFFFF'
+        size: 0.6
+        weight: 1
+      - particle: CRIMSON_SPORE
+        weight: 2
+    sang:
+      display-name: <dark_red>Sang & braises
+      icon: REDSTONE_BLOCK
+      layers:
+      - particle: DUST
+        color: '#8B0000'
+        size: 1.6
+        weight: 5
+      - particle: FLAME
+        weight: 1
+      - particle: LAVA
+        weight: 1
+    ame:
+      display-name: <aqua>Âmes bleues
+      icon: SOUL_LANTERN
+      layers:
+      - particle: DUST_COLOR_TRANSITION
+        from: '#3AD1E6'
+        to: '#0B3D91'
+        size: 1.3
+        weight: 5
+      - particle: SOUL_FIRE_FLAME
+        weight: 2
+      - particle: SCULK_SOUL
+        weight: 1
+    neant:
+      display-name: <dark_purple>Néant
+      icon: CRYING_OBSIDIAN
+      layers:
+      - particle: DUST_COLOR_TRANSITION
+        from: '#7A2BD6'
+        to: '#07070A'
+        size: 1.5
+        weight: 5
+      - particle: REVERSE_PORTAL
+        weight: 3
+      - particle: END_ROD
+        weight: 1
+    royal:
+      display-name: <gold>Or royal
+      icon: GOLD_BLOCK
+      layers:
+      - particle: DUST_COLOR_TRANSITION
+        from: '#F5C542'
+        to: '#A96E00'
+        size: 1.3
+        weight: 5
+      - particle: WAX_ON
+        weight: 2
+      - particle: END_ROD
+        weight: 1
+    nature:
+      display-name: <green>Émeraude
+      icon: EMERALD_BLOCK
+      layers:
+      - particle: DUST
+        color: '#2ECC71'
+        size: 1.3
+        weight: 5
+      - particle: HAPPY_VILLAGER
+        weight: 1
+      - particle: CHERRY_LEAVES
+        weight: 1
+    ombre:
+      display-name: <gray>Ombre
+      icon: BLACKSTONE
+      layers:
+      - particle: DUST_COLOR_TRANSITION
+        from: '#2A0A0E'
+        to: '#000000'
+        size: 1.6
+        weight: 5
+      - particle: SMOKE
+        weight: 2
+      - particle: ASH
+        weight: 2
+menu:
+  rows: 3 # hauteur du menu /rtp (1 à 6)
+  filler: BLACK_STAINED_GLASS_PANE
+  hide-locked-worlds: false # true = cacher les mondes dont le joueur n'a pas la permission
+
+teleport:
+  cooldown-per-world: true # false = un seul délai partagé entre tous les mondes
+  cancel-on-move: true # bouger pendant le compte à rebours annule le RTP
+  cancel-on-damage: true # subir des dégâts pendant le compte à rebours annule le RTP
+  fall-protection-seconds: 5 # pas de dégâts de chute juste après l'arrivée
+  title: true # titre à l'écran à l'arrivée
+
+search:
+  max-attempts: 25 # positions testées avant d'abandonner
+  unsafe-blocks: # sol ou blocs interdits à l'arrivée
+    - LAVA
+    - WATER
+    - MAGMA_BLOCK
+    - CACTUS
+    - FIRE
+    - SOUL_FIRE
+    - CAMPFIRE
+    - SOUL_CAMPFIRE
+    - POWDER_SNOW
+    - SWEET_BERRY_BUSH
+    - POINTED_DRIPSTONE
+    - WITHER_ROSE
+    - COBWEB
+    - BEDROCK
+  blocked-biomes: # biomes où l'on n'atterrit jamais
+    - ocean
+    - deep_ocean
+    - cold_ocean
+    - deep_cold_ocean
+    - frozen_ocean
+    - deep_frozen_ocean
+    - lukewarm_ocean
+    - deep_lukewarm_ocean
+    - warm_ocean
+    - river
+    - frozen_river
+
+messages:
+  wand-given: '<prefix><green>Hache des portails reçue : clic gauche = coin 1, clic
+    droit = coin 2.'
+  wand-pos1: '<prefix><gray>Coin 1 : <white><x> <y> <z></white> <dark_gray>· zone
+    : <size>'
+  wand-pos2: '<prefix><gray>Coin 2 : <white><x> <y> <z></white> <dark_gray>· zone
+    : <size>'
+  wand-too-big: '<prefix><red>⚠ Zone de <white><size></white> = <white><volume></white>
+    blocs, au-delà de la limite (<max>). Un ancien coin est peut-être resté ailleurs
+    : reclique les deux coins, ou <white>/rtpadmin wand clear</white>.'
+  wand-cleared: <prefix><green>Sélection effacée.
+  portal-maxvolume: '<prefix><gray>Taille max d''un portail : <white><max></white>
+    blocs.'
+  wand-no-selection: <prefix><red>Sélectionne d'abord les deux coins avec la hache
+    (<white>/rtpadmin wand</white>).
+  portal-created: '<prefix><green>Portail <white><portal></white> créé. Choisis sa
+    destination : <white>/rtpadmin portal dest <portal></white> ou le menu.'
+  portal-removed: <prefix><green>Portail <white><portal></white> supprimé.
+  portal-unknown: '<prefix><red>Portail inconnu : <white><portal>'
+  portal-dest-set: '<prefix><green>Destination de <white><portal></white> : <white><dest>'
+  portal-no-destination: <prefix><yellow>Le portail <white><portal></white> n'a pas
+    encore de destination.
+  portal-no-permission: <prefix><red>Ce portail ne s'ouvre pas pour toi.
+  portal-unavailable: <prefix><red>Ce portail ne mène nulle part pour le moment.
+  portal-list-empty: <prefix><gray>Aucun portail. <white>/rtpadmin wand</white> puis
+    <white>/rtpadmin portal create <nom>
+  portal-list-entry: <prefix><white><portal></white> <gray><state> · <world> <dark_gray>(<size>)</dark_gray>
+    → <white><dest></white> · <style>
+  prefix: '<gradient:#D21F2F:#5E0710><bold>VÆLORIA</bold></gradient> <dark_gray>»</dark_gray> '
+  menu-title: <dark_gray>Téléportation aléatoire
+  menu-click: <green>▶ Clic pour partir à l'aventure
+  menu-cooldown: <red>⌛ Disponible dans <time>
+  menu-locked: <red>🔒 Accès réservé
+  menu-empty: <red>Aucun monde disponible pour le moment
+  players-only: <prefix><red>Commande réservée aux joueurs.
+  no-permission: <prefix><red>Tu n'as pas la permission.
+  usage: '<prefix><gray>Utilisation : <white><usage>'
+  unknown-world: '<prefix><red>Monde inconnu : <white><world>'
+  unknown-player: '<prefix><red>Joueur introuvable : <white><player>'
+  world-unavailable: <prefix><red>Le monde <world> <red>n'est pas disponible.
+  world-disabled: <prefix><red>Le RTP est désactivé dans <world><red>.
+  world-no-permission: <prefix><red>Tu n'as pas accès au RTP de <world><red>.
+  already-pending: <prefix><red>Une téléportation est déjà en cours.
+  cooldown: <prefix><red>Patiente encore <white><time></white> avant un nouveau RTP
+    dans <world><red>.
+  warmup-start: <prefix><gray>Téléportation vers <world> <gray>dans <white><seconds>s</white>…
+    ne bouge pas !
+  warmup-actionbar: <gold>Téléportation dans <white><seconds></white>…
+  cancelled-move: '<prefix><red>Téléportation annulée : tu as bougé.'
+  cancelled-damage: '<prefix><red>Téléportation annulée : tu as subi des dégâts.'
+  searching: <prefix><gray>Recherche d'un endroit sûr dans <world><gray>…
+  not-found: <prefix><red>Aucun endroit sûr trouvé dans <world><red>, réessaie.
+  success: <prefix><green>Téléporté dans <world> <green>en <white><x> <y> <z></white>.
+  title: <gradient:#D21F2F:#FFFFFF><bold>EN TERRE INCONNUE</bold></gradient>
+  subtitle: <world>
+  forced: <prefix><green><player> part vers <world><green>.
+  forced-failed: <prefix><red>Impossible d'envoyer <player> dans <world> <red>(monde
+    indisponible ou téléportation déjà en cours).
+  reloaded: <prefix><green>Configuration rechargée.
+  prompt: <prefix><yellow><question><newline><gray>Écris la valeur dans le chat, ou
+    <white>annuler</white>.
+  prompt-timeout: <prefix><red>Saisie expirée.
+  admin-saved: <prefix><green>Enregistré.
+  admin-invalid: <prefix><red><error>
+  admin-added: <prefix><green>Monde <white><world></white> ajouté au RTP.
+  admin-removed: <prefix><green>Monde <white><world></white> retiré du RTP.
+  admin-hand-empty: <prefix><red>Prends un objet en main pour l'utiliser comme icône.
+  admin-wrong-world: <prefix><red>Tu dois être dans le monde <white><world></white>
+    pour utiliser ta position.
+  admin-cooldown-reset: <prefix><green>Délais RTP de <white><player></white> réinitialisés.
+  admin-list-empty: <prefix><gray>Aucun monde configuré. <white>/rtpadmin add <monde>
+  admin-list-entry: <prefix><white><world></white> <dark_gray>(</dark_gray><name><dark_gray>)</dark_gray>
+    <gray><state> · <min> → <max> blocs
+  admin-help:
+  - <gradient:#D21F2F:#5E0710><bold>VæloriaRTP</bold></gradient> <gray>— administration
+  - <white>/rtpadmin</white> <gray>ouvre l'interface
+  - <white>/rtpadmin list</white> <gray>liste les mondes
+  - <white>/rtpadmin add|remove|edit <monde>
+  - <white>/rtpadmin set <monde> <réglage> <valeur>
+  - <white>/rtpadmin resetcooldown <joueur>
+  - <white>/rtpadmin reload
+  - <white>/rtp <monde> <joueur></white> <gray>téléportation forcée (console, PNJ)

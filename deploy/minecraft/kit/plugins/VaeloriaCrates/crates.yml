@@ -1,0 +1,461 @@
+# Coffres VaeloriaCrates — généré par deploy/minecraft/outils/coffres.mjs (Vote, Rare, Légendaire : 16 lots chacun).
+# Format lisible de VaeloriaCrates 0.2.0 : le plugin le réencode en binaire à la première modification en jeu.
+# install.sh ne le pose que si le serveur n'a pas encore les coffres Rare et Légendaire (les réglages faits en jeu
+# avec /crate admin ne sont jamais écrasés). Chances : poids ÷ 1000.
+crates:
+  coffre_vote:
+    name: "&e&lCoffre Vote"
+    animation: true
+    key: H4sIAAAAAAAA/3VTy27bMBDcPBzYDmD03TR96VCgt+beq/sNvRIUubIZU1yCpGzrk/oD/YH+WFdKHdJ164MA75DcmdmdOcAFXH+TSX7HEA05gGc/p3BuNLxujUMVZJO+pmD8zgQUa6LNBUwUdS4BwNkc5opaTw5dijNY5CuWAs75yPkZXJkkrVEwhcuE+wQ3S/5X6UAmVbELlcVKUdMEnA4v80W4XAXZw+nNhafh/GfqtsGELyfnP+X+6NRautQyMbGyhr+0xRCMRib9ppBGZJPxQpvorexn8HRttEYnsq4py7iFV/98O8L7XJeJjaq7hKIlbRrDjsLLDHeuDig3srYIz3NZSSdGoGwxFJmPQsEjeZvrtSW1EdzYpF5oHlvZ4AGMSSYsJXpKPFgW5NLIuIBq6RwG4Zk5BhfhRYaMiyl0g8ZSIgsPK9TCB7pHlYzFCLcZvu82WNN+oN6POp9krJVe8FqV3TunLWZihSkNb9uOwubodS95jsat7rYyGB4A3BTE+BGGWYwlSn/JFxoVBTnYEOHdaReBe29pXP8PGd0Fw7bwcHjpDyThY5kK8kZJKxoT13d/PCwzUCMeiXrkWPqse7bzYY0XR4lrS99j4jxpcbR583L2quMjrXCyxZybGUw4NkGOQXxMy1WP1tLuEKrJ0v76UcH/4OvlmM1qS7xVh+Lw+w3RVJlxOwQAAA==
+    locations: ["spawn;31;105;-80", "spawn;27;105;-80"]
+    rewards:
+      '0':
+        weight: 150
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 500"]
+        item:
+          material: GOLD_NUGGET
+          name: "&6&l500 $"
+          lore: ["&7Versés sur ton compte."]
+      '1':
+        weight: 110
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 1000"]
+        item:
+          material: GOLD_INGOT
+          name: "&6&l1 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '2':
+        weight: 40
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 2500"]
+        item:
+          material: GOLD_BLOCK
+          name: "&6&l2 500 $"
+          lore: ["&7Versés sur ton compte."]
+      '3':
+        weight: 110
+        give-item: true
+        broadcast: false
+        item:
+          material: COOKED_BEEF
+          amount: 32
+          name: "&f32 steaks cuits"
+      '4':
+        weight: 70
+        give-item: true
+        broadcast: false
+        item:
+          material: GOLDEN_APPLE
+          amount: 2
+          name: "&f2 pommes dorées"
+      '5':
+        weight: 90
+        give-item: true
+        broadcast: false
+        item:
+          material: EXPERIENCE_BOTTLE
+          amount: 16
+          name: "&f16 fioles d'expérience"
+      '6':
+        weight: 70
+        give-item: true
+        broadcast: false
+        item:
+          material: IRON_INGOT
+          amount: 16
+          name: "&f16 lingots de fer"
+      '7':
+        weight: 50
+        give-item: true
+        broadcast: false
+        item:
+          material: DIAMOND
+          amount: 4
+          name: "&b4 diamants"
+      '8':
+        weight: 50
+        give-item: true
+        broadcast: false
+        item:
+          material: ENDER_PEARL
+          amount: 16
+          name: "&f16 perles de l'Ender"
+      '9':
+        weight: 60
+        give-item: false
+        broadcast: false
+        commands: ["kit construction {player}"]
+        item:
+          material: BRICKS
+          name: "&e&lKit Construction"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '10':
+        weight: 50
+        give-item: false
+        broadcast: false
+        commands: ["kit farmeur {player}"]
+        item:
+          material: WHEAT
+          name: "&e&lKit Farmeur"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '11':
+        weight: 40
+        give-item: false
+        broadcast: false
+        commands: ["kit explorateur {player}"]
+        item:
+          material: COMPASS
+          name: "&e&lKit Explorateur"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '12':
+        weight: 40
+        give-item: true
+        broadcast: false
+        item:
+          material: DIAMOND_PICKAXE
+          name: "&bPioche du votant"
+          lore: ["&7Gagnée au coffre Vote."]
+          enchants: {efficiency: 4, unbreaking: 3}
+      '13':
+        weight: 40
+        give-item: false
+        broadcast: false
+        commands: ["shop admin give {player} houe_moisson_1 1"]
+        item:
+          material: IRON_HOE
+          name: "&fHoue de moisson &cI"
+          lore: ["&7L'objet de la boutique de VÆLORIA."]
+      '14':
+        weight: 25
+        give-item: false
+        broadcast: true
+        commands: ["crate give {player} coffre_rare 1"]
+        item:
+          material: AMETHYST_SHARD
+          name: "&f&lClé Rare"
+          lore: ["&7Une clé de coffre en plus !"]
+          glow: true
+      '15':
+        weight: 5
+        give-item: false
+        broadcast: true
+        commands: ["shop admin give {player} spawner_zombie 1"]
+        item:
+          material: SPAWNER
+          name: "&c&lGénérateur Zombie"
+          lore: ["&7Un vrai générateur de VÆLORIA,", "&7revenu passif pour ta faction."]
+  coffre_rare:
+    name: "&b&lCoffre Rare"
+    animation: true
+    key:
+      material: AMETHYST_SHARD
+      name: "&b&lClé Rare"
+      lore: ["&7Clic droit sur un coffre Rare", "&7(Trésorerie du spawn).", "&8/boutique · coffre Vote"]
+      glow: true
+    locations: ["spawn;27;105;-84", "spawn;31;105;-84"]
+    rewards:
+      '0':
+        weight: 170
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 5000"]
+        item:
+          material: GOLD_INGOT
+          name: "&6&l5 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '1':
+        weight: 90
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 10000"]
+        item:
+          material: GOLD_BLOCK
+          name: "&6&l10 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '2':
+        weight: 30
+        give-item: false
+        broadcast: true
+        commands: ["eco give {player} 25000"]
+        item:
+          material: GOLD_BLOCK
+          name: "&6&l25 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '3':
+        weight: 90
+        give-item: true
+        broadcast: false
+        item:
+          material: GOLDEN_APPLE
+          amount: 6
+          name: "&f6 pommes dorées"
+      '4':
+        weight: 90
+        give-item: true
+        broadcast: false
+        item:
+          material: EXPERIENCE_BOTTLE
+          amount: 32
+          name: "&f32 fioles d'expérience"
+      '5':
+        weight: 70
+        give-item: true
+        broadcast: false
+        item:
+          material: DIAMOND
+          amount: 16
+          name: "&b16 diamants"
+      '6':
+        weight: 60
+        give-item: true
+        broadcast: false
+        item:
+          material: ENCHANTED_BOOK
+          name: "&bLivre Protection IV"
+          enchants: {protection: 4}
+      '7':
+        weight: 70
+        give-item: false
+        broadcast: false
+        commands: ["kit minerais {player}"]
+        item:
+          material: IRON_PICKAXE
+          name: "&e&lKit Minerais"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '8':
+        weight: 60
+        give-item: false
+        broadcast: false
+        commands: ["kit alchimiste {player}"]
+        item:
+          material: BREWING_STAND
+          name: "&e&lKit Alchimiste"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '9':
+        weight: 60
+        give-item: true
+        broadcast: false
+        item:
+          material: DIAMOND_SWORD
+          name: "&bLame du coffre Rare"
+          lore: ["&7Gagnée au coffre Rare."]
+          enchants: {sharpness: 5, unbreaking: 3}
+      '10':
+        weight: 50
+        give-item: true
+        broadcast: false
+        item:
+          material: DIAMOND_CHESTPLATE
+          name: "&bPlastron du coffre Rare"
+          lore: ["&7Gagné au coffre Rare."]
+          enchants: {protection: 4, unbreaking: 3}
+      '11':
+        weight: 50
+        give-item: false
+        broadcast: false
+        commands: ["shop admin give {player} hache_bucheron 1"]
+        item:
+          material: DIAMOND_AXE
+          name: "&fHache du bûcheron"
+          lore: ["&7L'objet de la boutique de VÆLORIA."]
+      '12':
+        weight: 30
+        give-item: true
+        broadcast: true
+        item:
+          material: TOTEM_OF_UNDYING
+          name: "&6Totem d'immortalité"
+      '13':
+        weight: 25
+        give-item: false
+        broadcast: true
+        commands: ["shop admin give {player} spawner_skeleton 1"]
+        item:
+          material: SPAWNER
+          name: "&c&lGénérateur Squelette"
+          lore: ["&7Un vrai générateur de VÆLORIA,", "&7revenu passif pour ta faction."]
+      '14':
+        weight: 25
+        give-item: false
+        broadcast: true
+        commands: ["crate give {player} coffre_legendaire 1"]
+        item:
+          material: ECHO_SHARD
+          name: "&f&lClé Légendaire"
+          lore: ["&7Une clé de coffre en plus !"]
+          glow: true
+      '15':
+        weight: 30
+        give-item: false
+        broadcast: true
+        commands: ["lp user {player} parent addtemp guerrier 7d accumulate"]
+        item:
+          material: NAME_TAG
+          name: "&d&lGrade Guerrier &7(7 jours)"
+          lore: ["&7Grade temporaire, cumulable.", "&7Warp farm et avantages du grade."]
+          glow: true
+  coffre_legendaire:
+    name: "&6&lCoffre Légendaire"
+    animation: true
+    key:
+      material: ECHO_SHARD
+      name: "&6&lClé Légendaire"
+      lore: ["&7Clic droit sur le coffre royal", "&7(Trésorerie du spawn).", "&8/boutique · coffre Rare"]
+      glow: true
+    locations: ["spawn;29;105;-82"]
+    rewards:
+      '0':
+        weight: 220
+        give-item: false
+        broadcast: false
+        commands: ["eco give {player} 25000"]
+        item:
+          material: GOLD_BLOCK
+          name: "&6&l25 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '1':
+        weight: 100
+        give-item: false
+        broadcast: true
+        commands: ["eco give {player} 50000"]
+        item:
+          material: GOLD_BLOCK
+          name: "&6&l50 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '2':
+        weight: 25
+        give-item: false
+        broadcast: true
+        commands: ["eco give {player} 100000"]
+        item:
+          material: NETHERITE_INGOT
+          name: "&6&l100 000 $"
+          lore: ["&7Versés sur ton compte."]
+      '3':
+        weight: 90
+        give-item: false
+        broadcast: false
+        commands: ["kit pvp {player}"]
+        item:
+          material: NETHERITE_SWORD
+          name: "&e&lKit PvP"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '4':
+        weight: 80
+        give-item: false
+        broadcast: false
+        commands: ["kit forgeron {player}"]
+        item:
+          material: ANVIL
+          name: "&e&lKit Forgeron"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '5':
+        weight: 70
+        give-item: false
+        broadcast: false
+        commands: ["kit sorcier {player}"]
+        item:
+          material: ENCHANTING_TABLE
+          name: "&e&lKit Sorcier"
+          lore: ["&7Le contenu du kit, une fois.", "&8(l'accès permanent reste en /boutique)"]
+          glow: true
+      '6':
+        weight: 60
+        give-item: true
+        broadcast: true
+        item:
+          material: NETHERITE_SWORD
+          name: "&6&lLame légendaire"
+          lore: ["&7Gagnée au coffre Légendaire."]
+          enchants: {sharpness: 5, unbreaking: 3, fire_aspect: 2}
+      '7':
+        weight: 50
+        give-item: true
+        broadcast: true
+        item:
+          material: NETHERITE_CHESTPLATE
+          name: "&6&lPlastron légendaire"
+          lore: ["&7Gagné au coffre Légendaire."]
+          enchants: {protection: 4, unbreaking: 3}
+      '8':
+        weight: 60
+        give-item: true
+        broadcast: false
+        item:
+          material: ENCHANTED_GOLDEN_APPLE
+          amount: 2
+          name: "&d2 pommes dorées enchantées"
+      '9':
+        weight: 15
+        give-item: true
+        broadcast: true
+        item:
+          material: ELYTRA
+          name: "&5&lÉlytres"
+      '10':
+        weight: 60
+        give-item: false
+        broadcast: false
+        commands: ["shop admin give {player} pioche_abysses 1"]
+        item:
+          material: NETHERITE_PICKAXE
+          name: "&5Pioche des abysses"
+          lore: ["&7L'objet de la boutique de VÆLORIA."]
+      '11':
+        weight: 60
+        give-item: false
+        broadcast: true
+        commands: ["shop admin give {player} spawner_enderman 1"]
+        item:
+          material: SPAWNER
+          name: "&c&lGénérateur Enderman"
+          lore: ["&7Un vrai générateur de VÆLORIA,", "&7revenu passif pour ta faction."]
+      '12':
+        weight: 40
+        give-item: false
+        broadcast: true
+        commands: ["shop admin give {player} spawner_blaze 1"]
+        item:
+          material: SPAWNER
+          name: "&c&lGénérateur Blaze"
+          lore: ["&7Un vrai générateur de VÆLORIA,", "&7revenu passif pour ta faction."]
+      '13':
+        weight: 10
+        give-item: false
+        broadcast: true
+        commands: ["shop admin give {player} spawner_golem 1"]
+        item:
+          material: SPAWNER
+          name: "&c&lGénérateur Golem de fer"
+          lore: ["&7Un vrai générateur de VÆLORIA,", "&7revenu passif pour ta faction."]
+      '14':
+        weight: 40
+        give-item: false
+        broadcast: true
+        commands: ["lp user {player} parent add guerrier"]
+        item:
+          material: NAME_TAG
+          name: "&d&lGrade Guerrier &7(définitif)"
+          lore: ["&7Le grade, pour toujours.", "&7Warp farm et avantages du grade."]
+          glow: true
+      '15':
+        weight: 20
+        give-item: false
+        broadcast: true
+        commands: ["lp user {player} parent addtemp roi 30d accumulate"]
+        item:
+          material: NAME_TAG
+          name: "&d&lGrade Roi &7(30 jours)"
+          lore: ["&7Grade temporaire, cumulable.", "&7Warp farm et avantages du grade."]
+          glow: true

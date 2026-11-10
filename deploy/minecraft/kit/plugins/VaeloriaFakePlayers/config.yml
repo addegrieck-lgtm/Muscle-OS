@@ -1,0 +1,435 @@
+# VæloriaFakePlayers — configuration
+# Formats en MiniMessage (https://docs.advntr.dev/minimessage/format.html). <name> = pseudo du faux joueur.
+
+# Restaurer au redémarrage les faux joueurs créés par commande (fichier fakes.yml).
+persist: true
+
+# Pseudos utilisés EN PRIORITÉ par /fp add et le mode ambiance (3 à 16 caractères : lettres, chiffres, _).
+# Vide = tous les pseudos sont générés (Lucas59, KrakenFR, patate_nuage, DarkHunter…), ce qui évite de revoir
+# toujours les mêmes noms. Ajoute ici des pseudos précis seulement si tu veux qu'ils soient souvent connectés.
+names: []
+
+messages:
+  # Doivent être IDENTIQUES aux messages des vrais joueurs. Par défaut : ceux de VaeloriaTab pour un joueur sans grade
+  # (join-quit.join / quit avec <tab_name> = <steel><player>), couleurs de la charte écrites en hexadécimal.
+  # Sans VaeloriaTab (message vanilla traduit) :
+  #   join: "<yellow><lang:multiplayer.player.joined:'<name>'>"
+  #   quit: "<yellow><lang:multiplayer.player.left:'<name>'>"
+  # Laisser vide ("") pour ne rien afficher.
+  join: "<#2A2C33>[<#D21F2F>+</#D21F2F>]</#2A2C33> <#A9AEB8><name>"
+  quit: "<#2A2C33>[<#5E0710>-</#5E0710>]</#2A2C33> <#A9AEB8><name>"
+
+# Apparence des faux joueurs reprise de VaeloriaTab (plugins/VaeloriaTab/config.yml) : nom dans le TAB, tri par grade
+# (« order »), chat avec survol et clic, messages de connexion. Identique aux vrais joueurs, et suit les /vtab reload.
+# false (ou VaeloriaTab absent) : formats de ce fichier (tab.display-name, chat.format, messages, ranks.*.tab…).
+style-from-vaeloriatab: true
+
+# Grades de JOUEURS donnés à une partie des faux joueurs. Le grade dépend du pseudo (toujours le même pour un
+# pseudo), et les arrivées sont choisies pour que la part de gradés connectés reste égale à la SOMME des chances
+# (ici 12,5 % : 6 % Guerrier, 3,5 % Seigneur, 2 % Roi, 1 % VÆLORIAN). Les noms des grades sont ceux de VaeloriaTab :
+# leur affichage et leur place dans le TAB (les meilleurs grades en haut) viennent de VaeloriaTab.
+# Facultatif par grade : list-order, tab, tab-compact, chat, join, quit (MiniMessage, <name> = pseudo, <message> =
+# texte) pour remplacer le rendu de VaeloriaTab.
+# Jamais de grade de staff (fondateur, admin, modo…) : ces clés sont ignorées.
+ranks:
+  guerrier:
+    chance: 0.06
+  seigneur:
+    chance: 0.035
+  roi:
+    chance: 0.02
+  vaelorian:
+    chance: 0.01
+
+# Factions des faux joueurs dans VaeloriaFactions (1.3.0+) : ils fondent des factions, s'invitent entre eux, passent
+# officier, partent parfois. Ces factions apparaissent dans /f liste, /f info et devant leurs messages ([**Hydra]),
+# mais elles ne sont jamais envoyées au site, n'ont pas de claims et ne peuvent pas être visées par une guerre.
+# Les faux joueurs sans faction sont dans « Wilderness », comme les vrais. /fp factions pour les voir.
+factions:
+  enabled: true
+  # Part visée des faux joueurs connectés qui sont dans une faction.
+  member-share: 0.6
+  # Nombre maximum de factions de faux joueurs, et de membres par faction (limité aussi par celle du serveur).
+  max-factions: 10
+  max-members: 8
+  # Délai aléatoire entre deux actions (création, arrivée, promotion, départ).
+  interval-seconds: {min: 40, max: 120}
+  # Un faux joueur doit être connecté depuis ce temps avant de fonder ou rejoindre une faction.
+  min-online-seconds: 90
+  # Quand il faut un membre de plus : chance de fonder une nouvelle faction plutôt que d'en rejoindre une.
+  create-chance: 0.15
+  promote-chance: 0.12
+  leave-chance: 0.04
+  # Annonce « X fonde la faction Y » à tout le serveur, comme pour un vrai joueur.
+  announce-creation: true
+  # Chance qu'un arrivant soit un membre d'une de ces factions (des habitués qui reviennent) plutôt qu'un inconnu.
+  regular-chance: 0.35
+  # Noms de faction proposés en plus des noms générés (2 à 16 caractères : lettres, chiffres, _ et -).
+  names: []
+
+tab:
+  # Nécessite le plugin PacketEvents (https://modrinth.com/plugin/packetevents).
+  enabled: true
+  # Nom affiché dans le TAB ("" = pseudo brut). Doit ressembler aux vrais joueurs sans grade :
+  # avec VaeloriaTab, c'est le format du grade « default » (<steel><player> = gris acier #A9AEB8).
+  display-name: "<#A9AEB8><name>"
+  # Ping : chaque faux joueur a sa connexion (la plupart 5 barres, certains 4, rares 3), qui fluctue,
+  # avec de petits pics de lag passagers. Calculé automatiquement, rien à régler.
+  # Faux joueurs affichés au plus dans la liste TAB (les autres sont connectés et comptés, mais pas listés).
+  # 0 = pas de limite propre. Avec VaeloriaTab, la limite est aussi « max-shown » moins les vrais joueurs :
+  # les vrais joueurs restent toujours visibles (Minecraft n'affiche que 80 noms).
+  max-listed: 0
+
+skins:
+  fetch: true
+  # pool  : skins variés de la galerie publique MineSkin (envoyés par des joueurs, liés à aucun vrai compte),
+  #         toujours le même pour un pseudo, jamais deux fois le même parmi les connectés. Par défaut.
+  # mojang: skin du compte Minecraft qui porte le même pseudo (c'est celui d'une vraie personne !).
+  # both  : compte Mojang s'il existe, sinon réserve.
+  source: pool
+  # Taille de la réserve (skin-pool.yml), constituée petit à petit en arrière-plan au premier démarrage
+  # (~400 ms par skin, soit quelques minutes). Prévois au moins 2 fois ton nombre max de faux joueurs.
+  pool-size: 400
+  # Clé d'API MineSkin facultative (mineskin.org) si la galerie publique limite les requêtes.
+  mineskin-api-key: ""
+  # Comptes dont emprunter le skin si la réserve est vide (facultatif).
+  fallback-names: []
+
+server-list:
+  # Affiche les faux joueurs dans le menu Multijoueur : compteur (ex. 87/200) et pseudos au survol.
+  # ATTENTION : la plupart des sites de classement (top-serveurs, serveurs-minecraft…) interdisent de gonfler
+  # le compteur et peuvent retirer le serveur s'ils le détectent.
+  include-fakes: true
+  # Nombre de places affiché (« 87/200 »). 0 = valeur de server.properties (max-players).
+  # À garder au-dessus de auto.hard-cap + tes vrais joueurs, sinon « 140/20 » se remarque.
+  max-players: 200
+  # Nombre max de pseudos affichés au survol du compteur (tirés au hasard à chaque rafraîchissement).
+  sample-size: 12
+
+bodies:
+  # Corps « mannequin » (Minecraft 1.21.9+) placés avec /fp spawn <pseudo> body ou /fp tphere.
+  invulnerable: true
+  # Les corps tournent la tête vers le joueur le plus proche (8 blocs).
+  look-at-players: true
+
+# Mode ambiance : des faux joueurs arrivent et partent tout seuls, UN PAR UN, pour suivre le planning.
+# Seuls les faux joueurs créés par ce mode comptent (ceux de /fp spawn ou /fp add s'ajoutent en plus).
+auto:
+  enabled: true
+  # Moyenne visée quand la courbe est au plus bas (nuit) et à 100 % (samedi soir, vacances).
+  min: 12
+  max: 120
+  # Plafond absolu : la variation aléatoire du jour peut faire dépasser max de quelques joueurs.
+  hard-cap: 140
+  # Délai aléatoire entre deux arrivées / deux départs (divisé jusqu'à 6× quand on est loin de la cible,
+  # par exemple au démarrage du serveur : ~100 arrivées en une dizaine de minutes).
+  join-delay-seconds:
+    min: 4
+    max: 45
+  leave-delay-seconds:
+    min: 4
+    max: 45
+  # Durée de connexion de chaque faux joueur : beaucoup de sessions courtes, quelques longues (moyenne ≈ 1 h).
+  # À la fin de sa session il part et un autre arrive : ça fait tourner les pseudos dans le TAB.
+  session-minutes:
+    min: 10
+    max: 180
+  # Sans planning (schedule.enabled: false) : toutes les N secondes la cible monte ou descend de 1.
+  interval-seconds: 60
+  join-chance: 0.5
+  leave-chance: 0.3
+
+# Planning : plus de monde le soir, les week-ends et pendant les vacances, presque personne la nuit et en
+# journée les jours d'école. Vérifie la prévision avec /fp schedule.
+schedule:
+  enabled: true
+  timezone: "Europe/Paris"
+  # Jours fériés français calculés automatiquement (1er janvier, lundi de Pâques, 1er et 8 mai, Ascension,
+  # lundi de Pentecôte, 14 juillet, 15 août, 1er et 11 novembre, Noël) : traités comme un dimanche.
+  french-public-holidays: true
+  # Jours de congé supplémentaires (événement, pont…) : "AAAA-MM-JJ".
+  extra-days-off: []
+  # Variation aléatoire d'un jour à l'autre (0.15 = ±15 %) et bruit doux par quart d'heure (±10 %).
+  # Reproductible : la même heure donne la même cible même après un redémarrage.
+  daily-variation: 0.15
+  noise: 0.10
+  seed: "vaeloria"
+
+  # Courbes : 24 valeurs en % du pic, de 0 h à 23 h. Une journée va de 6 h à 6 h : les valeurs de 0 h à 5 h
+  # décrivent la nuit QUI SUIT la journée (la nuit de vendredi à samedi = courbe school-eve).
+  # Les courbes sont mélangées selon la part de zones en vacances (ex. 1 zone sur 3 en vacances d'hiver).
+  # Supprimer une courbe ici = courbe par défaut.
+  curves:
+    #            0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23
+    # Jour d'école suivi d'un jour d'école (lundi, mardi, jeudi)
+    school:     [10,  4,  2,  1,  1,  1,  1,  2,  3,  3,  4,  6, 12, 12,  6,  6, 12, 30, 45, 50, 60, 65, 45, 22]
+    # Mercredi : après-midi libre
+    wednesday:  [10,  4,  2,  1,  1,  1,  1,  2,  3,  4,  6,  8, 15, 30, 45, 55, 60, 60, 55, 55, 60, 65, 45, 22]
+    # Jour d'école suivi d'un jour de congé (vendredi, veille de vacances) : grosse soirée
+    school-eve: [50, 35, 20, 10,  5,  3,  1,  2,  3,  3,  4,  6, 12, 12,  6,  6, 15, 40, 55, 65, 80, 90, 85, 65]
+    # Jour de congé suivi d'un jour de congé (samedi, vacances) : la journée la plus remplie
+    day-off:    [55, 40, 25, 12,  6,  3,  2,  2,  4,  8, 15, 25, 35, 40, 55, 65, 70, 70, 70, 75, 90,100, 95, 75]
+    # Jour de congé suivi d'un jour d'école (dimanche, dernier jour de vacances) : on se couche tôt
+    day-off-eve: [12,  5,  2,  1,  1,  1,  2,  2,  4,  8, 15, 25, 35, 40, 55, 65, 70, 70, 65, 65, 70, 65, 40, 18]
+
+  # Vacances scolaires. Calendrier officiel : https://data.education.gouv.fr (fr-en-calendrier-scolaire).
+  # Dates INCLUSES (du premier au dernier jour sans cours). À compléter chaque année.
+  school-holidays:
+    # Zones prises en compte. Un jour compte comme « vacances » au prorata des zones en congé.
+    zones: [A, B, C]
+    periods:
+      - {name: "vacances de la Toussaint", zones: "A,B,C", from: "2026-10-17", to: "2026-11-01"}
+      - {name: "vacances de Noël",         zones: "A,B,C", from: "2026-12-19", to: "2027-01-03"}
+      - {name: "vacances d'hiver",         zones: "C",     from: "2027-02-06", to: "2027-02-21"}
+      - {name: "vacances d'hiver",         zones: "A",     from: "2027-02-13", to: "2027-02-28"}
+      - {name: "vacances d'hiver",         zones: "B",     from: "2027-02-20", to: "2027-03-07"}
+      - {name: "vacances de printemps",    zones: "C",     from: "2027-04-03", to: "2027-04-18"}
+      - {name: "vacances de printemps",    zones: "A",     from: "2027-04-10", to: "2027-04-25"}
+      - {name: "vacances de printemps",    zones: "B",     from: "2027-04-17", to: "2027-05-02"}
+      - {name: "pont de l'Ascension",      zones: "A,B,C", from: "2027-05-07", to: "2027-05-07"}
+      - {name: "vacances d'été",           zones: "A,B,C", from: "2027-07-03", to: "2027-08-31"}
+
+chat:
+  # Doit être IDENTIQUE au format de chat de ton serveur, sinon ça se voit. <name> = pseudo, <message> = texte.
+  # Par défaut : le chat de VaeloriaTab pour un joueur sans grade (nom gris acier, survol « Joueur / Serveur »,
+  # clic → /msg). Si tu changes server-name ou le grade default dans VaeloriaTab, reporte-le ici.
+  # Sans VaeloriaTab (format vanilla) : format: '\<<name>> <message>'
+  format: "<hover:show_text:'<#A9AEB8>Joueur</#A9AEB8><newline><#6E737E>Serveur <#D9DCE2>Factions</#D9DCE2><newline><newline><#6E737E>Clique pour lui écrire'><click:suggest_command:'/msg <name> '><#A9AEB8><name></click></hover> <#2A2C33>»</#2A2C33> <#A9AEB8><message>"
+  # Les PHRASES sont dans phrases.yml (sujets, vocabulaire, conversations, réponses). Ici : fréquences et chances.
+  # Apprentissage : les phrases qui font réagir les vrais joueurs reviennent plus souvent (brain.yml).
+  learning: true
+  # Un modèle de phrase ne revient pas avant que N autres aient servi.
+  no-repeat: 100
+  # Une phrase n'est JAMAIS dite deux fois : toutes les phrases dites sont mémorisées (seen.dat, gardé entre les
+  # redémarrages), jusqu'à N phrases (~ plusieurs semaines). S'il n'a rien de neuf, le faux joueur se tait.
+  # Seules les réactions très courtes (« gg », « re », « slt », « ? ») peuvent revenir, après 40 messages.
+  memory: 200000
+
+  # Messages spontanés. Fréquence (par minute) = per-minute-base + per-minute-per-player × nombre de faux joueurs
+  # → ~0,5 message/min à 12 faux joueurs, ~2,7/min à 120. Chaque faux joueur parle plus ou moins selon son caractère.
+  auto:
+    enabled: true
+    per-minute-base: 0.3
+    per-minute-per-player: 0.02
+    min-gap-seconds: 8
+
+  # Petites conversations entre faux joueurs (question → réponse d'un autre → relance).
+  threads:
+    enabled: true
+    chance: 0.25
+    answer-chance: 0.75
+    follow-up-chance: 0.4
+
+  # Juste après une connexion : parfois un bonjour, 3 à 12 s plus tard.
+  on-join:
+    enabled: true
+    chance: 0.12
+    delay-seconds: {min: 3, max: 12}
+
+  # Juste avant un départ : parfois un au revoir (« bn » la nuit, « jvais manger » à midi et 19 h).
+  on-leave:
+    enabled: true
+    chance: 0.08
+
+  # Quand un VRAI joueur se connecte : parfois un faux joueur le salue (plus souvent un nouveau : « bienvenue »).
+  greet-real-players:
+    enabled: true
+    chance: 0.15
+    newcomer-multiplier: 2.5
+    delay-seconds: {min: 3, max: 10}
+
+  # Quand un vrai joueur meurt : parfois « rip », « gg <tueur> »…
+  death:
+    enabled: true
+    chance: 0.1
+    delay-seconds: {min: 2, max: 6}
+
+  # Quand un vrai joueur frappe un bot du spawn : parfois « ? », « arrête »… (phrases.yml → events.hit).
+  hit:
+    enabled: true
+    chance: 0.5
+
+  # Réponses aux messages des VRAIS joueurs, selon l'intention reconnue (phrases.yml → intents).
+  replies:
+    enabled: true
+    # Multiplie la chance de chaque intention pour un message général.
+    chance: 1.0
+    # Pause minimum entre deux réponses à des messages généraux.
+    cooldown-seconds: 15
+    # Un faux joueur ne reparle pas avant N secondes.
+    per-fake-cooldown-seconds: 6
+    # Quand un vrai joueur écrit le pseudo d'un faux joueur.
+    when-named-chance: 0.6
+    # Une fois qu'un faux joueur a parlé avec un vrai joueur, il poursuit la conversation pendant N secondes.
+    engage-seconds: 90
+    engaged-chance: 0.6
+    # Quand un vrai joueur cite une faction de faux joueurs : chance qu'un de ses membres connectés réagisse.
+    faction-named-chance: 0.6
+    # Un vrai joueur qui répète la même chose (« slt » deux fois) n'obtient pas de nouvelle réponse avant N secondes.
+    same-intent-seconds: 180
+    # Après un « salut » d'un vrai joueur : chance qu'un deuxième faux joueur salue aussi, quelques secondes après.
+    extra-greeter-chance: 0.35
+
+  # Après une action de faction d'un faux joueur : chance qu'il en parle (phrases.yml → events.faction-*).
+  faction-events:
+    enabled: true
+    faction-created: 0.6
+    faction-joined: 0.35
+    faction-left: 0.3
+
+# Faux joueurs VISIBLES au spawn : de vrais joueurs Minecraft envoyés par paquets (PacketEvents), avec skin, pseudo
+# et équipement, qui marchent entre les lieux du spawn, regardent les joueurs, font du shift, sautent, réagissent
+# quand on les frappe et repartent par la porte. Toutes versions 1.21. Les autres plugins ne les voient pas.
+# Repère = celui du schematic du spawn VÆLORIA (x/z = 0 au centre de l'arbre, sol à y = 0, nord = -Z).
+# Pour le placer : tiens-toi sur le point d'apparition (la lodestone) et tape /fp spawnzone here, puis
+# /fp spawnzone info pour vérifier que chaque lieu est praticable.
+spawn-bots:
+  enabled: true
+  world: ""            # "" = monde principal
+  # Rotation du collage (0, 90, 180, 270, sens horaire vu du dessus) si le spawn a été collé tourné.
+  rotation: 0
+  # Ancre (bloc de sol au centre de l'arbre). Absente = déduite du point d'apparition du monde (lodestone).
+  # anchor: {x: 0, y: 64, z: 0}
+  # Part des faux joueurs « auto » présents au spawn, entre min et max (≈ 4 la nuit, 20 le soir).
+  # Plus de monde au spawn : monte share (0.25) et max (25-30). Au-delà de 30, le serveur travaille pour rien.
+  share: 0.18
+  min: 4
+  max: 20
+  # Délai entre deux arrivées au spawn.
+  arrival-delay-seconds: {min: 4, max: 20}
+  # À la connexion d'un faux joueur, chance qu'il apparaisse au point d'apparition juste après son message [+].
+  login-at-spawn-chance: 0.6
+  # Chance, en changeant de lieu, d'aller rejoindre un autre bot pour « discuter » face à face.
+  group-chance: 0.35
+  # AFK : immobile (ne regarde personne), ne parle pas, ne répond ni aux messages ni aux coups ; à son retour,
+  # « dsl j'étais afk » à ceux qui l'ont sollicité (phrases.yml → events.afk-back-pinged).
+  afk:
+    chance: 0.3
+    minutes: {min: 3, max: 25}
+    # Zones AFK (repère du spawn). Vide = AFK là où le bot s'arrête. Avec des zones, les bots qui partent en AFK
+    # vont s'y installer. Le plus simple : va dans la zone et tape /fp spawnzone afk add <nom> [rayon].
+    points: {}
+    # Exemple :
+    # points:
+    #   bancs-place: {x: 10, z: 50, radius: 4, weight: 1}
+  # Postes : coffres de l'Ender, enclumes, tables de forge, meules, tables d'enchantement, établis, fours et
+  # alambics du spawn sont repérés automatiquement (dans ce rayon autour de l'arbre). Chance, en changeant de lieu,
+  # d'aller s'en servir : il se place devant, ouvre le coffre (animation et son) ou frappe sur l'enclume.
+  stations:
+    chance: 0.25
+    radius: 100
+  # Coups des vrais joueurs. pvp-protected: true = comme un vrai joueur dans un spawn protégé : ni dégât, ni recul,
+  # ni son ; protected-message = le message de ta protection (WorldGuard…) à reproduire, "" = aucun.
+  # false = animation de dégât, son et recul (spawn sans protection).
+  hit:
+    pvp-protected: true
+    protected-message: ""
+  # Chance d'arriver par la porte (retour de warzone) plutôt qu'au point d'apparition.
+  arrive-by-exit-chance: 0.3
+  spawn-point: {x: 0, z: 62, radius: 1.5}
+  exit: {x: 0, z: -56, radius: 2.5}
+  # Lieux fréquentés (repère du spawn), rayon et poids.
+  points:
+    place-arrivee: {x: 0, z: 46, radius: 12, weight: 5}
+    pres-du-blason: {x: 0, z: 60, radius: 5, weight: 2}
+    marche: {x: 57, z: 0, radius: 9, weight: 3}
+    entree-marche: {x: 40, z: 0, radius: 2, weight: 1}
+    arene: {x: -57, z: 0, radius: 7, weight: 2}
+    entree-arene: {x: -40, z: 0, radius: 2, weight: 1}
+    allee-sud: {x: 0, z: 32, radius: 2.5, weight: 1}
+    allee-est: {x: 32, z: 0, radius: 2.5, weight: 1}
+    allee-ouest: {x: -32, z: 0, radius: 2.5, weight: 1}
+    allee-nord: {x: 0, z: -32, radius: 2.5, weight: 1}
+    allee-nord-est: {x: 22.6, z: -22.6, radius: 2, weight: 1}
+    allee-sud-ouest: {x: -22.6, z: 22.6, radius: 2, weight: 1}
+    porte-de-guerre: {x: 0, z: -50, radius: 4, weight: 2}
+    ilot-arbre: {x: 0, z: -7, radius: 2.5, weight: 1}
+
+# Commandes visant un faux joueur. Sans ce module, /msg Pseudo, /tpa Pseudo… répondent « joueur introuvable ».
+# La commande est interceptée et reçoit une réponse crédible. Formats en MiniMessage :
+# <target> = faux joueur visé, <player> = celui qui tape la commande, <message> = texte du message privé.
+# Mets les MÊMES formats que tes plugins (Essentials, plugin de factions…), sinon la différence se voit.
+interactions:
+  enabled: true
+  whisper:
+    # Format vanilla /msg, traduit dans la langue du joueur. Exemple Essentials :
+    #   outgoing: "<gold>[<red>moi</red> <gold>-></gold> <red><target></red>]</gold> <white><message>"
+    #   incoming: "<gold>[<red><target></red> <gold>-></gold> <red>moi</red>]</gold> <white><message>"
+    outgoing: "<gray><i><lang:commands.message.display.outgoing:'<target>':'<message>'>"
+    incoming: "<gray><i><lang:commands.message.display.incoming:'<target>':'<message>'>"
+    # Chance de réponse. Délai = temps de lecture (delay-seconds) + temps de frappe selon la longueur.
+    # Réponses : intentions de phrases.yml d'abord, sinon events.whisper.
+    reply-chance: 0.6
+    delay-seconds: {min: 2, max: 10}
+    # Message montré à l'expéditeur quand le faux joueur est AFK au spawn, comme Essentials (« X est AFK »).
+    # Exemple Essentials : "<gray><target> est actuellement absent." ; "" = rien.
+    afk-notice: ""
+  list:
+    # Réponse de /list (vanilla, traduite). <count> inclut les faux joueurs, <max> = server-list.max-players.
+    format: "<lang:commands.list.players:'<count>':'<max>':'<names>'>"
+  # Zone où apparaissent les faux joueurs sans corps quand une demande teleport: to-target est acceptée.
+  teleport:
+    world: ""          # "" = monde principal
+    min-radius: 300    # distance au spawn du monde, en blocs
+    max-radius: 3000
+  # action : whisper (message privé), reply (/r), list, request (demande qui expire ou est refusée),
+  #          message (réponse fixe), disconnect (kick/ban : le faux joueur se déconnecte),
+  #          teleport (vers son corps s'il en a un).
+  # arg : position du pseudo dans la commande (1 par défaut ; 2 pour « /f invite <pseudo> »).
+  # subcommands : sous-commandes concernées (ex. invite pour /f).
+  commands:
+    - {commands: [msg, tell, w, whisper, m, t, pm, message, emsg, etell, ewhisper, dm], action: whisper}
+    - {commands: [r, reply, er, ereply], action: reply}
+    - {commands: [list, online, who, playerlist, elist, ewho], action: list}
+    - commands: [tpa, call, tpask, etpa, ecall]
+      action: request
+      sent: "<gold>Demande de téléportation envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé ta demande de téléportation."
+      expired: "<red>Ta demande de téléportation à <target> a expiré."
+      already: "<red>Tu as déjà une demande en cours avec <target>."
+      refuse-chance: 0.4
+      expire-seconds: 120
+      # Acceptation (optionnelle, Minecraft 1.21.9+) : teleport: to-target fait apparaître le faux joueur avec un
+      # corps quelque part dans le monde (interactions.teleport) et y téléporte le joueur. none = jamais acceptée.
+      teleport: none
+      accept-chance: 0.5
+      accepted: "<red><target></red> <gold>a accepté ta demande de téléportation."
+      warmup-seconds: 3
+    - commands: [tpahere, etpahere]
+      action: request
+      sent: "<gold>Demande envoyée à <red><target></red> pour qu'il se téléporte à toi."
+      refused: "<red><target></red> <gold>a refusé ta demande de téléportation."
+      expired: "<red>Ta demande de téléportation à <target> a expiré."
+      refuse-chance: 0.5
+      expire-seconds: 120
+    - commands: [duel, 1v1]
+      action: request
+      sent: "<gold>Demande de duel envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé ton duel."
+      expired: "<red>Ta demande de duel à <target> a expiré."
+      refuse-chance: 0.6
+      expire-seconds: 60
+    - commands: [trade, echange]
+      action: request
+      sent: "<gold>Demande d'échange envoyée à <red><target></red>."
+      refused: "<red><target></red> <gold>a refusé l'échange."
+      expired: "<red>Ta demande d'échange à <target> a expiré."
+      refuse-chance: 0.5
+      expire-seconds: 60
+    - commands: [f, fac, faction, factions]
+      subcommands: [invite, inv]
+      arg: 2
+      action: request
+      sent: "<yellow>Tu as invité <target> dans ta faction."
+      refused: ""
+      expired: "<red>L'invitation de <target> a expiré."
+      refuse-chance: 0
+      expire-seconds: 300
+    - commands: [pay, epay]
+      action: message
+      message: "<red><target> n'accepte pas les paiements pour le moment."
+    - commands: [kick, ekick, ban, eban, tempban, etempban, ipban, banip]
+      action: disconnect
+      feedback: "<gray><target> a été déconnecté du serveur."
+    - {commands: [tp, teleport, tpo, etp, s], action: teleport}
+

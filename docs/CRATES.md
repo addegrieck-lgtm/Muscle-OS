@@ -28,6 +28,24 @@ Copier le jar dans `plugins/` du serveur et redémarrer. Les coffres sont enregi
 
 Une clé d'un autre coffre peut être mise en lot : elle reste une vraie clé.
 
+## Format lisible de crates.yml (0.2.0)
+
+Un `item` (lot) ou une `key` peut aussi être écrit en clair ; le plugin le réencode en binaire à la première
+modification en jeu :
+
+```yaml
+item:
+  material: NETHERITE_SWORD
+  amount: 1
+  name: "&6&lLame légendaire"
+  lore: ["&7Gagnée au coffre Légendaire."]
+  enchants: {sharpness: 5, unbreaking: 3}
+  glow: true
+```
+
+Les coffres Vote, Rare et Légendaire du serveur (16 lots chacun) sont générés par
+`deploy/minecraft/outils/coffres.mjs` et posés par `deploy/minecraft/install.sh`.
+
 ## Côté joueur
 
 - **Clic droit** sur le coffre avec sa clé (main principale ou secondaire) : une clé est consommée, le lot est tiré, la roulette tourne, le lot est remis (le surplus tombe au sol si l'inventaire est plein).

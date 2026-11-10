@@ -1,0 +1,241 @@
+# VaeloriaWorldGen — tables de loot des coffres de structures.
+# Rechargement à chaud : /vgen reload   ·   Aperçu d'un tirage : /vgen loot <table>
+#
+# rolls   : nombre de piles tirées par coffre (ex. "4-7")
+# item    : identifiant Minecraft (diamond, golden_apple, splash_potion...)
+# amount  : quantité, fixe ou intervalle ("2-6")
+# weight  : poids relatif dans la table
+# enchants: { sharpness: 1-3, unbreaking: 2 }  (sur un enchanted_book = enchantement stocké)
+# potion  : type de potion (healing, strong_healing, swiftness, strong_strength, fire_resistance...)
+# name / lore : texte MiniMessage, ex. "<#D21F2F>Lame des Anciens"
+#
+# Coffres : donjon_classique (donjons 1.8 des grottes), ruines (+ ruines_cachette sous l'autel), donjon (+ donjon_tresor),
+#           tour_etage, tour_sommet, camp (coffres des tentes et tonneau).
+# Nether : forteresse_nether (+ forteresse_tresor sur le toit), sanctuaire_rubis, ossuaire.
+# Un coffre est rempli UNE fois, à sa première ouverture (ou s'il est cassé / explosé avant).
+
+tables:
+  # Donjons classiques des grottes : le loot de la 1.8.
+  donjon_classique:
+    rolls: 8
+    items:
+      - { item: saddle, weight: 10 }
+      - { item: iron_ingot, amount: 1-4, weight: 10 }
+      - { item: bread, weight: 10 }
+      - { item: wheat, amount: 1-4, weight: 10 }
+      - { item: gunpowder, amount: 1-4, weight: 10 }
+      - { item: string, amount: 1-4, weight: 10 }
+      - { item: bucket, weight: 10 }
+      - { item: golden_apple, weight: 1 }
+      - { item: redstone, amount: 1-4, weight: 10 }
+      - { item: music_disc_13, weight: 4 }
+      - { item: music_disc_cat, weight: 4 }
+      - { item: cocoa_beans, weight: 10 }
+      - { item: name_tag, weight: 10 }
+      - { item: golden_horse_armor, weight: 2 }
+      - { item: iron_horse_armor, weight: 5 }
+      - { item: diamond_horse_armor, weight: 1 }
+      - { item: enchanted_book, weight: 1, enchants: { sharpness: 1-3 } }
+
+  ruines:
+    rolls: 4-7
+    items:
+      - { item: bread, amount: 3-8, weight: 14 }
+      - { item: cooked_beef, amount: 2-6, weight: 10 }
+      - { item: arrow, amount: 6-16, weight: 10 }
+      - { item: iron_ingot, amount: 2-6, weight: 16 }
+      - { item: gold_ingot, amount: 1-4, weight: 10 }
+      - { item: experience_bottle, amount: 2-8, weight: 10 }
+      - { item: golden_apple, amount: 1-2, weight: 6 }
+      - { item: ender_pearl, amount: 1-3, weight: 6 }
+      - { item: obsidian, amount: 2-6, weight: 5 }
+      - { item: tnt, amount: 1-4, weight: 4 }
+      - { item: diamond, amount: 1-2, weight: 3 }
+      - { item: iron_sword, weight: 4, enchants: { sharpness: 1-2 } }
+      - { item: iron_chestplate, weight: 3, enchants: { protection: 1-2 } }
+      - { item: enchanted_book, weight: 3, enchants: { protection: 1-3 } }
+      - { item: splash_potion, potion: healing, amount: 1-2, weight: 5 }
+
+  ruines_cachette:
+    rolls: 2-4
+    items:
+      - { item: diamond, amount: 2-5, weight: 10 }
+      - { item: golden_apple, amount: 2-4, weight: 8 }
+      - { item: emerald, amount: 3-8, weight: 8 }
+      - { item: ender_pearl, amount: 2-4, weight: 6 }
+      - { item: enchanted_book, weight: 4, enchants: { sharpness: 3-4 } }
+      - { item: enchanted_golden_apple, weight: 1 }
+      - item: diamond_sword
+        weight: 2
+        enchants: { sharpness: 2-3, unbreaking: 2 }
+        name: "<#D21F2F>Lame des Anciens"
+        lore: ["<#A9AEB8>Forgée avant la Grande Guerre."]
+
+  donjon:
+    rolls: 5-8
+    items:
+      - { item: rotten_flesh, amount: 2-8, weight: 10 }
+      - { item: bone, amount: 2-6, weight: 8 }
+      - { item: string, amount: 2-6, weight: 8 }
+      - { item: gunpowder, amount: 2-6, weight: 10 }
+      - { item: tnt, amount: 2-6, weight: 8 }
+      - { item: iron_ingot, amount: 3-8, weight: 14 }
+      - { item: gold_ingot, amount: 2-6, weight: 10 }
+      - { item: diamond, amount: 1-3, weight: 6 }
+      - { item: redstone, amount: 4-12, weight: 8 }
+      - { item: experience_bottle, amount: 4-12, weight: 8 }
+      - { item: golden_apple, amount: 1-3, weight: 6 }
+      - { item: saddle, weight: 3 }
+      - { item: name_tag, weight: 2 }
+      - { item: enchanted_book, weight: 4, enchants: { sharpness: 2-3 } }
+      - { item: enchanted_book, weight: 4, enchants: { protection: 2-3 } }
+      - { item: diamond_helmet, weight: 2, enchants: { protection: 1-2 } }
+      - { item: splash_potion, potion: strong_healing, amount: 1-2, weight: 6 }
+
+  donjon_tresor:
+    rolls: 4-6
+    items:
+      - { item: diamond, amount: 3-8, weight: 12 }
+      - { item: diamond_block, weight: 2 }
+      - { item: gold_block, amount: 1-2, weight: 5 }
+      - { item: emerald_block, weight: 3 }
+      - { item: golden_apple, amount: 3-6, weight: 8 }
+      - { item: enchanted_golden_apple, weight: 2 }
+      - { item: ender_pearl, amount: 4-8, weight: 6 }
+      - { item: obsidian, amount: 6-16, weight: 6 }
+      - { item: enchanted_book, weight: 4, enchants: { protection: 4 } }
+      - { item: enchanted_book, weight: 3, enchants: { sharpness: 5 } }
+      - { item: diamond_chestplate, weight: 3, enchants: { protection: 2-3, unbreaking: 2-3 } }
+      - { item: diamond_leggings, weight: 3, enchants: { protection: 2-3, unbreaking: 2-3 } }
+      - item: diamond_sword
+        weight: 2
+        enchants: { sharpness: 3-4, fire_aspect: 1 }
+        name: "<#D21F2F>Croc du Donjon"
+        lore: ["<#A9AEB8>Arrachée aux profondeurs de Vaeloria."]
+
+  tour_etage:
+    rolls: 3-6
+    items:
+      - { item: book, amount: 2-6, weight: 12 }
+      - { item: paper, amount: 3-9, weight: 8 }
+      - { item: glass_bottle, amount: 2-6, weight: 8 }
+      - { item: nether_wart, amount: 2-6, weight: 8 }
+      - { item: blaze_powder, amount: 1-4, weight: 6 }
+      - { item: glowstone_dust, amount: 2-8, weight: 6 }
+      - { item: redstone, amount: 3-9, weight: 6 }
+      - { item: lapis_lazuli, amount: 4-12, weight: 10 }
+      - { item: experience_bottle, amount: 4-10, weight: 10 }
+      - { item: ender_pearl, amount: 1-3, weight: 5 }
+      - { item: potion, potion: swiftness, weight: 5 }
+      - { item: potion, potion: fire_resistance, weight: 5 }
+      - { item: splash_potion, potion: healing, amount: 1-3, weight: 6 }
+      - { item: enchanted_book, weight: 6, enchants: { efficiency: 2-4 } }
+
+  tour_sommet:
+    rolls: 5-7
+    items:
+      - { item: experience_bottle, amount: 10-24, weight: 12 }
+      - { item: diamond, amount: 2-6, weight: 10 }
+      - { item: emerald, amount: 4-12, weight: 6 }
+      - { item: golden_apple, amount: 2-5, weight: 8 }
+      - { item: enchanted_golden_apple, weight: 1 }
+      - { item: ender_pearl, amount: 3-6, weight: 8 }
+      - { item: splash_potion, potion: strong_healing, amount: 2-4, weight: 8 }
+      - { item: potion, potion: strong_strength, weight: 4 }
+      - { item: potion, potion: long_swiftness, weight: 4 }
+      - { item: enchanted_book, weight: 4, enchants: { protection: 3-4 } }
+      - { item: enchanted_book, weight: 4, enchants: { sharpness: 3-5 } }
+      - { item: enchanted_book, weight: 2, enchants: { power: 4-5 } }
+      - item: bow
+        weight: 2
+        enchants: { power: 3-4, punch: 1, flame: 1 }
+        name: "<#D21F2F>Arc du Mage Écarlate"
+      - item: diamond_boots
+        weight: 2
+        enchants: { protection: 3, feather_falling: 3-4 }
+        name: "<#D9DCE2>Bottes de l'Argentier"
+
+  camp:
+    rolls: 4-7
+    items:
+      - { item: cooked_porkchop, amount: 2-6, weight: 12 }
+      - { item: apple, amount: 2-5, weight: 10 }
+      - { item: arrow, amount: 8-24, weight: 12 }
+      - { item: leather, amount: 2-6, weight: 8 }
+      - { item: iron_ingot, amount: 2-5, weight: 12 }
+      - { item: gold_nugget, amount: 4-16, weight: 8 }
+      - { item: emerald, amount: 1-4, weight: 6 }
+      - { item: tnt, amount: 2-5, weight: 6 }
+      - { item: flint_and_steel, weight: 4 }
+      - { item: golden_apple, amount: 1-2, weight: 6 }
+      - { item: ender_pearl, amount: 1-2, weight: 4 }
+      - { item: crossbow, weight: 3, enchants: { quick_charge: 1-2 } }
+      - { item: iron_axe, weight: 4, enchants: { sharpness: 1-2 } }
+      - { item: chainmail_chestplate, weight: 3 }
+      - { item: splash_potion, potion: healing, amount: 1-2, weight: 5 }
+
+  # ---------------- Nether Vaeloria ----------------
+  # Quartiers de la Forteresse des Cendres : le loot des forteresses 1.8, plus de quoi brasser.
+  forteresse_nether:
+    rolls: 3-6
+    items:
+      - { item: diamond, amount: 1-3, weight: 5 }
+      - { item: iron_ingot, amount: 1-5, weight: 5 }
+      - { item: gold_ingot, amount: 1-3, weight: 15 }
+      - { item: golden_sword, weight: 5 }
+      - { item: golden_chestplate, weight: 5 }
+      - { item: flint_and_steel, weight: 5 }
+      - { item: nether_wart, amount: 3-7, weight: 8 }
+      - { item: blaze_rod, amount: 1-3, weight: 8 }
+      - { item: magma_cream, amount: 1-3, weight: 5 }
+      - { item: saddle, weight: 8 }
+      - { item: golden_horse_armor, weight: 6 }
+      - { item: iron_horse_armor, weight: 4 }
+      - { item: diamond_horse_armor, weight: 2 }
+      - { item: obsidian, amount: 2-4, weight: 2 }
+
+  # Salle du trésor, sur le toit de la forteresse.
+  forteresse_tresor:
+    rolls: 4-6
+    items:
+      - { item: diamond, amount: 2-5, weight: 12 }
+      - { item: blaze_rod, amount: 3-8, weight: 12 }
+      - { item: golden_apple, amount: 1-2, weight: 8 }
+      - { item: experience_bottle, amount: 8-16, weight: 10 }
+      - { item: ender_pearl, amount: 2-4, weight: 8 }
+      - { item: splash_potion, potion: strong_healing, amount: 1-3, weight: 6 }
+      - { item: potion, potion: fire_resistance, weight: 6 }
+      - { item: enchanted_book, weight: 5, enchants: { sharpness: 2-3 } }
+      - { item: enchanted_book, weight: 5, enchants: { protection: 2-3 } }
+      - { item: diamond_sword, weight: 2, enchants: { sharpness: 2, fire_aspect: 1 }, name: "<#D21F2F>Lame des Cendres", lore: ["<#6E737E>Forgée dans le Brasier des Damnés"] }
+
+  # Autel du Sanctuaire Rubis.
+  sanctuaire_rubis:
+    rolls: 3-5
+    items:
+      - { item: redstone, amount: 8-24, weight: 14 }
+      - { item: gold_ingot, amount: 3-8, weight: 12 }
+      - { item: quartz, amount: 8-16, weight: 12 }
+      - { item: glowstone_dust, amount: 6-16, weight: 10 }
+      - { item: nether_wart, amount: 4-8, weight: 10 }
+      - { item: ghast_tear, amount: 1-2, weight: 6 }
+      - { item: potion, potion: fire_resistance, weight: 6 }
+      - { item: golden_apple, weight: 4 }
+      - { item: enchanted_book, weight: 4, enchants: { fire_protection: 2-4 } }
+      - { item: diamond, amount: 1-2, weight: 3 }
+
+  # Dans la bouche du crâne de l'Ossuaire du Titan.
+  ossuaire:
+    rolls: 3-6
+    items:
+      - { item: bone, amount: 6-16, weight: 16 }
+      - { item: arrow, amount: 8-24, weight: 12 }
+      - { item: nether_wart, amount: 6-12, weight: 10 }
+      - { item: soul_sand, amount: 4-10, weight: 8 }
+      - { item: experience_bottle, amount: 4-10, weight: 8 }
+      - { item: skeleton_skull, weight: 2 }
+      - { item: bow, weight: 4, enchants: { power: 2-3 } }
+      - { item: enchanted_book, weight: 3, enchants: { power: 2-4 } }
+      - { item: enchanted_book, weight: 1, enchants: { infinity: 1 } }
+      - { item: golden_apple, weight: 3 }
+      - { item: diamond, amount: 1-3, weight: 4 }

@@ -1,0 +1,183 @@
+# VÆLORIA — commandes à passer après install.sh (serveur DÉMARRÉ).
+#
+# Deux sortes de sections :
+#   ## CONSOLE  → commandes console, sans « / ». Envoyées par RCON :  python3 rcon.py  (ou install.sh --rcon),
+#                 ou collées une par une dans la console du panel BoxToPlay.
+#   ## EN JEU   → à taper EN JEU par un opérateur (elles ont besoin d'une position ou d'une sélection).
+#                 rcon.py les ignore (elles commencent par « / »).
+# Tout est rejouable sans risque : une commande déjà appliquée redonne le même résultat (au pire un message
+# « existe déjà »).
+#
+# Coordonnées : nouveau spawn = vaeloria-spawn-fusionne-noel.schem collée en 0 100 0 dans le monde « spawn »
+# (emprise X -237 → 300, Y 11 → 162, Z -219 → 166) ; KOTH « Gouffre de Vælor » collé pieds en 1000 120 0,
+# même monde.
+
+## CONSOLE — règles de jeu des mondes
+# Noms de Minecraft 26.1 (le serveur tourne en Paper 26.1.2) : doFireTick → fire_spread_radius_around_player,
+# doMobSpawning → spawn_mobs, doWeatherCycle → advance_weather, spawnRadius → respawn_radius…
+# Spawn (monde vide protégé) : pas de feu, pas de monstres naturels, pas de cycle météo, réapparition exacte.
+execute in minecraft:spawn run gamerule fire_spread_radius_around_player 0
+execute in minecraft:spawn run gamerule mob_griefing false
+execute in minecraft:spawn run gamerule spawn_mobs false
+execute in minecraft:spawn run gamerule spawn_patrols false
+execute in minecraft:spawn run gamerule spawn_wandering_traders false
+execute in minecraft:spawn run gamerule spawn_phantoms false
+execute in minecraft:spawn run gamerule advance_weather false
+execute in minecraft:spawn run gamerule respawn_radius 0
+weather spawn sun
+# Warps farm (monde Warp) : les spawners doivent tourner (doMobSpawning reste vrai), mais pas de dégâts de
+# creeper ni de feu dans les salles.
+execute in minecraft:warp run gamerule mob_griefing false
+execute in minecraft:warp run gamerule fire_spread_radius_around_player 0
+
+## CONSOLE — régions WorldGuard (fusion : on modifie les régions existantes, on n'écrase pas regions.yml)
+# Gouffre de Vælor (déjà créé à la main, priorité 10) : on réaffirme les flags.
+rg setpriority -w spawn koth-volcan 10
+rg flag -w spawn koth-volcan pvp allow
+rg flag -w spawn koth-volcan build deny
+rg flag -w spawn koth-volcan use allow
+rg flag -w spawn koth-volcan chest-access deny
+rg flag -w spawn koth-volcan mob-spawning deny
+rg flag -w spawn koth-volcan lava-fire deny
+rg flag -w spawn koth-volcan fire-spread deny
+rg flag -w spawn koth-volcan lighter deny
+rg flag -w spawn koth-volcan lava-flow deny
+rg flag -w spawn koth-volcan water-flow deny
+rg flag -w spawn koth-volcan tnt deny
+rg flag -w spawn koth-volcan other-explosion deny
+rg flag -w spawn koth-volcan creeper-explosion deny
+rg flag -w spawn koth-volcan item-frame-rotation deny
+rg flag -w spawn koth-volcan greeting §4◆ §cGouffre de Vælor §4◆ §7PvP actif
+# Zone de capture (anneau rubis, rayon 5) : enfant du Gouffre, priorité 20, messages d'entrée et de sortie.
+rg setparent -w spawn koth-capture koth-volcan
+rg setpriority -w spawn koth-capture 20
+rg flag -w spawn koth-capture greeting §c⚔ §6Zone de capture §c⚔ §7Tiens-la seul pour gagner le KOTH
+rg flag -w spawn koth-capture farewell §7Tu quittes la zone de capture
+# Spawn : protection habituelle (agrandie en jeu plus bas, section EN JEU).
+rg flag -w spawn spawn pvp deny
+rg flag -w spawn spawn enderpearl deny
+rg flag -w spawn spawn chorus-fruit-teleport deny
+rg flag -w spawn spawn fall-damage deny
+rg flag -w spawn spawn leaf-decay deny
+rg flag -w spawn spawn vine-growth deny
+# Zone d'investissement : au-dessus du spawn (priorité 5), mêmes protections.
+rg setpriority -w spawn invest 5
+rg flag -w spawn invest pvp deny
+# Warzone du monde Faction (vaeloria) : PvP libre, rien ne se pose ni ne se casse.
+rg setpriority -w vaeloria warzone 1
+rg flag -w vaeloria warzone pvp allow
+rg flag -w vaeloria warzone build deny
+rg flag -w vaeloria warzone block-place deny
+rg flag -w vaeloria warzone block-break deny
+rg flag -w vaeloria warzone mob-spawning deny
+rg flag -w vaeloria warzone enderpearl deny
+rg flag -w vaeloria warzone chorus-fruit-teleport deny
+rg flag -w vaeloria warzone lighter deny
+rg flag -w vaeloria warzone fire-spread deny
+rg flag -w vaeloria warzone lava-fire deny
+rg flag -w vaeloria warzone lava-flow deny
+rg flag -w vaeloria warzone water-flow deny
+rg flag -w vaeloria warzone other-explosion deny
+rg save
+
+## CONSOLE — LuckPerms (stockage H2 : tout passe par lp, rien n'est écrit dans un fichier)
+# Essentials est réglé en per-warp-permission: true (kit) : chaque warp demande essentials.warps.<nom>.
+# Warps ouverts à tous :
+lp group default permission set essentials.warp true
+lp group default permission set essentials.warp.list true
+lp group default permission set essentials.warps.forge true
+lp group default permission set essentials.warps.mine-obsidienne true
+lp group default permission set essentials.warps.ressources true
+lp group default permission set essentials.warps.f-war true
+lp group default permission set essentials.warps.koth-no true
+lp group default permission set essentials.warps.koth-ne true
+lp group default permission set essentials.warps.koth-so true
+lp group default permission set essentials.warps.koth-se true
+# Grades (achetés par paliers de points, VaeloriaShop shop.yml → grade-tiers) : chacun hérite du précédent,
+# donc un grade a accès à son warp farm et à ceux des grades inférieurs.
+lp creategroup guerrier
+lp creategroup seigneur
+lp creategroup roi
+lp creategroup vaelorian
+lp group guerrier parent add default
+lp group seigneur parent add guerrier
+lp group roi parent add seigneur
+lp group vaelorian parent add roi
+lp group guerrier setweight 10
+lp group seigneur setweight 20
+lp group roi setweight 30
+lp group vaelorian setweight 40
+lp group guerrier permission set essentials.warps.guerrier true
+lp group seigneur permission set essentials.warps.seigneur true
+lp group roi permission set essentials.warps.roi true
+lp group vaelorian permission set essentials.warps.vaelorian true
+
+## CONSOLE — présentation des warps dans /warp (VaeloriaMenus, stocké dans warps.yml)
+vwarp nom koth-no <#C0392B><bold>Gouffre de Vælor</bold> <gray>· Nord-Ouest
+vwarp nom koth-ne <#C0392B><bold>Gouffre de Vælor</bold> <gray>· Nord-Est
+vwarp nom koth-so <#C0392B><bold>Gouffre de Vælor</bold> <gray>· Sud-Ouest
+vwarp nom koth-se <#C0392B><bold>Gouffre de Vælor</bold> <gray>· Sud-Est
+vwarp desc koth-no <gray>Entrée du KOTH, col nord-ouest | <gray>Une faction par entrée | <red>PvP actif
+vwarp desc koth-ne <gray>Entrée du KOTH, col nord-est | <gray>Une faction par entrée | <red>PvP actif
+vwarp desc koth-so <gray>Entrée du KOTH, col sud-ouest | <gray>Une faction par entrée | <red>PvP actif
+vwarp desc koth-se <gray>Entrée du KOTH, col sud-est | <gray>Une faction par entrée | <red>PvP actif
+vwarp icone koth-no magma_block
+vwarp icone koth-ne magma_block
+vwarp icone koth-so magma_block
+vwarp icone koth-se magma_block
+vwarp ordre koth-no 20
+vwarp ordre koth-ne 21
+vwarp ordre koth-so 22
+vwarp ordre koth-se 23
+vwarp permission guerrier essentials.warps.guerrier Grade Guerrier requis (/boutique)
+vwarp permission seigneur essentials.warps.seigneur Grade Seigneur requis (/boutique)
+vwarp permission roi essentials.warps.roi Grade Roi requis (/boutique)
+vwarp permission vaelorian essentials.warps.vaelorian Grade VÆLORIAN requis (/boutique)
+
+## CONSOLE — PNJ et pancartes du nouveau spawn (fichiers déposés par install.sh dans VaeloriaStaff/import/)
+staff importer
+
+## EN JEU — régions à redimensionner (il faut une sélection, donc un joueur dans le monde « spawn »)
+# Spawn : emprise de la schematic + 3 blocs (île, arène de bots, Île Marchande, Grotte de la Forge, Fosse).
+/mvtp spawn
+//pos1 -240,-64,-222
+//pos2 303,319,169
+/rg redefine spawn
+# Zone d'investissement (cage aux 4 dalles rouges, à droite de la place du V). Le plugin, lui, est déjà réglé
+# par install.sh (VaeloriaShop/data/invest.yml) ; cette région ne sert qu'à WorldGuard.
+//pos1 22,101,54
+//pos2 39,108,71
+/rg redefine invest
+//sel
+
+## EN JEU — KOTH (VaeloriaFactions : la zone se crée là où l'on se tient)
+# Centre de l'anneau rubis, pieds sur la plateforme. Rayon 5 = la région koth-capture (995 → 1005).
+/tp 1000 120 0
+/f koth creer gouffre 5
+# Vérification : /f koth liste   ·   test : /f koth lancer gouffre 5   puis   /f koth arreter
+# Les 4 arrivées sont les warps koth-no/ne/so/se (posés par install.sh, menu /warp).
+
+## EN JEU — réglages du nouveau spawn (coordonnées : vaeloria-spawn/out/points.json)
+# Coffres à clés de la Trésorerie : viser chaque coffre puis /crate set <coffre>
+/tp 31 106 -80
+/tp 27 106 -80
+/tp 27 106 -84
+/tp 31 106 -84
+/tp 29 106 -82
+# Mine d'obsidienne (grotte sous la verrière, à l'ouest) : /mine admin → zone, coins -87 77 31 et -53 97 61
+# Mine à ressources (fosse sous la pioche en diamant, à l'est) : coins 74 91 24 et 94 100 44, retour 71 101 34
+# Arène de bots : centre de la fosse de combat
+/tp -197 96 0
+/botarena setcentre 18
+# Île Marchande : les 16 parcelles sont posées par install.sh (zones, gammes, comptoirs, arrivées, modèles).
+# Vérification : /pshop admin → chaque parcelle « prête », « Voir les limites » (particules) ; /pshop → liste.
+/tp 237 101 0
+# Neige qui tombe pendant Noël (à couper en janvier : /noel neige off)
+/noel neige on
+
+## CONSOLE — boutique du site et votes
+# VaeloriaShop : bridge.enabled est déjà à true dans le kit (progression POINTS sur /boutique). Après une
+# modification à chaud de sa config :
+shop admin reload
+# VaeloriaVote : passer bridge.enabled à true dans VaeloriaVote/config.yml (README, étape 6), puis :
+# votes reload

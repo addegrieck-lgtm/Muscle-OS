@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>VAELORIA TikTok</title>
+<style>
+@font-face{font-family:Chakra;font-weight:500;src:url(fonts/chakra-petch-latin-500-normal.woff2)}
+@font-face{font-family:Chakra;font-weight:600;src:url(fonts/chakra-petch-latin-600-normal.woff2)}
+@font-face{font-family:Chakra;font-weight:700;src:url(fonts/chakra-petch-latin-700-normal.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#07070a;color:#f4f5f7;font-family:Inter,sans-serif}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#07070a}
+canvas{position:absolute;inset:0}
+#glow{position:absolute;left:50%;top:44%;width:1500px;height:1500px;margin:-750px 0 0 -750px;border-radius:50%;
+  background:radial-gradient(circle,rgba(163,18,30,.55) 0%,rgba(94,7,16,.25) 35%,rgba(7,7,10,0) 65%)}
+#vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 45%,rgba(0,0,0,.75) 100%)}
+#flash{position:absolute;inset:0;background:#d21f2f;opacity:0;mix-blend-mode:screen}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 90px 260px}
+.el{will-change:transform,opacity;opacity:0}
+.disp{font-family:Chakra;font-weight:700;text-transform:uppercase;letter-spacing:.04em;line-height:1.02}
+.metal{background:linear-gradient(180deg,#fff 0%,#e2e4e9 48%,#aeb3bc 52%,#d6d9df 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ruby{color:#ef4450}
+.muted{color:#a9aeb8}
+.eyebrow{font-family:Chakra;font-weight:600;font-size:40px;letter-spacing:.32em;text-transform:uppercase;color:#ef4450;display:flex;align-items:center;gap:22px}
+.dia{width:22px;height:22px;background:linear-gradient(135deg,#ff5a65,#a3121e);transform:rotate(45deg);display:inline-block}
+.orn{display:flex;align-items:center;gap:26px}
+.orn i{display:block;height:3px;width:200px;background:linear-gradient(90deg,transparent,#8b909b)}
+.orn i:last-child{background:linear-gradient(270deg,transparent,#8b909b)}
+.card{width:900px;padding:70px 60px 64px;border-radius:22px;position:relative;
+  background:linear-gradient(180deg,rgba(27,28,33,.92),rgba(16,17,21,.92));border:2px solid #3a3d45;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 40px 120px rgba(0,0,0,.6),0 0 90px rgba(210,31,47,.18)}
+.card .num{font-family:Chakra;font-weight:700;font-size:44px;letter-spacing:.2em;color:#ef4450;margin-bottom:24px;display:flex;justify-content:center;align-items:center;gap:18px}
+.card h2{font-size:132px;margin-bottom:34px}
+.card p{font-size:46px;line-height:1.35;color:#c9cdd4;font-weight:500}
+.card p b{color:#fff;font-weight:700}
+.card .bar{position:absolute;left:60px;right:60px;top:0;height:4px;background:linear-gradient(90deg,transparent,#d21f2f,transparent)}
+#dots{position:absolute;top:250px;left:0;right:0;display:flex;justify-content:center;gap:30px;opacity:0}
+#dots span{width:20px;height:20px;transform:rotate(45deg);border:2px solid #5a5e68}
+#dots span.on{background:#d21f2f;border-color:#ef4450;box-shadow:0 0 18px #d21f2f}
+.btn{font-family:Chakra;font-weight:700;font-size:52px;letter-spacing:.08em;text-transform:uppercase;color:#fff;
+  background:linear-gradient(180deg,#d21f2f,#a3121e);padding:34px 70px;border-radius:14px;box-shadow:0 0 60px rgba(210,31,47,.55)}
+</style></head><body>
+<div id="stage">
+  <div id="glow"></div>
+  <canvas id="embers" width="1080" height="1920"></canvas>
+
+  <!-- S1 : accroche -->
+  <div class="scene" id="s1">
+    <div class="el disp metal" data-in="0.25" data-out="2.85" data-fx="up" style="font-size:118px">Le PvP 1.8</div>
+    <div class="el disp metal" data-in="0.55" data-out="2.85" data-fx="up" style="font-size:118px;margin-top:6px">te manque&nbsp;?</div>
+    <div class="el disp ruby" data-in="1.65" data-out="2.85" data-fx="punch" style="font-size:96px;margin-top:70px">Nous aussi.</div>
+  </div>
+
+  <!-- S2 : logo -->
+  <div class="scene" id="s2">
+    <img class="el" id="shield" src="valoria-symbole.svg" data-in="3.0" data-out="7.6" data-fx="logo" style="width:560px;height:560px">
+    <img class="el" src="valoria-wordmark-argent.svg" data-in="3.7" data-out="7.6" data-fx="track" style="width:820px;margin-top:40px">
+    <div class="el orn" data-in="4.1" data-out="7.6" data-fx="fade" style="margin-top:46px"><i></i><span class="dia"></span><i></i></div>
+    <div class="el disp" data-in="4.7" data-out="7.6" data-fx="up" style="font-size:66px;margin-top:56px;line-height:1.15">Le retour de la<br><span class="ruby">vraie guerre.</span></div>
+    <div class="el muted" data-in="5.5" data-out="7.6" data-fx="fade" style="font-size:42px;margin-top:40px;font-weight:500;letter-spacing:.06em">Serveur Faction &amp; PvP français<br>Minecraft 1.21 · PvP 1.8</div>
+  </div>
+
+  <div id="dots"><span></span><span></span><span></span><span></span><span></span></div>
+
+  <!-- S3 : fonctionnalités -->
+  <div class="scene"><div class="el card" data-in="7.8" data-out="10.05" data-fx="slide">
+    <div class="bar"></div><div class="num"><span class="dia"></span>01<span class="dia"></span></div>
+    <h2 class="disp metal">Faction</h2>
+    <p>Fonde ton empire.<br><b>20 membres</b>, jusqu'à <b>120 claims</b>,<br>raids à la TNT.</p></div></div>
+  <div class="scene"><div class="el card" data-in="10.15" data-out="12.4" data-fx="slide">
+    <div class="bar"></div><div class="num"><span class="dia"></span>02<span class="dia"></span></div>
+    <h2 class="disp metal">PvP 1.8</h2>
+    <p>Le vrai combat d'avant.<br><b>Même réglage pour tous.</b><br>Zéro excuse.</p></div></div>
+  <div class="scene"><div class="el card" data-in="12.5" data-out="14.75" data-fx="slide">
+    <div class="bar"></div><div class="num"><span class="dia"></span>03<span class="dia"></span></div>
+    <h2 class="disp metal">Guerres</h2>
+    <p>Déclare la guerre.<br><b>48 h</b> de combat.<br>Kills, raids, overclaims : tout compte.</p></div></div>
+  <div class="scene"><div class="el card" data-in="14.85" data-out="17.1" data-fx="slide">
+    <div class="bar"></div><div class="num"><span class="dia"></span>04<span class="dia"></span></div>
+    <h2 class="disp metal">KOTH<br>&amp; Totem</h2>
+    <p>Chaque semaine.<br>Jusqu'à <b>75 000 $</b> à la clé.</p></div></div>
+  <div class="scene"><div class="el card" data-in="17.2" data-out="19.45" data-fx="slide">
+    <div class="bar"></div><div class="num"><span class="dia"></span>05<span class="dia"></span></div>
+    <h2 class="disp metal">Économie</h2>
+    <p>Marché, hôtel des ventes,<br>boutiques de joueurs.<br><b>Deviens le plus riche.</b></p></div></div>
+
+  <!-- S4 : appel à l'action -->
+  <div class="scene" id="s4">
+    <img class="el" src="valoria-symbole.svg" data-in="19.7" data-out="99" data-fx="logo" style="width:380px;height:380px">
+    <div class="el eyebrow" data-in="20.2" data-out="99" data-fx="fade" style="margin-top:40px"><span class="dia"></span>Saison I<span class="dia"></span></div>
+    <div class="el disp metal" data-in="20.5" data-out="99" data-fx="up" style="font-size:96px;margin-top:30px;line-height:1.08">Les fondateurs<br>entrent en premier.</div>
+    <div class="el btn" data-in="21.4" data-out="99" data-fx="punch" style="margin-top:70px">Rejoins la bêta</div>
+    <div class="el muted" data-in="22.0" data-out="99" data-fx="fade" style="font-size:44px;margin-top:44px;font-weight:600;letter-spacing:.04em">Lien en bio ↓ &nbsp;·&nbsp; Discord</div>
+  </div>
+
+  <div id="vignette"></div>
+  <div id="flash"></div>
+</div>
+<script>
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const easeOut=x=>1-Math.pow(1-x,3);
+const easeBack=x=>{const c=1.7;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const IN=0.55, OUT=0.3;
+const els=[...document.querySelectorAll('.el')].map(e=>({e,i:+e.dataset.in,o:+e.dataset.out,fx:e.dataset.fx}));
+// braises : positions pseudo-aléatoires déterministes
+let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+const embers=[...Array(70)].map(()=>({x:rnd()*1080,y:rnd()*1920,v:40+rnd()*110,r:1.5+rnd()*3.5,ph:rnd()*6.28,a:.25+rnd()*.6}));
+const ctx=document.getElementById('embers').getContext('2d');
+const cuts=[3.0,7.8,10.15,12.5,14.85,17.2,19.7];
+window.render=function(t){
+  // éléments
+  for(const {e,i,o,fx} of els){
+    const pin=clamp((t-i)/IN), pout=clamp((t-o)/OUT);
+    let op=easeOut(pin)*(1-pout), tr='';
+    if(fx==='up'){tr=`translateY(${(1-easeOut(pin))*70 - pout*40}px)`; e.style.filter=`blur(${(1-pin)*12}px)`}
+    else if(fx==='punch'){const k=clamp((t-i)/0.35); tr=`scale(${1.6-0.6*easeBack(k)})`; op=clamp(k*2)*(1-pout)}
+    else if(fx==='logo'){const k=clamp((t-i)/0.9); tr=`scale(${0.6+0.4*easeBack(k)}) translateY(${-pout*30}px)`; op=clamp(k*1.6)*(1-pout);
+      e.style.filter=`drop-shadow(0 0 ${30+20*Math.sin(t*3)}px rgba(210,31,47,.55))`}
+    else if(fx==='track'){const k=easeOut(clamp((t-i)/0.9)); tr=`scaleX(${1.25-0.25*k})`; e.style.filter=`blur(${(1-k)*14}px)`}
+    else if(fx==='slide'){const k=clamp((t-i)/0.45); tr=`translateX(${(1-easeOut(k))*1100 - easeOut(pout)*1100}px) rotate(${(1-easeOut(k))*4}deg) scale(${1+0.02*Math.sin((t-i)*2)})`; op=(k>0?1:0)*(pout<1?1:0)}
+    e.style.opacity=op; e.style.transform=tr;
+  }
+  // progression des cartes
+  const dots=document.getElementById('dots'), idx=[7.8,10.15,12.5,14.85,17.2].filter(c=>t>=c).length;
+  dots.style.opacity=(t>=7.8&&t<19.45)?1:0;
+  [...dots.children].forEach((d,k)=>d.classList.toggle('on',k<idx));
+  // lueur qui respire + pulsation aux coupes
+  const last=cuts.filter(c=>t>=c).pop()??-9, since=t-last;
+  document.getElementById('glow').style.transform=`scale(${1+0.06*Math.sin(t*1.6)+0.12*Math.exp(-since*5)})`;
+  document.getElementById('glow').style.opacity=t<0.3?t/0.3*0.8:0.8+0.2*Math.sin(t*2.2);
+  document.getElementById('flash').style.opacity=0.35*Math.exp(-since*9)*(since>=0?1:0);
+  document.getElementById('stage').style.transform=`translate(${Math.sin(since*60)*10*Math.exp(-since*10)}px,0)`;
+  // braises
+  ctx.clearRect(0,0,1080,1920);
+  for(const p of embers){
+    const y=((p.y - t*p.v)%1920+1920)%1920, x=p.x+Math.sin(t*1.3+p.ph)*30;
+    const g=ctx.createRadialGradient(x,y,0,x,y,p.r*4);
+    g.addColorStop(0,`rgba(255,110,110,${p.a})`);g.addColorStop(1,'rgba(210,31,47,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,p.r*4,0,6.29);ctx.fill();
+  }
+};
+window.render(0);
+</script></body></html>

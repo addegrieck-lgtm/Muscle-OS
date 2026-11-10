@@ -1,6 +1,7 @@
 /**
  * Règles de jeu affichées sur le site, recopiées des configurations des plugins du serveur :
- * VaeloriaVote 1.0.0, VaeloriaFactions 1.0.0, VaeloriaShop 1.0.0, VaeloriaCombat 0.1.0.
+ * VaeloriaVote 1.1.0, VaeloriaFactions 1.3.1, VaeloriaShop 1.0.0, VaeloriaCombat 0.1.0.
+ * Référence : deploy/minecraft/kit/plugins/ (le kit installé par deploy/minecraft/install.sh).
  * Quand une config change en jeu, mettre à jour la valeur ici (une seule source pour tout le site).
  */
 
@@ -16,7 +17,7 @@ export interface VoteSite {
 
 /** Les 3 sites de vote. Remplacer nom + lien en même temps que `sites:` dans VaeloriaVote/config.yml. */
 export const VOTE_SITES: VoteSite[] = [
-  { id: "site1", name: "Site 1", url: "", cooldownMinutes: 1440 },
+  { id: "site1", name: "Serveur Minecraft Vote", url: "https://serveur-minecraft-vote.fr/serveur/2870/voter", cooldownMinutes: 90 },
   { id: "site2", name: "Site 2", url: "", cooldownMinutes: 1440 },
   { id: "site3", name: "Site 3", url: "", cooldownMinutes: 1440 },
 ];

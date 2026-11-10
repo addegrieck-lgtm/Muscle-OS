@@ -1,0 +1,185 @@
+# PNJ du nouveau spawn — à déposer dans plugins/VaeloriaStaff/import/ puis /staff importer
+# (remplace les PNJ de même nom, supprime ceux de la liste « supprimer », garde tous les autres).
+npcs:
+  guide_jeux:
+    name: '&#D21F2F&lMini-jeux'
+    type: PIGLIN
+    location:
+      world: spawn
+      x: -5.5
+      y: 101
+      z: 56.5
+      yaw: -45.0
+      pitch: 0.0
+    messages:
+      - '&7Arène FFA, La Couronne Maudite et bien d''autres.'
+    commands:
+      - 'jeux'
+    glowing: true
+    name-visible: true
+  guide_marche:
+    name: '&#E2C27F&lMarché'
+    type: WANDERING_TRADER
+    location:
+      world: spawn
+      x: -1.5
+      y: 101
+      z: 54.5
+      yaw: -14.0
+      pitch: 0.0
+    messages:
+      - '&7Achète et vends au marché de VÆLORIA.'
+    commands:
+      - 'shop'
+    glowing: true
+    name-visible: true
+  guide_boutique:
+    name: '&#FFFFFF&lBoutique'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 2.5
+      y: 101
+      z: 54.5
+      yaw: 14.0
+      pitch: 0.0
+    messages:
+      - '&7Kits, spawners et packs en points boutique.'
+    commands:
+      - 'boutique'
+    glowing: true
+    name-visible: true
+  guide_voter:
+    name: '&#5BD17A&lVoter'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 6.5
+      y: 101
+      z: 56.5
+      yaw: 45.0
+      pitch: 0.0
+    messages:
+      - '&7Vote et touche la cagnotte du jour !'
+    commands:
+      - 'vote'
+    glowing: true
+    name-visible: true
+  aubergiste:
+    name: '&#E2C27F&lL''Aubergiste'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: -78.5
+      y: 101
+      z: -24.5
+      yaw: 0.0
+      pitch: 0.0
+    messages:
+      - '&7Bienvenue à l''Auberge du Rubis !'
+      - '&7Pour faire fructifier ton argent : la &fZone d''investissement&7, à droite de la place du V.'
+    commands: []
+    glowing: false
+    name-visible: true
+  banquier:
+    name: '&#E2C27F&lLe Banquier'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 21.5
+      y: 101
+      z: 62.5
+      yaw: -90.0
+      pitch: 0.0
+    messages:
+      - '&7Entre dans la Zone d''investissement et place ton argent avec &f/invest&7.'
+      - '&7Il rapporte tant que tu restes dans la zone.'
+    commands:
+      - 'invest'
+    glowing: true
+    name-visible: true
+  mineur:
+    name: '&#8A8F99&lLe Mineur'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: -55.5
+      y: 101
+      z: 78.5
+      yaw: -90.0
+      pitch: 0.0
+    messages:
+      - '&7L''escalier de ma maison descend jusqu''à la mine d''obsidienne.'
+      - '&7Prends une bonne pioche !'
+    commands: []
+    glowing: false
+    name-visible: true
+  dresseur:
+    name: '&#5BD17A&lLe Dresseur'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 18.5
+      y: 101
+      z: 62.5
+      yaw: 90.0
+      pitch: 0.0
+    messages:
+      - '&7Lance un &fœuf de capture &7sur un villageois : il devient un objet.'
+      - '&7Relâché, il repart à zéro : sans métier, sans chance, sans usure.'
+      - '&7Idéal pour relancer un bibliothécaire épuisé ! &f/villageois oeuf'
+    commands:
+      - 'villageois oeuf'
+    glowing: true
+    name-visible: true
+  capitaine:
+    name: '&#E2C27F&lLe Capitaine'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 17.5
+      y: 105
+      z: 110.5
+      yaw: 0.0
+      pitch: 0.0
+    messages:
+      - '&7Bienvenue à bord du &fPort des Nuées &7!'
+      - '&7Descends la passerelle et suis l’allée jusqu’à la place du V.'
+    commands:
+      - 'jeux'
+    glowing: false
+    name-visible: true
+  bibliothecaire:
+    name: '&#B57EDC&lLa Bibliothécaire'
+    type: VILLAGER
+    location:
+      world: spawn
+      x: 51.5
+      y: 101
+      z: 69.5
+      yaw: 90.0
+      pitch: 0.0
+    messages:
+      - '&7Enchantements, enclumes et grimoires : tout est ici.'
+      - '&7Le wiki complet : &fvaeloria.fr'
+    commands: []
+    glowing: false
+    name-visible: true
+  maitre_duels:
+    name: '&#D21F2F&lMaître d’armes'
+    type: VINDICATOR
+    location:
+      world: spawn
+      x: -40.5
+      y: 101
+      z: -23.5
+      yaw: 180.0
+      pitch: 0.0
+    messages:
+      - '&7Défie un joueur : &f/duel <joueur> [mise]'
+      - '&7Pas de mort, pas de perte de stuff : l’honneur seulement.'
+    commands:
+      - 'duel top'
+    glowing: false
+    name-visible: true
+supprimer: [porte_1, porte_2, porte_3, porte_4, pere_noel]

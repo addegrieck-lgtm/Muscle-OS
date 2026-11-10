@@ -1,0 +1,145 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                  VaeloriaNoel — configuration                ║
+# ║  Calendrier de l'Avent · cadeau du jour · chasse aux cadeaux ║
+# ║  · parcours du donjon · neige au spawn                       ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Après modification : /noel reload
+# Textes au format MiniMessage, avec les couleurs du logo : <ruby> <ruby_hi> <silver> <steel> <ash> <gold> <gain> <loss>.
+#
+# RÉCOMPENSES — même format partout :
+#   argent: 500                     (monnaie Vault du serveur, la même que le marché)
+#   objets: ["GOLDEN_CARROT:8", "EXPERIENCE_BOTTLE:4"]   (MATÉRIAU:quantité ; ce qui ne tient pas tombe au sol)
+#   commandes: ["crate give {player} vote 1"]          (console ; {player} = pseudo)
+#   texte: "<steel>8 carottes dorées"                  (affiché au joueur)
+# Les objets choisis ne se revendent pas au marché (steaks, carottes dorées, fioles d'XP, pommes dorées) :
+# Noël ne crée pas d'argent caché, comme les votes.
+
+fuseau: "Europe/Paris"
+# Pour tester hors saison : "2026-12-05" fait croire au plugin qu'on est ce jour-là. Laisser vide en production.
+date-simulee: ""
+
+# ── Calendrier de l'Avent (/calendrier) ───────────────────────────
+calendrier:
+  actif: true
+  annee: 2026
+  # true = un joueur peut ouvrir une case passée qu'il a manquée (jusqu'au 24). false = seulement la case du jour.
+  rattrapage: false
+  # Récompense par défaut d'une case, complétée ou remplacée jour par jour ci-dessous.
+  defaut:
+    argent: 600
+    objets: ["COOKED_BEEF:16", "EXPERIENCE_BOTTLE:6"]
+    texte: "<steel>600 $, 16 steaks et 6 fioles d'XP"
+  jours:
+    5:  {argent: 800, objets: ["GOLDEN_CARROT:16"], commandes: ["crate give {player} vote 1"], texte: "<steel>800 $, 16 carottes dorées et une <gold>clé Vote"}
+    10: {argent: 1000, objets: ["GOLDEN_APPLE:2"], commandes: ["crate give {player} vote 2"], texte: "<steel>1 000 $, 2 pommes dorées et 2 <gold>clés Vote"}
+    15: {argent: 1200, objets: ["GOLDEN_APPLE:3"], commandes: ["crate give {player} rare 1"], texte: "<steel>1 200 $, 3 pommes dorées et une <gold>clé Rare"}
+    20: {argent: 1500, objets: ["EXPERIENCE_BOTTLE:32"], commandes: ["crate give {player} rare 1"], texte: "<steel>1 500 $, 32 fioles d'XP et une <gold>clé Rare"}
+    24: {argent: 2500, objets: ["GOLDEN_APPLE:4"], commandes: ["crate give {player} legendaire 1"], texte: "<steel>2 500 $, 4 pommes dorées et une <gold>clé Légendaire"}
+
+# ── Cadeau du jour du Père Noël (/cadeau, aussi via le PNJ) ───────
+cadeau-du-jour:
+  actif: true
+  debut: "2026-12-01"
+  fin: "2027-01-06"
+  # Un cadeau tiré au sort par jour et par joueur (poids = chance relative).
+  tirage:
+    - {poids: 40, argent: 300, objets: ["COOKED_BEEF:16"], texte: "<steel>300 $ et 16 steaks"}
+    - {poids: 30, argent: 500, objets: ["GOLDEN_CARROT:12"], texte: "<steel>500 $ et 12 carottes dorées"}
+    - {poids: 20, argent: 800, objets: ["GOLDEN_APPLE:1"], texte: "<steel>800 $ et une pomme dorée"}
+    - {poids: 9, objets: ["EXPERIENCE_BOTTLE:16"], commandes: ["crate give {player} vote 1"], texte: "<steel>16 fioles d'XP et une <gold>clé Vote"}
+    - {poids: 1, commandes: ["crate give {player} legendaire 1"], texte: "<gold><b>une clé Légendaire !</b>", annonce: true}
+
+# ── Chasse aux cadeaux (/chasse) ──────────────────────────────────
+# Clic sur un paquet caché : récompense une fois par joueur et par paquet. Tous trouvés : grande récompense.
+chasse:
+  actif: true
+  debut: "2026-12-01"
+  fin: "2027-01-06"
+  # Petites étincelles visibles par le joueur seulement, autour des paquets qu'il n'a pas encore trouvés.
+  particules: true
+  rayon-particules: 10
+  par-cadeau: {argent: 250, objets: ["GOLDEN_CARROT:4"], texte: "<steel>250 $ et 4 carottes dorées"}
+  tous-trouves: {argent: 5000, commandes: ["crate give {player} legendaire 1"], texte: "<gold><b>5 000 $ et une clé Légendaire</b>"}
+  # Coordonnées générées avec le spawn fusionné (vaeloria-spawn, scripts/configs.mjs). Le bloc de laine du paquet.
+  cadeaux:
+    - {id: 1, zone: "Île du spawn", world: spawn, x: 58, y: 101, z: 85}
+    - {id: 2, zone: "Île du spawn", world: spawn, x: 62, y: 101, z: 10}
+    - {id: 3, zone: "Île du spawn", world: spawn, x: -94, y: 101, z: 18}
+    - {id: 4, zone: "Île du spawn", world: spawn, x: 98, y: 101, z: 16}
+    - {id: 5, zone: "Île du spawn", world: spawn, x: 82, y: 101, z: 63}
+    - {id: 6, zone: "Île du spawn", world: spawn, x: 70, y: 101, z: 21}
+    - {id: 7, zone: "Île du spawn", world: spawn, x: -34, y: 101, z: 12}
+    - {id: 8, zone: "Île du spawn", world: spawn, x: 53, y: 101, z: 48}
+    - {id: 9, zone: "Île du spawn", world: spawn, x: 44, y: 101, z: -8}
+    - {id: 10, zone: "Île du spawn", world: spawn, x: -67, y: 101, z: 2}
+    - {id: 11, zone: "Île du spawn", world: spawn, x: 19, y: 101, z: 17}
+    - {id: 12, zone: "Île du spawn", world: spawn, x: 22, y: 101, z: -21}
+    - {id: 13, zone: "Île du spawn", world: spawn, x: 84, y: 130, z: 45}
+    - {id: 14, zone: "Île du spawn", world: spawn, x: -72, y: 101, z: 29}
+    - {id: 15, zone: "Île du spawn", world: spawn, x: 23, y: 108, z: 55}
+    - {id: 16, zone: "Île du spawn", world: spawn, x: 34, y: 101, z: 47}
+    - {id: 17, zone: "Île du spawn", world: spawn, x: 14, y: 101, z: -69}
+    - {id: 18, zone: "Île du spawn", world: spawn, x: -10, y: 101, z: -108}
+    - {id: 19, zone: "Fosse (warzone)", world: spawn, x: 2, y: 23, z: -2}
+    - {id: 20, zone: "Fosse (warzone)", world: spawn, x: -25, y: 25, z: -30}
+    - {id: 21, zone: "Fosse (warzone)", world: spawn, x: 39, y: 25, z: 11}
+    - {id: 22, zone: "Arène de bots", world: spawn, x: -167, y: 101, z: -22}
+    - {id: 23, zone: "Arène de bots", world: spawn, x: -207, y: 101, z: -32}
+    - {id: 24, zone: "Île Marchande", world: spawn, x: 183, y: 101, z: 4}
+    - {id: 25, zone: "Île Marchande", world: spawn, x: 222, y: 101, z: 35}
+    - {id: 26, zone: "Île Marchande", world: spawn, x: 214, y: 107, z: 13}
+    - {id: 27, zone: "Île Marchande", world: spawn, x: 198, y: 101, z: 32}
+    - {id: 28, zone: "Grotte de la Forge", world: spawn, x: 5, y: 110, z: -181}
+    - {id: 29, zone: "Grotte de la Forge", world: spawn, x: 16, y: 101, z: -174}
+
+# ── Parcours du donjon (/parcours) ────────────────────────────────
+# Plaque de départ (pesée légère) au pied du donjon, plaque d'arrivée (pesée lourde) dans la loggia.
+# Actif toute l'année. Une téléportation, le vol ou un changement de mode de jeu annulent la course.
+parcours:
+  actif: true
+  depart: {world: spawn, x: -42, y: 101, z: -101}
+  arrivee: {world: spawn, x: -42, y: 128, z: -112}
+  # Pas de dégâts de chute dans cette zone (personne ne meurt en ratant un saut).
+  zone: {world: spawn, x0: -60, y0: 95, z0: -128, x1: -24, y1: 149, z1: -92}
+  sans-degats-de-chute: true
+  # Récompense une fois par jour (heure de Paris).
+  recompense: {argent: 500, commandes: ["crate give {player} vote 1"], texte: "<steel>500 $ et une <gold>clé Vote"}
+  # Annonce à tout le serveur quand le record du serveur tombe.
+  annonce-record: true
+
+# ── Neige au spawn (/noel neige on|off) ───────────────────────────
+# Passe la zone en biome enneigé et y fait neiger (orage permanent dans ce monde seulement). /noel neige off remet
+# le biome d'origine et le beau temps. Les couches de neige ne s'accumulent pas (règle snowAccumulationHeight = 0).
+neige:
+  zone: {world: spawn, x0: -250, y0: 0, z0: -225, x1: 310, y1: 200, z1: 200}
+  biome: "snowy_plains"
+  blocs-par-tick: 4000
+
+messages:
+  prefixe: "<ruby_hi>❄</ruby_hi> <graphite>»</graphite> "
+  hors-saison: "<steel>Ce n'est pas encore la saison : reviens en décembre !"
+  calendrier-titre: "<ruby_hi>❄</ruby_hi> <graphite>Calendrier de l'Avent"
+  calendrier-ouvert: "<steel>Case du <snow><jour> décembre</snow> ouverte : <gain><texte></gain>"
+  calendrier-deja: "<loss>Tu as déjà ouvert la case du <jour> décembre."
+  calendrier-trop-tot: "<loss>Patience ! Cette case s'ouvre le <jour> décembre."
+  calendrier-manquee: "<ash>Cette case est passée."
+  cadeau-recu: "<steel>Le Père Noël t'offre <gain><texte></gain> <steel>! Reviens demain."
+  cadeau-deja: "<loss>Tu as déjà reçu ton cadeau aujourd'hui. Reviens demain !"
+  cadeau-annonce: "<snow><player></snow> <steel>a reçu <texte> <steel>du Père Noël !"
+  chasse-trouve: "<gain>Cadeau trouvé !</gain> <steel>(<snow><n>/<total></snow>) <ash>· <texte>"
+  chasse-deja: "<ash>Tu as déjà trouvé ce cadeau (<n>/<total>)."
+  chasse-fini: "<gold><b>Tous les cadeaux trouvés !</b></gold> <steel>Récompense : <texte>"
+  chasse-annonce: "<snow><player></snow> <steel>a trouvé les <total> cadeaux cachés du spawn !"
+  chasse-progres: "<steel>Cadeaux trouvés : <snow><n>/<total></snow>"
+  chasse-zone: "<ash>• <silver><zone></silver> : <snow><reste></snow> <ash>à trouver"
+  parcours-depart: "<steel>Chrono lancé ! Grimpe jusqu'à la loggia du donjon."
+  parcours-annule: "<loss>Parcours annulé (<raison>)."
+  parcours-fini: "<gain>Arrivée !</gain> <steel>Temps : <snow><temps></snow> <ash>(record perso : <record>)"
+  parcours-recompense: "<steel>Récompense du jour : <gain><texte></gain>"
+  parcours-record-serveur: "<snow><player></snow> <steel>bat le record du parcours du donjon : <gold><temps></gold> !"
+  parcours-info: "<steel>Ton record : <snow><record></snow> <ash>· /parcours top"
+  parcours-top-titre: "<ruby_hi>❄</ruby_hi> <silver>Parcours du donjon — meilleurs temps"
+  parcours-top-ligne: "<ash><rang>.</ash> <snow><player></snow> <steel><temps>"
+  neige-on: "<steel>La neige tombe sur le spawn (biome <snow><biome></snow>, <n> blocs)."
+  neige-off: "<steel>Fin de la neige : biome <snow><biome></snow> rétabli."
+  recharge: "<gain>VaeloriaNoel rechargé.</gain>"

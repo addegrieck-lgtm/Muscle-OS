@@ -1,0 +1,45 @@
+# VaeloriaMenus — menus de /warp et /kit aux couleurs de VÆLORIA.
+#
+# ── Menu de /warp (et /warps) ───────────────────────────────────────
+# Les warps restent ceux d'EssentialsX : /setwarp <nom> pour en créer, /delwarp <nom> pour en retirer.
+# /warp <nom> marche toujours comme avant ; /warp seul ouvre le menu.
+# Le clic passe par « /warp <nom> » : délai, coût, permissions et blocage de combat restent ceux du serveur.
+# Personnaliser un warp : /vwarp icone|nom|desc|ordre|permission|cacher|brillant <warp> ... (stocké dans warps.yml).
+
+menu:
+  titre: "<ruby2>✦</ruby2> <ruby><bold>VÆLORIA</bold></ruby> <ash>— Warps</ash>"
+  # Rayon (en blocs) pour compter les joueurs autour d'un warp, 0 pour ne pas l'afficher
+  rayon-joueurs: 48
+  # Bouton « Spawn » en bas du menu (commande lancée par le joueur), vide pour le retirer
+  commande-spawn: "spawn"
+  son-ouverture: UI_BUTTON_CLICK
+  son-teleport: ENTITY_ENDERMAN_TELEPORT
+
+# Nom affiché des mondes (sinon le nom du dossier)
+mondes:
+  world: "Faction"
+  spawn: "Spawn"
+  vaeloria: "Faction"
+  warzone: "Warzone"
+  world_nether: "Nether"
+  world_the_end: "End"
+
+# Icône par défaut d'un warp sans icône choisie, selon son monde
+icones-par-defaut:
+  NORMAL: ENDER_PEARL
+  NETHER: NETHERRACK
+  THE_END: END_STONE
+
+# ── Menu de /kit (et /kits) ─────────────────────────────────────────
+# /kit seul ouvre le menu, /kit <nom> marche comme avant. Contenu et délais : plugins/Essentials/kits.yml.
+# Présentation de chaque kit (icône, nom, description, ordre, texte du verrou) : VaeloriaMenus/kits.yml ou /vkit.
+# Un kit est débloqué si le joueur a essentials.kits.<kit> (c'est ce que donne la /boutique).
+kits:
+  titre: "<ruby2>✦</ruby2> <ruby><bold>VÆLORIA</bold></ruby> <ash>— Kits</ash>"
+  # Texte d'un kit verrouillé quand kits.yml n'en donne pas
+  texte-verrou: "Débloque-le dans la /boutique"
+  # Les kits disponibles brillent
+  briller-si-disponible: true
+  # Bouton « Plus de kits » en bas du menu (commande lancée par le joueur), vide pour le retirer
+  commande-boutique: "boutique"
+  son-recuperation: ENTITY_PLAYER_LEVELUP

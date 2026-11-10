@@ -54,4 +54,49 @@ public final class Items {
     public static ItemStack decode(String data) {
         return ItemStack.deserializeBytes(Base64.getDecoder().decode(data));
     }
+
+    /**
+     * Objet décrit à la main dans crates.yml (format lisible, réécrit en binaire à la première sauvegarde) :
+     * <pre>
+     * item:
+     *   material: DIAMOND_SWORD
+     *   amount: 1
+     *   name: "&b&lÉpée du vote"
+     *   lore: ["&7Ligne 1", "&7Ligne 2"]
+     *   enchants: {sharpness: 4, unbreaking: 3}
+     *   glow: true          # brillance sans enchantement visible
+     * </pre>
+     */
+    public static ItemStack fromSection(org.bukkit.configuration.ConfigurationSection s) {
+        Material material = Material.matchMaterial(s.getString("material", "STONE"));
+        if (material == null || !material.isItem()) throw new IllegalArgumentException("matériau inconnu : " + s.getString("material"));
+        ItemStack item = new ItemStack(material, Math.max(1, Math.min(s.getInt("amount", 1), material.getMaxStackSize())));
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return item;
+        if (s.contains("name")) meta.displayName(Text.of(s.getString("name")));
+        if (s.contains("lore")) {
+            List<Component> lore = new ArrayList<>();
+            for (String l : s.getStringList("lore")) lore.add(Text.of(l));
+            meta.lore(lore);
+        }
+        org.bukkit.configuration.ConfigurationSection ench = s.getConfigurationSection("enchants");
+        if (ench != null) {
+            for (String key : ench.getKeys(false)) {
+                var e = org.bukkit.Registry.ENCHANTMENT.get(org.bukkit.NamespacedKey.minecraft(key.toLowerCase(java.util.Locale.ROOT)));
+                if (e == null) throw new IllegalArgumentException("enchantement inconnu : " + key);
+                meta.addEnchant(e, Math.max(1, ench.getInt(key, 1)), true);
+            }
+        }
+        if (s.getBoolean("glow", false)) meta.setEnchantmentGlintOverride(true);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /** « item » / « key » : chaîne encodée (format binaire) ou section lisible (voir {@link #fromSection}). */
+    public static ItemStack read(org.bukkit.configuration.ConfigurationSection parent, String path) {
+        org.bukkit.configuration.ConfigurationSection s = parent.getConfigurationSection(path);
+        if (s != null) return fromSection(s);
+        String data = parent.getString(path);
+        return data == null ? null : decode(data);
+    }
 }

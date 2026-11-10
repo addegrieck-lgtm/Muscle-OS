@@ -1,0 +1,102 @@
+# VaeloriaWorldGen — configuration
+# Toute modification demande un redémarrage. Ne change PAS les réglages de génération
+# (seed, custom-biome-ratio, structures.*) après avoir prégénéré : les nouveaux chunks
+# ne se raccorderaient plus aux anciens.
+
+world:
+  # Monde généré par le plugin. Pour en faire le monde principal, voir le README (bukkit.yml).
+  name: vaeloria
+  # Crée/charge automatiquement le monde au démarrage (une fois les biomes chargés).
+  auto-create: true
+  # Graine du monde (0 = aléatoire à la création). Aperçu d'une graine : /vgen map <graine>
+  seed: 0
+  # Rayon de la bordure autour de 0,0 : 12500 = carte de -12500 à +12500 (25000 × 25000).
+  # Appliqué à chaque démarrage. Chunky : /chunky radius <même valeur>
+  border-radius: 12500
+  # Hauteur du sol de bedrock (plat). Tout ce qui est en dessous est de la bedrock. Entre -64 et 0.
+  bedrock-y: -50
+
+# Part des biomes Vaeloria (le reste = biomes vanilla pour le sable, la neige, la savane...).
+custom-biome-ratio: 0.6
+
+# Donjons classiques de la 1.8 (salle moussue, spawner, 2 coffres « donjon_classique ») dans les grottes.
+# Tentatives par chunk (20 ≈ un donjon tous les 10 chunks ; 8 = réglage 1.8, plus rare ici ; 0 = désactivés).
+classic-dungeons:
+  attempts: 20
+
+structures:
+  enabled: true
+  # Grille de placement : au plus une structure par carré de cell-size blocs (minimum 80).
+  cell-size: 256
+  # Probabilité qu'un carré contienne une structure (0.6 ≈ 3000 structures sur 25000×25000).
+  chance: 0.6
+  # Pas de structure à moins de N blocs de 0,0 (zone du spawn).
+  spawn-exclusion-radius: 300
+  # Poids relatifs (×2.5 dans les biomes favoris de chaque structure). 0 = désactivée.
+  weights:
+    ruines: 40
+    camp: 30
+    donjon: 20
+    tour: 10
+
+# ── Monde ressource ───────────────────────────────────────────────
+# Même sol 1.8 que le monde faction, minerais plus riches, île portuaire au spawn (identique à chaque
+# reset, incassable, sans PvP) et NOUVELLE CARTE chaque jour. Accès par /rtp (VaeloriaRTP).
+resource-world:
+  enabled: true
+  name: ressources
+  # Rayon de la bordure : 3000 = carte de 6000 × 6000.
+  border-radius: 3000
+  # Richesse en minerais par rapport au monde faction (1.25 = +25 %). Terre, gravier, granite… inchangés.
+  ore-multiplier: 1.25
+  # Donjons classiques 1.8 (tentatives par chunk).
+  classic-dungeons: 20
+  reset:
+    time: "04:00"
+    timezone: "Europe/Paris"
+    # Annonces avant le reset (minutes).
+    warnings-minutes: [30, 10, 5, 1]
+    # Monde où les joueurs attendent pendant le reset (quelques secondes), puis retour sur l'île.
+    fallback-world: spawn
+    # Chunks générés d'avance autour de l'île après chaque reset (12 = 25 × 25 chunks).
+    pregenerate-radius-chunks: 12
+  spawn:
+    # Rayon protégé autour de 0,0 : pas de casse, de pose, d'explosion ni de PvP (staff : vaeloria.ressource.build).
+    protection-radius: 130
+  rtp:
+    # Ajoute le monde dans plugins/VaeloriaRTP/worlds.yml au premier démarrage (réglable ensuite avec /rtpadmin).
+    register: true
+    min-radius: 300
+    cooldown: 120
+
+# Nether Vaeloria : un Nether original À ÉTAGES (bas : mer de lave et îlots ; milieu : cavernes et
+# forteresses ; haut : voûtes de glowstone et sable des âmes), reliés par des puits, SANS obsidienne.
+# Il REMPLACE le Nether vanilla pour les portails de tous les mondes normaux.
+nether:
+  enabled: true
+  name: vaeloria_nether
+  # Graine (0 = aléatoire à la création). Aperçu sans serveur : ./gradlew renderNether -Pseed=<graine>
+  seed: 0
+  # Rayon de la bordure. 0 = rayon du monde Vaeloria ÷ 8 (12500 → 1562), pour que chaque bloc du Nether
+  # corresponde à la carte Faction.
+  border-radius: 0
+  portals:
+    # true = tout portail du Nether allumé dans un monde normal (world, vaeloria, ressources...) mène ici.
+    replace: true
+    # Mondes normaux dont les portails gardent le comportement vanilla.
+    excluded-worlds: []
+    # Monde de retour forcé. Vide = le monde d'où vient le joueur (sinon world.name).
+    return-world: ""
+  # Interdit le toit de bedrock (y 127+) en survie (permission de contournement : vaeloria.nether.roof).
+  deny-roof: true
+  # L'obsidienne des portails d'arrivée (posée par le jeu) ne donne rien quand on la casse dans ce Nether.
+  obsidian-drops: false
+  structures:
+    enabled: true
+    # Au plus une structure par carré de cell-size blocs (minimum 104).
+    cell-size: 176
+    chance: 0.55
+    weights:
+      forteresse: 35
+      sanctuaire: 35
+      ossuaire: 30

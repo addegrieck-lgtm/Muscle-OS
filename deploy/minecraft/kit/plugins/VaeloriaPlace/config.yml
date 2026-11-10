@@ -1,0 +1,113 @@
+# ══════════════════════════════════════════════════════════════════════
+#  VaeloriaPlace — lieux vivants du spawn de VÆLORIA
+#  Coordonnées générées pour le spawn fusionné (île collée en 0 100 0 du monde « spawn »).
+#  Textes en MiniMessage ; couleurs maison : <ruby> <ruby_hi> <snow> <silver> <steel> <ash> <gold> <gain> <loss>
+# ══════════════════════════════════════════════════════════════════════
+monde: spawn
+
+# ── Autel des Votes : chaque vote reçu (NuVotifier) remplit la cagnotte ──
+autel:
+  actif: true
+  objectif: 50                     # votes pour embraser l'autel
+  # Braseros allumés un par un (un par dixième de l'objectif) puis le cœur quand c'est plein.
+  flammes:
+    - [-26, 103, 79]
+    - [-23, 103, 81]
+    - [-22, 103, 84]
+    - [-23, 103, 87]
+    - [-26, 103, 89]
+    - [-30, 103, 89]
+    - [-33, 103, 87]
+    - [-34, 103, 84]
+    - [-33, 103, 81]
+    - [-30, 103, 79]
+  coeur: [-28, 107, 84]
+  hologramme: [-28, 111.2, 84]
+  # Récompense de TOUS les joueurs en ligne quand l'autel s'embrase.
+  recompense:
+    argent: 2000
+    commandes: ["crate give {player} vote 1"]
+    texte: "<gold>2 000 $ et une clé Vote</gold>"
+
+# ── Hall des Légendes : statues des chefs des 3 factions les plus puissantes ──
+hall:
+  actif: true
+  statues:                         # 1er (podium d'or), 2e, 3e — les pieds de la statue
+    - [-38, 104, -78]
+    - [-38, 103, -83]
+    - [-38, 102, -73]
+  regard: east                    # vers où regardent les statues
+  hologramme: [-38, 110, -78]
+  rafraichir-minutes: 5
+
+# ── Maison des Événements (clocheton sur le toit) : horaires lus dans plugins/VaeloriaFactions/config.yml ──
+beffroi:
+  actif: true
+  cloche: [52, 119, -45]
+  hologramme: [38, 105.5, -45]
+  rayon-cloche: 160                # joueurs qui entendent la cloche
+  rappel-minutes: 5                # sonne et prévient X minutes avant
+  # Événements suivis : section de VaeloriaFactions → nom affiché. Ajoute-en ici si besoin.
+  evenements:
+    totem: "Totem"
+    koth: "KOTH"
+    fortress: "La Forteresse"
+  # Horaires de secours si VaeloriaFactions est absent (même format : "JOUR HH:MM").
+  horaires-secours:
+    Totem: ["MERCREDI 20:30", "SAMEDI 21:00"]
+    KOTH: ["DIMANCHE 18:00"]
+    La Forteresse: ["DIMANCHE 21:00"]
+
+# ── Arène des duels ──
+duels:
+  actif: true
+  a: [-48, 101, -38]
+  b: [-38, 101, -38]
+  centre: [-43, 101, -38]
+  sortie: [-43, 101, -23]
+  zone: {x0: -51, y0: 98, z0: -46, x1: -35, y1: 110, z1: -30}
+  mise-max: 100000
+  delai-invitation: 30             # secondes pour accepter
+  duree-max: 180                   # secondes avant match nul
+
+# ── Crypte des Rois : coffre secret sous le Hall, une récompense par joueur ──
+crypte:
+  actif: true
+  coffre: [-40, 92, -62]
+  recompense:
+    argent: 5000
+    objets: ["GOLDEN_APPLE:2", "ENCHANTED_BOOK:1"]
+    commandes: ["crate give {player} epique 1"]
+    texte: "<gold>5 000 $, 2 pommes dorées, un livre et une clé Épique</gold>"
+  annonce: true
+
+messages:
+  prefixe: "<ruby_hi>◆</ruby_hi> <ash>»</ash> "
+  autel-titre: "<ruby_hi><b>AUTEL DES VOTES</b>"
+  autel-progres: "<steel>Cagnotte : <snow><n></snow><ash>/<objectif> votes"
+  autel-aide: "<ash>Vote avec <silver>/vote</silver> pour l'embraser !"
+  autel-vote: "<snow><player></snow> <steel>a voté : l'autel en est à <snow><n>/<objectif></snow>."
+  autel-plein: "<gold><b>L'AUTEL DES VOTES S'EMBRASE !</b></gold> <steel>Tous les joueurs en ligne reçoivent <texte>."
+  autel-recu: "<steel>L'Autel des Votes t'offre <gain><texte></gain>."
+  hall-titre: "<gold><b>HALL DES LÉGENDES</b>"
+  hall-ligne: "<rang> <snow><faction></snow> <ash>· <steel><power> power"
+  hall-vide: "<ash>Aucune faction pour l'instant…"
+  beffroi-titre: "<ruby_hi><b>MAISON DES ÉVÉNEMENTS</b>"
+  beffroi-ligne: "<silver><nom></silver> <ash>— <snow><quand></snow>"
+  beffroi-rappel: "<gold>🔔 <nom></gold> <steel>commence dans <snow><minutes> min</snow> ! <ash>(/evenements)"
+  beffroi-debut: "<gold>🔔 <nom></gold> <steel>commence maintenant !"
+  duel-invite: "<snow><player></snow> <steel>te défie en duel<mise> ! <ruby>[/duel accepter]</ruby> <ash>ou /duel refuser"
+  duel-envoye: "<steel>Défi envoyé à <snow><player></snow>."
+  duel-refuse: "<loss>Duel refusé."
+  duel-expire: "<ash>Le défi a expiré."
+  duel-occupee: "<loss>L'arène est occupée, réessaie dans un instant."
+  duel-argent: "<loss>Mise impossible : il manque de l'argent à <player>."
+  duel-debut: "<ruby_hi><b>DUEL</b></ruby_hi> <snow><j1></snow> <ash>contre</ash> <snow><j2></snow><mise>"
+  duel-victoire: "<gold><b><gagnant></b></gold> <steel>remporte le duel contre <snow><perdant></snow><gain>."
+  duel-nul: "<ash>Match nul : temps écoulé."
+  duel-top-titre: "<ruby_hi>◆</ruby_hi> <silver>Arène des duels — meilleurs duellistes"
+  duel-top-ligne: "<ash><rang>.</ash> <snow><player></snow> <steel><v> victoires <ash>/ <d> défaites"
+  crypte-trouve: "<gold><b>Tu as découvert la Crypte des Rois !</b></gold> <steel>Récompense : <texte>"
+  crypte-deja: "<ash>Le coffre est vide… tu l'as déjà pillé."
+  crypte-annonce: "<snow><player></snow> <steel>a découvert la <gold>Crypte des Rois</gold> cachée sous le spawn…"
+  recharge: "<gain>VaeloriaPlace rechargé."

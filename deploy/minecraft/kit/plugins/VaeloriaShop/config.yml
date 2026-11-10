@@ -1,0 +1,549 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                  VæloriaShop — configuration                 ║
+# ║   Boutique, marché dynamique et rangs de marchand (Farm2Win) ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Les articles et leurs prix sont dans shop.yml. Après modification : /shop admin reload
+# Textes au format MiniMessage, avec les couleurs du logo : <ruby> <ruby_hi> <ruby_lo> <snow> <silver>
+# <steel> <ash> <graphite>, plus <gain> (hausse) et <loss> (baisse).
+
+currency-symbol: "$"
+
+# Achats au-dessus de ce total : Maj+clic ouvre l'écran de confirmation au lieu d'acheter directement.
+confirm-above: 25000
+
+autosave-minutes: 5
+
+# ── Marché dynamique ──────────────────────────────────────────────
+# Chaque vente fait baisser un peu le prix de RACHAT de l'article pour tout le serveur. La baisse s'efface
+# toute seule avec le temps. Résultat : inonder le marché d'un seul produit rapporte de moins en moins, varier
+# ses farms rapporte plus. C'est le frein anti-inflation d'un Farm2Win.
+market:
+  enabled: true
+  # Temps pour que la baisse d'un article se résorbe de moitié.
+  half-life-hours: 8
+  # Baisse maximale du prix de rachat (jamais sous 50 % du prix de base).
+  max-drop-percent: 50
+  # Valeur vendue (au prix de base) par le serveur pour atteindre ~63 % de la baisse maximale.
+  # Réglable article par article dans shop.yml (champ saturation).
+  saturation: 150000
+  # Le seuil grandit avec le nombre de joueurs connectés au-delà de cette référence (40 joueurs = seuil × 2).
+  reference-players: 20
+  # Un article racheté ne dépasse jamais ce pourcentage de son prix d'achat, bonus compris : aucune boucle
+  # « acheter pour revendre » n'est possible.
+  max-sell-ratio-percent: 80
+  timezone: "Europe/Paris"
+  # Cours du jour : quelques articles tirés au sort chaque jour à minuit, rachetés plus cher.
+  featured:
+    count: 3
+    bonus-percent: 25
+
+# ── Rangs de marchand ─────────────────────────────────────────────
+# On monte en VENDANT au marché (total gagné depuis toujours). Chaque rang débloque des articles (champ level de
+# shop.yml) et ajoute un bonus sur toutes les ventes. Dans l'ordre des seuils ; le premier vaut 0.
+ranks:
+  colporteur:
+    name: "<steel>Colporteur"
+    threshold: 0
+    bonus-percent: 0
+    icon: LEATHER
+    perks:
+      - "<ash>Houe de moisson I, graines, blocs"
+  marchand:
+    name: "<silver>Marchand"
+    threshold: 20000
+    bonus-percent: 2
+    icon: IRON_INGOT
+    perks:
+      - "<ash>Houe II, hache du bûcheron"
+      - "<ash>Baguette de vente, livres enchantés"
+  negociant:
+    name: "<#E2C27F>Négociant"
+    threshold: 120000
+    bonus-percent: 4
+    icon: GOLD_INGOT
+    perks:
+      - "<ash>Pioche des abysses, obsidienne"
+      - "<ash>Livres Tranchant, Fortune, Butin"
+  maitre:
+    name: "<ruby_hi>Maître marchand"
+    threshold: 500000
+    bonus-percent: 6
+    icon: DIAMOND
+    perks:
+      - "<ash>Houe III, Raccommodage, boîte de Shulker"
+  baron:
+    name: "<ruby_hi><b>Baron du négoce"
+    threshold: 2000000
+    bonus-percent: 8
+    icon: EMERALD
+    perks:
+      - "<ash>Bonus de vente +8 %, 8 annonces HDV"
+  prince:
+    name: "<gradient:#D21F2F:#E2C27F><b>Prince marchand</gradient>"
+    threshold: 7500000
+    bonus-percent: 10
+    icon: NETHER_STAR
+    perks:
+      - "<ash>Le titre suprême du commerce."
+
+# Annonce à tout le serveur à partir de ce rang.
+ranks-broadcast-from: 4
+
+# ── Outils de Vaeloria ────────────────────────────────────────────
+# Types : HARVEST_HOE (radius 0 = 1×1, 1 = 3×3, 2 = 5×5), MINER_PICKAXE (radius 1 = 3×3, blocs naturels),
+# TIMBER_AXE (max-blocks), SELL_WAND (uses). Tous respectent les claims : un bloc protégé n'est jamais touché.
+tools:
+  houe-moisson-1:
+    type: HARVEST_HOE
+    material: IRON_HOE
+    name: "<silver>Houe de moisson <ruby_hi>I"
+    radius: 0
+    auto-pickup: true
+    lore:
+      - "<ash>Récolte et <snow>replante</snow> tout seul."
+      - "<ash>La récolte va directement dans ton sac."
+      - "<ash>Ne casse jamais une pousse pas mûre."
+  houe-moisson-2:
+    type: HARVEST_HOE
+    material: DIAMOND_HOE
+    name: "<silver>Houe de moisson <ruby_hi>II"
+    radius: 1
+    lore:
+      - "<ash>Récolte et replante en <snow>3×3</snow>."
+      - "<ash>Clic droit ou clic gauche sur une culture mûre."
+  houe-moisson-3:
+    type: HARVEST_HOE
+    material: NETHERITE_HOE
+    name: "<gradient:#D21F2F:#E2C27F>Houe de moisson III</gradient>"
+    radius: 2
+    lore:
+      - "<ash>Récolte et replante en <snow>5×5</snow>."
+      - "<ash>L'outil des grands domaines agricoles."
+  hache-bucheron:
+    type: TIMBER_AXE
+    material: DIAMOND_AXE
+    name: "<silver>Hache du bûcheron"
+    max-blocks: 96
+    enchantments: { efficiency: 4 }
+    lore:
+      - "<ash>Abat l'<snow>arbre entier</snow> d'un coup."
+      - "<ash>Accroupi : une seule bûche."
+  pioche-abysses:
+    type: MINER_PICKAXE
+    material: DIAMOND_PICKAXE
+    name: "<ruby_hi>Pioche des abysses"
+    radius: 1
+    enchantments: { efficiency: 5, fortune: 2 }
+    lore:
+      - "<ash>Mine en <snow>3×3</snow> la pierre, la terre"
+      - "<ash>et les minerais (jamais les constructions)."
+      - "<ash>Accroupi : un seul bloc."
+  baguette-vente-100:
+    type: SELL_WAND
+    material: BLAZE_ROD
+    name: "<#E2C27F>Baguette de vente"
+    uses: 100
+    lore:
+      - "<ash>Clic droit sur un coffre : vend tout"
+      - "<ash>ce qui est rachetable dedans."
+  baguette-vente-500:
+    type: SELL_WAND
+    material: BLAZE_ROD
+    name: "<gradient:#E2C27F:#D21F2F>Grande baguette de vente</gradient>"
+    uses: 500
+    lore:
+      - "<ash>Clic droit sur un coffre : vend tout"
+      - "<ash>ce qui est rachetable dedans."
+
+# ── Hôtel des ventes (/hdv) ───────────────────────────────────────
+# Annonces à prix fixe entre joueurs. Chaque objet affiche un PRIX CONSEILLÉ calculé d'après le serveur :
+# médiane des ventes récentes à l'HDV, sinon prix de la boutique −10 %, sinon rachat du marché +50 %.
+# Les frais et la taxe sont détruits : un puits d'argent qui freine l'inflation.
+hdv:
+  enabled: true
+  duration-hours: 48              # ensuite l'objet part à l'entrepôt du vendeur
+  listing-fee-percent: 1          # payé à la mise en vente, non remboursé
+  listing-fee-min: 10
+  sale-tax-percent: 5             # prélevé sur le vendeur à la vente
+  tax-discount-per-rank: 0.5      # -0,5 point par rang de marchand (Prince marchand : 2,5 %)
+  # Annonces simultanées selon le rang de marchand (I → VI). Permission vaeloria.hdv.listings.<n> pour plus.
+  max-listings-by-rank: [3, 4, 5, 6, 8, 10]
+  min-price: 1
+  max-price: 1000000000
+  warn-above-ratio: 5             # au-delà de 5× le prix conseillé : confirmation demandée
+  broadcast-above: 250000         # annonce à tout le serveur (cliquable) ; 0 = jamais
+  reference-days: 7               # ventes prises en compte pour le prix conseillé
+  reference-min-sales: 3          # ventes minimum avant de suivre la médiane de l'HDV
+  history-size: 500
+  blacklist: [BEDROCK, BARRIER, COMMAND_BLOCK, CHAIN_COMMAND_BLOCK, REPEATING_COMMAND_BLOCK, STRUCTURE_BLOCK, JIGSAW, LIGHT, DEBUG_STICK, KNOWLEDGE_BOOK, END_PORTAL_FRAME, SPAWNER_MINECART, COMMAND_BLOCK_MINECART]
+
+# ── Points boutique (/boutique, /points) ──────────────────────────
+# Monnaie achetée sur le site (1 € = 100 points). Les catégories « premium: true » de shop.yml (kits, spawners)
+# ne se paient QU'EN POINTS et n'apparaissent plus dans le marché en $. Les GRADES ne s'achètent pas : ils se
+# débloquent selon le total de points dépensés (shop.yml → grade-tiers).
+# Crédit après paiement : le site envoie, via VaeloriaBridge, la commande console
+#   points give <uuid ou pseudo> <points> [référence de commande]
+# Chaque mouvement est écrit dans plugins/VaeloriaShop/data/points.log (à conserver : argent réel).
+points:
+  store-url: "https://vaeloria.fr/boutique"
+  rate-text: "1 € = 100 points"
+  # Grade débloqué (palier atteint) : {player} {uuid} {grade} {permission}. Possession vérifiée par group.<grade>,
+  # vraie aussi pour les grades qui en héritent. Rattrapé à chaque connexion si LuckPerms était indisponible.
+  grade-command: "lp user {player} parent add {grade}"
+
+# ── Déban (payé en points, envoyé par le site : « points deban <uuid> ») ──
+# Prix selon le nombre de débans déjà achetés. Au-delà de la liste : plus de déban possible.
+deban:
+  prices: [1000, 2500]
+
+# ── Kits (catégorie « kits » de shop.yml) ─────────────────────────
+# On achète l'ACCÈS DÉFINITIF à un kit EssentialsX, puis la commande console ci-dessous l'accorde.
+# Le contenu et le délai de chaque kit se règlent dans plugins/Essentials/kits.yml.
+# {player} {uuid} {permission} {kit}. Si la commande échoue (LuckPerms absent), le joueur est remboursé.
+kits:
+  grant-command: "lp user {player} permission set {permission} true"
+
+# ── Boutiques de joueurs (/pshop) ─────────────────────────────────
+# Parcelles délimitées par le staff à la spawn (/pshop admin), louées à la semaine. Le locataire y construit sa
+# vitrine et vend des OBJETS UNIQUES, qui ne se vendent ni au marché ni à l'hôtel des ventes.
+#
+# Calibrage des loyers (prix de base, avant la demande) :
+#   Une pièce unique se vend ~10 000 à 150 000 $ (totem ~20 k, plastron en netherite ~50 k, élytres ~100 k).
+#   Échoppe          : ~5 ventes/semaine × ~20 k  ≈ 100 k/sem → loyer 15 k  (~15 % du chiffre d'affaires)
+#   Boutique         : vitrine plus grande, meilleur passage ≈ 200 k/sem → loyer 35 k
+#   Grande enseigne  : emplacement central, 28 objets ≈ 300-500 k/sem → loyer 75 k
+#   Une boutique active rapporte donc 5 à 7 fois son loyer ; une boutique abandonnée coûte : les places tournent.
+player-shops:
+  enabled: true
+  max-plots: 16
+  max-plots-per-player: 1
+  max-volume: 32768              # blocs maximum par parcelle (32×32×32)
+  max-weeks-ahead: 4             # on peut payer jusqu'à 4 semaines d'avance
+  grace-hours: 48                # loyer impayé : boutique fermée 48 h, puis parcelle libérée
+  warn-before-hours: 24
+  sale-tax-percent: 3            # moins que l'HDV : le loyer est déjà payé
+  # La demande ajuste tous les loyers : presque tout est loué → plus cher ; presque vide → moins cher.
+  demand:
+    enabled: true
+    high-occupancy-percent: 75
+    high-multiplier: 1.25
+    low-occupancy-percent: 25
+    low-multiplier: 0.8
+  # Gammes : l'admin en attribue une à chaque parcelle selon son emplacement.
+  # level = rang de marchand requis pour louer (II Marchand, III Négociant, IV Maître marchand).
+  tiers:
+    standard:
+      name: "<silver>Échoppe"
+      rent: 15000
+      offers: 14
+      level: 2
+      icon: OAK_SIGN
+      estimate: "80 000 à 120 000 $ / semaine"
+    premium:
+      name: "<#E2C27F>Boutique"
+      rent: 35000
+      offers: 21
+      level: 3
+      icon: GOLD_BLOCK
+      estimate: "150 000 à 250 000 $ / semaine"
+    prestige:
+      name: "<ruby_hi>Grande enseigne"
+      rent: 75000
+      offers: 28
+      level: 4
+      icon: BEACON
+      estimate: "300 000 à 500 000 $ / semaine"
+  # Ce qui compte comme objet unique.
+  unique:
+    only-in-player-shops: true   # refusés à l'hôtel des ventes
+    renamed-items: true          # toute pièce renommée à l'enclume
+    trimmed-armor: true          # armures ornées (gabarits d'ornement)
+    decorated-banners: true      # bannières à motifs
+    materials: [ELYTRA, TOTEM_OF_UNDYING, DRAGON_EGG, DRAGON_HEAD, NETHER_STAR, BEACON, CONDUIT, HEART_OF_THE_SEA,
+      TRIDENT, MACE, HEAVY_CORE, ENCHANTED_GOLDEN_APPLE, NETHERITE_SWORD, NETHERITE_AXE, NETHERITE_PICKAXE,
+      NETHERITE_SHOVEL, NETHERITE_HOE, NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS,
+      NETHERITE_BLOCK, PLAYER_HEAD, WITHER_SKELETON_SKULL, SKELETON_SKULL, ZOMBIE_HEAD, CREEPER_HEAD, PIGLIN_HEAD,
+      SHULKER_SHELL, SNIFFER_EGG, RECOVERY_COMPASS, WRITTEN_BOOK, GOAT_HORN]
+    name-starts-with: [MUSIC_DISC_]
+    name-ends-with: [_SMITHING_TEMPLATE, _POTTERY_SHERD, _BANNER_PATTERN]
+  # ── Spécialités : une par parcelle (la parcelle n reçoit la n-ième, modifiable dans /pshop admin) ──
+  # Un objet de la spécialité vendu dans CETTE boutique rapporte un bonus au vendeur, même enchanté, abîmé ou
+  # renommé. Le bonus est versé en plus du prix payé par l'acheteur (argent créé : 15 % reste modéré).
+  # specialty-items-allowed : ces objets peuvent être exposés dans la boutique même s'ils ne sont pas uniques
+  # (un arc enchanté n'est pas une pièce unique, mais il a sa place chez l'armurier des arcs).
+  specialty-bonus-percent: 15
+  specialty-items-allowed: true
+  specialties:
+    arcs:
+      name: "<#C9A36B>Arcs & arbalètes"
+      icon: BOW
+      materials: [BOW, CROSSBOW]
+      description: ["<ash>Arcs, arbalètes, enchantés ou non."]
+    epees:
+      name: "<silver>Épées"
+      icon: DIAMOND_SWORD
+      name-ends-with: [_SWORD]
+      description: ["<ash>Toutes les épées, du bois à la netherite."]
+    haches:
+      name: "<silver>Haches"
+      icon: DIAMOND_AXE
+      name-ends-with: [_AXE]
+      materials: [MACE]
+      description: ["<ash>Haches et masses de guerre."]
+    casques:
+      name: "<steel>Casques"
+      icon: DIAMOND_HELMET
+      name-ends-with: [_HELMET]
+      description: ["<ash>Casques de toutes matières."]
+    plastrons:
+      name: "<steel>Plastrons"
+      icon: DIAMOND_CHESTPLATE
+      name-ends-with: [_CHESTPLATE]
+      description: ["<ash>Plastrons de toutes matières."]
+    jambieres:
+      name: "<steel>Jambières"
+      icon: DIAMOND_LEGGINGS
+      name-ends-with: [_LEGGINGS]
+      description: ["<ash>Jambières de toutes matières."]
+    bottes:
+      name: "<steel>Bottes"
+      icon: DIAMOND_BOOTS
+      name-ends-with: [_BOOTS]
+      description: ["<ash>Bottes de toutes matières."]
+    pioches:
+      name: "<#9FC3D9>Pioches & pelles"
+      icon: DIAMOND_PICKAXE
+      name-ends-with: [_PICKAXE, _SHOVEL]
+      description: ["<ash>L'outillage du mineur."]
+    outils-terre:
+      name: "<gain>Outils de la terre"
+      icon: DIAMOND_HOE
+      name-ends-with: [_HOE]
+      materials: [SHEARS, FISHING_ROD, BRUSH]
+      description: ["<ash>Houes, cisailles, cannes à pêche, pinceaux."]
+    livres:
+      name: "<#B48CFF>Livres enchantés"
+      icon: ENCHANTED_BOOK
+      materials: [ENCHANTED_BOOK]
+      description: ["<ash>Tous les livres enchantés."]
+    potions:
+      name: "<#E07FB0>Potions & flèches"
+      icon: SPLASH_POTION
+      materials: [POTION, SPLASH_POTION, LINGERING_POTION, TIPPED_ARROW, SPECTRAL_ARROW, ARROW]
+      description: ["<ash>Potions et flèches, pour l'alchimiste."]
+    vol:
+      name: "<#7FC8E0>Élytres & vol"
+      icon: ELYTRA
+      materials: [ELYTRA, FIREWORK_ROCKET, PHANTOM_MEMBRANE]
+      description: ["<ash>Élytres, fusées, membranes."]
+    survie:
+      name: "<#E2C27F>Totems & pommes dorées"
+      icon: TOTEM_OF_UNDYING
+      materials: [TOTEM_OF_UNDYING, GOLDEN_APPLE, ENCHANTED_GOLDEN_APPLE, GOLDEN_CARROT]
+      description: ["<ash>De quoi survivre à la guerre."]
+    trophees:
+      name: "<ruby_hi>Trophées & têtes"
+      icon: WITHER_SKELETON_SKULL
+      materials: [DRAGON_EGG, NETHER_STAR, BEACON, DRAGON_HEAD, PLAYER_HEAD, WITHER_SKELETON_SKULL, SKELETON_SKULL,
+        ZOMBIE_HEAD, CREEPER_HEAD, PIGLIN_HEAD, HEAVY_CORE]
+      description: ["<ash>Têtes, étoiles, œufs de dragon…"]
+    mer:
+      name: "<#4FB0C6>Trésors marins"
+      icon: TRIDENT
+      materials: [TRIDENT, HEART_OF_THE_SEA, CONDUIT, NAUTILUS_SHELL, TURTLE_HELMET, PRISMARINE_CRYSTALS]
+      description: ["<ash>Tridents, conduits, cœurs de la mer."]
+    art:
+      name: "<#D9A0FF>Art & ornements"
+      icon: WHITE_BANNER
+      name-starts-with: [MUSIC_DISC_]
+      name-ends-with: [_BANNER, _BANNER_PATTERN, _POTTERY_SHERD, _SMITHING_TEMPLATE]
+      materials: [GOAT_HORN, PAINTING, DECORATED_POT]
+      description: ["<ash>Bannières, gabarits, disques, tessons."]
+
+# ── Investissement AFK (/invest) ──────────────────────────────────
+# Le joueur place de l'argent ; il rapporte des intérêts SEULEMENT quand il est connecté dans une zone
+# d'investissement (délimitée avec /invest admin). Calibrage « pas trop abusé » :
+#   0,25 %/h × 8 h comptées par jour = 2 % par jour au plus, intérêts non composés.
+#   Colporteur (50 k placés)   : ≤ 1 000 $/jour   (8 h de farm actif : ~15 000 $)
+#   Négociant (300 k placés)   : ≤ 6 000 $/jour
+#   Prince marchand (2 M)      : ≤ 40 000 $/jour
+#   Au-delà de soft-cap investis sur tout le serveur, le taux baisse pour tous (soft-cap / total investi),
+#   sans descendre sous min-rate-factor × le taux : plus le serveur est riche, moins l'AFK rapporte.
+invest:
+  enabled: true
+  hourly-rate-percent: 0.25
+  max-hours-per-day: 8
+  soft-cap: 20000000
+  min-rate-factor: 0.25
+  min-deposit: 1000
+  withdraw-fee-percent: 1         # retirer le capital coûte 1 % (argent détruit)
+  # Capital maximum selon le rang de marchand (I → VI).
+  max-deposit-by-rank: [50000, 150000, 300000, 600000, 1000000, 2000000]
+
+# ── Remontée vers le site (VaeloriaBridge) ────────────────────────
+# Envoie SHOP_PURCHASE (achats ≥ min-purchase) et MERCHANT_RANK au site. À activer seulement quand l'API
+# connaît ces deux types d'événements.
+bridge:
+  # Indispensable pour la boutique web : envoie au site l'état des points (événements POINTS) et les gros achats.
+  enabled: true
+  min-purchase: 50000
+
+gui:
+  title: "<ruby_hi>◆</ruby_hi> <graphite>Marché de VÆLORIA"
+
+texts:
+  tool-footer: "<ruby>◆</ruby> <ash>Outil de <silver>VÆLORIA"
+  tool-uses: "<ash>Utilisations : <snow><uses></snow><ash>/<max>"
+  spawner-name: "<ruby_hi>Générateur <ash>·</ash> <snow><mob>"
+
+palette:
+  ruby: "#A3121E"
+  ruby_hi: "#D21F2F"
+  ruby_lo: "#5E0710"
+  snow: "#FFFFFF"
+  silver: "#D9DCE2"
+  steel: "#A9AEB8"
+  ash: "#6E737E"
+  graphite: "#2A2C33"
+  gain: "#5BD17A"
+  loss: "#E0525E"
+
+messages:
+  prefix: "<ruby_hi>◆</ruby_hi> <graphite>»</graphite> "
+  bought: "<steel>Acheté <snow><amount> × <item></snow> pour <ruby_hi><price></ruby_hi>."
+  bought-partial: "<ash>(demande réduite : place, argent ou limite du jour)"
+  # Boutique en points
+  premium-confirm: "<snow><item></snow> <steel>pour <gold><price></gold> : <snow>Maj + clic gauche</snow> pour confirmer."
+  premium-bought: "<gain>Merci !</gain> <snow><item></snow> <steel>pour <gold><price></gold>. Il te reste <gold><balance></gold>."
+  points-missing: "<loss>Il te faut <gold><price></gold> (tu as <gold><balance></gold>). <click:open_url:'<url>'><hover:show_text:'<steel>Ouvrir la boutique du site'><gold><u>Obtenir des points</u></gold></hover></click>"
+  points-balance: "<steel>Tu as <gold><balance></gold> <ash>(dépensé : <spent>)</ash>. <click:run_command:'/boutique'><hover:show_text:'<steel>Ouvrir /boutique'><ruby_hi>[/boutique]</ruby_hi></hover></click> <click:open_url:'<url>'><hover:show_text:'<steel>Ouvrir la boutique du site'><gold><u>Obtenir des points</u></gold></hover></click>"
+  points-store: "<steel>Points boutique : <click:open_url:'<url>'><hover:show_text:'<steel>Ouvrir la boutique du site'><gold><u><url></u></gold></hover></click>"
+  points-received: "<gain>+<amount></gain> <steel>reçus ! Total : <gold><balance></gold>. <click:run_command:'/boutique'><hover:show_text:'<steel>Ouvrir /boutique'><ruby_hi>[/boutique]</ruby_hi></hover></click>"
+  points-changed: "<steel>Points de <snow><player></snow> : <gold><balance></gold>."
+  points-of: "<steel><snow><player></snow> a <gold><balance></gold>, dépensé au total : <gold><spent></gold>."
+  points-too-low: "<loss><player> n'a que <balance> : retrait impossible."
+  points-unknown: "<loss>Joueur inconnu : <player> (jamais connecté ? utilise son UUID)."
+  usage-points: "<steel>/points give|take|set|setspent <joueur|uuid> <points> [raison] · /points deban <joueur|uuid> · /points <joueur>"
+  grade-unlocked: "<gain>Nouveau grade !</gain> <steel>Tes achats en boutique te font passer <grade><steel>. Merci pour ton soutien !"
+  grade-unlocked-broadcast: "<snow><player></snow> <steel>devient <grade> <steel>grâce à son soutien ! <ruby_hi>[/boutique]"
+  kit-use: "<steel>Récupère ton kit avec <snow>/kit <kit></snow>."
+  deban-done: "<gain><player> est débanni (points débités)."
+  deban-not-banned: "<loss><player> n'est pas banni : aucun point débité."
+  deban-max: "<loss><player> a déjà utilisé tous ses débans : aucun point débité."
+  deban-no-points: "<loss><player> n'a pas assez de points pour ce déban : rien n'a été fait."
+  kit-owned: "<steel>Tu possèdes déjà ce kit : récupère-le avec <snow>/kit <kit></snow>."
+  kit-error: "<loss>L'achat n'a pas pu être activé (LuckPerms absent ?). Tes points ont été rendus."
+  sold: "<steel>Vendu <snow><amount> × <item></snow> pour <gain><price></gain>."
+  sold-many: "<steel>Vendu <snow><amount></snow> objets (<kinds> sortes) pour <gain><price></gain>."
+  nothing-to-sell: "<loss>Rien de rachetable ici."
+  not-sellable: "<loss>Le marché ne rachète pas cet objet."
+  not-enough-money: "<loss>Il te faut <snow><price></snow> (tu as <snow><balance></snow>)."
+  inventory-full: "<loss>Ton inventaire est plein."
+  daily-limit: "<loss>Limite du jour atteinte (<limit>). Reviens demain !"
+  locked: "<loss>Article réservé au rang <rank><loss>. Vends au marché pour monter en rang."
+  economy-error: "<loss>La transaction a échoué, rien n'a été débité."
+  worth: "<item> <steel>: <snow><unit></snow> l'unité (marché <market> %). Tes <amount> → <gain><total></gain>."
+  rank-up: "<steel>Tu es maintenant <rank><steel> ! Bonus de vente : <gain>+<bonus> %</gain>."
+  rank-up-title: "<ruby_hi><b>NOUVEAU RANG"
+  rank-up-subtitle: "<rank>"
+  rank-up-broadcast: "<snow><player></snow> <steel>devient <rank><steel> du marché de VÆLORIA !"
+  wand-no-access: "<loss>Tu n'as pas accès à ce coffre."
+  wand-empty: "<loss>Rien de rachetable dans ce coffre."
+  wand-broken: "<loss>Ta baguette de vente s'est brisée."
+  spawner-need-silk: "<loss>Il faut une pioche Toucher de soie pour récupérer ce générateur."
+  players-only: "<loss>Commande réservée aux joueurs."
+  no-permission: "<loss>Tu n'as pas la permission."
+  usage-sell: "<steel>/vendre <ash>(comptoir)</ash>, /vendre main, /vendre tout"
+  usage-admin: "<steel>/shop admin reload | give <joueur> <article> [n] | vendu <joueur> <montant> | reset <joueur> | marche | info <article>"
+  admin-reset: "<steel>Progression de marchand de <player> remise à zéro."
+  reloaded: "<gain>VæloriaShop rechargé : <items> articles."
+  admin-unknown: "<loss>Joueur ou article inconnu."
+  admin-given: "<steel>Donné <amount> × <item> à <player>."
+  admin-sold: "<steel><player> : <amount> vendus → <rank>"
+  admin-market-reset: "<steel>Saturation du marché remise à zéro."
+  admin-info: "<steel><item> : pression <pressure>, marché <market> %, cours du jour : <featured>"
+  # Hôtel des ventes
+  hdv-listed: "<steel>En vente : <snow><amount> × <item></snow> pour <ruby_hi><price></ruby_hi> <ash>(frais <fee>, <duration>)."
+  hdv-broadcast: "<snow><player></snow> <steel>vend <snow><amount> × <item></snow> pour <ruby_hi><price></ruby_hi> à l'hôtel des ventes. <ash>[/hdv]"
+  hdv-bought: "<steel>Acheté <snow><amount> × <item></snow> à <snow><seller></snow> pour <ruby_hi><price></ruby_hi>."
+  hdv-sold: "<gain>Vendu !</gain> <snow><amount> × <item></snow> <steel>à <snow><buyer></snow> : <gain>+<net></gain> <ash>(taxe <tax>)."
+  hdv-expired: "<steel>Ton annonce <snow><item></snow> a expiré : récupère-la avec <snow>/hdv entrepot</snow>."
+  hdv-offline-sales: "<steel>Pendant ton absence : <snow><count></snow> vente(s) à l'hôtel des ventes, <gain>+<net></gain>."
+  hdv-storage-waiting: "<steel><snow><count></snow> objet(s) t'attendent à l'entrepôt de l'HDV. <ruby_hi>[Cliquer ici]"
+  hdv-search-prompt: "<steel>Tape ta recherche dans le chat <ash>(nom anglais : diamond, sword… ou pseudo du vendeur). « annuler » pour revenir."
+  hdv-price-prompt: "<steel>Tape le prix total dans le chat <ash>(ex. 2500, 12,5k, 1.2m). « annuler » pour revenir."
+  hdv-price-invalid: "<loss>Prix illisible. Exemples : 2500, 12,5k, 1.2m"
+  hdv-blacklisted: "<loss>Cet objet ne peut pas être vendu à l'hôtel des ventes."
+  hdv-too-many: "<loss>Tu as déjà <max> annonces : c'est ta limite. Monte en rang de marchand pour en avoir plus."
+  hdv-price-bounds: "<loss>Le prix doit être entre <min> et <max>."
+  hdv-no-fee: "<loss>Il te faut <fee> pour les frais de mise en vente."
+  hdv-cancelled: "<steel>Annonce retirée."
+  hdv-gone: "<loss>Cette annonce n'existe plus."
+  hdv-claimed: "<steel><count> objet(s) récupéré(s)."
+  hdv-disabled: "<loss>L'hôtel des ventes est fermé pour le moment."
+  hdv-hand-empty: "<loss>Prends en main l'objet à vendre."
+  hdv-admin-removed: "<steel>Annonce #<id> renvoyée à l'entrepôt de son vendeur."
+  usage-hdv: "<steel>/hdv <ash>|</ash> /hdv vendre [prix] [quantité] <ash>|</ash> /hdv ventes <ash>|</ash> /hdv entrepot <ash>|</ash> /hdv historique"
+  hdv-unique: "<loss>Objet unique : il se vend uniquement dans une boutique de joueur. <ash>(/pshop)"
+  # Boutiques de joueurs
+  plot-rented: "<gain>Parcelle louée !</gain> <steel><plot> est à toi pour <snow><weeks></snow> semaine(s) (<snow><price></snow>). Clic droit sur le comptoir pour gérer ta vitrine."
+  plot-opened-broadcast: "<snow><player></snow> <steel>ouvre sa boutique à la spawn (<plot>). <ash>/pshop"
+  plot-extended: "<steel>Bail prolongé d'une semaine (<snow><price></snow>). Il reste <snow><left></snow>."
+  plot-too-far: "<loss>Tu ne peux pas payer plus de <weeks> semaines d'avance."
+  plot-auto-renewed: "<steel>Loyer de ta boutique renouvelé automatiquement (<snow><price></snow>)."
+  plot-expiring: "<#E2A05A>Le bail de ta boutique se termine dans <left>. <steel>/pshop gerer pour prolonger."
+  plot-grace: "<loss>Ta boutique est FERMÉE (loyer impayé). <steel>Prolonge-la dans les <snow><left></snow>, sinon la parcelle sera libérée."
+  plot-evicted: "<loss>Ta parcelle <plot> a été libérée (loyer impayé). <steel>Tes objets sont à l'entrepôt : <snow>/hdv entrepot</snow>."
+  plot-evicted-admin: "<loss>Le staff a libéré ta parcelle <plot>. <steel>Tes objets sont à l'entrepôt : <snow>/hdv entrepot</snow>."
+  plot-terminated: "<steel>Location résiliée. Tes objets sont à l'entrepôt : <snow>/hdv entrepot</snow>."
+  plot-taken: "<loss>Cette parcelle vient d'être louée."
+  plot-already-has: "<loss>Tu as déjà une boutique."
+  plot-not-ready: "<loss>Cette parcelle n'est pas encore prête."
+  plot-none: "<loss>Tu n'as pas de boutique. <steel>/pshop pour en louer une."
+  plot-disabled: "<loss>Les boutiques de joueurs sont fermées pour le moment."
+  plot-no-build: "<loss>Cette parcelle ne t'appartient pas."
+  plot-teleported: "<steel>Bienvenue à <snow><plot></snow>."
+  plot-not-listable: "<loss>Ta boutique n'expose que des objets uniques ou de ta spécialité (<specialty><loss>)."
+  plot-full: "<loss>Ta vitrine est pleine."
+  plot-price-prompt: "<steel>Prix de vente de <snow><item></snow> ? Tape-le dans le chat <ash>(ex. 25000, 80k, 1.5m). « annuler » pour reprendre l'objet."
+  plot-offer-added: "<steel>En vitrine : <snow><item></snow> pour <ruby_hi><price></ruby_hi>."
+  plot-offer-removed: "<steel>Objet retiré de la vitrine."
+  plot-to-storage: "<steel>Inventaire plein : l'objet est à ton entrepôt (<snow>/hdv entrepot</snow>)."
+  plot-name-prompt: "<steel>Nouveau nom de ta boutique ? <ash>(32 caractères max, « annuler » pour garder l'actuel)"
+  plot-bought: "<steel>Acheté <snow><amount> × <item></snow> chez <snow><shop></snow> pour <ruby_hi><price></ruby_hi>."
+  plot-sold: "<gain>Vendu en boutique !</gain> <snow><item></snow> <steel>à <snow><buyer></snow> : <gain>+<net></gain> <ash>(taxe <tax>)."
+  plot-sold-bonus: "<gain>✦ Bonus de spécialité</gain> <steel>(<specialty><steel>) : <gain>+<bonus></gain> <ash>(+<percent> %)."
+  plot-offline-sales: "<steel>Pendant ton absence, ta boutique a vendu <snow><count></snow> objet(s) : <gain>+<net></gain>."
+  plot-closed: "<loss>Cette boutique est fermée."
+  plot-admin-wand: "<steel>Baguette donnée : clic gauche = coin 1, clic droit = coin 2."
+  plot-admin-corner: "<steel>Coin <n> : <snow><pos></snow><size>"
+  plot-admin-done: "<gain>C'est fait."
+  plot-admin-rented: "<loss>Parcelle louée : impossible tant que le bail court."
+  plot-admin-counter-outside: "<loss>Vise un bloc à l'intérieur de la parcelle (6 blocs max)."
+  plot-admin-name-prompt: "<steel>Nom de la parcelle ? <ash>(ex. « Allée du Marché 3 »)"
+  plot-admin-bounds-no_selection: "<loss>Sélectionne d'abord 2 coins avec la baguette."
+  plot-admin-bounds-other_world: "<loss>Les 2 coins doivent être dans le même monde."
+  plot-admin-bounds-too_big: "<loss>Zone trop grande (player-shops.max-volume)."
+  plot-admin-bounds-overlap: "<loss>Cette zone chevauche une autre parcelle."
+  plot-admin-bounds-rented: "<loss>Parcelle louée : libère-la avant de la redélimiter."
+  usage-pshop: "<steel>/pshop <ash>|</ash> /pshop gerer <ash>|</ash> /pshop admin [n° | baguette]"
+  # Investissement
+  invest-deposited: "<steel>Placé <snow><amount></snow>. Capital investi : <ruby_hi><total></ruby_hi>. <ash>Reste AFK dans la zone pour le faire fructifier."
+  invest-claimed: "<gain>+<amount></gain> <steel>d'intérêts versés sur ton solde."
+  invest-withdrawn: "<steel>Capital retiré : <snow><amount></snow> <ash>(frais <fee>)."
+  invest-too-small: "<loss>Dépôt minimum : <min>."
+  invest-max: "<loss>Ton capital est au maximum de ton rang (<max>). Monte en rang de marchand pour placer plus."
+  invest-disabled: "<loss>L'investissement est fermé pour le moment."
+  invest-no-gains: "<loss>Pas encore d'intérêts à récupérer."
+  invest-nothing: "<loss>Tu n'as rien d'investi."
+  invest-prompt: "<steel>Combien veux-tu placer ? <ash>(ex. 25000, 50k) « annuler » pour revenir."
+  invest-teleported: "<steel>Bienvenue dans la zone d'investissement. Reste ici : ton argent travaille."
+  invest-left: "<ash>Tu quittes la zone d'investissement : les intérêts s'arrêtent."
+  invest-title: "<ruby_hi><b>Zone d'investissement"
+  invest-subtitle: "<ash>Ton argent rapporte <gain><rate></gain><ash> / heure"
+  invest-subtitle-empty: "<ash>Place ton argent avec <snow>/invest"
+  invest-bar: "<ruby_hi>◆</ruby_hi> <ash>Investi <snow><principal></snow> <graphite>·</graphite> <gain>+<rate>/h</gain> <graphite>·</graphite> <ash>intérêts <gain><gains></gain> <graphite>·</graphite> <ash><time> / <hours>"
+  invest-bar-empty: "<ruby_hi>◆</ruby_hi> <ash>Zone d'investissement : <snow>/invest</snow> <ash>pour placer ton argent"
+  invest-bar-capped: "<ruby_hi>◆</ruby_hi> <ash>Plafond du jour atteint (<hours>) · intérêts <gain><gains></gain> <ash>· reviens demain"
+  invest-zone-created: "<gain><zone> créée</gain> <ash>(<size>). Maj + clic dessus pour fixer le point d'arrivée."
+  usage-invest: "<steel>/invest <ash>|</ash> /invest placer <montant> <ash>|</ash> /invest recuperer <ash>|</ash> /invest retirer"

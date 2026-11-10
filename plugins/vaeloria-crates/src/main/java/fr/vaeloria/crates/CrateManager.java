@@ -149,15 +149,15 @@ public final class CrateManager {
             ConfigurationSection s = root.getConfigurationSection(id);
             try {
                 String name = s.getString("name", id);
-                String keyData = s.getString("key");
-                Crate crate = new Crate(id, name, keyData == null ? defaultKey(name) : Items.decode(keyData));
+                ItemStack keyItem = Items.read(s, "key");
+                Crate crate = new Crate(id, name, keyItem == null ? defaultKey(name) : keyItem);
                 crate.animation(s.getBoolean("animation", true));
                 ConfigurationSection rewards = s.getConfigurationSection("rewards");
                 if (rewards != null) {
                     for (String i : rewards.getKeys(false)) {
                         ConfigurationSection r = rewards.getConfigurationSection(i);
                         try {
-                            Reward reward = new Reward(Items.decode(r.getString("item")), r.getInt("weight", 10));
+                            Reward reward = new Reward(Items.read(r, "item"), r.getInt("weight", 10));
                             reward.giveItem(r.getBoolean("give-item", true));
                             reward.broadcast(r.getBoolean("broadcast", false));
                             reward.commands().addAll(r.getStringList("commands"));
@@ -184,7 +184,7 @@ public final class CrateManager {
         YamlConfiguration yml = new YamlConfiguration();
         yml.options().setHeader(List.of(
                 "Coffres VaeloriaCrates — modifiés en jeu avec /crate admin.",
-                "Les objets sont encodés (format Paper) : ne pas éditer « key » ni « item » à la main."));
+                "Les objets sont encodés (format Paper). Un « item » ou « key » peut aussi être écrit en clair (material, name, lore, enchants) : il est réencodé ici."));
         for (Crate c : crates.values()) {
             String base = "crates." + c.id() + ".";
             yml.set(base + "name", c.name());
