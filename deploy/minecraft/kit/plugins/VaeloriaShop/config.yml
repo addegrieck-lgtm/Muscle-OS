@@ -191,6 +191,11 @@ points:
   # vraie aussi pour les grades qui en héritent. Rattrapé à chaque connexion si LuckPerms était indisponible.
   grade-command: "lp user {player} parent add {grade}"
 
+# ── Déban (payé en points, envoyé par le site : « points deban <uuid> ») ──
+# Prix selon le nombre de débans déjà achetés. Au-delà de la liste : plus de déban possible.
+deban:
+  prices: [1000, 2500]
+
 # ── Kits (catégorie « kits » de shop.yml) ─────────────────────────
 # On achète l'ACCÈS DÉFINITIF à un kit EssentialsX, puis la commande console ci-dessous l'accorde.
 # Le contenu et le délai de chaque kit se règlent dans plugins/Essentials/kits.yml.
@@ -379,7 +384,8 @@ invest:
 # Envoie SHOP_PURCHASE (achats ≥ min-purchase) et MERCHANT_RANK au site. À activer seulement quand l'API
 # connaît ces deux types d'événements.
 bridge:
-  enabled: true   # API workers.dev : accepte POINTS, SHOP_PURCHASE, MERCHANT_RANK (progression sur /boutique)
+  # Indispensable pour la boutique web : envoie au site l'état des points (événements POINTS) et les gros achats.
+  enabled: true
   min-purchase: 50000
 
 gui:
@@ -417,10 +423,14 @@ messages:
   points-of: "<steel><snow><player></snow> a <gold><balance></gold>, dépensé au total : <gold><spent></gold>."
   points-too-low: "<loss><player> n'a que <balance> : retrait impossible."
   points-unknown: "<loss>Joueur inconnu : <player> (jamais connecté ? utilise son UUID)."
-  usage-points: "<steel>/points give|take|set|setspent <joueur|uuid> <points> [raison] · /points <joueur>"
+  usage-points: "<steel>/points give|take|set|setspent <joueur|uuid> <points> [raison] · /points deban <joueur|uuid> · /points <joueur>"
   grade-unlocked: "<gain>Nouveau grade !</gain> <steel>Tes achats en boutique te font passer <grade><steel>. Merci pour ton soutien !"
   grade-unlocked-broadcast: "<snow><player></snow> <steel>devient <grade> <steel>grâce à son soutien ! <ruby_hi>[/boutique]"
   kit-use: "<steel>Récupère ton kit avec <snow>/kit <kit></snow>."
+  deban-done: "<gain><player> est débanni (points débités)."
+  deban-not-banned: "<loss><player> n'est pas banni : aucun point débité."
+  deban-max: "<loss><player> a déjà utilisé tous ses débans : aucun point débité."
+  deban-no-points: "<loss><player> n'a pas assez de points pour ce déban : rien n'a été fait."
   kit-owned: "<steel>Tu possèdes déjà ce kit : récupère-le avec <snow>/kit <kit></snow>."
   kit-error: "<loss>L'achat n'a pas pu être activé (LuckPerms absent ?). Tes points ont été rendus."
   sold: "<steel>Vendu <snow><amount> × <item></snow> pour <gain><price></gain>."

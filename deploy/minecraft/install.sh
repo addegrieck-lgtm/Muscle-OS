@@ -69,15 +69,19 @@ fi
 
 STAGE="$(mktemp -d)"; trap 'rm -rf "$STAGE"' EXIT
 cp -R "$KIT/plugins/." "$STAGE/"
+# La config du Bridge est livrée en modèle (config.yml.modele) : copiée à la main par erreur, elle ne peut pas
+# écraser la vraie config du serveur. Seul ce script la transforme en config.yml, avec le secret.
+BRIDGE_CFG="VaeloriaBridge/config.yml"
+mv "$STAGE/$BRIDGE_CFG.modele" "$STAGE/$BRIDGE_CFG"
 
 # ── Secret VaeloriaBridge ─────────────────────────────────────────────
-BRIDGE_CFG="VaeloriaBridge/config.yml"
 current_secret() {
   [[ -f "$PLUGINS/$BRIDGE_CFG" ]] || return 0
   sed -n -E 's/^  secret:[[:space:]]*"?([^"#[:space:]]*)"?.*$/\1/p' "$PLUGINS/$BRIDGE_CFG" | head -1
 }
 SECRET="$(current_secret)"
-if [[ "$SECRET" == "__BRIDGE_SECRET__" || "$SECRET" == "CHANGE_ME" ]]; then SECRET=""; fi
+# Placeholder du kit, exemple du jar (REMPLACER_PAR_LE_SECRET) ou trop court : le Bridge le refuserait.
+if [[ "$SECRET" == "__BRIDGE_SECRET__" || "$SECRET" == REMPLACER* || ${#SECRET} -lt 32 ]]; then SECRET=""; fi
 if ((NEW_SECRET)) || [[ -z "$SECRET" ]]; then
   if ((DRY)); then
     say "Bridge   : secret à saisir lors de la vraie installation (non demandé en --dry-run)"

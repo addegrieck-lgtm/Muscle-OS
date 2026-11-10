@@ -409,6 +409,208 @@ categories:
           - "<steel>• 3 pommes dorées, 32 carottes dorées"
           - "<graphite>Valeur ≈ 13 000 $ par récupération"
 
+  # ─────────────────────────────────────────────────────────────────
+  # Clés de caisse (VaeloriaCrates). Le 3e mot de la commande est l'identifiant du coffre : à aligner sur
+  # /crate list (coffre_vote sur le serveur). Livrées par commande, le joueur doit avoir une case libre.
+  cles:
+    name: "<gold><b>Clés de caisse"
+    icon: TRIPWIRE_HOOK
+    slot: 29
+    premium: true
+    description:
+      - "<ash>Ouvre les coffres du spawn."
+      - "<ash>Les lots annoncés à tout le serveur."
+    items:
+      cle_vote:
+        material: TRIPWIRE_HOOK
+        name: "<silver><b>Clé Vote"
+        points: 50
+        commands: ["crate give {player} coffre_vote 1"]
+        lore: ["<steel>• 1 clé du coffre Vote"]
+      # Clés Rare (150 points) et Légendaire (400 points) : à remettre quand les coffres « rare » et
+      # « legendaire » existeront dans VaeloriaCrates (/crate list), sinon les points sont débités sans clé.
+
+  # ─────────────────────────────────────────────────────────────────
+  # Outils de VÆLORIA en points (ils restent aussi au marché en $, avec leur rang requis).
+  outils_boutique:
+    name: "<gradient:#D21F2F:#E2C27F><b>Outils</gradient>"
+    icon: NETHERITE_HOE
+    slot: 31
+    premium: true
+    description:
+      - "<ash>Les outils qui font la différence,"
+      - "<ash>sans attendre le rang de marchand."
+    items:
+      p_houe_moisson_2:     { tool: houe-moisson-2, points: 300 }
+      p_hache_bucheron:     { tool: hache-bucheron, points: 200 }
+      p_baguette_vente_100: { tool: baguette-vente-100, points: 150 }
+      p_baguette_vente_500: { tool: baguette-vente-500, points: 500 }
+      p_pioche_abysses:     { tool: pioche-abysses, points: 900 }
+      p_houe_moisson_3:     { tool: houe-moisson-3, points: 1500 }
+
+  # ─────────────────────────────────────────────────────────────────
+  # Packs de ressources, livrés par /give (ce qui ne tient pas dans l'inventaire tombe au sol).
+  ressources:
+    name: "<ruby><b>Ressources"
+    icon: OBSIDIAN
+    slot: 33
+    premium: true
+    description:
+      - "<ash>Obsidienne, TNT, minerais :"
+      - "<ash>de quoi bâtir et raider."
+    items:
+      pack_obsidienne:
+        material: OBSIDIAN
+        name: "<ruby_hi><b>Pack Obsidienne"
+        points: 600
+        commands: ["give {player} obsidian 16"]
+        lore: ["<steel>• 16 obsidiennes"]
+      pack_tnt:
+        material: TNT
+        name: "<ruby_hi><b>Pack TNT"
+        points: 400
+        commands: ["give {player} tnt 64"]
+        lore: ["<steel>• 64 TNT"]
+      pack_diamants:
+        material: DIAMOND
+        name: "<#7FE0E0><b>Pack Diamants"
+        points: 300
+        commands: ["give {player} diamond 32"]
+        lore: ["<steel>• 32 diamants"]
+      pack_fer_or:
+        material: IRON_INGOT
+        name: "<silver><b>Pack Fer & Or"
+        points: 250
+        commands: ["give {player} iron_ingot 128", "give {player} gold_ingot 64"]
+        lore: ["<steel>• 128 lingots de fer", "<steel>• 64 lingots d'or"]
+
+  # ─────────────────────────────────────────────────────────────────
+  # Packs : plusieurs articles de la boutique d'un coup, 20 à 28 % moins chers qu'à l'unité.
+  # value = prix des articles achetés séparément (affiché barré sur le site, ignoré par le plugin).
+  # Livraison par commandes console : « shop admin give » pour les outils et spawners (identifiants de ce
+  # fichier), « crate give » pour les clés, « give » pour les ressources. Ce qui ne tient pas dans
+  # l'inventaire tombe aux pieds du joueur. Attention : un identifiant mal écrit dans « shop admin give »
+  # ne livre rien mais débite quand même, à vérifier avec /shop admin give <toi> <article> avant de publier.
+  # Pas de kit dans les packs : un joueur qui possède déjà le kit paierait pour rien.
+  packs:
+    name: "<gradient:#E2C27F:#D21F2F><b>Packs</gradient>"
+    icon: ENDER_CHEST
+    slot: 13
+    premium: true
+    description:
+      - "<ash>Plusieurs articles d'un coup,"
+      - "<gain>jusqu'à −28 %</gain> <ash>par rapport à l'unité."
+    items:
+      pack_debutant:
+        material: CHEST
+        name: "<silver><b>Pack Débutant"
+        points: 650
+        value: 900
+        commands:
+          - "crate give {player} vote 2"
+          - "shop admin give {player} houe_moisson_2 1"
+          - "shop admin give {player} hache_bucheron 1"
+          - "shop admin give {player} baguette_vente_100 1"
+          - "shop admin give {player} spawner_zombie 1"
+        lore:
+          - "<steel>• Houe de moisson II"
+          - "<steel>• Hache du bûcheron"
+          - "<steel>• Baguette de vente (100)"
+          - "<steel>• Spawner Zombie"
+          - "<steel>• 2 clés Vote"
+          - "<gain>−28 %</gain> <graphite>· 900 points à l'unité"
+      pack_cles:
+        material: TRIPWIRE_HOOK
+        name: "<gold><b>Pack Clés"
+        points: 850
+        value: 1100
+        commands:
+          - "crate give {player} vote 5"
+          - "crate give {player} rare 3"
+          - "crate give {player} legendaire 1"
+        lore:
+          - "<steel>• 5 clés Vote"
+          - "<steel>• 3 clés Rare"
+          - "<steel>• 1 clé Légendaire"
+          - "<gain>−23 %</gain> <graphite>· 1 100 points à l'unité"
+      pack_mineur:
+        material: DIAMOND_PICKAXE
+        name: "<#7FE0E0><b>Pack Mineur"
+        points: 1150
+        value: 1450
+        commands:
+          - "shop admin give {player} pioche_abysses 1"
+          - "give {player} diamond 32"
+          - "give {player} iron_ingot 128"
+          - "give {player} gold_ingot 64"
+        lore:
+          - "<steel>• Pioche des abysses"
+          - "<steel>• 32 diamants"
+          - "<steel>• 128 lingots de fer, 64 lingots d'or"
+          - "<gain>−21 %</gain> <graphite>· 1 450 points à l'unité"
+      pack_pillard:
+        material: TNT
+        name: "<ruby_hi><b>Pack Pillard"
+        points: 1290
+        value: 1650
+        commands:
+          - "crate give {player} rare 1"
+          - "shop admin give {player} spawner_creeper 1"
+          - "give {player} tnt 128"
+        lore:
+          - "<steel>• 128 TNT"
+          - "<steel>• Spawner Creeper"
+          - "<steel>• 1 clé Rare"
+          - "<gain>−22 %</gain> <graphite>· 1 650 points à l'unité"
+      pack_bastion:
+        material: OBSIDIAN
+        name: "<ruby><b>Pack Bastion"
+        points: 1590
+        value: 2000
+        commands:
+          - "shop admin give {player} spawner_skeleton 1"
+          - "shop admin give {player} spawner_spider 1"
+          - "give {player} obsidian 32"
+        lore:
+          - "<steel>• 32 obsidiennes"
+          - "<steel>• Spawner Squelette"
+          - "<steel>• Spawner Araignée"
+          - "<gain>−20 %</gain> <graphite>· 2 000 points à l'unité"
+      pack_fermier:
+        material: NETHERITE_HOE
+        name: "<gain><b>Pack Grand Domaine"
+        points: 2490
+        value: 3150
+        commands:
+          - "shop admin give {player} houe_moisson_3 1"
+          - "shop admin give {player} baguette_vente_500 1"
+          - "shop admin give {player} spawner_chicken 1"
+          - "shop admin give {player} spawner_pig 1"
+        lore:
+          - "<steel>• Houe de moisson III"
+          - "<steel>• Grande baguette de vente (500)"
+          - "<steel>• Spawner Poulet"
+          - "<steel>• Spawner Cochon"
+          - "<gain>−21 %</gain> <graphite>· 3 150 points à l'unité"
+      pack_empire:
+        material: BEACON
+        name: "<gradient:#FFFFFF:#E2C27F><b>Pack Empire</gradient>"
+        points: 5990
+        value: 8100
+        commands:
+          - "crate give {player} legendaire 2"
+          - "shop admin give {player} spawner_golem 1"
+          - "shop admin give {player} spawner_blaze 1"
+          - "shop admin give {player} spawner_enderman 1"
+          - "give {player} obsidian 32"
+        lore:
+          - "<steel>• Spawner Golem de fer"
+          - "<steel>• Spawner Blaze"
+          - "<steel>• Spawner Enderman"
+          - "<steel>• 32 obsidiennes"
+          - "<steel>• 2 clés Légendaire"
+          - "<gain>−26 %</gain> <graphite>· 8 100 points à l'unité"
+
 # ═════════════════════════════════════════════════════════════════════
 # Grades : ils ne s'achètent PAS. Chaque point boutique dépensé (kits, spawners) compte, et le grade tombe
 # tout seul au palier (spent = points dépensés au total, 1 € = 100 points). Commande : points.grade-command.
@@ -418,3 +620,6 @@ grade-tiers:
   seigneur:  { spent: 2500, name: "<#D9DCE2>Seigneur" }
   roi:       { spent: 5000, name: "<#E2C27F>Roi" }
   vaelorian: { spent: 8000, name: "<gradient:#FFFFFF:#D9DCE2>VÆLORIAN</gradient>" }
+
+# Packs de points vendus sur le site (1 € = 100 points). Lu par le site et par l'API de paiement.
+points-packs: [500, 1000, 2500, 5000, 8000]
