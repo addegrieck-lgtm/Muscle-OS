@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<defs>
+  <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/>
+    <stop offset="0.45" stop-color="#D9DCE2"/>
+    <stop offset="0.55" stop-color="#A9AEB8"/>
+    <stop offset="1" stop-color="#E6E8EC"/>
+  </linearGradient>
+  <linearGradient id="silverText" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="100">
+    <stop offset="0" stop-color="#FFFFFF"/>
+    <stop offset="0.48" stop-color="#E2E4E9"/>
+    <stop offset="0.52" stop-color="#AEB3BC"/>
+    <stop offset="1" stop-color="#D6D9DF"/>
+  </linearGradient>
+  <linearGradient id="rubyText" gradientUnits="userSpaceOnUse" x1="0" y1="62" x2="0" y2="86">
+    <stop offset="0" stop-color="#D21F2F"/>
+    <stop offset="1" stop-color="#5E0710"/>
+  </linearGradient>
+  <linearGradient id="silverDark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#B9BDC6"/>
+    <stop offset="1" stop-color="#6E737E"/>
+  </linearGradient>
+  <linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2A2C33"/>
+    <stop offset="1" stop-color="#07070A"/>
+  </linearGradient>
+  <linearGradient id="ruby" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#D21F2F"/>
+    <stop offset="1" stop-color="#5E0710"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
+    <stop offset="0" stop-color="#2A0A0E" stop-opacity="0.9"/>
+    <stop offset="1" stop-color="#07070A" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<g>
+  <path d="M256 40 L300 100 L360 72 L432 104 L432 264 C432 360 360 420 256 472 C152 420 80 360 80 264 L80 104 L152 72 L212 100 Z" fill="url(#silver)"/>
+  <path d="M256 40 L300 100 L360 72 L432 104 L432 264 C432 360 360 420 256 472 C152 420 80 360 80 264 L80 104 L152 72 L212 100 Z" transform="translate(256 262) scale(0.875) translate(-256 -262)" fill="url(#core)"/>
+  <polygon points="160,150 187,150 256,350 256,400" fill="#F4F5F7"/>
+  <polygon points="187,150 214,150 256,300 256,350" fill="url(#silverDark)"/>
+  <polygon points="352,150 325,150 256,350 256,400" fill="#A9AEB8"/>
+  <polygon points="325,150 298,150 256,300 256,350" fill="#E1E3E8"/>
+  <polygon points="256,150 276,188 256,272 236,188" fill="url(#ruby)"/>
+  <polygon points="256,150 276,188 256,188" fill="#D21F2F" opacity="0.55"/>
+</g></svg>
