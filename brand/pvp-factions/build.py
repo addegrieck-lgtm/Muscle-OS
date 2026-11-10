@@ -126,9 +126,8 @@ PIX = {
 }
 
 
-def pixel_sword_grid():
+def pixel_sword_grid(tip=18):
     cells = {}
-    tip = 18
     for x in range(6, tip + 1):  # lame le long de x + y = 15
         y = 15 - x
         cells[(x, y)] = "W"
@@ -153,9 +152,9 @@ def pixel_sword_grid():
     return out
 
 
-def pixel_sword(cell, mirror=False):
+def pixel_sword(cell, mirror=False, tip=18):
     rects = []
-    for (x, y), c in pixel_sword_grid().items():
+    for (x, y), c in pixel_sword_grid(tip).items():
         px = (15 - x) if mirror else x
         rects.append(f'<rect x="{px * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="{PIX[c]}"/>')
     return f'<g shape-rendering="crispEdges">{"".join(rects)}</g>'
@@ -176,3 +175,100 @@ out("vaeloria-pvp-factions-pixel-logo-transparent.svg", doc(W, H, main_px, bg=Fa
 icon_px = (f'<ellipse cx="540" cy="520" rx="470" ry="440" fill="url(#glow)"/>'
            + place(emblem_pixel(), 540 - 256 * 1.02, 540 - 300 * 1.02, 1.02))
 out("vaeloria-pvp-factions-pixel-profil.svg", doc(P, P, icon_px))
+
+
+# --------------------------------------------------------------------------- variante tout pixel
+# Bouclier dessiné à la main sur une grille 16 × 18, comme une texture d'objet Minecraft,
+# avec la même taille de pixel que les épées.
+SHIELD_MASK = [
+    ".......##.......",
+    "......####......",
+    "##...######...##",
+    "####.######.####",
+    "################",
+    "################",
+    "################",
+    "################",
+    "################",
+    "################",
+    "################",
+    ".##############.",
+    ".##############.",
+    "..############..",
+    "...##########...",
+    "....########....",
+    "......####......",
+    ".......##.......",
+]
+# V et gemme posés sur le cœur : A/B branche gauche (claire/ombre), D/C branche droite, R/r rubis
+V_LAYER = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "...AB..RR..DC...",
+    "...AB..Rr..DC...",
+    "....AB.rr.DC....",
+    "....AB.rr.DC....",
+    ".....AB..DC.....",
+    ".....AB..DC.....",
+    "......ABDC......",
+    "......ABDC......",
+    ".......AC.......",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+V_COL = {"A": "#F4F5F7", "B": "#9EA3AD", "C": "#A9AEB8", "D": "#E1E3E8", "R": "#D21F2F", "r": "#7A0A14"}
+
+
+def pixel_shield(cell, x0, y0):
+    filled = {(x, y) for y, row in enumerate(SHIELD_MASK) for x, ch in enumerate(row) if ch == "#"}
+    rects = []
+
+    def put(x, y, col):
+        rects.append(f'<rect x="{x0 + x * cell}" y="{y0 + y * cell}" width="{cell}" height="{cell}" fill="{col}"/>')
+
+    for (x, y) in filled:  # contour sombre à l'extérieur
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + dx, y + dy)
+            if n not in filled:
+                put(*n, "#2E3038")
+    n4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
+    ring1 = {(x, y) for (x, y) in filled if any((x + dx, y + dy) not in filled for dx, dy in n4)}
+    ring2 = {(x, y) for (x, y) in filled - ring1 if any((x + dx, y + dy) in ring1 for dx, dy in n4) and y >= 5}
+    for (x, y) in sorted(filled):
+        edge = (x, y) in ring1 or (x, y) in ring2
+        if edge:  # bordure argent, bande sombre au milieu comme le dégradé du logo
+            col = "#FFFFFF" if y < 5 else "#D9DCE2" if y < 9 else "#A9AEB8" if y < 11 else "#E6E8EC"
+            if x >= 8 and y >= 5:
+                col = {"#D9DCE2": "#C3C7CF", "#E6E8EC": "#CDD0D6", "#FFFFFF": "#E9EBEE"}.get(col, col)
+            if (x, y) in ring2:  # anneau intérieur un ton plus sombre : effet de biseau
+                col = {"#FFFFFF": "#D9DCE2", "#E9EBEE": "#C3C7CF", "#D9DCE2": "#B9BDC6", "#C3C7CF": "#A9AEB8",
+                       "#A9AEB8": "#8A8F9A", "#E6E8EC": "#C3C7CF", "#CDD0D6": "#A9AEB8"}.get(col, col)
+        else:
+            col = "#2A2C33" if y < 7 else "#1E2026" if y < 11 else "#131419"
+            v = V_LAYER[y][x]
+            if v != ".":
+                col = V_COL[v]
+        put(x, y, col)
+    return f'<g shape-rendering="crispEdges">{"".join(rects)}</g>'
+
+
+def emblem_all_pixel(cell=24):
+    x0, y0 = 256 - 8 * cell, 40
+    ax, ay = -5, 4  # décalage des épées en cases (symétrique pour l'épée miroir)
+    swords = "".join(
+        f'<g transform="translate({x0 + (-ax if m else ax) * cell} {y0 + ay * cell})">{pixel_sword(cell, m, 21)}</g>'
+        for m in (False, True))
+    return swords + pixel_shield(cell, x0, y0)
+
+
+main_ap = place(emblem_all_pixel(), ex, 90, es) + place(WM, wx, 745, ws) + rule + pvp_factions(600, sub_y, 58, 14)
+out("vaeloria-pvp-factions-tout-pixel-logo.svg", doc(W, H, glow + main_ap))
+out("vaeloria-pvp-factions-tout-pixel-logo-transparent.svg", doc(W, H, main_ap, bg=False))
+icon_ap = (f'<ellipse cx="540" cy="520" rx="470" ry="440" fill="url(#glow)"/>'
+           + place(emblem_all_pixel(), 540 - 256 * 1.2, 540 - 232 * 1.2, 1.2))
+out("vaeloria-pvp-factions-tout-pixel-profil.svg", doc(P, P, icon_ap))
