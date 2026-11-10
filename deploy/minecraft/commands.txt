@@ -13,20 +13,22 @@
 # même monde.
 
 ## CONSOLE — règles de jeu des mondes
+# Noms de Minecraft 26.1 (le serveur tourne en Paper 26.1.2) : doFireTick → fire_spread_radius_around_player,
+# doMobSpawning → spawn_mobs, doWeatherCycle → advance_weather, spawnRadius → respawn_radius…
 # Spawn (monde vide protégé) : pas de feu, pas de monstres naturels, pas de cycle météo, réapparition exacte.
-execute in minecraft:spawn run gamerule doFireTick false
-execute in minecraft:spawn run gamerule mobGriefing false
-execute in minecraft:spawn run gamerule doMobSpawning false
-execute in minecraft:spawn run gamerule doPatrolSpawning false
-execute in minecraft:spawn run gamerule doTraderSpawning false
-execute in minecraft:spawn run gamerule doInsomnia false
-execute in minecraft:spawn run gamerule doWeatherCycle false
-execute in minecraft:spawn run gamerule spawnRadius 0
-execute in minecraft:spawn run weather clear
+execute in minecraft:spawn run gamerule fire_spread_radius_around_player 0
+execute in minecraft:spawn run gamerule mob_griefing false
+execute in minecraft:spawn run gamerule spawn_mobs false
+execute in minecraft:spawn run gamerule spawn_patrols false
+execute in minecraft:spawn run gamerule spawn_wandering_traders false
+execute in minecraft:spawn run gamerule spawn_phantoms false
+execute in minecraft:spawn run gamerule advance_weather false
+execute in minecraft:spawn run gamerule respawn_radius 0
+weather spawn sun
 # Warps farm (monde Warp) : les spawners doivent tourner (doMobSpawning reste vrai), mais pas de dégâts de
 # creeper ni de feu dans les salles.
-execute in minecraft:warp run gamerule mobGriefing false
-execute in minecraft:warp run gamerule doFireTick false
+execute in minecraft:warp run gamerule mob_griefing false
+execute in minecraft:warp run gamerule fire_spread_radius_around_player 0
 
 ## CONSOLE — régions WorldGuard (fusion : on modifie les régions existantes, on n'écrase pas regions.yml)
 # Gouffre de Vælor (déjà créé à la main, priorité 10) : on réaffirme les flags.

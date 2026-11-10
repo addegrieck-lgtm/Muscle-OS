@@ -77,10 +77,25 @@ def main():
     ap.add_argument("file", nargs="?", default=os.path.join(here, "commands.txt"))
     ap.add_argument("--host", default=os.environ.get("RCON_HOST"))
     ap.add_argument("--port", type=int, default=int(os.environ.get("RCON_PORT", "0")) or None)
+    ap.add_argument("--properties", help="server.properties téléchargé : lit rcon.password et rcon.port (rien à taper)")
+    ap.add_argument("--match", help="n'envoie que les lignes contenant ce texte (ex. gamerule)")
     ap.add_argument("--dry-run", action="store_true", help="affiche les commandes sans rien envoyer")
     a = ap.parse_args()
+    if a.properties:
+        props = {}
+        with open(a.properties, encoding="utf-8") as fh:
+            for line in fh:
+                if "=" in line and not line.lstrip().startswith("#"):
+                    k, v = line.rstrip("\r\n").split("=", 1)
+                    props[k.strip()] = v.strip()
+        if props.get("rcon.password"):
+            os.environ.setdefault("RCON_PASSWORD", props["rcon.password"])
+        if not a.port and props.get("rcon.port", "").isdigit():
+            a.port = int(props["rcon.port"])
+        if props.get("enable-rcon") != "true":
+            print("Attention : enable-rcon n'est pas à true dans ce server.properties.")
 
-    cmds = list(console_lines(a.file))
+    cmds = [c for c in console_lines(a.file) if not a.match or a.match in c]
     if a.dry_run:
         print("\n".join(cmds))
         print(f"-- {len(cmds)} commande(s) console", file=sys.stderr)
@@ -92,7 +107,7 @@ def main():
     failed = 0
     for c in cmds:
         out = r.command(c)
-        bad = any(w in out.lower() for w in ("unknown command", "commande inconnue", "erreur", "error"))
+        bad = any(w in out.lower() for w in ("unknown command", "unknown or incomplete", "incorrect argument", "commande inconnue", "erreur", "error", "usage"))
         failed += bad
         print(("ÉCHEC " if bad else "ok    ") + c + (f"\n      → {out.strip()}" if out.strip() else ""))
     r.close()
