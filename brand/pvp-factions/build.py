@@ -109,3 +109,70 @@ ps = 1.3
 icon = (f'<ellipse cx="540" cy="520" rx="470" ry="440" fill="url(#glow)"/>'
         + place(emblem_swords(), 540 - 256 * ps, 540 - 318 * ps, ps))
 out("vaeloria-pvp-factions-profil.svg", doc(P, P, icon))
+
+
+# --------------------------------------------------------------------------- variante pixel (style Minecraft)
+# Épée originale en pixel art 16 × 16, diagonale (pommeau en bas à gauche, pointe en haut à droite),
+# aux couleurs de la marque. Dessin propre à VÆLORIA : aucune texture Mojang n'est reprise.
+PIX = {
+    "K": "#2E3038",  # contour
+    "W": "#FFFFFF",  # arête de la lame
+    "L": "#D9DCE2",  # lame, face éclairée
+    "D": "#8A8F9A",  # lame, face dans l'ombre
+    "R": "#D21F2F",  # rubis clair
+    "r": "#7A0A14",  # rubis sombre
+    "G": "#6E737E",  # poignée
+    "g": "#4A4E58",  # poignée, ombre
+}
+
+
+def pixel_sword_grid():
+    cells = {}
+    tip = 18
+    for x in range(6, tip + 1):  # lame le long de x + y = 15
+        y = 15 - x
+        cells[(x, y)] = "W"
+        if x < tip:
+            cells[(x, y - 1)] = "L"
+            cells[(x + 1, y)] = "D"
+    cells[(tip + 1, 15 - tip - 1)] = "L"
+    for i, (x, y) in enumerate([(3, 8), (4, 9), (5, 10), (6, 11), (7, 12)]):  # garde
+        cells[(x, y)] = "R" if i in (0, 4) else "r"
+    cells[(5, 10)] = "R"
+    for x, y, c in [(4, 11, "G"), (3, 12, "g"), (2, 13, "G")]:  # poignée
+        cells[(x, y)] = c
+    for x, y, c in [(1, 14, "R"), (0, 15, "r"), (1, 15, "r"), (0, 14, "r")]:  # pommeau
+        cells[(x, y)] = c
+    out = dict(cells)
+    for (x, y) in cells:  # contour d'un pixel
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                n = (x + dx, y + dy)
+                if n not in cells and abs(dx) + abs(dy) == 1:
+                    out[n] = "K"
+    return out
+
+
+def pixel_sword(cell, mirror=False):
+    rects = []
+    for (x, y), c in pixel_sword_grid().items():
+        px = (15 - x) if mirror else x
+        rects.append(f'<rect x="{px * cell}" y="{y * cell}" width="{cell}" height="{cell}" fill="{PIX[c]}"/>')
+    return f'<g shape-rendering="crispEdges">{"".join(rects)}</g>'
+
+
+def emblem_pixel():
+    cell = 30
+    half = 8 * cell
+    swords = "".join(
+        f'<g transform="translate({256 - half + (3 * cell if m else -3 * cell)} {360 - half})">{pixel_sword(cell, m)}</g>'
+        for m in (False, True))
+    return swords + emblem()
+
+
+main_px = place(emblem_pixel(), ex, 50, es) + place(WM, wx, 745, ws) + rule + pvp_factions(600, sub_y, 58, 14)
+out("vaeloria-pvp-factions-pixel-logo.svg", doc(W, H, glow + main_px))
+out("vaeloria-pvp-factions-pixel-logo-transparent.svg", doc(W, H, main_px, bg=False))
+icon_px = (f'<ellipse cx="540" cy="520" rx="470" ry="440" fill="url(#glow)"/>'
+           + place(emblem_pixel(), 540 - 256 * 1.02, 540 - 300 * 1.02, 1.02))
+out("vaeloria-pvp-factions-pixel-profil.svg", doc(P, P, icon_px))

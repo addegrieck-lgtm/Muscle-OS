@@ -6,6 +6,9 @@ const files = [
   ["vaeloria-pvp-factions-logo.svg", 1200, false],
   ["vaeloria-pvp-factions-logo-transparent.svg", 1200, true],
   ["vaeloria-pvp-factions-profil.svg", 1080, false],
+  ["vaeloria-pvp-factions-pixel-logo.svg", 1200, false],
+  ["vaeloria-pvp-factions-pixel-logo-transparent.svg", 1200, true],
+  ["vaeloria-pvp-factions-pixel-profil.svg", 1080, false],
 ];
 (async () => {
   const b = await chromium.launch();
