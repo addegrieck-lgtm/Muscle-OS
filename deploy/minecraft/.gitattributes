@@ -1,0 +1,4 @@
+# Le kit doit rester en LF : install.sh tourne sous bash et compare octet par octet avec les fichiers du serveur.
+* text=auto eol=lf
+*.schem binary
+*.png binary
