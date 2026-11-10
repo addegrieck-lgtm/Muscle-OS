@@ -1,0 +1,260 @@
+# Généré par deploy/minecraft/outils/parcelles.mjs (île marchande du spawn fusionné, X +140). Ne pas éditer à la main :
+# relancer le script. install.sh ne l'installe que si le serveur n'a encore aucune parcelle définie.
+plots:
+  '1':
+    name: 'Boutique 01'
+    tier: prestige
+    world: spawn
+    min: [201, 101, -13]
+    max: [209, 105, -6]
+    counter: [205, 101, -10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 205.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '2':
+    name: 'Boutique 02'
+    tier: standard
+    world: spawn
+    min: [211, 101, -13]
+    max: [215, 105, -6]
+    counter: [215, 102, -8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 213.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '3':
+    name: 'Boutique 03'
+    tier: premium
+    world: spawn
+    min: [217, 101, -13]
+    max: [223, 105, -6]
+    counter: [220, 101, -10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 220.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '4':
+    name: 'Boutique 04'
+    tier: standard
+    world: spawn
+    min: [225, 101, -13]
+    max: [229, 105, -6]
+    counter: [229, 102, -8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 227.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '5':
+    name: 'Boutique 05'
+    tier: standard
+    world: spawn
+    min: [245, 101, -13]
+    max: [249, 105, -6]
+    counter: [249, 102, -8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 247.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '6':
+    name: 'Boutique 06'
+    tier: premium
+    world: spawn
+    min: [251, 101, -13]
+    max: [257, 105, -6]
+    counter: [254, 101, -10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 254.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '7':
+    name: 'Boutique 07'
+    tier: standard
+    world: spawn
+    min: [259, 101, -13]
+    max: [263, 105, -6]
+    counter: [263, 102, -8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 261.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '8':
+    name: 'Boutique 08'
+    tier: prestige
+    world: spawn
+    min: [265, 101, -13]
+    max: [273, 105, -6]
+    counter: [269, 101, -10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 269.5
+      y: 101.0
+      z: -5.5
+      pitch: 0.0
+      yaw: 180.0
+    revenue: 0.0
+  '9':
+    name: 'Boutique 09'
+    tier: prestige
+    world: spawn
+    min: [201, 101, 6]
+    max: [211, 105, 13]
+    counter: [206, 101, 10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 206.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '10':
+    name: 'Boutique 10'
+    tier: standard
+    world: spawn
+    min: [213, 101, 6]
+    max: [217, 105, 13]
+    counter: [217, 102, 8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 215.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '11':
+    name: 'Boutique 11'
+    tier: standard
+    world: spawn
+    min: [219, 101, 6]
+    max: [223, 105, 13]
+    counter: [223, 102, 8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 221.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '12':
+    name: 'Boutique 12'
+    tier: standard
+    world: spawn
+    min: [225, 101, 6]
+    max: [229, 105, 13]
+    counter: [229, 102, 8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 227.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '13':
+    name: 'Boutique 13'
+    tier: premium
+    world: spawn
+    min: [245, 101, 6]
+    max: [251, 105, 13]
+    counter: [248, 101, 10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 248.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '14':
+    name: 'Boutique 14'
+    tier: premium
+    world: spawn
+    min: [253, 101, 6]
+    max: [259, 105, 13]
+    counter: [256, 101, 10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 256.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '15':
+    name: 'Boutique 15'
+    tier: premium
+    world: spawn
+    min: [261, 101, 6]
+    max: [267, 105, 13]
+    counter: [264, 101, 10]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 264.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+  '16':
+    name: 'Boutique 16'
+    tier: standard
+    world: spawn
+    min: [269, 101, 6]
+    max: [273, 105, 13]
+    counter: [273, 102, 8]
+    spawn:
+      ==: org.bukkit.Location
+      world: spawn
+      x: 271.5
+      y: 101.0
+      z: 6.5
+      pitch: 0.0
+      yaw: 0.0
+    revenue: 0.0
+sales: []

@@ -18,7 +18,7 @@ Constructions concernées et leurs coordonnées (toutes dans le monde `spawn`, s
 | Spawn agrandi de Noël (`vaeloria-spawn-fusionne-noel.schem`) | `/tp 0 100 0`, `//paste` **sans** `-a` | région `spawn` (X −240 → 303, Z −222 → 169), arrivée 0,4 101 62,35, PNJ et pancartes (VaeloriaStaff), Autel, Hall des Légendes, duels, crypte (VaeloriaPlace), cadeaux et parcours (VaeloriaNoel) |
 | Zone d'investissement (dans le spawn) | — | zone VaeloriaShop + région `invest` : 22 101 54 → 39 108 71 |
 | KOTH « Gouffre de Vælor » (`minecraft/koth-volcan`) | pieds en 1000 120 0, `//paste -a` | régions `koth-volcan` (prio 10) et `koth-capture` (prio 20), zone `/f koth gouffre` rayon 5, warps `koth-no/ne/so/se` |
-| Île Marchande (`minecraft/ile-commerciale`) | dans la schematic du spawn (x +140) | 16 parcelles `/pshop` à refaire en jeu |
+| Île Marchande (`minecraft/ile-commerciale`) | dans la schematic du spawn (x +140) | 16 parcelles `/pshop` prêtes à louer (voir « Boutiques de joueurs ») |
 | Warps farm (`minecraft/warps-farm`) | monde `Warp` (warps `guerrier`, `seigneur`, `roi`, `vaelorian`) | un warp par grade, réservé par permission |
 | Warzone | monde `vaeloria`, région `warzone` (−192 → 207) | flags PvP / protection |
 
@@ -134,6 +134,33 @@ sur le coffre `coffre_vote` ; Rare et Légendaire attendent leurs coffres dans V
 VaeloriaFactions n'est pas dans ce dépôt (projet Gradle séparé `vaeloria-factions`). La 1.3.1 envoie
 `koth = "gouffre"` au site ; la 1.3.0 envoyait `"KOTH gouffre"`, que l'API sait aussi relier à la zone
 (`apps/api/src/services/kothKey.ts`). Installer la 1.3.1 en retirant la 1.3.0 de `plugins/`.
+
+## Boutiques de joueurs (île marchande)
+
+Les 16 boutiques de l'île marchande sont livrées prêtes à louer dans `kit/plugins/VaeloriaShop/data/` :
+`plots.yml` (zone, gamme, comptoir, point d'arrivée) et `plots/<n>.yml` (modèle : l'état des blocs remis en fin de
+bail). Ils sont produits depuis la schematic du spawn par `outils/parcelles.mjs`, qui vérifie que chaque porte porte
+bien son panneau « Boutique NN » :
+
+```bash
+node deploy/minecraft/outils/parcelles.mjs /c/Users/addeg/vaeloria-spawn/out/vaeloria-spawn-fusionne-noel.schem
+```
+
+| Boutiques | Panneau | Gamme (`player-shops.tiers`) | Loyer / semaine | Comptoir |
+|---|---|---|---|---|
+| 02, 04, 05, 07, 10, 11, 12, 16 | Échoppe | `standard` — rang Marchand | 15 000 $ | pot décoré sur le tonneau |
+| 03, 06, 13, 14, 15 | Boutique | `premium` — rang Négociant | 35 000 $ | milieu du comptoir |
+| 01, 08 | Grande boutique | `prestige` — rang Maître marchand | 75 000 $ | milieu du comptoir |
+| 09 | Enseigne | `prestige` | 75 000 $ | milieu du comptoir |
+
+Rangée nord (01 à 08) : portes en Z −5, intérieurs de Z −13 à −6 ; rangée sud (09 à 16) : portes en Z 5,
+intérieurs de Z 6 à 13 ; toutes de Y 101 à 105, de X 201 à 273 (monde `spawn`). L'arrivée est juste derrière la porte,
+tournée vers le comptoir. La spécialité de chaque parcelle est attribuée par le plugin (la n-ième de la liste),
+modifiable dans `/pshop admin`.
+
+`install.sh` ne pose ces fichiers que si le serveur n'a **encore aucune parcelle** (`plots:` absent de `plots.yml`) :
+une fois des boutiques louées, `plots.yml` contient les locataires et leurs vitrines, et il n'est plus jamais
+remplacé. Un modèle déjà présent sur le serveur est gardé.
 
 ## Mettre à jour le kit
 

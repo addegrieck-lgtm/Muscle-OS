@@ -167,7 +167,9 @@ staff importer
 # Arène de bots : centre de la fosse de combat
 /tp -197 96 0
 /botarena setcentre 18
-# Île Marchande : /pshop admin → refaire les 16 parcelles (baguette), comptoirs et points d'arrivée.
+# Île Marchande : les 16 parcelles sont posées par install.sh (zones, gammes, comptoirs, arrivées, modèles).
+# Vérification : /pshop admin → chaque parcelle « prête », « Voir les limites » (particules) ; /pshop → liste.
+/tp 237 101 0
 # Neige qui tombe pendant Noël (à couper en janvier : /noel neige off)
 /noel neige on
 

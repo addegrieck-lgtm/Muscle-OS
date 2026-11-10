@@ -134,6 +134,21 @@ mkdir -p "$STAGE/VaeloriaShop/data"
   fi
 } > "$STAGE/$INVEST"
 
+# ── Parcelles des boutiques de joueurs (VaeloriaShop/data/plots.yml + modèles plots/<n>.yml) ──
+# Posées seulement sur un serveur qui n'a encore AUCUNE parcelle définie : plots.yml contient aussi les locations
+# en cours (locataires, vitrines, loyers), qu'il ne faut jamais écraser. Un modèle déjà présent est gardé.
+PLOTS="VaeloriaShop/data/plots.yml"
+if [[ -f "$PLUGINS/$PLOTS" ]] && grep -q '^plots:' "$PLUGINS/$PLOTS"; then
+  say "Parcelles : le serveur en a déjà (plots.yml) → kit des parcelles ignoré, rien n'est touché"
+  rm -f "$STAGE/$PLOTS"; rm -rf "$STAGE/VaeloriaShop/data/plots"
+else
+  say "Parcelles : aucune sur le serveur → les 16 boutiques de l'île marchande seront posées"
+  for t in "$STAGE"/VaeloriaShop/data/plots/*.yml; do
+    [[ -f "$t" ]] || continue
+    [[ -f "$PLUGINS/VaeloriaShop/data/plots/$(basename "$t")" ]] && rm -f "$t"
+  done
+fi
+
 # ── Comparaison kit / serveur ─────────────────────────────────────────
 NEW=(); CHANGED=(); SAME=0
 while IFS= read -r -d '' f; do
