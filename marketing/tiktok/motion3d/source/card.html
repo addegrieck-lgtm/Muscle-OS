@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:CP;font-weight:700;src:url(chakra-petch-latin-700-normal.woff2)}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#07070a;font-family:CP;color:#fff;text-align:center}
+#glow{position:absolute;left:-200px;top:200px;width:1480px;height:1300px;background:radial-gradient(closest-side,#3a0c12cc,#07070a00)}
+#logo{position:absolute;left:40px;width:1000px;height:1000px}
+.l{position:absolute;left:0;right:0;letter-spacing:.14em;opacity:0}
+#a{top:1340px;font-size:48px;color:#c9ccd3}
+#b{top:1150px;font-size:120px;line-height:1}
+#c{top:1300px;font-size:40px;letter-spacing:.1em;color:#e2303f}
+#d{top:1500px;font-size:40px;color:#9aa0ab;letter-spacing:.2em}
+#e{top:1560px;font-size:66px;letter-spacing:.06em}
+#bar{position:absolute;left:240px;top:1460px;width:600px;height:3px;background:#6e737e;opacity:0}
+#fade{position:absolute;inset:0;background:#07070a;opacity:0}
+</style></head><body>
+<div id="glow"></div><img id="logo" src="logo.png">
+<div class="l" id="a">LE RETOUR DE LA VRAIE GUERRE</div>
+<div class="l" id="b">SAISON I</div><div class="l" id="c">BIENTÔT · FONDATEURS EN PREMIER</div>
+<div id="bar"></div><div class="l" id="d">REJOINS LE DISCORD</div><div class="l" id="e">discord.gg/vaeloria</div>
+<div id="fade"></div>
+<script>
+const $ = id => document.getElementById(id);
+const cl = x => Math.max(0, Math.min(1, x));
+const eo = x => 1 - Math.pow(1 - cl(x), 3);
+const show = (id, t, a, d = 0.12) => { const v = eo((t - a) / d); $(id).style.opacity = v; $(id).style.transform = `translateY(${(1 - v) * 30}px)`; };
+window.renderAt = (t, kind) => {
+  const v = eo(t / (kind === "intro" ? 0.45 : 0.2));
+  $("glow").style.opacity = 0.4 + 0.6 * v;
+  if (kind === "intro") {
+    $("logo").style.top = "330px";
+    $("logo").style.opacity = v; $("logo").style.transform = `scale(${1.25 - 0.25 * v + 0.04 * t})`;
+    show("a", t, 0.45, 0.2);
+    ["b", "c", "d", "e"].forEach(i => $(i).style.opacity = 0); $("bar").style.opacity = 0;
+    $("fade").style.opacity = cl((t - 0.93) / 0.07);
+  } else {
+    $("logo").style.top = "120px";
+    $("logo").style.opacity = v; $("logo").style.transform = `scale(${0.9 + 0.1 * v + 0.02 * t})`;
+    $("a").style.opacity = 0;
+    show("b", t, 0.12); show("c", t, 0.22); $("bar").style.opacity = eo((t - 0.34) / 0.1); show("d", t, 0.38); show("e", t, 0.46);
+    $("fade").style.opacity = Math.max(cl(1 - t / 0.04), cl((t - 0.94) / 0.06));
+  }
+};
+</script></body></html>
