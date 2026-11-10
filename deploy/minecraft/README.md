@@ -54,7 +54,7 @@ installés en double (par exemple deux WorldGuard) : retire à la main la versio
 > le secret du Bridge et ne remplace que le bloc `zones:` de `invest.yml`. La config du Bridge est d'ailleurs
 > livrée en `config.yml.modele` pour qu'une copie à la main ne puisse pas écraser la vraie. Si le Bridge écrit
 > au démarrage « api.secret non configuré », son secret a été perdu : relance `install.sh` (il le redemande).
-> Une boutique qui tombe en même temps (« zip file closed ») vient de là ; VaeloriaShop 1.0.1 ne tombe plus.
+> Une boutique qui tombe en même temps (« zip file closed ») vient de là ; VaeloriaShop 1.0.1+ ne tombe plus.
 
 - Le script demande de confirmer que le serveur est arrêté.
 - **Secret du Bridge** : s'il en existe déjà un sur le serveur, il est gardé. Sinon (ou avec `--new-secret`),
@@ -122,11 +122,11 @@ Sites de vote : mêmes noms et liens dans `VaeloriaVote/config.yml` (`sites:`) e
 
 | Plugin | Version à installer | Pourquoi |
 |---|---|---|
-| VaeloriaShop | **1.0.1** (projet `vaeloria-shop`) | événement `POINTS` et déban en points (boutique du site), ne tombe plus si le Bridge est désactivé. La 1.0.0 envoyée le 10 novembre est une ancienne version sans `POINTS` ni déban. |
+| VaeloriaShop | **1.0.2** (projet `vaeloria-shop`) | événement `POINTS` et déban en points (boutique du site), ne tombe plus si le Bridge est désactivé, démarre après Multiverse-Core (sinon les arrivées des parcelles du monde `spawn` sont perdues : « unknown world »). La 1.0.0 envoyée le 10 novembre est une ancienne version sans `POINTS` ni déban. |
 | VaeloriaFactions | **1.3.1** | voir ci-dessous |
 | VaeloriaBridge | 0.1.0, **un seul** jar (`VaeloriaBridge-0.1.0.jar`) | deux jars du même plugin : Paper en charge un au hasard (« Ambiguous plugin name ») |
 
-Le kit suit les configs de VaeloriaShop 1.0.1 : section `deban:`, clés de caisse en points (seule la clé Vote,
+Le kit suit les configs de VaeloriaShop 1.0.1 et 1.0.2 : section `deban:`, clés de caisse en points (seule la clé Vote,
 sur le coffre `coffre_vote` ; Rare et Légendaire attendent leurs coffres dans VaeloriaCrates).
 
 ### Plugin Factions
