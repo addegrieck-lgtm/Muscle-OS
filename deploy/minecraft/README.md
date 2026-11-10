@@ -124,6 +124,8 @@ Sites de vote : mêmes noms et liens dans `VaeloriaVote/config.yml` (`sites:`) e
 |---|---|---|
 | VaeloriaShop | **1.0.2** (projet `vaeloria-shop`) | événement `POINTS` et déban en points (boutique du site), ne tombe plus si le Bridge est désactivé, démarre après Multiverse-Core (sinon les arrivées des parcelles du monde `spawn` sont perdues : « unknown world »). La 1.0.0 envoyée le 10 novembre est une ancienne version sans `POINTS` ni déban. |
 | VaeloriaFactions | **1.3.1** | voir ci-dessous |
+| VaeloriaCrates | **0.2.0** (`plugins/vaeloria-crates`) | lit le format lisible de `crates.yml` (coffres Vote, Rare, Légendaire) |
+| VaeloriaVote | **1.2.0** (projet `vaeloria-vote`) | `rewards.per-vote.commands` : une clé Vote à chaque vote, mise de côté si le joueur est hors ligne |
 | VaeloriaBridge | 0.1.0, **un seul** jar (`VaeloriaBridge-0.1.0.jar`) | deux jars du même plugin : Paper en charge un au hasard (« Ambiguous plugin name ») |
 
 Le kit suit les configs de VaeloriaShop 1.0.1 et 1.0.2 : section `deban:`, clés de caisse en points (seule la clé Vote,
@@ -161,6 +163,21 @@ modifiable dans `/pshop admin`.
 `install.sh` ne pose ces fichiers que si le serveur n'a **encore aucune parcelle** (`plots:` absent de `plots.yml`) :
 une fois des boutiques louées, `plots.yml` contient les locataires et leurs vitrines, et il n'est plus jamais
 remplacé. Un modèle déjà présent sur le serveur est gardé.
+
+## Coffres à clés
+
+Trésorerie du spawn : coffre **Vote** (31 105 −80 et 27 105 −80), **Rare** (27 105 −84 et 31 105 −84), **Légendaire**
+(coffre royal, 29 105 −82). 16 lots par coffre, chances sur 1 000, générés par `outils/coffres.mjs` :
+
+| Coffre | Clé | Lots (du plus courant au plus rare) |
+|---|---|---|
+| Vote | 1 par vote (VaeloriaVote), 50 points | 500 à 2 500 $, nourriture, XP, fer, diamants, perles, kits Construction/Farmeur/Explorateur, pioche, houe I, clé Rare (2,5 %), générateur Zombie (0,5 %) |
+| Rare | 150 points, coffre Vote | 5 000 à 25 000 $, pommes dorées, diamants, kits Minerais/Alchimiste, épée et plastron en diamant, hache du bûcheron, totem, générateur Squelette, clé Légendaire (2,5 %), grade Guerrier 7 jours (3 %) |
+| Légendaire | 400 points, coffre Rare | 25 000 à 100 000 $, kits PvP/Forgeron/Sorcier, épée et plastron en netherite, pommes enchantées, élytres (1,5 %), pioche des abysses, générateurs Enderman/Blaze/Golem (1 %), grade Guerrier définitif (4 %), grade Roi 30 jours (2 %) |
+
+Les lots « kit » donnent le contenu du kit une fois (`kit <kit> <joueur>`) ; l'accès permanent reste vendu en
+/boutique. Générateurs et outils passent par `shop admin give` (vrais objets de VaeloriaShop). Les lots rares sont
+annoncés à tout le serveur. `install.sh` ne pose `crates.yml` que si le coffre Légendaire n'existe pas encore.
 
 ## Mettre à jour le kit
 

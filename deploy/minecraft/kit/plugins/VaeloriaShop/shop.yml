@@ -411,7 +411,7 @@ categories:
 
   # ─────────────────────────────────────────────────────────────────
   # Clés de caisse (VaeloriaCrates). Le 3e mot de la commande est l'identifiant du coffre : à aligner sur
-  # /crate list (coffre_vote sur le serveur). Livrées par commande, le joueur doit avoir une case libre.
+  # /crate list (coffre_vote, coffre_rare, coffre_legendaire). Livrées par commande, le joueur doit avoir une case libre.
   cles:
     name: "<gold><b>Clés de caisse"
     icon: TRIPWIRE_HOOK
@@ -427,8 +427,18 @@ categories:
         points: 50
         commands: ["crate give {player} coffre_vote 1"]
         lore: ["<steel>• 1 clé du coffre Vote"]
-      # Clés Rare (150 points) et Légendaire (400 points) : à remettre quand les coffres « rare » et
-      # « legendaire » existeront dans VaeloriaCrates (/crate list), sinon les points sont débités sans clé.
+      cle_rare:
+        material: AMETHYST_SHARD
+        name: "<#7FC8E0><b>Clé Rare"
+        points: 150
+        commands: ["crate give {player} coffre_rare 1"]
+        lore: ["<steel>• 1 clé du coffre Rare", "<ash>Kits, diamants, totem, générateur Squelette…"]
+      cle_legendaire:
+        material: ECHO_SHARD
+        name: "<gold><b>Clé Légendaire"
+        points: 400
+        commands: ["crate give {player} coffre_legendaire 1"]
+        lore: ["<steel>• 1 clé du coffre Légendaire", "<ash>Netherite, élytres, générateurs, grades…"]
 
   # ─────────────────────────────────────────────────────────────────
   # Outils de VÆLORIA en points (ils restent aussi au marché en $, avec leur rang requis).

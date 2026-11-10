@@ -75,6 +75,11 @@ rewards:
     items:
       COOKED_BEEF: 8            # boutique : 6 $ l'unité, non rachetable
       EXPERIENCE_BOTTLE: 4      # boutique : 40 $, non rachetable
+    # Commandes console à CHAQUE vote, hors cagnotte et hors roue (VaeloriaVote 1.2.0). {player} {uuid}.
+    # Joueur hors ligne (vote reçu par NuVotifier) : mises de côté et lancées à sa prochaine connexion.
+    # 1 clé du coffre Vote (Trésorerie du spawn, VaeloriaCrates) : 3 clés par journée complète.
+    commands:
+      - "crate give {player} coffre_vote 1"
   all-sites-bonus:              # une fois par jour, au 3e site
     money: 500
     items:

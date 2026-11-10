@@ -149,6 +149,17 @@ else
   done
 fi
 
+# ── Coffres à clés (VaeloriaCrates/crates.yml) ──
+# Posés seulement si le serveur n'a pas encore le coffre Légendaire : ensuite, les lots se règlent en jeu
+# (/crate admin) et le fichier n'est plus jamais remplacé.
+CRATES="VaeloriaCrates/crates.yml"
+if [[ -f "$PLUGINS/$CRATES" ]] && grep -q '^  coffre_legendaire:' "$PLUGINS/$CRATES"; then
+  say "Coffres  : Vote/Rare/Légendaire déjà sur le serveur → crates.yml gardé tel quel"
+  rm -f "$STAGE/$CRATES"
+elif [[ -f "$STAGE/$CRATES" ]]; then
+  say "Coffres  : les coffres Vote, Rare et Légendaire (16 lots chacun) seront posés"
+fi
+
 # ── Comparaison kit / serveur ─────────────────────────────────────────
 NEW=(); CHANGED=(); SAME=0
 while IFS= read -r -d '' f; do
