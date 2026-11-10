@@ -1,0 +1,79 @@
+# Présentation des kits EssentialsX dans le menu /kit (clés = noms des kits de plugins/Essentials/kits.yml).
+# icone, nom (MiniMessage), description (lignes), ordre (petit = en haut), texte-verrou, cache: true pour le retirer.
+# Sans entrée ici, un kit prend l'icône de son premier objet. Modifiable en jeu avec /vkit.
+
+depart:
+  cache: true
+
+# ── Kits de grade ──
+joueur:
+  icone: STONE_SWORD
+  nom: "<silver><bold>Kit Joueur"
+  description: ["Le kit de base, pour tout le monde."]
+  ordre: 10
+guerrier:
+  icone: CHAINMAIL_CHESTPLATE
+  nom: "<#9AA4B2><bold>Kit Guerrier"
+  description: ["Armure en mailles, épée et pioche en fer."]
+  ordre: 11
+  texte-verrou: "Réservé au grade Guerrier"
+seigneur:
+  icone: IRON_CHESTPLATE
+  nom: "<#D9DCE2><bold>Kit Seigneur"
+  description: ["Armure complète en fer, arc et flèches."]
+  ordre: 12
+  texte-verrou: "Réservé au grade Seigneur"
+roi:
+  icone: GOLDEN_HELMET
+  nom: "<#E2C27F><bold>Kit Roi"
+  description: ["L'équipement des têtes couronnées."]
+  ordre: 13
+  texte-verrou: "Réservé au grade Roi"
+vaelorian:
+  icone: DIAMOND_CHESTPLATE
+  nom: "<ruby><bold>Kit VÆLORIAN"
+  description: ["Full diamant, le plus haut grade."]
+  ordre: 14
+  texte-verrou: "Réservé au grade VÆLORIAN"
+
+# ── Kits de la /boutique ──
+minerais:
+  icone: DIAMOND_PICKAXE
+  nom: "<silver><bold>Kit Minerais"
+  description: ["Pioche en diamant, torches, échelles", "et de quoi tenir sous terre."]
+  ordre: 20
+construction:
+  icone: STONE_BRICKS
+  nom: "<#C9A36B><bold>Kit Construction"
+  description: ["Briques, verre, planches et lanternes."]
+  ordre: 21
+explorateur:
+  icone: COMPASS
+  nom: "<#7FC8E0><bold>Kit Explorateur"
+  description: ["Perles de l'Ender, pomme dorée", "et potions de vitesse."]
+  ordre: 22
+farmeur:
+  icone: GOLDEN_HOE
+  nom: "<#8FD16A><bold>Kit Farmeur"
+  description: ["Graines, poudre d'os, entonnoirs", "et coffres pour ta ferme."]
+  ordre: 23
+alchimiste:
+  icone: BREWING_STAND
+  nom: "<#E07FB0><bold>Kit Alchimiste"
+  description: ["Ingrédients et potions prêtes."]
+  ordre: 24
+forgeron:
+  icone: ANVIL
+  nom: "<#E2C27F><bold>Kit Forgeron"
+  description: ["Lingots, diamants, enclume", "et livre Solidité III."]
+  ordre: 25
+sorcier:
+  icone: ENCHANTING_TABLE
+  nom: "<#B48CFF><bold>Kit Sorcier"
+  description: ["Fioles d'XP, lapis et livres", "Protection IV et Efficacité V."]
+  ordre: 26
+pvp:
+  icone: DIAMOND_SWORD
+  nom: "<ruby><bold>Kit PvP"
+  description: ["Stuff de combat complet, potions", "et pommes dorées."]
+  ordre: 27

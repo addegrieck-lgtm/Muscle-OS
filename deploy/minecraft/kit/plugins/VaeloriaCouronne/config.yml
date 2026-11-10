@@ -1,0 +1,105 @@
+# VaeloriaCouronne — « La Couronne Maudite », mini-jeu de VÆLORIA.
+# Presque tout se règle en jeu : /couronne admin (op). Chaque clic est enregistré ici.
+
+world:
+  # Monde dédié (vide, créé au premier démarrage). Il rejoint le groupe « mini-jeux » de VaeloriaHub :
+  # inventaire séparé de la faction, entrée seulement par /jeux ou /couronne.
+  name: couronne
+  # Heure fixe (0 = aube, 6000 = midi, 12500 = coucher de soleil, 18000 = minuit).
+  time: 12500
+
+arena:
+  # Centre du château : bloc du sol de la cour (on marche à y + 1).
+  center: {x: 0, y: 100, z: 0}
+  # Construire le château automatiquement si le monde est neuf (/couronne admin > Carte pour le reconstruire).
+  build: true
+  # Points d'apparition (/couronne admin > Carte > « Ajouter un spawn ici »). Vide = 12 points autour de la cour.
+  spawns: []
+  # Emplacement de la couronne sur le trône. Vide = sommet de l'estrade au centre.
+  throne: {}
+  # Profondeur sous le sol de la cour à partir de laquelle on meurt (chute dans le vide).
+  void-depth: 14
+
+prep:
+  # Salle de préparation (règles, classement, menu admin). Bloc du sol au centre de la salle.
+  center: {x: 200, y: 100, z: 0}
+  build: true
+
+game:
+  # Joueurs réels nécessaires pour lancer le compte à rebours (les bots complètent).
+  min-players: 1
+  # Participants au maximum (joueurs + bots).
+  max-players: 16
+  countdown: 30
+  duration-minutes: 8
+  target-points: 250
+  # Rejoindre une partie déjà commencée (avec 0 point).
+  late-join: true
+  respawn-delay: 3
+  spawn-protection: 2
+  # Délai entre la fin de la partie et le retour en salle de préparation.
+  end-delay: 10
+
+points:
+  # Points par seconde pour le porteur de la couronne (doublés pendant la Frénésie).
+  per-second: 1
+  kill: 2
+  # Bonus pour avoir tué le porteur (la couronne passe en plus au tueur).
+  kill-carrier: 15
+
+crown:
+  # Délai avant la première apparition de la couronne sur le trône.
+  first-spawn-delay: 5
+  # Lenteur du porteur : 0 = aucune, 1 = Lenteur I, 2 = Lenteur II.
+  carrier-slowness: 1
+  carrier-glowing: true
+  # Malédiction : Wither I après N secondes de port continu, puis +1 niveau toutes les « curse-step » secondes.
+  curse-after: 45
+  curse-step: 15
+  curse-max: 3
+  # Après avoir lâché la couronne (touche F), délai avant de pouvoir la reprendre.
+  repick-cooldown: 8
+  # Couronne au sol sans porteur pendant N secondes : elle retourne sur le trône.
+  return-after: 20
+  anti-camp:
+    # Le porteur qui reste dans un rayon de « radius » blocs pendant « seconds » secondes ne gagne plus de points.
+    enabled: true
+    seconds: 8
+    radius: 5
+  frenzy:
+    # Dernières secondes de la partie : points du porteur multipliés.
+    enabled: true
+    last-seconds: 60
+    multiplier: 2
+
+bots:
+  enabled: true
+  # FILL : ajoute des bots jusqu'à « fill-to » participants. FIXED : ajoute toujours « count » bots.
+  mode: FILL
+  fill-to: 8
+  count: 4
+  # FACILE, NORMAL, DIFFICILE, LEGENDAIRE ou MIXTE (mélange Normal / Difficile / Légendaire).
+  difficulty: DIFFICILE
+  names: [Aldric, Morwen, Kael, Ysolde, Brann, Lyra, Thorne, Elara, Garrick, Sylas, Nyx, Roderic, Isolde, Fenrir, Seren, Corvin]
+  # Pseudos Minecraft premium dont on emprunte le skin (vide = les 9 skins par défaut du jeu).
+  skins: []
+
+rewards:
+  # Pièces (monnaie Vault de VaeloriaShop) pour les joueurs réels. 0 = désactivé.
+  win-money: 100
+  participation-money: 10
+
+# Kit donné à chaque apparition, identique pour les joueurs et les bots.
+# Format : MATERIAU [xQUANTITE] [enchantement:niveau ...]
+# « Menu admin > Kit > Utiliser mon inventaire » remplace ce kit par ton inventaire (section custom).
+kit:
+  helmet: "IRON_HELMET protection:1"
+  chestplate: "IRON_CHESTPLATE protection:1"
+  leggings: "IRON_LEGGINGS protection:1"
+  boots: "IRON_BOOTS protection:1"
+  items:
+    - "DIAMOND_SWORD sharpness:1"
+    - "BOW power:1"
+    - "GOLDEN_APPLE x3"
+    - "COOKED_BEEF x16"
+    - "ARROW x12"

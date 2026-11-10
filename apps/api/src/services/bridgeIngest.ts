@@ -1,5 +1,6 @@
 import type { BridgeEvent } from "@vaeloria/types";
 import type { Sql, Tx as TxSql } from "../db";
+import { kothZoneKey } from "./kothKey";
 import { DEFAULT_LAG, trackLag, type LagThresholds } from "./serverHealth";
 import { grantInfluence } from "./world/influence";
 
@@ -101,7 +102,7 @@ async function apply(tx: Tx, e: BridgeEvent, seasonId: string | null, lag: LagTh
     }
     case "KOTH_START": {
       const ends = new Date(new Date(e.occurredAt).getTime() + (e.durationSeconds ?? 1800) * 1000).toISOString();
-      const zone = await tx<{ key: string; name: string }[]>`SELECT key, name FROM map_zones WHERE key = ${e.koth} AND kind = 'koth'`;
+      const zone = await tx<{ key: string; name: string }[]>`SELECT key, name FROM map_zones WHERE key = ${kothZoneKey(e.koth) ?? ""} AND kind = 'koth'`;
       await tx`
         INSERT INTO events (slug, title, type, description, starts_at, ends_at, published, zone_key, external_id)
         VALUES (${`koth-${e.id.slice(0, 8)}`}, ${`KOTH — ${zone[0]?.name ?? e.koth}`}, 'koth', 'Capture en cours.', ${e.occurredAt}, ${ends}, true, ${zone[0]?.key ?? null}, ${`koth:${e.id}`})

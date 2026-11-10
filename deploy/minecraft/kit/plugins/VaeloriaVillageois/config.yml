@@ -1,0 +1,179 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║               VæloriaVillageois — configuration              ║
+# ║   Bibliothécaires chanceux, boosts en émeraudes, œuf capture ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Après modification : /villageois reload
+#
+# FONCTIONNEMENT — le but : monter des farms de bibliothécaires et, à force, sortir les bons livres pour son stuff.
+#   1. Les livres des bibliothécaires sont tirés dans les paliers « tiers » ci-dessous (et plus dans la table vanilla) :
+#      beaucoup de livres courants et variés, les grands livres (Protection IV, Solidité III, Fortune III…) très rares.
+#   2. Accroupi + clic droit sur un bibliothécaire : menu de BOOST. Chaque boost coûte des émeraudes, relance les
+#      livres que personne n'a encore achetés et ajoute 1 niveau de CHANCE au villageois (plafond : boost.max-luck).
+#      Un livre déjà acheté au moins une fois est verrouillé : il ne sera plus jamais relancé.
+#   3. USURE : après une quinzaine de livres vendus (wear), le bibliothécaire est épuisé : plus de livres, plus de boost.
+#   4. L'ŒUF DE CAPTURE, lancé sur un villageois, le transforme en objet. Relâché, il repart à zéro : sans métier,
+#      sans échanges, sans chance, sans usure. C'est ainsi qu'on relance un bibliothécaire épuisé.
+#
+# DIFFICULTÉ (vérifiée par ShippedConfigTest, détail dans docs/VILLAGEOIS.md)
+#   Palier rare : 1,5 % des livres sans boost, 17,5 % à chance maximale.
+#   Protection IV, Solidité III ou Fortune III précis : ~0,2 % par livre sans boost (≈ 1 livre sur 530 tiré au
+#   lutrin), ~2,2 % à chance maximale. Un livre rare quelconque : ≈ 1 sur 68 sans boost.
+#
+# ÉCONOMIE EN ÉMERAUDES (repères de VaeloriaShop : débutant ~1 500 à 3 000 $/h, équipé ~6 000 à 12 000 $/h)
+#   1 émeraude = 250 $ à l'achat, 100 $ à la revente (exchange ci-dessous, ou mêmes prix dans shop.yml).
+#   Boost : 6 émeraudes = 1 500 $. Protection IV : 56 émeraudes = 14 000 $.
+#   Boosts pour viser un Protection IV précis : ~15 à ~27 sur un bibliothécaire monté de niveau (4 ou 2 livres
+#   relancés par boost, ~90 à ~165 émeraudes), ~49 sur un novice qui n'a qu'un livre. Monter ses bibliothécaires paie.
+#   /villageois chances [boosts] affiche la table réelle, calculée depuis ce fichier.
+
+# ── Livres ──────────────────────────────────────────────────────────
+# Trois paliers. Un livre est tiré en deux temps : d'abord le palier (selon son poids), puis un livre du palier
+# (selon le poids du livre, 1 par défaut). La chance du villageois (boosts) déplace le poids vers le palier rare.
+#   weight    : poids du palier sans boost (sur 1000 ici : 750 = 75 %)
+#   per-boost : poids ajouté au palier par niveau de chance (négatif = le palier se raréfie)
+#   max-uses  : achats possibles d'un même livre avant le réapprovisionnement du villageois
+#   announce  : tout le serveur est prévenu quand un boost fait sortir un livre du palier
+# Livres : « enchantement-niveau: prix en émeraudes » (niveau 1 si absent), ou { price: 56, weight: 3 }.
+# Clés Minecraft : protection, fire_protection, blast_protection, projectile_protection, feather_falling,
+# respiration, aqua_affinity, thorns, depth_strider, frost_walker, sharpness, smite, bane_of_arthropods, knockback,
+# fire_aspect, looting, efficiency, silk_touch, unbreaking, fortune, power, punch, flame, infinity, luck_of_the_sea,
+# lure, mending. Prix au-delà de 64 : payé en blocs d'émeraude, arrondi au bloc supérieur.
+tiers:
+  courant:
+    weight: 750
+    per-boost: -40
+    max-uses: 6
+    books:
+      protection-1: 6
+      protection-2: 10
+      fire_protection-1: 5
+      fire_protection-2: 7
+      fire_protection-3: 10
+      blast_protection-1: 5
+      blast_protection-2: 7
+      blast_protection-3: 10
+      projectile_protection-1: 5
+      projectile_protection-2: 7
+      projectile_protection-3: 10
+      feather_falling-1: 5
+      feather_falling-2: 8
+      respiration-1: 6
+      respiration-2: 9
+      aqua_affinity: 8
+      thorns-1: 7
+      thorns-2: 10
+      depth_strider-1: 6
+      depth_strider-2: 9
+      frost_walker-1: 12
+      sharpness-1: 6
+      sharpness-2: 10
+      sharpness-3: 14
+      smite-1: 5
+      smite-2: 7
+      smite-3: 9
+      bane_of_arthropods-1: 5
+      bane_of_arthropods-2: 7
+      bane_of_arthropods-3: 9
+      knockback-1: 8
+      fire_aspect-1: 12
+      looting-1: 10
+      efficiency-1: 5
+      efficiency-2: 7
+      efficiency-3: 10
+      unbreaking-1: 6
+      fortune-1: 10
+      power-1: 5
+      power-2: 7
+      power-3: 10
+      punch-1: 8
+      flame: 12
+      luck_of_the_sea-1: 6
+      luck_of_the_sea-2: 9
+      lure-1: 6
+      lure-2: 9
+  intermediaire:
+    weight: 235
+    per-boost: 10
+    max-uses: 4
+    books:
+      protection-3: 24
+      fire_protection-4: 16
+      blast_protection-4: 18
+      projectile_protection-4: 16
+      feather_falling-3: 18
+      respiration-3: 16
+      thorns-3: 20
+      depth_strider-3: 24
+      frost_walker-2: 20
+      sharpness-4: 26
+      smite-4: 14
+      smite-5: 20
+      bane_of_arthropods-4: 12
+      bane_of_arthropods-5: 16
+      knockback-2: 18
+      looting-2: 24
+      efficiency-4: 22
+      silk_touch: 20
+      unbreaking-2: 16
+      fortune-2: 26
+      power-4: 20
+      punch-2: 16
+      infinity: 28
+      luck_of_the_sea-3: 18
+      lure-3: 18
+  # Les livres recherchés pour le stuff : 1,5 % des tirages sans boost, ~17 % à chance maximale.
+  rare:
+    weight: 15
+    per-boost: 13
+    max-uses: 2
+    announce: true
+    books:
+      protection-4:     { price: 56, weight: 3 }
+      unbreaking-3:     { price: 40, weight: 3 }
+      fortune-3:        { price: 48, weight: 3 }
+      sharpness-5:      { price: 60, weight: 2 }
+      efficiency-5:     { price: 40, weight: 3 }
+      power-5:          { price: 48, weight: 2 }
+      looting-3:        { price: 44, weight: 2 }
+      feather_falling-4: { price: 36, weight: 3 }
+      fire_aspect-2:    { price: 36, weight: 2 }
+      mending:          { price: 64, weight: 1 }
+
+trades:
+  # true : les livres des bibliothécaires (nouveau métier, montée de niveau) viennent de la table ci-dessus.
+  replace-vanilla-books: true
+  # Le livre vierge reste demandé avec les émeraudes, comme en vanilla.
+  require-book: true
+  # Échanges où le villageois PAIE en émeraudes (blé, papier, charbon…) : quantité demandée × ce nombre (max 64).
+  # Les halls de villageois sont un robinet d'émeraudes gratuit : 1.5 le ralentit sans le fermer. 1 = vanilla.
+  emerald-income-multiplier: 1.5
+
+boost:
+  # Coût en émeraudes : base + step × boosts déjà payés sur ce villageois, plafonné à max.
+  cost-base: 6
+  cost-step: 0
+  cost-max: 6
+  # Au-delà, les boosts relancent toujours les livres mais n'augmentent plus la chance.
+  max-luck: 10
+  # Un villageois sans aucun livre en reçoit un au premier boost (jamais plus d'un ajouté ainsi).
+  add-book-if-none: true
+
+wear:
+  enabled: true
+  # Livres vendus avant épuisement, tirés une fois par villageois entre ces deux bornes : 15 en moyenne.
+  books-min: 12
+  books-max: 18
+
+capture:
+  enabled: true
+  # Prix de l'œuf avec /villageois oeuf (0 = pas en vente par le plugin, à vendre dans VaeloriaShop par exemple).
+  egg-price-emeralds: 24
+  # L'œuf est rendu s'il rate sa cible ou si la zone est protégée.
+  refund-on-miss: true
+
+# ── Change émeraudes ↔ argent (/emeraudes), via Vault ──────────────
+# Mettre enabled: false si les émeraudes sont vendues par VaeloriaShop (shop.yml), avec les mêmes prix.
+exchange:
+  enabled: true
+  buy-price: 250      # le joueur achète 1 émeraude
+  sell-price: 100     # le joueur revend 1 émeraude (bien plus bas : pas d'aller-retour rentable)

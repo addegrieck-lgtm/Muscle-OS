@@ -1,0 +1,177 @@
+# Kits EssentialsX de VÆLORIA — à copier dans plugins/Essentials/kits.yml, puis /essentials reload.
+# Valeurs au prix d'achat de VæloriaShop (shop.yml). Presque rien n'y est revendable au marché :
+# les kits n'injectent pas d'argent dans l'économie.
+kits:
+  # Donné une seule fois, à la toute première connexion (newbies.kit dans config.yml). ≈ 3 500 $
+  depart:
+    delay: -1
+    items:
+      - stone_sword 1
+      - stone_pickaxe 1
+      - stone_axe 1
+      - stone_shovel 1
+      - /shop admin give {player} houe_moisson_1 1
+      - wheat_seeds 32
+      - carrot 16
+      - potato 16
+      - bone_meal 16
+      - cooked_beef 32
+      - oak_log 32
+      - torch 32
+      - crafting_table 1
+      - furnace 1
+      - chest 2
+  # Grade gratuit Joueur : /kit joueur, toutes les 24 h. ≈ 300 $ + outils en pierre
+  joueur:
+    delay: 86400
+    items:
+      - stone_sword 1
+      - stone_pickaxe 1
+      - stone_axe 1
+      - stone_shovel 1
+      - cooked_beef 16
+      - torch 16
+      - wheat_seeds 16
+      - bone_meal 8
+
+  # ── Grades payants : /kit <grade>, une fois par semaine ─────────────
+  # Chaque grade hérite des précédents : un VÆLORIAN peut aussi prendre les kits Guerrier, Seigneur et Roi.
+  guerrier:
+    delay: 604800
+    items:
+      - chainmail_helmet 1
+      - chainmail_chestplate 1
+      - chainmail_leggings 1
+      - chainmail_boots 1
+      - iron_sword 1
+      - iron_pickaxe 1
+      - golden_carrot 16
+  seigneur:
+    delay: 604800
+    items:
+      - iron_helmet 1
+      - iron_chestplate 1
+      - iron_leggings 1
+      - iron_boots 1
+      - iron_sword 1
+      - iron_pickaxe 1
+      - iron_axe 1
+      - bow 1
+      - arrow 16
+      - golden_apple 1
+      - golden_carrot 16
+  roi:
+    delay: 604800
+    items:
+      - diamond_helmet 1
+      - iron_chestplate 1
+      - iron_leggings 1
+      - diamond_boots 1
+      - diamond_sword 1
+      - iron_pickaxe 1
+      - iron_axe 1
+      - bow 1
+      - arrow 32
+      - golden_apple 2
+      - golden_carrot 32
+  # Le plus haut grade : full diamant, sans aucun enchantement.
+  vaelorian:
+    delay: 604800
+    items:
+      - diamond_helmet 1
+      - diamond_chestplate 1
+      - diamond_leggings 1
+      - diamond_boots 1
+      - diamond_sword 1
+      - diamond_pickaxe 1
+      - diamond_axe 1
+      - bow 1
+      - arrow 32
+      - golden_apple 4
+      - golden_carrot 32
+
+  # ── Kits achetés dans /shop (catégorie Kits) ─────────────────────
+  # Le shop vend l'accès DÉFINITIF : il donne la permission essentials.kits.<kit> par LuckPerms.
+  # Potions et livres passent par /shop admin give pour être identiques à ceux de la boutique.
+  # Si tu changes un contenu, mets aussi à jour son lore dans VaeloriaShop/shop.yml.
+  minerais:
+    delay: 86400
+    items:
+      - diamond_pickaxe 1 efficiency:3 unbreaking:2
+      - torch 64
+      - ladder 16
+      - cooked_beef 32
+      - /shop admin give {player} potion_fire 2
+  construction:
+    delay: 86400
+    items:
+      - stone_bricks 64
+      - glass 64
+      - oak_planks 64
+      - oak_log 32
+      - sea_lantern 16
+      - torch 32
+  explorateur:
+    delay: 86400
+    items:
+      - ender_pearl 4
+      - golden_apple 1
+      - cooked_beef 32
+      - golden_carrot 16
+      - torch 32
+      - /shop admin give {player} potion_speed 2
+      - /shop admin give {player} potion_fire 1
+  farmeur:
+    delay: 86400
+    items:
+      - wheat_seeds 64
+      - carrot 32
+      - potato 32
+      - sugar_cane 32
+      - bone_meal 64
+      - hopper 2
+      - chest 4
+  alchimiste:
+    delay: 86400
+    items:
+      - nether_wart 8
+      - blaze_rod 4
+      - ghast_tear 2
+      - magma_cream 8
+      - glowstone_dust 16
+      - redstone 16
+      - glass_bottle 16
+      - /shop admin give {player} potion_heal 3
+      - /shop admin give {player} potion_strength 1
+      - /shop admin give {player} potion_regen 1
+  forgeron:
+    delay: 604800
+    items:
+      - iron_ingot 64
+      - gold_ingot 16
+      - coal 32
+      - diamond 5
+      - anvil 1
+      - /shop admin give {player} book_unbreaking 1
+  sorcier:
+    delay: 604800
+    items:
+      - experience_bottle 64
+      - lapis_lazuli 64
+      - /shop admin give {player} book_protection 1
+      - /shop admin give {player} book_efficiency 1
+  pvp:
+    delay: 259200
+    items:
+      - iron_helmet 1 protection:2
+      - iron_chestplate 1 protection:2
+      - iron_leggings 1 protection:2
+      - iron_boots 1 protection:2
+      - diamond_sword 1 sharpness:3
+      - bow 1 power:3
+      - arrow 64
+      - golden_apple 3
+      - golden_carrot 32
+      - /shop admin give {player} potion_heal 6
+      - /shop admin give {player} potion_strength 2
+      - /shop admin give {player} potion_speed 2

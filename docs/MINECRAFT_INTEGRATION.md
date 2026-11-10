@@ -86,6 +86,10 @@ Les 4 plugins du serveur détectent VæloriaBridge tout seuls (`softdepend`) et 
 | VaeloriaShop 1.0.0 | `bridge.enabled: true`, `bridge.min-purchase` | `SHOP_PURCHASE`, `AUCTION_SALE` (≥ `min-purchase`), `MERCHANT_RANK` | rang de marchand du joueur (`players.merchant_level/merchant_rank`) ; achats conservés dans `bridge_events` |
 | VaeloriaCombat 0.1.0 | — | aucun (le TPS/MSPT part déjà dans `SERVER_HEARTBEAT`) | — |
 
+KOTH : le champ `koth` doit être la clé d'une zone de carte de type `koth` (`citadelle`, `gouffre`…) pour que l'événement s'affiche sur la carte. VaeloriaFactions 1.3.1 envoie le nom de la zone (`/f koth creer gouffre`) ; les libellés de la 1.3.0 (`"KOTH gouffre"`, `"Totem rubis"`) sont normalisés par l'API (`kothZoneKey`). Le Gouffre de Vælor est ajouté par `007_koth_gouffre.sql`.
+
+Installation complète du serveur (configs, régions, warps, Bridge) : [deploy/minecraft/README.md](../deploy/minecraft/README.md).
+
 Format vérifié en lisant le bytecode des jars : les champs correspondent à `packages/types/src/bridge.ts`. **Important** : un type inconnu fait rejeter tout le lot (400) ; l'API doit donc être déployée avec ces types **avant** d'activer `bridge.enabled` dans Vote et Shop.
 
 ### Mise en service, pas à pas

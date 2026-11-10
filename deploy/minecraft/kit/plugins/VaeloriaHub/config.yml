@@ -1,0 +1,92 @@
+# VaeloriaHub — lobby, mondes séparés et mini-jeux de VÆLORIA.
+#
+# Trois groupes de mondes, chacun avec son propre inventaire :
+#   - lobby     : le monde ci-dessous (créé automatiquement, vide + plateforme)
+#   - minijeux  : le monde ci-dessous (créé automatiquement, vide + arène FFA)
+#   - faction   : TOUS les autres mondes (world, spawn, vaeloria, warzone, KOTH, totem, nether, end...).
+#     Rien n'y change : en quittant la faction, inventaire, armure, XP, vie, faim, effets, mode de jeu
+#     et position sont sauvegardés dans plugins/VaeloriaHub/profiles/, puis rendus au retour.
+#     Le coffre de l'Ender n'est ouvrable qu'en faction (impossible d'y glisser un kit d'arène).
+worlds:
+  lobby: lobby
+  minigames: minijeux
+
+join:
+  # Envoyer chaque joueur au lobby à la connexion (false = il reprend là où il s'est déconnecté).
+  to-lobby: true
+  # Titre affiché à l'arrivée au lobby.
+  title: "<gradient:#A3121E:#D21F2F><bold>VÆLORIA</bold></gradient>"
+  subtitle: "<silver>Choisis ton mode de jeu</silver>"
+
+faction:
+  # Arrivée en faction pour un joueur qui n'a encore aucune position enregistrée (nouveau joueur).
+  # Par défaut : le /spawn Essentials actuel.
+  spawn:
+    world: spawn
+    x: 0.4
+    y: 101.0
+    z: 62.35
+    yaw: 180.0
+    pitch: 0.0
+
+travel:
+  # Délai pour quitter le monde faction (secondes). Annulé si le joueur bouge ou prend des dégâts.
+  warmup-seconds: 5
+  # Interdit de quitter la faction pendant ce temps après un coup PvP donné ou reçu.
+  combat-seconds: 15
+  # Commandes bloquées au lobby et en mini-jeu (les objets achetés y seraient perdus, ou un kit pourrait être vendu).
+  blocked-commands: [shop, hdv, ah, pshop, sell, vendre, kit, kits, ec, enderchest, echest, ender, craft, workbench, wb, anvil, hat, repair, fix]
+
+chat:
+  # Un tchat par groupe : le lobby, les mini-jeux et la faction ne se lisent pas entre eux.
+  # Le staff (permission vaeloria.hub.chatspy, op par défaut) lit tout.
+  separate: true
+  # Étiquette ajoutée devant les messages ("" = aucune ; la faction garde son format habituel).
+  tags:
+    lobby: "<ash>[<silver>Lobby</silver>]</ash> "
+    minigames: "<ash>[<ruby>Arène</ruby>]</ash> "
+    faction: ""
+
+lobby:
+  # Point d'apparition (modifiable en jeu : /vhub setspawn lobby).
+  spawn: {x: 0.5, y: 101.0, z: 0.5, yaw: 180.0, pitch: 0.0}
+  # Construire la plateforme de départ si le monde est neuf (remplaçable par ta propre map avec FAWE).
+  build-platform: true
+  double-jump: true
+  # Sous cette hauteur, retour au spawn du lobby.
+  void-y: 40
+
+ffa:
+  enabled: true
+  center: {x: 0.5, y: 101.0, z: 0.5}
+  # Construire l'arène si le monde est neuf.
+  build-arena: true
+  radius: 32
+  # Points d'apparition personnalisés (/vhub ffa addspawn). Vide = 8 points en cercle autour du centre.
+  spawns: []
+  spawn-protection-seconds: 3
+  heal-on-kill: true
+  no-hunger: true
+  void-y: 60
+  # Annonce de série toutes les N victimes.
+  killstreak-announce: 5
+  reward:
+    # Pièces (monnaie Vault de VaeloriaShop) par victime. 0 = désactivé.
+    money: 15.0
+    # Pas de récompense si on tue la même personne plusieurs fois dans ce délai (anti-farm entre amis).
+    same-victim-cooldown-minutes: 10
+    # Objets donnés au tueur.
+    items: ["GOLDEN_APPLE x1", "ARROW x4"]
+  # Format : MATERIAU [xQUANTITE] [enchantement:niveau ...]
+  kit:
+    helmet: "IRON_HELMET protection:1"
+    chestplate: "IRON_CHESTPLATE protection:1"
+    leggings: "IRON_LEGGINGS protection:1"
+    boots: "IRON_BOOTS protection:1"
+    items:
+      - "DIAMOND_SWORD sharpness:1"
+      - "FISHING_ROD"
+      - "BOW power:1"
+      - "GOLDEN_APPLE x3"
+      - "COOKED_BEEF x16"
+      - "ARROW x16"

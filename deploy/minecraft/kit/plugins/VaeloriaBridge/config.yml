@@ -1,0 +1,21 @@
+# VæloriaBridge — configuration
+# Le secret ne doit JAMAIS être partagé ni commité. Il doit correspondre à BRIDGE_KEYS côté API.
+api:
+  url: "https://vaeloria-api.paysapro-prospection.workers.dev"
+  key-id: "factions-1"
+  secret: "__BRIDGE_SECRET__"   # rempli par install.sh (jamais commité)
+  timeout-seconds: 5
+
+# Nom de ce serveur dans le réseau (factions, hub, practice…)
+server-name: "factions"
+
+intervals:
+  # Envoi des événements en file (secondes)
+  flush-seconds: 5
+  # Heartbeat : joueurs, TPS, MSPT (secondes)
+  heartbeat-seconds: 30
+  # Récupération des commandes web (secondes)
+  commands-seconds: 10
+
+# Taille max d'un lot envoyé à l'API
+batch-size: 200

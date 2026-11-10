@@ -224,12 +224,20 @@ describe("guerres, événements et carte via VæloriaBridge", () => {
     expect((await me("Bravo")).influence - before).toBe(15);
   });
 
+  it("KOTH_START du plugin Factions (« KOTH gouffre ») rattaché à la zone du Gouffre", async () => {
+    const r = await bridge({ events: [ev({ event: "KOTH_START", koth: "KOTH gouffre", durationSeconds: 1800 })] });
+    expect(r.json(), r.body).toMatchObject({ accepted: 1, failed: [] });
+    const [row] = await sql`SELECT title, zone_key FROM events WHERE type = 'koth' ORDER BY starts_at DESC LIMIT 1`;
+    expect(row).toMatchObject({ title: "KOTH — Gouffre de Vælor", zone_key: "gouffre" });
+  });
+
   it("carte : zones configurées et territoires des empires liés", async () => {
     const [season] = await sql`SELECT id FROM seasons WHERE status = 'active'`;
     const [f] = await sql`INSERT INTO factions (season_id, name) VALUES (${season!.id}, 'Nightmare') RETURNING id`;
     for (let x = 0; x < 3; x++) await sql`INSERT INTO claims (faction_id, season_id, world, chunk_x, chunk_z) VALUES (${f!.id}, ${season!.id}, 'world', ${x}, 0)`;
     const map = (await app.inject({ url: "/api/v1/world/map" })).json();
     expect(map.zones.map((z: { key: string }) => z.key)).toContain("citadelle");
+    expect(map.zones).toContainEqual(expect.objectContaining({ key: "gouffre", kind: "koth" }));
     expect(map.territories).toEqual([expect.objectContaining({ slug: "nightmare", cx: 0, cz: 0, chunks: 3 })]);
   });
 });

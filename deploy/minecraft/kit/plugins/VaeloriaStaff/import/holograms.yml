@@ -1,0 +1,203 @@
+# Pancartes du nouveau spawn — à déposer dans plugins/VaeloriaStaff/import/ puis /staff importer
+# (remplace les pancartes de même nom, supprime celles de la liste « supprimer », garde toutes les autres).
+holograms:
+  accueil:
+    location:
+      world: spawn
+      x: 0.5
+      y: 104
+      z: 58.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#A9AEB8&lV&#D21F2F&lÆ&#A9AEB8&lLORIA'
+      - '&7Le retour de la &#D21F2F&lvraie guerre&7.'
+      - ''
+      - '&fParle aux guides &7pour rejoindre les mondes et les jeux'
+      - '&7Wiki complet : &#D21F2Fvaeloria.fr'
+    scale: 1.2
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  evenements:
+    location:
+      world: spawn
+      x: -9.5
+      y: 103
+      z: 60.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#E2C27F&lÉVÉNEMENTS'
+      - '&fTotem &7mer. 20 h 30 · sam. 21 h'
+      - '&fKOTH &7dim. 18 h'
+      - '&fLa Forteresse &7dim. 21 h'
+      - '&fConvoi &7toutes les 25 min'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  tresorerie:
+    location:
+      world: spawn
+      x: 29.5
+      y: 108
+      z: -81.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#E2C27F&lTRÉSORERIE'
+      - '&7Coffres à clés : &fclic gauche &7pour voir les lots'
+      - '&7Clés : votes, événements, &f/boutique'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  auberge:
+    location:
+      world: spawn
+      x: -78.5
+      y: 104
+      z: -24.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#D21F2F&lAUBERGE DU RUBIS'
+      - '&7La taverne du spawn'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  invest:
+    location:
+      world: spawn
+      x: 30.5
+      y: 106
+      z: 62.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#E2C27F&lZONE D''INVESTISSEMENT'
+      - '&f/invest &7dans la zone'
+      - '&70,25 % par heure, 8 h par jour'
+    scale: 1.1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  ressources:
+    location:
+      world: spawn
+      x: 84.5
+      y: 142
+      z: 34.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#5BC0EB&lMINE À RESSOURCES'
+      - '&7Se remplit toute seule'
+      - '&7Minerais pour tous'
+    scale: 1.4
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  mine:
+    location:
+      world: spawn
+      x: -55.5
+      y: 105
+      z: 76.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#8A8F99&lMINE D''OBSIDIENNE'
+      - '&7Escalier dans la maison du mineur'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  oeufs:
+    location:
+      world: spawn
+      x: 14.5
+      y: 107
+      z: 62.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#5BD17A&lŒUFS DE CAPTURE'
+      - '&7Lancé sur un villageois, il le met en boîte'
+      - '&7Relâché : sans métier, chance ni usure'
+      - '&7→ relance un bibliothécaire épuisé'
+      - '&fœuf : 24 émeraudes &7· &f/villageois oeuf'
+      - '&7Boost : accroupi + clic droit sur un bibliothécaire'
+      - '&7Émeraudes : &f/emeraudes'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  parcours:
+    location:
+      world: spawn
+      x: -41.5
+      y: 104
+      z: -100.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#D21F2F&lPARCOURS DU DONJON'
+      - '&727 sauts jusqu''à la loggia'
+      - '&7Récompense une fois par jour'
+      - '&f/parcours top'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  port:
+    location:
+      world: spawn
+      x: 28.5
+      y: 104
+      z: 100.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#E2C27F&lPORT DES NUÉES'
+      - '&7Navire volant et phare de VÆLORIA'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  duels:
+    location:
+      world: spawn
+      x: -42.5
+      y: 105
+      z: -22.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#D21F2F&lARÈNE DES DUELS'
+      - '&f/duel <joueur> [mise]'
+      - '&7Sans mort ni perte de stuff'
+      - '&f/duel top'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+  bibliotheque:
+    location:
+      world: spawn
+      x: 51.5
+      y: 104
+      z: 69.5
+      yaw: 0.0
+      pitch: 0.0
+    lines:
+      - '&#B57EDC&lBIBLIOTHÈQUE DES MAGES'
+      - '&7Table d’enchantement niveau 30'
+      - '&7Enclumes, meule, grimoires'
+    scale: 1
+    background: DARK
+    billboard: CENTER
+    shadow: true
+supprimer: [porte_des_mondes, pere_noel]

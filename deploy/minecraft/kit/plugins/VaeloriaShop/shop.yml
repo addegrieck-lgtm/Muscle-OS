@@ -1,0 +1,420 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                 VæloriaShop — articles et prix               ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Champs d'un article :
+#   material      objet Minecraft (ou tool: <outil de config.yml>, ou spawner: <créature>)
+#   buy / sell    prix d'achat / de rachat à l'unité (0 ou absent = impossible)
+#   level         rang de marchand requis pour l'ACHETER (1 = tout le monde)
+#   daily-limit   achats maximum par joueur et par jour
+#   saturation    seuil de saturation propre à l'article (sinon market.saturation)
+#   dynamic       false = prix de rachat fixe (pas de saturation ni de cours du jour)
+#   featured      false = jamais tiré au sort pour le cours du jour
+#   income        revenu indicatif par heure, affiché sur les générateurs
+#   points        prix en points boutique (catégories « premium: true » seulement, vendues dans /boutique)
+#   kit           accès définitif à un kit EssentialsX (voir config.yml : kits)
+#   potion        type de potion (STRONG_HEALING…) ; enchantments { protection: 4 } ; name ; lore
+#
+# REPÈRES D'ÉQUILIBRAGE (prix de base, avant marché et bonus)
+#   Débutant, houe I, à la main ............. ~1 500 à 3 000 $/h
+#   Champs + houe II/III, fermes auto ........ ~6 000 à 12 000 $/h
+#   Générateurs, kits ....................... en points boutique uniquement (/boutique, 1 € = 100 points)
+#   Grades ................................. jamais vendus : débloqués par les points dépensés (grade-tiers)
+#   Le marché dynamique freine ceux qui farment UN seul produit : varier ses farms rapporte plus.
+#   Revendre = 80 % maximum du prix d'achat, bonus compris : l'argent ne se crée qu'en farmant.
+
+categories:
+
+  # ─────────────────────────────────────────────────────────────────
+  agriculture:
+    name: "<gain><b>Agriculture"
+    icon: WHEAT
+    slot: 11
+    description:
+      - "<ash>Graines, plants et récoltes."
+      - "<ash>La base de toute fortune."
+    items:
+      wheat:          { material: WHEAT, sell: 2 }
+      carrot:         { material: CARROT, buy: 6, sell: 1.2 }
+      potato:         { material: POTATO, buy: 6, sell: 1.2 }
+      beetroot:       { material: BEETROOT, sell: 2 }
+      sugar_cane:     { material: SUGAR_CANE, buy: 12, sell: 2.5 }
+      cactus:         { material: CACTUS, buy: 12, sell: 2 }
+      melon_slice:    { material: MELON_SLICE, sell: 0.8 }
+      pumpkin:        { material: PUMPKIN, sell: 8 }
+      nether_wart:    { material: NETHER_WART, buy: 25, sell: 2.5 }
+      cocoa_beans:    { material: COCOA_BEANS, buy: 15, sell: 2 }
+      bamboo:         { material: BAMBOO, buy: 8, sell: 0.4 }
+      sweet_berries:  { material: SWEET_BERRIES, buy: 10, sell: 0.8 }
+      apple:          { material: APPLE, sell: 3 }
+      wheat_seeds:    { material: WHEAT_SEEDS, buy: 4 }
+      beetroot_seeds: { material: BEETROOT_SEEDS, buy: 5 }
+      melon_seeds:    { material: MELON_SEEDS, buy: 60 }
+      pumpkin_seeds:  { material: PUMPKIN_SEEDS, buy: 60 }
+      bone_meal:      { material: BONE_MEAL, buy: 6 }
+      oak_sapling:    { material: OAK_SAPLING, buy: 20 }
+      spruce_sapling: { material: SPRUCE_SAPLING, buy: 20 }
+      water_bucket:   { material: WATER_BUCKET, buy: 80 }
+
+  # ─────────────────────────────────────────────────────────────────
+  minage:
+    name: "<silver><b>Minerais"
+    icon: DIAMOND_ORE
+    slot: 12
+    description:
+      - "<ash>Le fruit de tes galeries."
+      - "<ash>Le diamant reste roi."
+    items:
+      coal:            { material: COAL, buy: 15, sell: 3 }
+      raw_iron:        { material: RAW_IRON, sell: 6 }
+      iron_ingot:      { material: IRON_INGOT, buy: 40, sell: 8, saturation: 300000 }
+      raw_gold:        { material: RAW_GOLD, sell: 8 }
+      gold_ingot:      { material: GOLD_INGOT, buy: 45, sell: 10 }
+      raw_copper:      { material: RAW_COPPER, sell: 1.5 }
+      copper_ingot:    { material: COPPER_INGOT, buy: 10, sell: 2 }
+      redstone:        { material: REDSTONE, buy: 8, sell: 1.5 }
+      lapis_lazuli:    { material: LAPIS_LAZULI, buy: 10, sell: 2 }
+      quartz:          { material: QUARTZ, buy: 12, sell: 3 }
+      amethyst_shard:  { material: AMETHYST_SHARD, sell: 3 }
+      diamond:         { material: DIAMOND, buy: 400, sell: 60 }
+      emerald:         { material: EMERALD, buy: 300, sell: 45 }
+      ancient_debris:  { material: ANCIENT_DEBRIS, sell: 550, featured: false }
+      netherite_scrap: { material: NETHERITE_SCRAP, sell: 600, featured: false }
+      flint:           { material: FLINT, buy: 6, sell: 1 }
+      glowstone_dust:  { material: GLOWSTONE_DUST, buy: 6, sell: 1 }
+
+  # ─────────────────────────────────────────────────────────────────
+  butin:
+    name: "<ruby_hi><b>Butin de créatures"
+    icon: BONE
+    slot: 13
+    description:
+      - "<ash>Ce que lâchent les monstres."
+      - "<ash>Le revenu de tes générateurs."
+    items:
+      rotten_flesh:      { material: ROTTEN_FLESH, sell: 0.5 }
+      bone:              { material: BONE, buy: 6, sell: 1.5 }
+      arrow:             { material: ARROW, buy: 2, sell: 0.4 }
+      string:            { material: STRING, buy: 8, sell: 1.5 }
+      spider_eye:        { material: SPIDER_EYE, buy: 10, sell: 2 }
+      gunpowder:         { material: GUNPOWDER, buy: 20, sell: 4 }
+      ender_pearl:       { material: ENDER_PEARL, buy: 80, sell: 10 }
+      blaze_rod:         { material: BLAZE_ROD, buy: 60, sell: 12 }
+      slime_ball:        { material: SLIME_BALL, buy: 20, sell: 4 }
+      magma_cream:       { material: MAGMA_CREAM, buy: 25, sell: 5 }
+      ghast_tear:        { material: GHAST_TEAR, buy: 150, sell: 30 }
+      phantom_membrane:  { material: PHANTOM_MEMBRANE, buy: 30, sell: 6 }
+      leather:           { material: LEATHER, buy: 15, sell: 3 }
+      feather:           { material: FEATHER, buy: 5, sell: 1 }
+      beef:              { material: BEEF, sell: 2 }
+      porkchop:          { material: PORKCHOP, sell: 2 }
+      chicken:           { material: CHICKEN, sell: 1.5 }
+      mutton:            { material: MUTTON, sell: 1.5 }
+      rabbit_hide:       { material: RABBIT_HIDE, sell: 2 }
+      ink_sac:           { material: INK_SAC, buy: 8, sell: 1.5 }
+      white_wool:        { material: WHITE_WOOL, buy: 10, sell: 2 }
+      egg:               { material: EGG, sell: 0.5 }
+
+  # ─────────────────────────────────────────────────────────────────
+  blocs:
+    name: "<#C9A36B><b>Blocs & bois"
+    icon: STONE_BRICKS
+    slot: 14
+    description:
+      - "<ash>De quoi bâtir ta base."
+      - "<ash>Le bois se revend (Hache du bûcheron)."
+    items:
+      oak_log:         { material: OAK_LOG, buy: 8, sell: 1.5 }
+      spruce_log:      { material: SPRUCE_LOG, buy: 8, sell: 1.5 }
+      birch_log:       { material: BIRCH_LOG, buy: 8, sell: 1.5 }
+      jungle_log:      { material: JUNGLE_LOG, buy: 8, sell: 1.5 }
+      dark_oak_log:    { material: DARK_OAK_LOG, buy: 8, sell: 1.5 }
+      cherry_log:      { material: CHERRY_LOG, buy: 8, sell: 1.5 }
+      cobblestone:     { material: COBBLESTONE, buy: 2 }
+      stone:           { material: STONE, buy: 3 }
+      stone_bricks:    { material: STONE_BRICKS, buy: 4 }
+      deepslate_bricks: { material: DEEPSLATE_BRICKS, buy: 6 }
+      dirt:            { material: DIRT, buy: 2 }
+      grass_block:     { material: GRASS_BLOCK, buy: 5 }
+      sand:            { material: SAND, buy: 4 }
+      gravel:          { material: GRAVEL, buy: 4 }
+      glass:           { material: GLASS, buy: 6 }
+      oak_planks:      { material: OAK_PLANKS, buy: 2 }
+      black_concrete:  { material: BLACK_CONCRETE, buy: 6 }
+      red_concrete:    { material: RED_CONCRETE, buy: 6 }
+      white_concrete:  { material: WHITE_CONCRETE, buy: 6 }
+      quartz_block:    { material: QUARTZ_BLOCK, buy: 40 }
+      glowstone:       { material: GLOWSTONE, buy: 25 }
+      sea_lantern:     { material: SEA_LANTERN, buy: 40 }
+      end_stone:       { material: END_STONE, buy: 10 }
+      torch:           { material: TORCH, buy: 2 }
+      ladder:          { material: LADDER, buy: 3 }
+
+  # ─────────────────────────────────────────────────────────────────
+  utilitaires:
+    name: "<#E2C27F><b>Redstone & utilitaires"
+    icon: HOPPER
+    slot: 15
+    description:
+      - "<ash>Tout pour automatiser tes farms."
+    items:
+      hopper:           { material: HOPPER, buy: 400 }
+      chest:            { material: CHEST, buy: 20 }
+      barrel:           { material: BARREL, buy: 25 }
+      piston:           { material: PISTON, buy: 80 }
+      sticky_piston:    { material: STICKY_PISTON, buy: 120 }
+      observer:         { material: OBSERVER, buy: 150 }
+      dispenser:        { material: DISPENSER, buy: 120 }
+      dropper:          { material: DROPPER, buy: 60 }
+      repeater:         { material: REPEATER, buy: 40 }
+      comparator:       { material: COMPARATOR, buy: 120 }
+      redstone_block:   { material: REDSTONE_BLOCK, buy: 70 }
+      redstone_torch:   { material: REDSTONE_TORCH, buy: 10 }
+      lever:            { material: LEVER, buy: 5 }
+      rail:             { material: RAIL, buy: 10 }
+      hopper_minecart:  { material: HOPPER_MINECART, buy: 450 }
+      crafting_table:   { material: CRAFTING_TABLE, buy: 10 }
+      furnace:          { material: FURNACE, buy: 15 }
+      blast_furnace:    { material: BLAST_FURNACE, buy: 150 }
+      anvil:            { material: ANVIL, buy: 600 }
+      enchanting_table: { material: ENCHANTING_TABLE, buy: 1500 }
+      bookshelf:        { material: BOOKSHELF, buy: 80 }
+      brewing_stand:    { material: BREWING_STAND, buy: 300 }
+      name_tag:         { material: NAME_TAG, buy: 300 }
+      ender_chest:      { material: ENDER_CHEST, buy: 2500, level: 2 }
+      shulker_box:      { material: SHULKER_BOX, buy: 12000, level: 4 }
+
+  # ─────────────────────────────────────────────────────────────────
+  combat:
+    name: "<loss><b>Combat & potions"
+    icon: DIAMOND_SWORD
+    slot: 20
+    description:
+      - "<ash>Équipement et potions de guerre."
+      - "<ash>Le farm finance la guerre."
+    items:
+      golden_apple:     { material: GOLDEN_APPLE, buy: 350 }
+      golden_carrot:    { material: GOLDEN_CARROT, buy: 30 }
+      cooked_beef:      { material: COOKED_BEEF, buy: 6 }
+      potion_heal:      { material: SPLASH_POTION, potion: STRONG_HEALING, buy: 120, name: "<loss>Potion de soin II <ash>(jetable)" }
+      potion_speed:     { material: POTION, potion: STRONG_SWIFTNESS, buy: 180, name: "<#7FC8E0>Potion de vitesse II" }
+      potion_fire:      { material: POTION, potion: LONG_FIRE_RESISTANCE, buy: 200, name: "<#E2A05A>Résistance au feu (8:00)" }
+      potion_strength:  { material: POTION, potion: STRONG_STRENGTH, buy: 450, level: 2, name: "<ruby_hi>Potion de force II" }
+      potion_regen:     { material: POTION, potion: STRONG_REGENERATION, buy: 300, level: 2, name: "<#E07FB0>Potion de régénération II" }
+      experience_bottle: { material: EXPERIENCE_BOTTLE, buy: 40 }
+      bow:              { material: BOW, buy: 150 }
+      diamond_sword:    { material: DIAMOND_SWORD, buy: 850 }
+      diamond_helmet:   { material: DIAMOND_HELMET, buy: 2100 }
+      diamond_chestplate: { material: DIAMOND_CHESTPLATE, buy: 3400 }
+      diamond_leggings: { material: DIAMOND_LEGGINGS, buy: 2950 }
+      diamond_boots:    { material: DIAMOND_BOOTS, buy: 1700 }
+      diamond_pickaxe:  { material: DIAMOND_PICKAXE, buy: 1250 }
+
+  # ─────────────────────────────────────────────────────────────────
+  raid:
+    name: "<ruby><b>Raid & défense"
+    icon: TNT
+    slot: 21
+    description:
+      - "<ash>TNT, canons et murs."
+      - "<ash>L'obsidienne reste rare : limitée chaque jour."
+    items:
+      tnt:             { material: TNT, buy: 180 }
+      obsidian:
+        material: OBSIDIAN
+        buy: 2500
+        level: 3
+        daily-limit: 8
+        lore:
+          - "<ash>Indestructible à la TNT sur VÆLORIA."
+          - "<ash>Ne tombe que par surclaim."
+      flint_and_steel: { material: FLINT_AND_STEEL, buy: 50 }
+      lava_bucket:     { material: LAVA_BUCKET, buy: 250 }
+      slime_block:     { material: SLIME_BLOCK, buy: 200 }
+      honey_block:     { material: HONEY_BLOCK, buy: 200 }
+      cobweb:          { material: COBWEB, buy: 80, level: 2 }
+      stone_button:    { material: STONE_BUTTON, buy: 3 }
+      iron_door:       { material: IRON_DOOR, buy: 120 }
+      iron_trapdoor:   { material: IRON_TRAPDOOR, buy: 160 }
+
+  # ─────────────────────────────────────────────────────────────────
+  livres:
+    name: "<#B48CFF><b>Livres enchantés"
+    icon: ENCHANTED_BOOK
+    slot: 23
+    level: 2
+    description:
+      - "<ash>Les meilleurs enchantements,"
+      - "<ash>sans dépendre de la table."
+    items:
+      book_efficiency:   { material: ENCHANTED_BOOK, enchantments: { efficiency: 5 }, buy: 3000, level: 2 }
+      book_unbreaking:   { material: ENCHANTED_BOOK, enchantments: { unbreaking: 3 }, buy: 3500, level: 2 }
+      book_protection:   { material: ENCHANTED_BOOK, enchantments: { protection: 4 }, buy: 5000, level: 2 }
+      book_feather:      { material: ENCHANTED_BOOK, enchantments: { feather_falling: 4 }, buy: 2500, level: 2 }
+      book_silk:         { material: ENCHANTED_BOOK, enchantments: { silk_touch: 1 }, buy: 6000, level: 2, lore: ["<ash>Indispensable pour déplacer un générateur."] }
+      book_power:        { material: ENCHANTED_BOOK, enchantments: { power: 5 }, buy: 4000, level: 2 }
+      book_knockback:    { material: ENCHANTED_BOOK, enchantments: { knockback: 2 }, buy: 3000, level: 2 }
+      book_punch:        { material: ENCHANTED_BOOK, enchantments: { punch: 2 }, buy: 3000, level: 2 }
+      book_depth:        { material: ENCHANTED_BOOK, enchantments: { depth_strider: 3 }, buy: 2500, level: 2 }
+      book_sharpness:    { material: ENCHANTED_BOOK, enchantments: { sharpness: 5 }, buy: 6000, level: 3 }
+      book_fortune:      { material: ENCHANTED_BOOK, enchantments: { fortune: 3 }, buy: 9000, level: 3 }
+      book_looting:      { material: ENCHANTED_BOOK, enchantments: { looting: 3 }, buy: 8000, level: 3 }
+      book_fire_aspect:  { material: ENCHANTED_BOOK, enchantments: { fire_aspect: 2 }, buy: 5000, level: 3 }
+      book_flame:        { material: ENCHANTED_BOOK, enchantments: { flame: 1 }, buy: 4000, level: 3 }
+      book_infinity:     { material: ENCHANTED_BOOK, enchantments: { infinity: 1 }, buy: 4000, level: 3 }
+      book_mending:      { material: ENCHANTED_BOOK, enchantments: { mending: 1 }, buy: 30000, level: 4 }
+
+  # ─────────────────────────────────────────────────────────────────
+  # Revenus ≈ 400 créatures/h tuées, butin revendu au prix de base (avant saturation).
+  # Points boutique : 1 € = 100 points. Plus de rang de marchand requis : ils ne s'achètent plus en $.
+  generateurs:
+    name: "<ruby_hi><b>Spawners"
+    icon: SPAWNER
+    slot: 24
+    premium: true
+    description:
+      - "<ash>Revenu passif pour ta faction."
+      - "<ash>Récupérables au Toucher de soie."
+    items:
+      spawner_zombie:   { spawner: ZOMBIE, points: 150, income: 220 }
+      spawner_skeleton: { spawner: SKELETON, points: 400, income: 760 }
+      spawner_spider:   { spawner: SPIDER, points: 400, income: 870 }
+      spawner_chicken:  { spawner: CHICKEN, points: 450, income: 1000 }
+      spawner_pig:      { spawner: PIG, points: 700, income: 1600 }
+      spawner_creeper:  { spawner: CREEPER, points: 700, income: 1600, lore: ["<ash>Et la poudre de tes TNT…"] }
+      spawner_enderman: { spawner: ENDERMAN, points: 900, income: 2000 }
+      spawner_cow:      { spawner: COW, points: 1200, income: 2800 }
+      spawner_blaze:    { spawner: BLAZE, points: 1200, income: 2400, lore: ["<ash>Les bâtons ne tombent que tués par un joueur."] }
+      spawner_golem:    { spawner: IRON_GOLEM, points: 4000, income: 9600 }
+
+  # ─────────────────────────────────────────────────────────────────
+  outils:
+    name: "<gradient:#D21F2F:#E2C27F><b>Outils de VÆLORIA</gradient>"
+    icon: NETHERITE_HOE
+    slot: 24
+    description:
+      - "<ash>Les outils qui font la différence."
+      - "<ash>Farme plus vite, gagne plus."
+    items:
+      houe_moisson_1:     { tool: houe-moisson-1, buy: 2500 }
+      houe_moisson_2:     { tool: houe-moisson-2, buy: 20000, level: 2 }
+      hache_bucheron:     { tool: hache-bucheron, buy: 12000, level: 2 }
+      baguette_vente_100: { tool: baguette-vente-100, buy: 8000, level: 2 }
+      pioche_abysses:     { tool: pioche-abysses, buy: 90000, level: 3 }
+      houe_moisson_3:     { tool: houe-moisson-3, buy: 150000, level: 4 }
+      baguette_vente_500: { tool: baguette-vente-500, buy: 30000, level: 4 }
+
+  # ─────────────────────────────────────────────────────────────────
+  # Kits : on achète l'ACCÈS DÉFINITIF en points (permission LuckPerms essentials.kits.<kit>), puis /kit <kit>
+  # à chaque délai. Contenu et délais : plugins/Essentials/kits.yml (à garder en phase avec le lore ci-dessous).
+  # Uniquement des consommables : pas d'obsidienne, de TNT, de spawner, de Fortune ni de Mending.
+  kits:
+    name: "<gradient:#D21F2F:#E2C27F><b>Kits</gradient>"
+    icon: CHEST_MINECART
+    slot: 22
+    premium: true
+    description:
+      - "<ash>Achète l'accès une fois,"
+      - "<ash>récupère-le à vie avec /kit."
+    items:
+      kit_minerais:
+        kit: minerais
+        material: DIAMOND_PICKAXE
+        name: "<silver><b>Kit Minerais"
+        points: 700
+        lore:
+          - "<ash>Toutes les <snow>24 h</snow> :"
+          - "<steel>• Pioche en diamant <ash>Efficacité III, Solidité II"
+          - "<steel>• 64 torches, 16 échelles"
+          - "<steel>• 32 steaks, 2 résistances au feu"
+          - "<graphite>Valeur ≈ 3 200 $ par récupération"
+      kit_construction:
+        kit: construction
+        material: STONE_BRICKS
+        name: "<#C9A36B><b>Kit Construction"
+        points: 400
+        lore:
+          - "<ash>Toutes les <snow>24 h</snow> :"
+          - "<steel>• 64 briques de pierre, 64 verres"
+          - "<steel>• 64 planches, 32 bûches"
+          - "<steel>• 16 lanternes marines, 32 torches"
+          - "<graphite>Valeur ≈ 1 700 $ par récupération"
+      kit_explorateur:
+        kit: explorateur
+        material: COMPASS
+        name: "<#7FC8E0><b>Kit Explorateur"
+        points: 400
+        lore:
+          - "<ash>Toutes les <snow>24 h</snow> :"
+          - "<steel>• 4 perles de l'Ender, 1 pomme dorée"
+          - "<steel>• 32 steaks, 16 carottes dorées"
+          - "<steel>• 2 vitesses II, 1 résistance au feu"
+          - "<steel>• 32 torches"
+          - "<graphite>Valeur ≈ 2 000 $ par récupération"
+      kit_farmeur:
+        kit: farmeur
+        material: GOLDEN_HOE
+        name: "<gain><b>Kit Farmeur"
+        points: 600
+        lore:
+          - "<ash>Toutes les <snow>24 h</snow> :"
+          - "<steel>• 64 graines, 32 carottes, 32 pommes de terre"
+          - "<steel>• 32 cannes à sucre, 64 poudres d'os"
+          - "<steel>• 2 entonnoirs, 4 coffres"
+          - "<graphite>Valeur ≈ 2 300 $ par récupération"
+      kit_alchimiste:
+        kit: alchimiste
+        material: BREWING_STAND
+        name: "<#E07FB0><b>Kit Alchimiste"
+        points: 700
+        lore:
+          - "<ash>Toutes les <snow>24 h</snow> :"
+          - "<steel>• 8 verrues du Nether, 4 bâtons de blaze"
+          - "<steel>• 2 larmes de ghast, 8 crèmes de magma"
+          - "<steel>• Poudre lumineuse, redstone, 16 fioles"
+          - "<steel>• 3 soins II, 1 force II, 1 régénération II"
+          - "<graphite>Valeur ≈ 2 300 $ par récupération"
+      kit_forgeron:
+        kit: forgeron
+        material: ANVIL
+        name: "<#E2C27F><b>Kit Forgeron"
+        points: 1000
+        lore:
+          - "<ash>Tous les <snow>7 jours</snow> :"
+          - "<steel>• 64 lingots de fer, 16 lingots d'or"
+          - "<steel>• 32 charbons, 5 diamants"
+          - "<steel>• 1 enclume, livre Solidité III"
+          - "<graphite>Valeur ≈ 9 800 $ par récupération"
+      kit_sorcier:
+        kit: sorcier
+        material: ENCHANTING_TABLE
+        name: "<#B48CFF><b>Kit Sorcier"
+        points: 1200
+        lore:
+          - "<ash>Tous les <snow>7 jours</snow> :"
+          - "<steel>• 64 fioles d'XP, 64 lapis-lazuli"
+          - "<steel>• Livre Protection IV"
+          - "<steel>• Livre Efficacité V"
+          - "<graphite>Valeur ≈ 11 200 $ par récupération"
+      kit_pvp:
+        kit: pvp
+        material: DIAMOND_SWORD
+        name: "<ruby_hi><b>Kit PvP"
+        points: 2000
+        lore:
+          - "<ash>Tous les <snow>3 jours</snow> :"
+          - "<steel>• Armure en fer <ash>Protection II"
+          - "<steel>• Épée en diamant <ash>Tranchant III"
+          - "<steel>• Arc <ash>Puissance III</ash> + 64 flèches"
+          - "<steel>• 6 soins II, 2 forces II, 2 vitesses II"
+          - "<steel>• 3 pommes dorées, 32 carottes dorées"
+          - "<graphite>Valeur ≈ 13 000 $ par récupération"
+
+# ═════════════════════════════════════════════════════════════════════
+# Grades : ils ne s'achètent PAS. Chaque point boutique dépensé (kits, spawners) compte, et le grade tombe
+# tout seul au palier (spent = points dépensés au total, 1 € = 100 points). Commande : points.grade-command.
+# La clé est le nom du groupe LuckPerms ; chaque grade doit hériter du précédent.
+grade-tiers:
+  guerrier:  { spent: 1000, name: "<#C9CDD5>Guerrier" }
+  seigneur:  { spent: 2500, name: "<#D9DCE2>Seigneur" }
+  roi:       { spent: 5000, name: "<#E2C27F>Roi" }
+  vaelorian: { spent: 8000, name: "<gradient:#FFFFFF:#D9DCE2>VÆLORIAN</gradient>" }

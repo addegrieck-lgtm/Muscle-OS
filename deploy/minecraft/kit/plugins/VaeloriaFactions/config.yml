@@ -1,0 +1,352 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║                 VæloriaFactions — configuration              ║
+# ║  Le Faction à l'ancienne : power, surclaim, TNT, obsidienne. ║
+# ╚══════════════════════════════════════════════════════════════╝
+# Après modification : /f admin reload
+
+# Fuseau horaire du bouclier quotidien.
+timezone: "Europe/Paris"
+
+# ── Économie ──────────────────────────────────────────────────────
+# UNE seule monnaie sur VÆLORIA : celle de VæloriaShop (Vault + EssentialsX). Banque de faction, améliorations,
+# coûts et récompenses l'utilisent ; les montants s'affichent exactement comme dans le shop.
+# Les valeurs par défaut sont calibrées sur le catalogue du shop (générateur zombie 15 000 $, golem 1 000 000 $,
+# obsidienne 2 500 $, rangs de marchand de 20 000 $ à 7 500 000 $). Voir « Économie » dans GUIDE-FACTIONS.md.
+economy:
+  required: true               # prévient en console si aucune économie Vault n'est installée
+  currency-symbol: "$"         # utilisé seulement si VæloriaShop est absent
+  costs:                       # dépenses qui retirent de l'argent du jeu (anti-inflation)
+    create-faction: 10000      # payé par le fondateur
+    rename-faction: 25000      # payé par la banque de faction
+    declare-war: 50000         # payé par la banque de faction
+
+factions:
+  name-min: 3
+  # Le site accepte jusqu'à 24 caractères.
+  name-max: 16
+  max-members: 20
+  description-max: 64
+  invite-minutes: 10
+  allow-rename: true
+
+# ── Power ─────────────────────────────────────────────────────────
+# Chaque joueur porte un power entre min et max. Le power d'une faction (somme de ses membres) fixe
+# combien de chunks elle peut tenir. Une faction qui tient plus de chunks que son power devient SURCLAIMABLE.
+power:
+  max: 10.0
+  min: -10.0
+  start: 5.0
+  regen-per-minute: 0.2        # 10 power en 50 minutes de jeu
+  offline-regen: false
+  loss-on-death: 4.0
+  warzone-loss-multiplier: 1.5
+  # Anti-farm : un même tueur ne fait perdre du power à une même victime qu'une fois par période.
+  farm-cooldown-minutes: 15
+  # Aucune perte de power (ni kill compté) entre deux joueurs de même adresse IP : doubles comptes.
+  same-ip-no-loss: true
+
+claims:
+  per-power: 1.0               # chunks autorisés par point de power
+  max: 120                     # plafond absolu par faction (0 = aucun)
+  max-radius: 5                # /f claim <rayon>
+  must-be-connected: true      # les nouveaux claims doivent toucher le territoire
+  disabled-worlds: [lobby, minijeux, ressources]   # Hub + monde ressource (réinitialisé chaque jour) : pas de claim
+
+# ── Pillage par SURCLAIM (le pillage historique) ──────────────────
+# Une faction ennemie en sous-power perd ses chunks de bordure : le surclaimeur devient propriétaire du chunk
+# et de TOUT ce qu'il contient (coffres, obsidienne…), qu'il peut alors casser normalement.
+overclaim:
+  enabled: true
+  require-enemy: true          # il faut être en guerre (/f ennemi)
+  edge-only: true              # on grignote par l'extérieur, pas au cœur de la base
+  broadcast: true
+
+# ── Pillage BASIQUE (TNT, creepers, canons) ───────────────────────
+explosions:
+  wilderness: true
+  in-claims: true
+  offline-protection: false    # true = aucune explosion quand aucun membre n'est connecté
+
+raid:
+  alert-cooldown-seconds: 30   # titre + son d'alerte aux défenseurs
+  lock-minutes: 10             # sous le feu : pas d'unclaim, de dissolution ni de changement de bouclier
+  bossbar: true
+  broadcast: true              # « X pille Y ! » à tout le serveur, une fois par raid
+  # Brèche : un chunk explosé par un ennemi laisse ses ennemis ouvrir coffres et portes pendant quelques minutes.
+  breach:
+    enabled: true
+    minutes: 15
+    allow: [CONTAINER, DOOR, SPAWNER]
+
+protection:
+  liquid-flow: true            # eau / lave ne coulent pas dans un claim depuis l'extérieur
+  fire-spread: true
+  pistons: true                # pas de piston qui pousse ou tire à travers une frontière
+
+# ── Bouclier quotidien ────────────────────────────────────────────
+# Chaque faction choisit une plage de N heures (ex. la nuit) sans explosions ni surclaim.
+shield:
+  enabled: true
+  hours: 6
+  change-cooldown-hours: 72
+  blocks-overclaim: true
+
+# ── Obsidienne : indestructible et rare ───────────────────────────
+obsidian:
+  # Eau sur une source de lave : pierre au lieu d'obsidienne.
+  block-generation: true
+  # L'obsidienne de la nature (portails en ruine, End) ne donne que des éclats.
+  wilderness-drops-shards: true
+  replace-in-loot: true        # coffres de structures
+  replace-in-bartering: true   # troc piglin
+  protect-from-wither: true
+  shards:
+    material: ECHO_SHARD
+    min: 1
+    max: 3
+    per-obsidian: 9            # éclats pour recrafter 1 obsidienne
+    deepslate-ore-chance: 0.03 # chance d'un éclat en minant un minerai de deepslate (sans Toucher de soie)
+  # Explosions nécessaires pour briser chaque bloc renforcé. 0 = INDESTRUCTIBLE.
+  # Avec 0, un mur d'obsidienne ne tombe que par surclaim.
+  durability:
+    OBSIDIAN: 0
+    CRYING_OBSIDIAN: 0
+  durability-radius: 3         # rayon d'usure autour d'une explosion (si une durabilité > 0)
+
+# ── Bélier de siège : entrer dans une base sans surclaim ──────────
+# Clic droit avec le bélier sur l'obsidienne ennemie : charge (le porteur est ralenti), puis un coup.
+# Bouger, changer d'objet ou prendre un coup annule la charge. Au bout de « durability » coups, le bloc cède
+# et ouvre une brèche comme la TNT. Il faut une GUERRE OFFICIELLE (/f guerre declarer) déclarée depuis
+# war-delay-minutes : le défenseur a ce temps pour se préparer. Respecte la grâce, le bouclier quotidien
+# et la protection hors-ligne. Les défenseurs effacent l'usure d'un bloc abîmé par un clic droit avec un bloc d'obsidienne (consommé).
+# OBJET RARE : pas de craft. Le chef l'achète très cher sur la banque de faction (/f belier acheter),
+# une fois par période, avec annonce à tout le serveur ; sinon /f admin belier <joueur> (récompense d'événement).
+ram:
+  enabled: true
+  material: WOODEN_AXE
+  uses: 20                     # coups avant que le bélier se brise
+  charge-seconds: 3
+  cooldown-seconds: 8
+  war-delay-minutes: 15        # après la déclaration de guerre
+  max-per-chunk: 2             # béliers en charge en même temps sur un même chunk
+  slowness-level: 2            # 0 = pas de lenteur pendant la charge
+  regen-minutes: 30            # un bloc laissé tranquille ce temps-là oublie ses coups (0 = jamais)
+  repair-with-block: true
+  recipe: false                # true = craft bûche / bloc de fer / bûche, bûche / éclat d'obsidienne / bûche, bûche / bloc de fer / bûche
+  buy:
+    enabled: true
+    price: 1000000             # payé par la banque de faction, chef seulement
+    cooldown-days: 7           # un achat par faction tous les N jours
+    broadcast: true            # « X s'est procuré un bélier de siège… »
+  # Coups pour briser chaque bloc, indépendants de obsidian.durability : l'obsidienne peut rester
+  # insensible à la TNT tout en cédant au bélier.
+  durability:
+    OBSIDIAN: 5
+    CRYING_OBSIDIAN: 8
+
+relations:
+  max-allies: 2
+  max-truces: 4
+  friendly-fire: false
+  ally-pvp: false
+  truce-pvp: false
+  ally-permissions: [DOOR]     # ce que les alliés peuvent faire chez vous
+
+teleport:
+  warmup-seconds: 5
+  enemy-radius: 16             # pas de /f home avec un ennemi à moins de N blocs
+  home-must-be-in-claim: true
+  max-warps: 3
+
+chest:
+  rows: 3
+
+fly:
+  enabled: true
+  enemy-radius: 32
+
+territory:
+  display: TITLE               # TITLE, ACTIONBAR, CHAT ou NONE
+
+chat:
+  tags: true                   # [Faction] devant les messages publics, coloré selon la relation
+
+scoreboard:
+  enabled: true
+  refresh-ticks: 40
+
+bank:
+  enabled: true                # nécessite Vault + un plugin d'économie
+
+inactivity:
+  days: 0                      # 0 = jamais ; sinon retire les membres absents depuis N jours au démarrage
+
+bridge:
+  snapshot-minutes: 5          # FACTION_SNAPSHOT vers le site (si VæloriaBridge est installé)
+
+# ── Combat ────────────────────────────────────────────────────────
+combat:
+  tag-seconds: 15              # durée du « en combat » après un coup PvP (0 = désactivé)
+  kill-on-logout: true         # combat-log : se déconnecter en combat = mourir
+  # Commandes interdites en combat (début de la commande, sans le /).
+  blocked-commands: [spawn, home, homes, sethome, tpa, tpahere, tpaccept, tpyes, back, warp, warps, rtp, wild, ec, enderchest, "f home", "f warp", "f fly", "f h"]
+
+# ── Journal de faction (/f logs) ──────────────────────────────────
+logs:
+  max: 300                     # lignes gardées par faction
+
+# ── Alertes Discord ───────────────────────────────────────────────
+# Chaque chef relie le salon Discord de sa faction : /f discord <lien du webhook>.
+discord:
+  enabled: true
+  events: [RAID, OVERCLAIM, WAR, MEMBERS, COMBATLOG, TOTEM]
+  # Webhook du staff pour les annonces publiques (guerres) ; vide = aucun.
+  global-webhook: ""
+  # Liens acceptés (expression régulière). Vide = webhooks Discord officiels uniquement.
+  url-pattern: ""
+
+# ── Totem ─────────────────────────────────────────────────────────
+# Une colonne de blocs à abattre : la faction qui casse TOUS les blocs d'affilée gagne. Si une autre faction
+# casse un bloc, le totem se reconstruit et elle prend la main.
+# Tout se règle aussi en jeu : /f totem admin (totems, horaires, gains, réglages).
+# Création : place-toi sur la case de base et tape /f totem creer <nom> (mets la zone en warzone).
+totem:
+  enabled: true
+  height: 5
+  material: OBSIDIAN
+  required-item: DIAMOND_SWORD # arme obligatoire pour frapper le totem (AUCUN = n'importe quoi)
+  break-seconds: 7.5           # temps de frappe continue pour casser UN bloc
+  hologram: true
+  duration-minutes: 30         # sans vainqueur à la fin : le totem s'effondre
+  min-online: 10               # joueurs connectés minimum pour un lancement programmé
+  # Lancements automatiques (heure de « timezone ») : JOUR HH:MM [nom] — JOUR = LUNDI…DIMANCHE ou TOUS.
+  schedule:
+    - "MERCREDI 20:30"
+    - "SAMEDI 21:00"
+  reward:
+    money: 75000               # versé en banque de faction (≈ un générateur d'enderman)
+    power-boost: 0             # power de faction ajouté à vie (0 = aucun)
+    # Commandes console : {player} = dernier coup, {faction}, {totem}
+    commands: []
+
+# ── Spawners pillables ────────────────────────────────────────────
+# Dans un claim, un spawner résiste aux explosions et ne se récupère qu'à la main : par la faction qui tient le chunk
+# (donc par l'attaquant après un surclaim) ou par un ennemi pendant une brèche (raid.breach.allow contient SPAWNER).
+# Il tombe alors en objet avec sa créature.
+spawners:
+  enabled: true
+  explosion-proof: true
+  wilderness-drop: false       # spawners naturels (donjons) : ne tombent pas, pour garder la valeur de la boutique
+  require-silk-touch: true     # même règle que VæloriaShop (qui gère ses générateurs lui-même s'il est installé)
+
+# ── Améliorations de faction (/f ameliorations) ───────────────────
+# Achetées avec la banque de faction. per-level = bonus par niveau ; costs = prix de chaque niveau.
+upgrades:
+  claims:                      # plafond de claims
+    per-level: 10
+    costs: [25000, 60000, 125000, 250000, 500000]
+  power:                       # power de faction
+    per-level: 5
+    costs: [50000, 120000, 250000, 500000, 1000000]
+  chest:                       # rangées du coffre de faction (6 maximum)
+    per-level: 1
+    costs: [20000, 60000, 150000]
+  shield:                      # heures de bouclier quotidien
+    per-level: 1
+    costs: [150000, 400000]
+  warps:
+    per-level: 1
+    costs: [15000, 40000, 90000]
+  members:                     # places de membre
+    per-level: 5
+    costs: [75000, 200000]
+
+# ── Avant-postes (/f avantposte) ──────────────────────────────────
+# Zones permanentes : une faction seule dans la zone pendant capture-seconds la prend, puis touche un revenu en
+# banque et un bonus de power tant qu'elle la tient. Création : /f avantposte creer <nom> [rayon].
+outposts:
+  enabled: true
+  capture-seconds: 120
+  income-minutes: 10
+  income-money: 1500           # 9 000 $/h : le revenu d'un générateur de golem, mais à défendre
+  power-bonus: 2               # power de faction par avant-poste tenu
+
+# ── KOTH (/f koth) ────────────────────────────────────────────────
+# Événement : la faction qui tient la zone seule, sans interruption, pendant hold-seconds gagne.
+# Zone disputée = chrono figé ; zone désertée = chrono remis à zéro. Création : /f koth creer <nom> [rayon].
+koth:
+  enabled: true
+  hold-seconds: 300
+  duration-minutes: 30
+  min-online: 10
+  schedule:
+    - "DIMANCHE 18:00"
+  reward:
+    money: 60000               # versé en banque de faction
+    power-boost: 0
+    commands: []               # {player}, {faction}, {koth}
+
+# ── Missions quotidiennes (/f missions) ───────────────────────────
+# Chaque jour à minuit, per-day missions sont tirées du catalogue, les mêmes pour toutes les factions.
+# Types : KILL_PLAYERS, KILL_MOBS, MINE_ORES, MINE_DEEPSLATE_ORES, RAID_BLOCKS, PLAYTIME_MINUTES, CAPTURE_OUTPOST
+missions:
+  enabled: true
+  per-day: 3
+  pool:
+    - {id: chasse, type: KILL_PLAYERS, target: 20, reward: 15000, label: "Tuer 20 joueurs ennemis"}
+    - {id: monstres, type: KILL_MOBS, target: 250, reward: 6000, label: "Tuer 250 monstres"}
+    - {id: mineurs, type: MINE_ORES, target: 256, reward: 8000, label: "Miner 256 minerais"}
+    - {id: profondeurs, type: MINE_DEEPSLATE_ORES, target: 96, reward: 10000, label: "Miner 96 minerais de deepslate"}
+    - {id: pillards, type: RAID_BLOCKS, target: 300, reward: 20000, label: "Détruire 300 blocs ennemis à la TNT"}
+    - {id: presence, type: PLAYTIME_MINUTES, target: 600, reward: 5000, label: "Cumuler 10 h de jeu entre membres"}
+    - {id: conquete, type: CAPTURE_OUTPOST, target: 1, reward: 12000, label: "Capturer un avant-poste"}
+
+# ── Convoi (/f convoi admin) ──────────────────────────────────────
+# Toutes les interval-minutes, une caisse tombe en warzone (sur un point d'atterrissage défini dans l'interface, sinon
+# dans un chunk de warzone au hasard). Rester open-seconds à côté l'ouvre et donne la Clé du convoi.
+# Le porteur brille et sa position est annoncée toutes les reveal-seconds. Il gagne en rapportant la clé :
+#   - à un avant-poste tenu par sa faction ;
+#   - ou, si sa faction n'en tient aucun, en sortant de la warzone.
+# La clé ne se range pas (coffre, ender chest, entonnoir) et ne se perd pas ; tué, le porteur la laisse tomber.
+convoy:
+  enabled: true
+  interval-minutes: 25
+  min-online: 5
+  open-seconds: 5
+  duration-minutes: 15         # temps pour ouvrir la caisse ET rapporter la clé
+  reveal-seconds: 30
+  fall-height: 40
+  reward:
+    money: 25000               # versé à la banque de la faction du porteur
+    commands: []               # ex. "crate key give {player} convoi 1" — {player}, {faction}
+
+# ── Primes ────────────────────────────────────────────────────────
+# Un joueur en série de kills a la tête mise à prix : un pourcentage de SA fortune (argent du marché), versé à celui
+# qui l'abat. Annonce à tout le serveur à chaque palier puis tous les announce-every kills.
+# Les kills farmés (même victime trop souvent, même IP) ne comptent pas.
+bounty:
+  enabled: true
+  tiers:
+    - {kills: 5, percent: 5}
+    - {kills: 15, percent: 10}
+  announce-every: 5
+  max-amount: 0                # plafond d'une prime (0 = aucun)
+
+# ── Confort ───────────────────────────────────────────────────────
+nametags:
+  enabled: true                # pseudo coloré (et [Faction]) au-dessus des têtes selon la relation
+
+# ── Guerres officielles ───────────────────────────────────────────
+# /f guerre declarer <faction> : préparation, puis combat chronométré. Points : kills, pillages, surclaims.
+war:
+  enabled: true
+  preparation-minutes: 15
+  duration-hours: 48
+  cooldown-hours: 72           # délai avant une nouvelle guerre entre les deux mêmes factions
+  min-members: 2               # membres minimum de chaque côté
+  points:
+    kill: 1
+    raid: 5
+    overclaim: 10
+
+autosave-minutes: 5
