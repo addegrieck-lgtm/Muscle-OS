@@ -171,7 +171,9 @@ staff importer
 # Neige qui tombe pendant Noël (à couper en janvier : /noel neige off)
 /noel neige on
 
-## CONSOLE — à la toute fin, quand l'API connaît VOTE, SHOP_PURCHASE et MERCHANT_RANK (sinon le lot est rejeté)
-# Passer bridge.enabled à true dans VaeloriaVote/config.yml et VaeloriaShop/config.yml (README, étape 6), puis :
+## CONSOLE — boutique du site et votes
+# VaeloriaShop : bridge.enabled est déjà à true dans le kit (progression POINTS sur /boutique). Après une
+# modification à chaud de sa config :
+shop admin reload
+# VaeloriaVote : passer bridge.enabled à true dans VaeloriaVote/config.yml (README, étape 6), puis :
 # votes reload
-# shop admin reload

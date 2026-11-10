@@ -83,7 +83,7 @@ if ((NEW_SECRET)) || [[ -z "$SECRET" ]]; then
     say "Bridge   : secret à saisir lors de la vraie installation (non demandé en --dry-run)"
     SECRET="__BRIDGE_SECRET__"
   else
-    say "Secret VaeloriaBridge : le même que BRIDGE_KEYS=factions-1:<secret> côté API (openssl rand -hex 32)."
+    say "Secret VaeloriaBridge : le même que dans BRIDGE_KEYS côté API ({\"factions-1\":\"<secret>\"} sur le Worker workers.dev ; openssl rand -hex 32)."
     read -r -s -p "Secret (saisie masquée) : " SECRET; echo
     read -r -s -p "Confirme le secret     : " SECRET2; echo
     [[ "$SECRET" == "$SECRET2" ]] || die "les deux saisies diffèrent"

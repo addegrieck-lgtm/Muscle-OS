@@ -52,8 +52,12 @@ installés en double (par exemple deux WorldGuard) : retire à la main la versio
 
 - Le script demande de confirmer que le serveur est arrêté.
 - **Secret du Bridge** : s'il en existe déjà un sur le serveur, il est gardé. Sinon (ou avec `--new-secret`),
-  il est demandé deux fois, saisie masquée. C'est la même valeur que `BRIDGE_KEYS=factions-1:<secret>` côté
-  API (`deploy/.env`, jamais commité). Pour en créer un : `openssl rand -hex 32`.
+  il est demandé deux fois, saisie masquée. C'est la même valeur que dans `BRIDGE_KEYS` côté API :
+  - API actuelle (Worker `vaeloria-api` sur workers.dev) : `npx wrangler secret put BRIDGE_KEYS` avec
+    `{"factions-1":"<secret>"}` ;
+  - API du monorepo (`apps/api`) : `BRIDGE_KEYS=factions-1:<secret>` dans `deploy/.env` (jamais commité).
+
+  Pour en créer un : `openssl rand -hex 32`.
 - Les fichiers remplacés sont d'abord archivés dans `kit-backups/configs-AAAAMMJJ-HHMMSS.tar.gz`
   (restauration : `tar -xzf <archive> -C <dossier>/plugins`).
 - La liste des fichiers à renvoyer est écrite dans `kit-backups/fichiers-modifies-*.txt` : renvoie-les avec
@@ -90,15 +94,23 @@ Démarre le serveur, puis :
 | Invest | `/invest` dans la cage aux dalles rouges | dépôt accepté |
 | PNJ | `/staff` → PNJ | Banquier en 21 101 62, plus de PNJ des portes |
 
-### 6. Brancher Vote et Shop au site (seulement après le déploiement de l'API)
+### 6. Boutique du site et votes
 
-Un type d'événement inconnu de l'API fait rejeter tout le lot. Une fois l'API déployée avec `VOTE`,
-`SHOP_PURCHASE`, `AUCTION_SALE` et `MERCHANT_RANK` :
+**Boutique du site (déjà reliée par le kit).** Le site vend des points : après un paiement Stripe, l'API met
+en file `points give <uuid> <points> site-<commande>`, que VaeloriaBridge récupère toutes les 10 s et exécute
+en console (livraison même si le joueur est hors ligne, rejouée si le serveur plante avant l'accusé).
+Dans l'autre sens, le kit active `bridge.enabled: true` dans `VaeloriaShop/config.yml` : le serveur envoie
+`POINTS` (solde, total dépensé, débans), ce qui affiche la progression et le grade du joueur sur `/boutique`,
+ainsi que `SHOP_PURCHASE` et `MERCHANT_RANK`. Le Worker actuel accepte tous ces types.
+Vérification : un achat test (Stripe en mode test) doit apparaître dans `plugins/VaeloriaShop/data/points.log`,
+et `/vbridge` ne doit montrer aucune erreur.
 
-1. `VaeloriaVote/config.yml` et `VaeloriaShop/config.yml` → `bridge: enabled: true` (dans le kit puis sur le serveur).
-2. `votes reload` et `shop admin reload` en console.
-3. Sites de vote : mêmes noms et liens dans `VaeloriaVote/config.yml` (`sites:`) et dans `VOTE_SITES`
-   (`apps/web/content/gameplay.ts`). Les sites 2 et 3 sont encore des exemples.
+**Votes.** `VaeloriaVote/config.yml` → `bridge.enabled: true` puis `votes reload` quand le site affiche les
+votes. Attention : l'API du monorepo (`apps/api`) rejette tout le lot si elle ne connaît pas un type
+d'événement ; avant de basculer le Bridge vers elle, vérifier qu'elle connaît `VOTE`, `POINTS`,
+`SHOP_PURCHASE`, `AUCTION_SALE` et `MERCHANT_RANK`.
+Sites de vote : mêmes noms et liens dans `VaeloriaVote/config.yml` (`sites:`) et dans `VOTE_SITES`
+(`apps/web/content/gameplay.ts`). Les sites 2 et 3 sont encore des exemples.
 
 ### Plugin Factions
 

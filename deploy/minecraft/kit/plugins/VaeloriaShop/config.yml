@@ -379,7 +379,7 @@ invest:
 # Envoie SHOP_PURCHASE (achats ≥ min-purchase) et MERCHANT_RANK au site. À activer seulement quand l'API
 # connaît ces deux types d'événements.
 bridge:
-  enabled: false
+  enabled: true   # API workers.dev : accepte POINTS, SHOP_PURCHASE, MERCHANT_RANK (progression sur /boutique)
   min-purchase: 50000
 
 gui:
