@@ -24,13 +24,14 @@
     "expo-system-ui": "~58.0.7",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-native": "0.88.0",
+    "react-native": "0.88.1",
     "react-native-purchases": "^11.0.0",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-svg": "15.16.0",
     "react-native-view-shot": "6.1.1",
+    "react-native-web": "^0.21.4",
     "react-native-worklets": "0.13.0",
     "zod": "^4.6.7"
   },
@@ -53,7 +54,9 @@
     "lint": "expo lint",
     "test": "jest",
     "test:rls": "bash supabase/tests/run-rls-tests.sh",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "web": "expo start --web",
+    "build:web": "bash scripts/build-web.sh dist-web"
   },
   "private": true,
   "jest": {

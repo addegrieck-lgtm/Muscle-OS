@@ -5,6 +5,7 @@ Application mobile (iOS et Android) d'épargne sur 52 semaines : chaque semaine,
 L'application **ne détient pas d'argent, ne fait aucun virement et ne se connecte à aucune banque**. Elle enregistre des montants déclarés.
 
 - **Stack** : Expo SDK 58 · React Native 0.88 · TypeScript strict · Expo Router · SQLite (expo-sqlite) · Reanimated · Supabase (facultatif) · RevenueCat (facultatif)
+- **Version web de démonstration** : https://addegrieck-lgtm.github.io/Muscle-OS/cap52/ (publiée à chaque push sur `main` ; données stockées dans le navigateur, sans rappels ni achats).
 - **Fonctionne sans compte et hors ligne.** Les services externes sont facultatifs : s'ils ne sont pas configurés, les écrans concernés le disent explicitement.
 
 ## Démarrer
@@ -36,6 +37,8 @@ npx expo run:ios
 | `npm test` | Tests Jest : logique métier, base SQLite réelle (node:sqlite), synchronisation |
 | `npm run test:rls` | Applique les migrations Supabase sur un Postgres 16 jetable et teste l'isolation RLS (nécessite les binaires PostgreSQL) |
 | `npm run check` | typecheck + lint + tests |
+| `npm run web` | Version web en développement (navigateur) |
+| `npm run build:web` | Export web statique dans `dist-web/` (`EXPO_BASE_URL` pour un sous-dossier) |
 | `npx expo-doctor` | Cohérence des dépendances avec le SDK Expo |
 | `npx expo export --platform android --platform ios` | Vérifie que Metro empaquette toute l'application |
 
